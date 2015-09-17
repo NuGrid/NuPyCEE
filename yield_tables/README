@@ -1,0 +1,24 @@
+
+Content:
+
+The .txt files contain yields
+for bb (bb_*) , sn1a (sn1a_*) 
+as well as the NuGrid yield tables
+isotope_yield_table.txt in solar masses.
+
+The SN1a abundances of Seitenzahl13 are either
+provided divided in stable and unstable ones
+or in a mix of both types.
+
+The iniabu dir contains
+the initial abundances the
+the five metallicities provided
+by NuGrid.
+
+nugrid yield tables notes:
+isotope_yield_table.txt
+isotope_yield_table_july14.txt file with M4,M6,M7
+isotope_yield_table_dec14.txt file with out M4,6,7
+isotope_yield_table_jan15.txt 
+> difference in time when..
+ 

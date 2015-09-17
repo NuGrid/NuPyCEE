@@ -1,0 +1,1 @@
+[Fe/H], err, Na, err, Mg, err, Ca, err, Ti1, err, Ti2, err, Cr, err, Fe1, err, Fe2, err, Ni, err, Sr, err, Ba, err

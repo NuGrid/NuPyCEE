@@ -1,0 +1,8 @@
+Fit : log10( M_DM ) = a*z**3 + b*z**2 + c*z + d
+File : col 1, 2, 3, 4 -> a, b, c, d
+
+Each line represents a different final (z=0) dark matter halo mass.
+
+!! IMPORTANT !!
+The poly3_fits.txt file NEEDS to be in order from the most massive
+halo (top) to the less massive halo (bottom). 

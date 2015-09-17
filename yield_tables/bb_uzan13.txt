@@ -1,0 +1,9 @@
+H Coc et al. 2013
+H Table 2, Observational data taken (Planck mission)
+H Yield in mass fraction
+&Isotopes  &Z=0.0
+&H-1 	   &7.6e-1
+&H-2 	   &2.2952e-5
+&H-3 	   &7.98e-6
+&He-4 	   &2.534e-1
+&Li-7 	   &1.2008e-10
