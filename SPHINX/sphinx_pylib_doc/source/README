@@ -1,0 +1,97 @@
+Sphinx Configuration
+====================
+Currently the documentation project is setup to use 5 Sphinx extensions.
+These extensions are defined in "conf.py", and the list of extensions
+can be edited there.
+
+- sphinx.ext.autodoc: Incorporates the ability to use python docstrings
+  as a source for the documentation.
+
+- sphinx.ext.mathjax: Renders mathematics equations in the browser
+  using JavaScript.
+
+- sphinx.ext.viewcode: Adds links to the source code in the html
+  documentation.
+  
+- sphinx.ext.autosummary: Enables commands in Sphinx that automatically
+  produce summaries of the methods and attributes in python classes.
+  
+- numpydoc: Remaps some of the Sphinx commands so they produce more
+  readable code even in raw form.
+
+Due to how Sphinx operates all of the python modules to be documented
+will be imported. If a dependency of one of those modules is not
+installed on the system then Sphinx will fail to compile. This problem
+can be fixed by mocking the missing module using the python "mock"
+package. To mock a module add the name of the module to the list of
+mocked modules in the conf file.
+
+Setting Up Documentation
+========================
+The basic form of the ".rst" files for a module named "module_name" is
+as follows. ::
+
+    module_name module
+    ==================
+
+    .. automodule:: module_name
+        :members: function_1, class_2, class_3
+        :exclude-members: method_1, method_2
+        :undoc-members:
+        :show-inheritance:
+
+The command ".. automodule:: module_name" tells Sphinx to look in the
+python path for a module named "module_name". After the automodule
+command you can set a variety of flags to modify how the documentation
+is produced. All of the flags should immediately follow the automodule
+command, they should be indented and be immediately preceded and
+followed by a colon. Some of the flags accept arguments, those arguments
+should come after the flag in the same line separated by spaces. A short
+list of useful flags are listed below.
+
+- members: The members flag has no effect if it is not given arguments,
+  otherwise it causes Sphinx to exclusively document the classes and
+  functions listed.
+
+- exclude-members: This flag should be given a series of class members
+  that will be excluded from the documentation. If this flag is set then
+  it must be given a list of members to exclude.
+  
+- undoc-members: This flag causes Sphinx to produce documentation for
+  all functions, classes and methods even if they do not have a
+  docstring. When it generated documentation for one of those functions
+  the documentation consists only of a stub.
+
+- show-inheritance: If this flag is set Sphinx will list all of the
+  classes a documented class inherits from.
+
+Generating ".rst" Files
+=======================
+The ".rst" for documenting python modules can also be generated
+automatically by a tool that comes along with Sphinx called
+"sphinx-apidoc". This tool generates basic ".rst" files from existing
+python code. The simplest way to call the tool is to use the command
+"sphinx-apidoc -o output_path python_source_path". For more information
+access the help using "sphinx-apidoc -h".
+
+Starting a Sphinx Project
+=========================
+Sphinx comes with a project setup tool, to quickly setup a new project.
+The command for the tool is "sphinx-quickstart", then enter the
+requested information for configuring the project.
+
+If the project is going to use "sphinx.ext.autodoc" to generate
+documentation from python docstring, then you will need to add the
+directorie of the python code to "conf.py". This can be done by adding
+"sys.path.insert(0, os.path.abspath('../path/to/source'))" to the file.
+
+Further Reading
+===============
+For more information on how to use Sphinx refer to the guides below.
+
+- Getting started with Sphinx <http://sphinx-doc.org/tutorial.html>
+- Using Sphinx autodoc <http://sphinx-doc.org/ext/autodoc.html>
+
+For project web page refer to the sites below.
+
+- Sphinx project <http://sphinx-doc.org/>
