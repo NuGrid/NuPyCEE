@@ -1,6 +1,7 @@
 echo 'Updating SPHINX documentation...'
 cd SPHINX
-update html
+make html
+cd ../
 echo 'done'
 echo 'Submitting to bitbucket'
 #inside the NUPYCEE dir
