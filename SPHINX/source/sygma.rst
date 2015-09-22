@@ -1,4 +1,4 @@
-sygma Module
+SYGMA Module
 ===========
 
 .. automodule:: sygma

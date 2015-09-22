@@ -1,4 +1,4 @@
-omega Module
+OMEGA Module
 ===========
 
 .. automodule:: omega

@@ -6,6 +6,11 @@
 Welcome to NUPYCEE documentation!
 =====================================
 
+The user can choose between the *Stellar Yields for galactic modeling applications* (SYGMA) module 
+and the *One-zone model for the evolution of galaxies* (OMEGA) module.
+SYGMA allows to follow the ejecta of of simple stellar populations in a closed box while OMEGA deals with
+the simulation of galaxies with inflows and outflows.
+
 Contents:
 
 .. toctree::
