@@ -6,7 +6,8 @@ cd ../
 echo 'Updating SPHINX documentation done'
 #for online access
 echo 'compile DOC pdf'
-DOC/runlatex
+cd DOC
+./runlatex
 echo 'compile DOC pdf done'
 # finally submit
 echo 'Submitting to bitbucket'
