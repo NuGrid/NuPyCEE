@@ -11,16 +11,40 @@
         </td>
       </tr>
     </table>
-     <p> NUPYCEE is a <b>open-source</b> chemical evolution platform of the <a href="http://nugridstars.org">NuGrid collaboration</a>.</p>
-     The user can choose between the Stellar Yields for galactic modeling applications (SYGMA) module and the One-zone model for the evolution of galaxies (OMEGA) module. 
-      </p>
-     <p>
-      SYGMA allows to follow the ejecta of of simple stellar populations in a closed box. OMEGA deals with the simulation of galaxies with inflows and outflows.
+     <p> NUPYCEE is a <b>open-source</b> chemical evolution platform of the <a href="http://nugridstars.org">NuGrid collaboration</a>.
+     The user can choose between the Stellar Yields for galactic modeling applications (<b>SYGMA</b>) module and the One-zone model for the evolution of galaxies (<b>OMEGA</b>) module. 
       </p>
 
      <hr>
 
-    <h2> Download </h2>
+    <h2> SYGMA web user interface </h2>
+
+     <p>
+      The Stellar Yields for galactic modeling applications (<b>SYGMA</b>) module allows to follow the ejecta of of simple stellar populations in a closed box.
+      </p>
+
+    <p>We provide an online interface where tables of the evolution of the ejecta of SSP's can be downloaded. 
+       Access the interface <a href="http://206.12.59.73/cgi-bin/canfarSessionLauncher.py" target="_blank">here</a>.
+       Click on either SYGMA and start the interfaces by clicking in the new window into the first line and
+     press shift+enter. 
+
+    </p>
+
+    <h4> Notes: </h4>
+     <p>
+     Stellar yields of AGB and massive stars are calculated with the same nuclear physics and are provided by the NuGrid collaboration.
+     The interface is hosted by NuGrid's WENDI platform. 
+     A documentation can be found <a href="DOC_Interfaces/sygma_doc.html">here</a>.
+     </p>
+
+
+     <hr>
+         <h2> OMEGA web user interface </h2>
+
+
+     <hr>
+    <h2> Download code </h2>
+    All NUPYCEE is publicly available on bitbucket.
     To download the code git is required on your system.
     First create a directory, for example NUPYCEE, and navigate in it:
 
@@ -39,40 +63,35 @@
         </pre>
          </div>
 
-    <hr>
 
-    <h2> Running SYGMA and OMEGA</h2>
+     <p>The repository can be found <a href="https://bitbucket.org/nupycee/nupycee.bitbucket.org">here</a>.</p>
+
+     <hr>
+
+    <h2> Running SYGMA and OMEGA locally </h2>
 
     The ipython environment with numpy and matplotlib are required.
     A installation of NUPYCEE is not necessary. Instead, you can access the tools through the ipython interactive interface.
+    To run SYGMA and OMEGA have a look at the tutorials in the online documentations (links below) and
+    the <a href="DOC/nupycee-chapter.pdf">DOC</a> directory of NUPYCEE .</p>
 
-    <p>You can find the repository <a href="https://bitbucket.org/nupycee/nupycee.bitbucket.org">here</a>.</p> 
+    <hr>
 
-    To run SYGMA and OMEGA have a look at the tutorials in the online documentation and
-    the DOC directory of NUPYCEE
+    <h3> SYGMA </h3>
+
+     <p>The online documentation (SPHINX) can be found <a href="http://nupycee.bitbucket.org/SPHINX/build/html/sygma.html">here</a>.</p>
 
     <hr>
 
 
-    <h2> Interactive online interface </h2>
-
-     <p>We provide online interfaces for SYGMA and OMEGA through NuGrid's WENDI.
-     Access the interfaces <a href="http://206.12.59.73/cgi-bin/canfarSessionLauncher.py">here</a>.
-     Click on either SYGMA or OMEGA, and start the interfaces by clicking in the new window into the first line and
-     press shift+enter.</p>
+     <h3> GCE with OMEGA</h2>
 
      <h3>
-	SYGMA interface
+	OMEGA interface
       </h3>  
-        Each simulation can be run with a particular set of input parameter followed by a analysis  
-        in the Plotting window.
-        You can download tables containing the ejecta of simple stellar populations.
 
-    <hr>
+        <p>The online documentation (SPHINX) can be found <a href="http://nupycee.bitbucket.org/SPHINX/build/html/omega.html">here</a>.</p>
 
-    <h2>Online documentation</h2>
-
-    <p>The online documentation (SPHINX) can be found <a href="http://nupycee.bitbucket.org/SPHINX/build/html/index.html">here</a>.</p> 
 
     <hr>
  
