@@ -86,24 +86,43 @@ NuGrid collaboration</dd>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">help</span> <span class="n">s</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">sygma</span><span class="p">(</span><span class="n">alphaimf</span><span class="o">=</span><span class="mf">2.35</span><span class="p">,</span> <span class="n">sfr</span><span class="o">=</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="n">iniZ</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">1e7</span><span class="p">,</span> <span class="n">tend</span><span class="o">=</span><span class="mf">5e9</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+<p>Now start a calculation by providing the initial metal fraction
+iniZ, the final evolution time tend and the total mass of the SSP:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">sygma</span><span class="p">(</span><span class="n">iniZ</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">tend</span><span class="o">=</span><span class="mf">5e9</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>For more information:</p>
+<p>For more information regarding the input parameter see below or
+try</p>
 <div class="highlight-python"><div class="highlight"><pre>&gt;&gt;&gt; s.sygma?
 </pre></div>
 </div>
-<p>write isotope evolution in table (and download):</p>
+<p>For plotting utilize the plotting functions (plot_*) as described further
+below, for example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="o">.</span><span class="n">plot_totmasses</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can write out the information about the composition of the total
+ejecta of a SSP via</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">write_evol_table</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;H&#39;</span><span class="p">,</span><span class="s">&#39;C&#39;</span><span class="p">,</span><span class="s">&#39;O&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>For non-default yield inputs look into the yield_tables and yield_tables/iniabu
-(initial abundances) folders.  For example with artifical yields, following only
-with H-1, you can run,</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">sygma</span><span class="p">(</span><span class="n">iniZ</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span><span class="n">dt</span><span class="o">=</span><span class="mf">1e8</span><span class="p">,</span><span class="n">tend</span><span class="o">=</span><span class="mf">1.5e10</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e11</span><span class="p">,</span> <span class="o">&gt;&gt;&gt;</span>              <span class="n">table</span><span class="o">=</span><span class="s">&#39;yield_tables/isotope_yield_table_h1.txt&#39;</span><span class="p">,</span> <span class="o">&gt;&gt;&gt;</span>              <span class="n">sn1a_table</span><span class="o">=</span><span class="s">&#39;yield_tables/sn1a_h1.txt&#39;</span><span class="p">,</span> <span class="o">&gt;&gt;&gt;</span>              <span class="n">iniabu_table</span><span class="o">=</span><span class="s">&#39;yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt&#39;</span><span class="p">)</span>
+<p>Yield tables are available in the NUPYCEE subdirectory 
+yield   extunderscore tables. Add your yield tables to
+this directory and SYGMA will be able read the table
+if you have specified the $table$ variable. Only
+for table of Z=0 the variable $pop3     extunderscore table$ is used.
+Both tables need yields specified in the SYGMA (and OMEGA)
+yield input format. See for the structure the default table.
+It is important to provide an initial abundance
+file which has to match the number of species provided in the yield tables.
+Provide the file in the iniAbu directory inside the directory yield     extunderscore tables.
+The input variable with which the table file can be specified is $iniabu        extunderscore table$.
+For the necessary structure see again the default choice of that variable.</p>
+<p>For example with artifical yields of only H-1, you can try</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">sygma</span><span class="p">(</span><span class="n">iniZ</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span><span class="n">dt</span><span class="o">=</span><span class="mf">1e8</span><span class="p">,</span><span class="n">tend</span><span class="o">=</span><span class="mf">1.5e10</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e11</span><span class="p">,</span><span class="n">table</span><span class="o">=</span><span class="s">&#39;yield_tables/isotope_yield_table_h1.txt&#39;</span><span class="p">,</span>
+<span class="go">    sn1a_table=&#39;yield_tables/sn1a_h1.txt&#39;,iniabu_table=&#39;yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt&#39;)</span>
 </pre></div>
 </div>
-<p>Analysis functions: see chem_evol_plot.py</p>
 <dl class="class">
 <dt id="sygma.sygma">
 <em class="property">class </em><code class="descclassname">sygma.</code><code class="descname">sygma</code><span class="sig-paren">(</span><em>sfr='input', imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1, 100], sn1a_rate='power_law', iniZ=0.0, dt=1000000.0, special_timesteps=30, tend=13000000000.0, mgal=160000000000.0, transitionmass=8, iolevel=0, ini_alpha=True, table='yield_tables/isotope_yield_table.txt', hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt', iniabu_table='', extra_source_on=False, extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', pop3_table='yield_tables/popIII_heger10.txt', imf_bdys_pop3=[0.1, 100], imf_yields_range_pop3=[10, 30], starbursts=[], beta_pow=-1.0, gauss_dtd=[1000000000.0, 660000000.0], exp_dtd=2000000000.0, nb_1a_per_m=0.001, direct_norm_1a=-1, Z_trans=0, f_arfo=1.0, imf_yields_range=[1, 30], exclude_masses=[32, 60], netyields_on=False, wiersmamod=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma" title="Permalink to this definition">¶</a></dt>

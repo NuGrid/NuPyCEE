@@ -86,26 +86,43 @@
 
 <span class="sd">&gt;&gt;&gt; help s</span>
 
-<span class="sd">&gt;&gt;&gt; s1=s.sygma(alphaimf=2.35, sfr=&#39;input&#39;, iniZ=0.0001, dt=1e7, tend=5e9, mgal=1e5)</span>
+<span class="sd">Now start a calculation by providing the initial metal fraction</span>
+<span class="sd">iniZ, the final evolution time tend and the total mass of the SSP:</span>
 
-<span class="sd">For more information:</span>
+<span class="sd">&gt;&gt;&gt; s1=s.sygma(iniZ=0.0001, tend=5e9, mgal=1e5)</span>
+
+<span class="sd">For more information regarding the input parameter see below or</span>
+<span class="sd">try</span>
 
 <span class="sd">&gt;&gt;&gt; s.sygma?</span>
 
-<span class="sd">write isotope evolution in table (and download):</span>
+<span class="sd">For plotting utilize the plotting functions (plot_*) as described further</span>
+<span class="sd">below, for example:</span>
+
+<span class="sd">&gt;&gt;&gt; s1.plot_totmasses()</span>
+
+<span class="sd">You can write out the information about the composition of the total</span>
+<span class="sd">ejecta of a SSP via</span>
 
 <span class="sd">&gt;&gt;&gt; s.write_evol_table(elements=[&#39;H&#39;,&#39;C&#39;,&#39;O&#39;])</span>
 
-<span class="sd">For non-default yield inputs look into the yield_tables and yield_tables/iniabu</span>
-<span class="sd">(initial abundances) folders.  For example with artifical yields, following only</span>
-<span class="sd">with H-1, you can run,</span>
+<span class="sd">Yield tables are available in the NUPYCEE subdirectory </span>
+<span class="sd">yield\textunderscore tables. Add your yield tables to</span>
+<span class="sd">this directory and SYGMA will be able read the table</span>
+<span class="sd">if you have specified the $table$ variable. Only</span>
+<span class="sd">for table of Z=0 the variable $pop3\textunderscore table$ is used.</span>
+<span class="sd">Both tables need yields specified in the SYGMA (and OMEGA)</span>
+<span class="sd">yield input format. See for the structure the default table.</span>
+<span class="sd">It is important to provide an initial abundance</span>
+<span class="sd">file which has to match the number of species provided in the yield tables.</span>
+<span class="sd">Provide the file in the iniAbu directory inside the directory yield\textunderscore tables.</span>
+<span class="sd">The input variable with which the table file can be specified is $iniabu\textunderscore table$.</span>
+<span class="sd">For the necessary structure see again the default choice of that variable.</span>
 
-<span class="sd">&gt;&gt;&gt; s2 = s.sygma(iniZ=0.0001,dt=1e8,tend=1.5e10, mgal=1e11, \</span>
-<span class="sd">&gt;&gt;&gt;              table=&#39;yield_tables/isotope_yield_table_h1.txt&#39;, \</span>
-<span class="sd">&gt;&gt;&gt;              sn1a_table=&#39;yield_tables/sn1a_h1.txt&#39;, \</span>
-<span class="sd">&gt;&gt;&gt;              iniabu_table=&#39;yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt&#39;)</span>
+<span class="sd">For example with artifical yields of only H-1, you can try</span>
 
-<span class="sd">Analysis functions: see chem_evol_plot.py</span>
+<span class="sd">&gt;&gt;&gt; s2 = s.sygma(iniZ=0.0001,dt=1e8,tend=1.5e10, mgal=1e11,table=&#39;yield_tables/isotope_yield_table_h1.txt&#39;,</span>
+<span class="sd">    sn1a_table=&#39;yield_tables/sn1a_h1.txt&#39;,iniabu_table=&#39;yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt&#39;)</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 

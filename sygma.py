@@ -36,26 +36,43 @@ Get help with
 
 >>> help s
 
->>> s1=s.sygma(alphaimf=2.35, sfr='input', iniZ=0.0001, dt=1e7, tend=5e9, mgal=1e5)
+Now start a calculation by providing the initial metal fraction
+iniZ, the final evolution time tend and the total mass of the SSP:
 
-For more information:
+>>> s1=s.sygma(iniZ=0.0001, tend=5e9, mgal=1e5)
+
+For more information regarding the input parameter see below or
+try
 
 >>> s.sygma?
 
-write isotope evolution in table (and download):
+For plotting utilize the plotting functions (plot_*) as described further
+below, for example:
+
+>>> s1.plot_totmasses()
+
+You can write out the information about the composition of the total
+ejecta of a SSP via
 
 >>> s.write_evol_table(elements=['H','C','O'])
 
-For non-default yield inputs look into the yield_tables and yield_tables/iniabu
-(initial abundances) folders.  For example with artifical yields, following only
-with H-1, you can run,
+Yield tables are available in the NUPYCEE subdirectory 
+yield\textunderscore tables. Add your yield tables to
+this directory and SYGMA will be able read the table
+if you have specified the $table$ variable. Only
+for table of Z=0 the variable $pop3\textunderscore table$ is used.
+Both tables need yields specified in the SYGMA (and OMEGA)
+yield input format. See for the structure the default table.
+It is important to provide an initial abundance
+file which has to match the number of species provided in the yield tables.
+Provide the file in the iniAbu directory inside the directory yield\textunderscore tables.
+The input variable with which the table file can be specified is $iniabu\textunderscore table$.
+For the necessary structure see again the default choice of that variable.
 
->>> s2 = s.sygma(iniZ=0.0001,dt=1e8,tend=1.5e10, mgal=1e11, \
->>>              table='yield_tables/isotope_yield_table_h1.txt', \
->>>              sn1a_table='yield_tables/sn1a_h1.txt', \
->>>              iniabu_table='yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt')
+For example with artifical yields of only H-1, you can try
 
-Analysis functions: see chem_evol_plot.py
+>>> s2 = s.sygma(iniZ=0.0001,dt=1e8,tend=1.5e10, mgal=1e11,table='yield_tables/isotope_yield_table_h1.txt',
+    sn1a_table='yield_tables/sn1a_h1.txt',iniabu_table='yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt')
 
 '''
 
