@@ -1,0 +1,1 @@
+rm -f *.aux *.dvi *.log *.bbl *.blg *.pdf *.toc *.lot *.idx *ilg *lof *ind *.out

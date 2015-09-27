@@ -1,0 +1,137 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{nugrid}
+\RequirePackage[dvipsnames]{xcolor}
+\usepackage[setpagesize=false]{hyperref}
+\usepackage{tabularx,array}
+
+
+\newcommand{\fig}[1]{Fig.\,\ref{#1}}
+\newcommand{\mem}[1]{\ensuremath{\mathrm{ #1}}}
+%
+% Isotopes
+%
+\newcommand{\n}{\ensuremath{\mem{n}}}
+\newcommand{\lei}{\ensuremath{^{1}\mem{L}}}
+\newcommand{\p}{\ensuremath{\mem{p}}}
+\newcommand{\e}{\ensuremath{\mem{e}}}
+\newcommand{\epl}{\ensuremath{\mem{e}^\mem{+}}}
+\newcommand{\emi}{\ensuremath{\mem{e}^\mem{-}}}
+\newcommand{\deu}{\ensuremath{\mem{D}}}
+\newcommand{\h}{\ensuremath{\mem{H}}}
+\newcommand{\hedr}{\ensuremath{^{3}\mem{He}}}
+\newcommand{\hevi}{\ensuremath{^{4}\mem{He}}}
+\newcommand{\lisi}{\ensuremath{^{7}\mem{Li}}}
+\newcommand{\besi}{\ensuremath{^{7}\mem{Be}}}
+\newcommand{\beac}{\ensuremath{^{8}\mem{Be}}}
+\newcommand{\bac}{\ensuremath{^{8}\mem{B}}}
+\newcommand{\bel}{\ensuremath{^{11}\mem{B}}}
+\newcommand{\cdr}{\ensuremath{^{13}\mem{C}}}
+\newcommand{\czw}{\ensuremath{^{12}\mem{C}}}
+\newcommand{\cel}{\ensuremath{^{11}\mem{C}}}
+\newcommand{\cvi}{\ensuremath{^{14}\mem{C}}}
+\newcommand{\ndr}{\ensuremath{^{13}\mem{N}}}
+\newcommand{\nvi}{\ensuremath{^{14}\mem{N}}}
+\newcommand{\nfu}{\ensuremath{^{15}\mem{N}}}
+\newcommand{\ovi}{\ensuremath{^{14}\mem{O}}}
+\newcommand{\ofu}{\ensuremath{^{15}\mem{O}}}
+\newcommand{\ose}{\ensuremath{^{16}\mem{O}}}
+\newcommand{\osi}{\ensuremath{^{17}\mem{O}}}
+\newcommand{\oac}{\ensuremath{^{18}\mem{O}}}
+\newcommand{\fsi}{\ensuremath{^{17}\mem{F}}}
+\newcommand{\fac}{\ensuremath{^{18}\mem{F}}}
+\newcommand{\fne}{\ensuremath{^{19}\mem{F}}}
+\newcommand{\nezwa}{\ensuremath{^{20}\mem{Ne}}}
+\newcommand{\neei}{\ensuremath{^{21}\mem{Ne}}}
+\newcommand{\nezw}{\ensuremath{^{22}\mem{Ne}}}
+\newcommand{\naei}{\ensuremath{^{21}\mem{Na}}}
+\newcommand{\nazw}{\ensuremath{^{22}\mem{Na}}}
+\newcommand{\nadr}{\ensuremath{^{23}\mem{Na}}}
+\newcommand{\mgvi}{\ensuremath{^{24}\mem{Mg}}}
+\newcommand{\mgfu}{\ensuremath{^{25}\mem{Mg}}}
+\newcommand{\mgse}{\ensuremath{^{26}\mem{Mg}}}
+\newcommand{\alfu}{\ensuremath{^{25}\mem{Al}}}
+\newcommand{\alse}{\ensuremath{^{26}\mem{Al}}}
+\newcommand{\alsi}{\ensuremath{^{27}\mem{Al}}}
+\newcommand{\sisi}{\ensuremath{^{27}\mem{Si}}}
+\newcommand{\siac}{\ensuremath{^{28}\mem{Si}}}
+\newcommand{\sine}{\ensuremath{^{29}\mem{Si}}}
+\newcommand{\sidr}{\ensuremath{^{30}\mem{Si}}}
+\newcommand{\pne}{\ensuremath{^{29}\mem{P}}}
+\newcommand{\pdr}{\ensuremath{^{30}\mem{P}}}
+\newcommand{\pei}{\ensuremath{^{31}\mem{P}}}
+\newcommand{\szw}{\ensuremath{^{32}\mem{S}}}
+\newcommand{\fese}{\ensuremath{^{56}\mem{Fe}}}
+\newcommand{\fesi}{\ensuremath{^{57}\mem{Fe}}}
+\newcommand{\feac}{\ensuremath{^{58}\mem{Fe}}}
+\newcommand{\cone}{\ensuremath{^{59}\mem{Co}}}
+\newcommand{\niac}{\ensuremath{^{58}\mem{Ni}}}
+\newcommand{\nine}{\ensuremath{^{59}\mem{Ni}}}
+\newcommand{\nise}{\ensuremath{^{60}\mem{Ni}}}
+\newcommand{\niei}{\ensuremath{^{61}\mem{Ni}}}
+\newcommand{\nizw}{\ensuremath{^{62}\mem{Ni}}}
+\newcommand{\nidr}{\ensuremath{^{63}\mem{Ni}}}
+\newcommand{\nivi}{\ensuremath{^{64}\mem{Ni}}}
+\newcommand{\cudr}{\ensuremath{^{63}\mem{Cu}}}
+\newcommand{\gdr}{\ensuremath{^{63}\mem{G}}}
+\newcommand{\cuvi}{\ensuremath{^{64}\mem{Cu}}}
+\newcommand{\cufu}{\ensuremath{^{65}\mem{Cu}}}
+\newcommand{\krfu}{\ensuremath{^{85}\mem{Kr}}}
+\newcommand{\krse}{\ensuremath{^{86}\mem{Kr}}}
+\newcommand{\rbse}{\ensuremath{^{86}\mem{Rb}}}
+\newcommand{\rbsi}{\ensuremath{^{87}\mem{Rb}}}
+\newcommand{\zrse}{\ensuremath{^{96}\mem{Zr}}}
+\newcommand{\zrvi}{\ensuremath{^{94}\mem{Zr}}}
+\newcommand{\zrfu}{\ensuremath{^{95}\mem{Zr}}}
+\newcommand{\srac}{\ensuremath{^{88}\mem{Sr}}}
+\newcommand{\iac}{\ensuremath{^{128}\mem{I}}}
+\newcommand{\xeac}{\ensuremath{^{128}\mem{Xe}}}
+\newcommand{\xedr}{\ensuremath{^{130}\mem{Xe}}}
+\newcommand{\taac}{\ensuremath{^{180}\mem{Ta}}}
+\newcommand{\csvi}{\ensuremath{^{134}\mem{Cs}}}
+\newcommand{\baac}{\ensuremath{^{138}\mem{Ba}}}
+\newcommand{\smei}{\ensuremath{^{151}\mem{Sm}}}
+\newcommand{\blac}{\ensuremath{^{208}\mem{Pb}}}
+\newcommand{\bine}{\ensuremath{^{209}\mem{Bi}}}
+%
+%   temperatures
+%
+\newcommand{\teight}{\ensuremath{T_{\rm 8}}}
+\newcommand{\teff}{\ensuremath{T_{\rm eff}}}
+\newcommand{\kelv}{\ensuremath{\,\mathrm K}}
+%
+%   units
+%
+\newcommand{\msun}{\ensuremath{\, {\rm M}_\odot}}
+\newcommand{\lsun}{\ensuremath{\, {\rm L}_\odot}}
+\newcommand{\zsun}{\ensuremath{\, {\rm Z}_\odot}}
+\newcommand{\rsun}{\ensuremath{\, {\rm R}_\odot}}
+\newcommand{\dsun}{\ensuremath{\, {\rm d}_\odot}}
+\newcommand{\MeV}{\ensuremath{\, \mathrm{MeV}}}
+\newcommand{\kpc}{\ensuremath{\, \mathrm{kpc}}}
+                                                                                              
+%
+% Document structure
+%                                                            
+\newcommand{\ngtitle}[1]{{\vspace{10cm} \color{ForestGreen}  \LARGE \bf
+    \sffamily \centering #1 \\
+\vspace{12pt}}}
+
+\newcommand{\ngcolor}{Black}
+
+%\renewcommand\chapter{%
+%\@startsection{chapter}{1}{\z@}%
+%              {-4.0ex \@plus -1ex \@minus -.2ex}%
+%              {3.0ex \@plus.2ex}%
+%              {\color{\ngcolor}\sffamily\Large\bfseries}}
+\renewcommand\section{%
+\@startsection{section}{1}{\z@}%
+              {-3.5ex \@plus -1ex \@minus -.2ex}%
+              {2.3ex \@plus.2ex}%
+              {\color{\ngcolor}\sffamily\Large\bfseries}}
+\renewcommand\subsection{%
+\@startsection{subsection}{2}{\z@}%
+              {-3.25ex\@plus -1ex \@minus -.2ex}%
+              {1.5ex \@plus .2ex}%
+              {\color{\ngcolor}\sffamily\large\bfseries}}
+
+\endinput
