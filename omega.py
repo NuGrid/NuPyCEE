@@ -1,12 +1,14 @@
 '''
 
-OMEGA (One-zone Model for the Evolution of GAlaxies)
+GCE OMEGA (One-zone Model for the Evolution of Galaxies) modle
 
 
 Functionality
 =============
 
-To be filled ...
+This tool allows to simulate the chemical evolution of single-zone galaxies.
+Having the star formation history as one of the input parameters, OMEGA can
+target local galaxies by using observational data found in the literature.
 
 
 Made by
@@ -35,7 +37,27 @@ v0.5 MAR2015: B. Cote
 Usage
 =====
 
-To be filled ...
+Import the module:
+
+>>> import omega as o
+
+Get help:
+
+>>> help o
+
+Get more information:
+
+>>> o.omega?
+
+Create an costum galaxy (closed box):
+
+>>> o1 = o.omega(cte_sfr=1.0, mgal=1.5e10)
+
+Simulate a known galaxy (open box):
+
+>>> o2 = o.omega(galaxy='sculptor', in_out_control=True, mgal=1e6, mass_loading=8, in_out_ratio=1.5)
+
+Analysis functions: See the Sphinx documentation
 
 '''
 
@@ -58,125 +80,168 @@ class omega( chem_evol ):
     Important : By default, a closed box model is always assumed.
 
     galaxy : string
+
         Name of the target galaxy.  By using a known galaxy, the code
         automatically selects the corresponding star formation history, stellar
         mass, and total mass (when available).  By using 'none', the user has
         the perfect control on these three last parameters.
+
         Choices : 'milky_way', 'milky_way_cte', 'sculptor', 'carina', 'fornax',
-                  'none'
+        'none'
+
         Default value : 'none' 
+
         Special note : The 'milky_way_cte' option uses the Milky Way's
-                       characteristics, but with a constant star formation
-                       history.
+        characteristics, but with a constant star formation history.
 
     cte_sfr : float
+
         Constant star formation history in [Mo/yr].
+
         Default value : 1.0
 
     rand_sfh : float
+
         Maximum possible ratio between the maximum and the minium values of a star
         formation history that is randomly generated.
+
         Default value : 0.0 (deactivated)
+
         Special note : A value greater than zero automatically generates a random
-                       star formation history, which pypasses the use of the
-                       cte_sfr parameter.
+        star formation history, which pypasses the use of the cte_sfr parameter.
 
     sfh_file : string
+
         Path to a file containing an input star formation history.  The first and
         second columns must be the age of the galaxy in [yr] and the star
         formation rate in [Mo/yr].
+
         Default value : 'none' (deactivated)
+
         Special note : When a path is specified, it by passes the cte_sfr and the
-                       rand_sfh parameters.
+        and_sfh parameters.
 
     stellar_mass_0 : float
+
         Current stellar mass of the galaxy, in [Mo], at the end of the simulation.
+
         Default value : -1.0 (you need to specify a value with unkown galaxies)
 
     in_out_control : boolean
+
         The in_out_control implementation enables to control the outflow and
         the inflow rates independently by using constant values (see outflow_rate
         and inflow_rate) or by using a mass-loading factor that connects the
         rates to the star formation history (see mass_loading and in_out_ratio).
+
         Default value : False (deactivated)
 
     mass_loading : float
+
         Ratio between the outflow rate and the star formation rate.
+
         Default value : 1.0
 
     outflow_rate : float
+
         Constant outflow rate in [Mo/yr].
+
         Default value : -1.0 (deactivated)
+
         Special note : A value greater or equal to zero activates the constant
-                       outflow mode, which bypasses the use of the mass_loading
-                       parameter.
+        utflow mode, which bypasses the use of the mass_loading parameter.
 
     in_out_ratio : float
+
         Used in : in_out_control mode
+
         Ratio between the inflow rate and the outflow rate.  This parameter is
         used to calculate the inflow rate, not the outflow rate.
+
         Default value : 1.0
 
     inflow_rate : float
+
         Used in : in_out_control mode
+
         Constant inflow rate in [Mo/yr].
+
         Default value : -1.0 (deactivated)
+
         Special note : A value greater or equal to zero activates the constant
-                       inflow mode, which bypasses the use of the in_out_ratio
-                       parameter.
+        inflow mode, which bypasses the use of the in_out_ratio parameter.
 
     SF_law : boolean
+
         The SF_law inplementation assumes a Kennicutt-Schmidt star formation law
         and combines it to the known input star formation history in order to
         derive the mass of the gas reservoir at every timestep.
+
         Default value : False (deactivated)
 
     sfe : float
+
         Used in : SF_law and DM_evolution modes
+
         Star formation efficiency present in the Kennicutt-Schmidt law.
+
         Default value : 0.1
 
     f_dyn : float
+
         Used in : SF_law and DM_evolution modes
+
         Scaling factor used to calculate the star formation timescale present in
         the Kennicutt-Schmidt law.  We assume that this timescale is equal to a
         fraction of the dynamical timescale of the virialized system (dark and
         baryonic matter), t_star = f_dyn * t_dyn.
+
         Default value : 0.1
 
     m_DM_0 : float
+
         Used in : SF_law and DM_evolution modes
+
         Current dark matter halo mass of the galaxy, in [Mo], at the end of the
         simulations.
+
         Default value : 1.0e+11 
 
     t_star : float
+
         Used in : SF_law and DM_evolution modes
+
         Star formation timescale, in [yr], used in the Kennicutt-Schmidt law.
+
         Default value = -1.0 (deactivated)
+
         Special note : A positive value activates the use of this parameter, 
-                       which bypasses the f_dyn parameter.
+        which bypasses the f_dyn parameter.
 
     DM_evolution : boolean
+
         The DM_evolution implementation is an extention of the SF_law option.
         In addition of using a Kennicutt-Schmidt star formation law, it assumes
         an evolution in the total mass of the galaxy as function of time.  With
         this prescription, the mass-loading factor has a mass dependency.  The
         mass_loading parameter then only represents the final value at the end
         of the simulation. 
+
         Default value : False (deactivated)
 
     exp_ml : float
+
         Used in : DM_evolution mode
+
         Exponent of the mass dependency of the mass-loading factor.  This last
         factor is proportional to M_vir**(-exp_ml/3), where M_vir is the sum of
         dark and baryonic matter.
+
         Default value : 2.0    
-
-
 
     ================
     '''
+
     #Combine docstrings from chem_evol with sygma docstring
     __doc__ = __doc__+chem_evol.__doc__
 
@@ -193,7 +258,8 @@ class omega( chem_evol ):
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  tend=13e9, mgal=-1, transitionmass=8, iolevel=0, \
-                 ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
+                 ini_alpha=True, \
+                 table='yield_tables/isotope_yield_table_MESA_only.txt', \
                  hardsetZ=-1, sn1a_on=True,\
                  sn1a_table='yield_tables/sn1a_t86.txt',\
                  iniabu_table='', \
@@ -205,7 +271,7 @@ class omega( chem_evol ):
                  nb_1a_per_m=1.0e-3, f_arfo=1, \
                  imf_yields_range=[1,30],exclude_masses=[32,60], \
 		 netyields_on=False,wiersmamod=False,skip_zero=False,\
-                 redshift_f=0.0,print_off=False):
+                 redshift_f=0.0,print_off=False,long_range_ref=False):
 
         # Announce the beginning of the simulation 
         print 'OMEGA run in progress..'
@@ -255,6 +321,7 @@ class omega( chem_evol ):
         self.skip_zero = skip_zero
         self.redshift_f = redshift_f
         self.print_off = print_off
+        self.long_range_ref = long_range_ref
 
         # Set cosmological parameters - Dunkley et al. (2009)
         self.omega_0   = 0.257   # Current mass density parameter
@@ -288,6 +355,9 @@ class omega( chem_evol ):
                     need_t_raf = True
                     break
             if need_t_raf:
+              if self.long_range_ref:
+                self.__rafine_steps_lr()
+              else:
                 self.__rafine_steps()
 
         # Declare arrays used to follow the evolution of the galaxy
@@ -402,6 +472,65 @@ class omega( chem_evol ):
                 # Split the step
                 for i_sp_st in range(0,nb_split):
                     new_dt.append(self.history.timesteps[i_rs]/nb_split)
+
+            # If ok, don't change anything
+            else:
+                new_dt.append(self.history.timesteps[i_rs])
+
+        # Update the timestep information
+        self.nb_timesteps = len(new_dt)
+        self.history.timesteps = new_dt
+
+        # Update/redeclare all the arrays
+        ymgal = self._get_iniabu()
+        self.len_ymgal = len(ymgal)
+        self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
+        self.ymgal_1a, self.mdot_massive, self.mdot_agb, self.mdot_1a, \
+        self.sn1a_numbers, self.sn2_numbers, self.imf_mass_ranges, \
+        self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
+        self._get_storing_arrays(ymgal)
+
+
+    ##############################################
+    #              Rafine Steps LR               #
+    ##############################################
+    def __rafine_steps_lr(self):
+
+        '''
+        This function increases the number of timesteps if the star formation
+        will eventually consume all the gas, which occur when dt > (t_star/sfe).
+
+        '''
+
+        # Declaration of the new timestep array
+        if not self.print_off:
+            print '..Time rafinement (long range)..'
+        new_dt = []
+
+        # For every timestep ...
+        for i_rs in range(0,len(self.history.timesteps)):
+
+            # Calculate the critital time delay
+            t_raf = self.t_SF_t[i_rs] / self.sfe
+
+            # If the step needs to be rafined ...
+            if self.history.timesteps[i_rs] > t_raf:
+
+                # Calculate the number of remaining steps
+                nb_step_rem = len(self.history.timesteps) - i_rs
+                t_rem = 0.0
+                for i_rs in range(0,len(self.history.timesteps)):
+                    t_rem += self.history.timesteps[i_rs]
+
+                # Calculate the split factor
+                nb_split = int(t_rem / t_raf) + 1
+
+                # Split the step
+                for i_sp_st in range(0,nb_split):
+                    new_dt.append(t_rem/nb_split)
+
+                # Quit the for loop
+                break
 
             # If ok, don't change anything
             else:
@@ -1026,7 +1155,7 @@ class omega( chem_evol ):
                     self.eta_outflow_t[i_ceo] = self.mass_loading
                     self.m_outflow_t[i_ceo] = self.eta_outflow_t[i_ceo] * \
                         self.sfr_input[i_ceo] * self.history.timesteps[i_ceo]
-
+                  
             # If the mass of the dark matter halo is evolving
             else:
 
@@ -6415,6 +6544,10 @@ class omega( chem_evol ):
 
 	return shape,marker,color
 
+
+    ##############################################
+    #                Fig Standard                #
+    ##############################################
     def __fig_standard(self,ax,fontsize=8,labelsize=8,lwtickboth=[6,2],lwtickmajor=[10,3],markersize=8,rspace=0.6,bspace=0.15, legend_fontsize=14):
 
         '''
@@ -6445,7 +6578,50 @@ class omega( chem_evol ):
     ##############################################
     #              Plot Mass-Loading             #
     ##############################################
-    def plot_mass_loading(self,fig=8,source='all',marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_mass_loading(self,fig=8,marker='',shape='',\
+            color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
+            bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+	This function plots the mass-loading factor, which is the ratio
+	between the mass outflow rate and the star formation rate, as a
+	function of time.
+
+        Parameters
+        ----------
+
+        fig : string, float
+	     Figure name.
+	marker : string
+	     Figure marker.
+	shape : string
+	     Line style.
+	color : string
+	     Line color.
+	label : string
+	     Figure label.
+	fsize : 2D float array
+	     Figure dimension/size.
+	fontsize : integer
+	     Font size of the numbers on the X and Y axis.
+	rspace : float
+	     Extra space on the right for the legend.
+	bspace : float
+	     Extra space at the bottom for the Y axis label.
+	labelsize : integer
+	     Font size of the X and Y axis labels.
+	legend_fontsize : integer
+ 	       Font size of the legend.
+
+        Examples
+	----------
+
+	>>> o1.plot_mass_loading(label='Mass-Loading Factor')
+
+        '''
+
+        # Define variable only used for plot visual
+        source='all'
 
         #Plot only if in the open box scenario
         if self.open_box:
@@ -6463,7 +6639,8 @@ class omega( chem_evol ):
             mass_lo = self.history.eta_outflow_t
 
             #Plot data
-            plt.plot(age,mass_lo,color=color,label=label,marker=marker,linestyle=shape)
+            plt.plot(age,mass_lo,color=color,label=label,\
+                     marker=marker,linestyle=shape)
 
             #Save plot
             self.save_data(header=['age','mass-loading'],data=[age,mass_lo])
@@ -6474,13 +6651,54 @@ class omega( chem_evol ):
 
         else:
             print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
 
 
     ##############################################
     #              Plot Outflow Rate             #
     ##############################################
-    def plot_outflow_rate(self,fig=9,source='all',marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_outflow_rate(self,fig=9,marker='',shape='',\
+            color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
+            bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+	This function plots the mass outflow rate as a function of time
+        in units of [Mo/yr].
+
+        Parameters
+        ----------
+
+        fig : string, float
+	     Figure name.
+	marker : string
+	     Figure marker.
+	shape : string
+	     Line style.
+	color : string
+	     Line color.
+	label : string
+	     Figure label.
+	fsize : 2D float array
+	     Figure dimension/size.
+	fontsize : integer
+	     Font size of the numbers on the X and Y axis.
+	rspace : float
+	     Extra space on the right for the legend.
+	bspace : float
+	     Extra space at the bottom for the Y axis label.
+	labelsize : integer
+	     Font size of the X and Y axis labels.
+	legend_fontsize : integer
+ 	       Font size of the legend.
+
+        Examples
+	----------
+
+	>>> o1.plot_outflow_rate(label='Outflow Rate')
+
+        '''
+
+        # Define variable only used for plot visual
+        source='all'
 
         #Plot only if in the open box scenario
         if self.open_box:
@@ -6495,10 +6713,15 @@ class omega( chem_evol ):
 
             #Copy data for x and y axis
             age = self.history.age[:-1]
-            outflow_plot = self.history.m_outflow_t / self.history.timesteps
+            outflow_plot = []
+            for i_op in range(0,len(age)):
+                outflow_plot.append(self.history.m_outflow_t[i_op] / \
+                    self.history.timesteps[i_op])
+            outflow_plot[0] = 0.0
 
             #Plot data
-            plt.plot(age,outflow_plot,label=label,marker=marker,color=color,linestyle=shape)
+            plt.plot(age,outflow_plot,label=label,marker=marker,\
+                     color=color,linestyle=shape)
 
             #Save plot
             self.save_data(header=['age','outflow rate'],data=[age,outflow_plot])
@@ -6509,13 +6732,54 @@ class omega( chem_evol ):
 
         else:
             print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
 
 
     ##############################################
     #              Plot Inflow Rate              #
     ##############################################
-    def plot_inflow_rate(self,fig=10,source='all',marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_inflow_rate(self,fig=10,marker='',shape='',color='',\
+            label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,\
+            labelsize=15,legend_fontsize=14):
+
+        '''
+	This function plots the mass inflow rate as a function of time
+        in units of [Mo/yr].
+
+        Parameters
+        ----------
+
+        fig : string, float
+	     Figure name.
+	marker : string
+	     Figure marker.
+	shape : string
+	     Line style.
+	color : string
+	     Line color.
+	label : string
+	     Figure label.
+	fsize : 2D float array
+	     Figure dimension/size.
+	fontsize : integer
+	     Font size of the numbers on the X and Y axis.
+	rspace : float
+	     Extra space on the right for the legend.
+	bspace : float
+	     Extra space at the bottom for the Y axis label.
+	labelsize : integer
+	     Font size of the X and Y axis labels.
+	legend_fontsize : integer
+ 	       Font size of the legend.
+
+        Examples
+	----------
+
+	>>> o1.plot_inflow_rate(label='Inflow Rate')
+
+        '''
+
+        # Define variable only used for plot visual
+        source='all'
 
         #Plot only if in the open box scenario
         if self.open_box:
@@ -6530,10 +6794,14 @@ class omega( chem_evol ):
 
             #Copy data for x and y axis
             age = self.history.age[:-1]
-            inflow_plot = self.history.m_inflow_t / self.history.timesteps
+            inflow_plot = []
+            for i_op in range(0,len(age)):
+                inflow_plot.append(self.history.m_inflow_t[i_op] / \
+                    self.history.timesteps[i_op])
 
             #Plot data
-            plt.plot(age,inflow_plot,label=label,marker=marker,color=color,linestyle=shape)
+            plt.plot(age,inflow_plot,label=label,marker=marker,\
+                     color=color,linestyle=shape)
 
             #Save plot
             self.save_data(header=['age','inflow rate'],data=[age,inflow_plot])
@@ -6544,18 +6812,59 @@ class omega( chem_evol ):
 
         else:
             print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
 
 
     ##############################################
     #              Plot Dark Matter              #
     ##############################################
-    def plot_dark_matter(self,fig=11,source='all',marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_dark_matter(self,fig=11,marker='',shape='',\
+            color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6, \
+            bspace=0.15,labelsize=15,legend_fontsize=14):
 
-        #Plot only if in the open box scenario
+        '''
+	This function plots the dark matter halo mass of the galaxy as a 
+	function of time.
+
+        Parameters
+        ----------
+
+        fig : string, float
+	     Figure name.
+	marker : string
+	     Figure marker.
+	shape : string
+	     Line style.
+	color : string
+	     Line color.
+	label : string
+	     Figure label.
+	fsize : 2D float array
+	     Figure dimension/size.
+	fontsize : integer
+	     Font size of the numbers on the X and Y axis.
+	rspace : float
+	     Extra space on the right for the legend.
+	bspace : float
+	     Extra space at the bottom for the Y axis label.
+	labelsize : integer
+	     Font size of the X and Y axis labels.
+	legend_fontsize : integer
+ 	       Font size of the legend.
+
+        Examples
+	----------
+
+	>>> o1.plot_dark_matter(label='Dark Matter')
+
+        '''
+
+        # Define variable only used for plot visual
+        source='all'
+
+        # Plot only if in the open box scenario
         if self.open_box:
 
-            #Define visual aspects
+            # Define visual aspects
             shape,marker,color=self.__msc(source,shape,marker,color)
 	    plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
@@ -6568,10 +6877,12 @@ class omega( chem_evol ):
             DM_plot = self.history.m_DM_t
 
             #Plot data
-            plt.plot(age,DM_plot,label=label,marker=marker,color=color,linestyle=shape)
+            plt.plot(age,DM_plot,label=label,marker=marker,\
+                     color=color,linestyle=shape)
 
             #Save plot
-            self.save_data(header=['age','dark matter halo mass'],data=[age,DM_plot])
+            self.save_data(header=['age','dark matter halo mass'],\
+                           data=[age,DM_plot])
 
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
@@ -6579,83 +6890,54 @@ class omega( chem_evol ):
 
         else:
             print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
-
-
-    ##############################################
-    #                 Plot Sigma                 #
-    ##############################################
-    def plot_sigma(self,fig=13,source='all',marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
-
-        #Plot only if in the open box scenario
-        if self.open_box:
-
-            #Define visual aspects
-            shape,marker,color=self.__msc(source,shape,marker,color)
-	    plt.figure(fig, figsize=(fsize[0],fsize[1]))
-
-            #Display axis labels
-            plt.xlabel('Age [yrs]')
-            plt.ylabel('Velocity dispersion [km/s]')	
-
-            #Copy data for x and y axis
-            age = self.history.age
-            sigma_plot = self.history.sigma_t
-
-            #Plot data
-            plt.plot(age,sigma_plot,label=label,marker=marker,color=color,linestyle=shape)
-
-            #Save plot
-            self.save_data(header=['age','velocity dispersion'],data=[age,sigma_plot])
-
-            ax=plt.gca()
-            self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
-                rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-
-        else:
-            print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
-
-
-    ##############################################
-    #                Plot Hubble                 #
-    ##############################################
-    def plot_hubble(self,fig=14,source='all',marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
-
-        #Plot only if in the open box scenario
-        if self.open_box:
-
-            #Define visual aspects
-            shape,marker,color=self.__msc(source,shape,marker,color)
-	    plt.figure(fig, figsize=(fsize[0],fsize[1]))
-
-            #Display axis labels
-            plt.xlabel('Age [yrs]')
-            plt.ylabel('Hubble parameter [km/s/Mpc]')	
-
-            #Copy data for x and y axis
-            age = self.history.age
-            hubble_plot = self.history.H_t
-
-            #Plot data
-            plt.plot(age,hubble_plot,label=label,marker=marker,color=color,linestyle=shape)
-
-            #Save plot
-            self.save_data(header=['age','Hubble parameter'],data=[age,hubble_plot])
-
-            ax=plt.gca()
-            self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
-                rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-
-        else:
-            print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
 
 
     ##############################################
     #             Plot SF Timescale              #
     ##############################################
-    def plot_sf_timescale(self,fig=15,source='all',marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_sf_timescale(self,fig=15,marker='',shape='',color='',\
+            label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,\
+            labelsize=15,legend_fontsize=14):
+
+        '''
+	This function plots the star formation timescale as a function of time
+        in units of [yr].
+
+        Parameters
+        ----------
+
+        fig : string, float
+	     Figure name.
+	marker : string
+	     Figure marker.
+	shape : string
+	     Line style.
+	color : string
+	     Line color.
+	label : string
+	     Figure label.
+	fsize : 2D float array
+	     Figure dimension/size.
+	fontsize : integer
+	     Font size of the numbers on the X and Y axis.
+	rspace : float
+	     Extra space on the right for the legend.
+	bspace : float
+	     Extra space at the bottom for the Y axis label.
+	labelsize : integer
+	     Font size of the X and Y axis labels.
+	legend_fontsize : integer
+ 	       Font size of the legend.
+
+        Examples
+	----------
+
+	>>> o1.plot_sf_timescale(label='Star Formation Timescale')
+
+        '''
+
+        # Define variable only used for plot visual
+        source='all'
 
         #Plot only if in the open box scenario
         if self.open_box:
@@ -6676,10 +6958,12 @@ class omega( chem_evol ):
             t_SF_plot = self.history.t_SF_t
 
             #Plot data
-            plt.plot(age,t_SF_plot,label=label,marker=marker,color=color,linestyle=shape)
+            plt.plot(age,t_SF_plot,label=label,marker=marker,\
+                     color=color,linestyle=shape)
 
             #Save plot
-            self.save_data(header=['age','star formation timescale'],data=[age,t_SF_plot])
+            self.save_data(header=['age','star formation timescale'],\
+                                   data=[age,t_SF_plot])
 
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
@@ -6687,13 +6971,53 @@ class omega( chem_evol ):
 
         else:
             print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
 
 
     ##############################################
     #               Plot Redshift                #
     ##############################################
-    def plot_redshift(self,fig=16,source='all',marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_redshift(self,fig=16,marker='',shape='',\
+            color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
+            bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+	This function plots the redshift a function of time.
+
+        Parameters
+        ----------
+
+        fig : string, float
+	     Figure name.
+	marker : string
+	     Figure marker.
+	shape : string
+	     Line style.
+	color : string
+	     Line color.
+	label : string
+	     Figure label.
+	fsize : 2D float array
+	     Figure dimension/size.
+	fontsize : integer
+	     Font size of the numbers on the X and Y axis.
+	rspace : float
+	     Extra space on the right for the legend.
+	bspace : float
+	     Extra space at the bottom for the Y axis label.
+	labelsize : integer
+	     Font size of the X and Y axis labels.
+	legend_fontsize : integer
+ 	       Font size of the legend.
+
+        Examples
+	----------
+
+	>>> o1.plot_redshift(label='Redshift')
+
+        '''
+
+        # Define variable only used for plot visual
+        source='all'
 
         #Plot only if in the open box scenario
         if self.open_box:
@@ -6711,7 +7035,8 @@ class omega( chem_evol ):
             redshift_plot = self.history.redshift_t
 
             #Plot data
-            plt.plot(age,redshift_plot,label=label,marker=marker,color=color,linestyle=shape)
+            plt.plot(age,redshift_plot,label=label,marker=marker,\
+                     color=color,linestyle=shape)
 
             #Save plot
             self.save_data(header=['age','redshift'],data=[age,redshift_plot])
@@ -6722,89 +7047,79 @@ class omega( chem_evol ):
 
         else:
             print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
-
-    ##############################################
-    #                 Plot R_vir                 #
-    ##############################################
-    def plot_r_vir(self,fig=17,source='all',marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
-
-        #Plot only if in the open box scenario
-        if self.open_box:
-
-            #Define visual aspects
-            shape,marker,color=self.__msc(source,shape,marker,color)
-	    plt.figure(fig, figsize=(fsize[0],fsize[1]))
-
-            #Display axis labels
-            plt.xlabel('Age [yrs]')
-            plt.ylabel('R_vir [kpc]')	
-
-            #Copy data for x and y axis
-            age = self.history.age
-            r_vir_plot = self.history.r_vir_DM_t
-
-            #Plot data
-            plt.plot(age,r_vir_plot,label=label,marker=marker,color=color,linestyle=shape)
-
-            #Save plot
-            self.save_data(header=['age','r_vir'],data=[age,r_vir_plot])
-
-            ax=plt.gca()
-            self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
-                rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-
-        else:
-            print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
-
-
-    ##############################################
-    #                 Plot V_vir                 #
-    ##############################################
-    def plot_v_vir(self,fig=18,source='all',marker='',shape='',\
-        color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
-        bspace=0.15,labelsize=15,legend_fontsize=14):
-
-        #Plot only if in the open box scenario
-        if self.open_box:
-
-            #Define visual aspects
-            shape,marker,color=self.__msc(source,shape,marker,color)
-            plt.figure(fig, figsize=(fsize[0],fsize[1]))
-
-            #Display axis labels
-            plt.xlabel('Age [yrs]')
-            plt.ylabel('V_vir [km/s]')	
-
-            #Copy data for x and y axis
-            age = self.history.age
-            v_vir_plot = self.history.v_vir_DM_t
-
-            #Plot data
-            plt.plot(age,v_vir_plot,label=label,marker=marker,color=color,linestyle=shape)
-
-            #Save plot
-            self.save_data(header=['age','v_vir'],data=[age,v_vir_plot])
-
-            ax=plt.gca()
-            self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
-                rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-
-        else:
-            print 'Not available with a closed box.'
-            print 'Add the parameter open_box=True when creating a SYGMA instance.'
 
 
     ###################################################
     #                  Plot Iso Ratio                 #
     ###################################################
-    def plot_iso_ratio(self,fig=18,source='all',marker='',shape='',\
-        color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
-        bspace=0.15,labelsize=15,legend_fontsize=14,return_x_y=False,
-        xaxis='age',yaxis='C-12/C-13',markevery=500,\
+    def plot_iso_ratio(self,return_x_y=False,
+        xaxis='age',yaxis='C-12/C-13',\
         solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
-        solar_iso='solar_normalization/Asplund_et_al_2009_iso.txt'):
+        solar_iso='solar_normalization/Asplund_et_al_2009_iso.txt',\
+        fig=18,source='all',marker='',shape='',\
+        color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
+        bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+	This function plots the evolution of an isotopic ratio as a function
+	of time, as a function of an abundance ratio, or as a function of
+	another isotopic ratio.  Isotopic ratios are given in the
+	delta notation and abundances ratios are given in spectroscopic notation.
+
+        Parameters
+        ----------
+
+	return_x_y : boolean
+	     If False, show the plot.  If True, return two arrays containing
+	     the X and Y axis data, respectively.
+	xaxis : string
+	     X axis, either 'age', an abundance ratio such as '[Fe/H]', or an
+	     isotopic ratio such as 'C-12/C-13'.
+	yaxis : string
+	     Y axis, isotopic ratio such as 'C-12/C-13'.
+	solar_ab : string
+	     Path to the solar abundances used to normalize abundance ratios.
+	solar_iso : string
+	     Path to the solar isotopes used to normalize the isotopic ratios.
+        fig : string, float
+	     Figure name.
+        source : string
+            Specificies if yields come from
+	    all sources ('all') or from
+	    distinctive sources:
+	    only AGB stars ('agb'), only
+	    SN Ia ('sn1a'), or only massive stars
+	    ('massive')
+	marker : string
+	     Figure marker.
+	shape : string
+	     Line style.
+	color : string
+	     Line color.
+	label : string
+	     Figure label.
+	fsize : 2D float array
+	     Figure dimension/size.
+	fontsize : integer
+	     Font size of the numbers on the X and Y axis.
+	rspace : float
+	     Extra space on the right for the legend.
+	bspace : float
+	     Extra space at the bottom for the Y axis label.
+	labelsize : integer
+	     Font size of the X and Y axis labels.
+	legend_fontsize : integer
+ 	       Font size of the legend.
+
+        Examples
+	----------
+
+	>>> o1.plot_iso_ratio(xaxis='[Fe/H]', yaxis='C-12/C-13')
+
+        '''
+
+        # Marker on the plots
+        markevery=500
 
         # Declaration of the array to plot
         x = []
@@ -6936,12 +7251,6 @@ class omega( chem_evol ):
             x1_sol, x2_sol, y1_sol, y2_sol = \
                 self.__read_solar_iso(solar_iso, '', '', y_1, y_2)
 
-        # Calculate the isotope ratios (mass ratio)
-        #for k in range(0,len(yields_evol)):
-        #    if xaxis_ratio:
-        #        x.append( yields_evol[k][idx_1] / yields_evol[k][idx_2] )
-        #    y.append( yields_evol[k][idy_1] / yields_evol[k][idy_2] )
-
         # Calculate the isotope ratios (delta notation)
         for k in range(0,len(yields_evol)):
             if xaxis_ratio:
@@ -6953,7 +7262,11 @@ class omega( chem_evol ):
                            (y2_at_nb / y1_at_nb)
             ratio_std = y1_sol / y2_sol
             y.append( ((ratio_sample/ratio_std) - 1) * 1000)
-    
+  
+        # Make sure the length of array are the same when xaxis = '[X/Y]'
+        too_much = len(y)-len(x)
+        y = y[too_much:]
+
         #Reserved for plotting
         if not return_x_y:
             shape,marker,color=self.__msc(source,shape,marker,color)
@@ -6961,8 +7274,8 @@ class omega( chem_evol ):
         #Reserved for plotting
         if not return_x_y:
            plt.figure(fig, figsize=(fsize[0],fsize[1]))
-           if xaxis == 'age':
-               plt.xscale('log')
+               #if xaxis == 'age':
+               #plt.xscale('log')
            #plt.yscale('log')
            plt.ylabel("$\delta$($^{"+str(int(y1_at_nb))+"}$"+y1_elem+"/$^{"+\
                            str(int(y2_at_nb))+"}$"+y2_elem+")")
@@ -7029,12 +7342,71 @@ class omega( chem_evol ):
     ##############################################
     #                  Plot MDF                  #
     ##############################################
-    def plot_mdf(self, fig=19, axis_mdf = '[Fe/H]', dx = 0.05,\
-        solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',
-        return_x_y=False ,marker='',shape='',source='all',\
+    def plot_mdf(self, fig=19, return_x_y=False, axis_mdf = '[Fe/H]',\
+        dx = 0.05, solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
+        sigma_gauss=0.0, nb_sigma = 3.0,\
+        marker='',shape='',\
         color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
-        bspace=0.15,labelsize=15,legend_fontsize=14,markevery=10000,\
-        sigma_gauss=0.0, nb_sigma = 3.0):
+        bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+	This function plots the stellar metallicity distribution function (MDF),
+	or the distribution function of any other abundance ratio.
+
+        Parameters
+        ----------
+
+	return_x_y : boolean
+	     If False, show the plot.  If True, return two arrays containing
+	     the X and Y axis data, respectively.
+	axis_mdf : string
+	     Abundance ratio for the distribution such as '[Fe/H]' or '[Mg/H]'.
+	dx : float
+	     Bin resolution of the distribution.
+	solar_ab : string
+	     Path to the solar abundances used to normalize abundance ratios.
+	sigma_gauss : float
+	     Each point in the MDF can be associated with a gaussian. This implies
+	     that in reality, the metallicity should have a certain dispersion 
+	     when stars form at each timestep (instead of using only a single
+	     average value).  The sigma_guass parameter sets the sigma value eac
+	     gaussian function.
+	nb_sigma : float
+	     When sigma_gauss is greater than zero, nb_sigma is the number of
+	     sigma by which the X axis range is expanded.
+        fig : string, float
+	     Figure name.
+	marker : string
+	     Figure marker.
+	shape : string
+	     Line style.
+	color : string
+	     Line color.
+	label : string
+	     Figure label.
+	fsize : 2D float array
+	     Figure dimension/size.
+	fontsize : integer
+	     Font size of the numbers on the X and Y axis.
+	rspace : float
+	     Extra space on the right for the legend.
+	bspace : float
+	     Extra space at the bottom for the Y axis label.
+	labelsize : integer
+	     Font size of the X and Y axis labels.
+	legend_fontsize : integer
+ 	       Font size of the legend.
+
+        Examples
+	----------
+
+	>>> o1.plot_mdf(axis_mdf='[Fe/H]', sigma_gauss=0.2)
+
+        '''
+
+        # Define variable only used for plot visual
+        source='all'
+        markevery = 10000
 
         # Get the [X/Y] values
         x_min, x_max, x_all = self.__get_XY(axis_mdf, solar_ab)
@@ -7087,12 +7459,6 @@ class omega( chem_evol ):
               elif mdf_x[i] <= x_all[i_sim] and \
                 x_all[i_sim+1] < mdf_x[i+1]:
                   mdf_y[i] += (x_all[i_sim+1] - x_all[i_sim]) * f_mlocked
-
-        #aa=0.0
-        #for i in range(0,len(self.history.m_locked)):
-        #    if np.isfinite(x_all[i]):
-        #        aa+=self.history.m_locked[i]
-        #print aa / sum(mdf_y)
 
         # Correct the x axis to use the middle value of each bin
         x_cor = dx/2.0
