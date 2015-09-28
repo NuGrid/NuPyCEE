@@ -50,13 +50,15 @@
   <h1>Source code for omega</h1><div class="highlight"><pre>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<span class="sd">OMEGA (One-zone Model for the Evolution of GAlaxies)</span>
+<span class="sd">GCE OMEGA (One-zone Model for the Evolution of Galaxies) modle</span>
 
 
 <span class="sd">Functionality</span>
 <span class="sd">=============</span>
 
-<span class="sd">To be filled ...</span>
+<span class="sd">This tool allows to simulate the chemical evolution of single-zone galaxies.</span>
+<span class="sd">Having the star formation history as one of the input parameters, OMEGA can</span>
+<span class="sd">target local galaxies by using observational data found in the literature.</span>
 
 
 <span class="sd">Made by</span>
@@ -85,7 +87,27 @@
 <span class="sd">Usage</span>
 <span class="sd">=====</span>
 
-<span class="sd">To be filled ...</span>
+<span class="sd">Import the module:</span>
+
+<span class="sd">&gt;&gt;&gt; import omega as o</span>
+
+<span class="sd">Get help:</span>
+
+<span class="sd">&gt;&gt;&gt; help o</span>
+
+<span class="sd">Get more information:</span>
+
+<span class="sd">&gt;&gt;&gt; o.omega?</span>
+
+<span class="sd">Create an costum galaxy (closed box):</span>
+
+<span class="sd">&gt;&gt;&gt; o1 = o.omega(cte_sfr=1.0, mgal=1.5e10)</span>
+
+<span class="sd">Simulate a known galaxy (open box):</span>
+
+<span class="sd">&gt;&gt;&gt; o2 = o.omega(galaxy=&#39;sculptor&#39;, in_out_control=True, mgal=1e6, mass_loading=8, in_out_ratio=1.5)</span>
+
+<span class="sd">Analysis functions: See the Sphinx documentation</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 
@@ -108,125 +130,168 @@
 <span class="sd">    Important : By default, a closed box model is always assumed.</span>
 
 <span class="sd">    galaxy : string</span>
+
 <span class="sd">        Name of the target galaxy.  By using a known galaxy, the code</span>
 <span class="sd">        automatically selects the corresponding star formation history, stellar</span>
 <span class="sd">        mass, and total mass (when available).  By using &#39;none&#39;, the user has</span>
 <span class="sd">        the perfect control on these three last parameters.</span>
+
 <span class="sd">        Choices : &#39;milky_way&#39;, &#39;milky_way_cte&#39;, &#39;sculptor&#39;, &#39;carina&#39;, &#39;fornax&#39;,</span>
-<span class="sd">                  &#39;none&#39;</span>
+<span class="sd">        &#39;none&#39;</span>
+
 <span class="sd">        Default value : &#39;none&#39; </span>
+
 <span class="sd">        Special note : The &#39;milky_way_cte&#39; option uses the Milky Way&#39;s</span>
-<span class="sd">                       characteristics, but with a constant star formation</span>
-<span class="sd">                       history.</span>
+<span class="sd">        characteristics, but with a constant star formation history.</span>
 
 <span class="sd">    cte_sfr : float</span>
+
 <span class="sd">        Constant star formation history in [Mo/yr].</span>
+
 <span class="sd">        Default value : 1.0</span>
 
 <span class="sd">    rand_sfh : float</span>
+
 <span class="sd">        Maximum possible ratio between the maximum and the minium values of a star</span>
 <span class="sd">        formation history that is randomly generated.</span>
+
 <span class="sd">        Default value : 0.0 (deactivated)</span>
+
 <span class="sd">        Special note : A value greater than zero automatically generates a random</span>
-<span class="sd">                       star formation history, which pypasses the use of the</span>
-<span class="sd">                       cte_sfr parameter.</span>
+<span class="sd">        star formation history, which pypasses the use of the cte_sfr parameter.</span>
 
 <span class="sd">    sfh_file : string</span>
+
 <span class="sd">        Path to a file containing an input star formation history.  The first and</span>
 <span class="sd">        second columns must be the age of the galaxy in [yr] and the star</span>
 <span class="sd">        formation rate in [Mo/yr].</span>
+
 <span class="sd">        Default value : &#39;none&#39; (deactivated)</span>
+
 <span class="sd">        Special note : When a path is specified, it by passes the cte_sfr and the</span>
-<span class="sd">                       rand_sfh parameters.</span>
+<span class="sd">        and_sfh parameters.</span>
 
 <span class="sd">    stellar_mass_0 : float</span>
+
 <span class="sd">        Current stellar mass of the galaxy, in [Mo], at the end of the simulation.</span>
+
 <span class="sd">        Default value : -1.0 (you need to specify a value with unkown galaxies)</span>
 
 <span class="sd">    in_out_control : boolean</span>
+
 <span class="sd">        The in_out_control implementation enables to control the outflow and</span>
 <span class="sd">        the inflow rates independently by using constant values (see outflow_rate</span>
 <span class="sd">        and inflow_rate) or by using a mass-loading factor that connects the</span>
 <span class="sd">        rates to the star formation history (see mass_loading and in_out_ratio).</span>
+
 <span class="sd">        Default value : False (deactivated)</span>
 
 <span class="sd">    mass_loading : float</span>
+
 <span class="sd">        Ratio between the outflow rate and the star formation rate.</span>
+
 <span class="sd">        Default value : 1.0</span>
 
 <span class="sd">    outflow_rate : float</span>
+
 <span class="sd">        Constant outflow rate in [Mo/yr].</span>
+
 <span class="sd">        Default value : -1.0 (deactivated)</span>
+
 <span class="sd">        Special note : A value greater or equal to zero activates the constant</span>
-<span class="sd">                       outflow mode, which bypasses the use of the mass_loading</span>
-<span class="sd">                       parameter.</span>
+<span class="sd">        utflow mode, which bypasses the use of the mass_loading parameter.</span>
 
 <span class="sd">    in_out_ratio : float</span>
+
 <span class="sd">        Used in : in_out_control mode</span>
+
 <span class="sd">        Ratio between the inflow rate and the outflow rate.  This parameter is</span>
 <span class="sd">        used to calculate the inflow rate, not the outflow rate.</span>
+
 <span class="sd">        Default value : 1.0</span>
 
 <span class="sd">    inflow_rate : float</span>
+
 <span class="sd">        Used in : in_out_control mode</span>
+
 <span class="sd">        Constant inflow rate in [Mo/yr].</span>
+
 <span class="sd">        Default value : -1.0 (deactivated)</span>
+
 <span class="sd">        Special note : A value greater or equal to zero activates the constant</span>
-<span class="sd">                       inflow mode, which bypasses the use of the in_out_ratio</span>
-<span class="sd">                       parameter.</span>
+<span class="sd">        inflow mode, which bypasses the use of the in_out_ratio parameter.</span>
 
 <span class="sd">    SF_law : boolean</span>
+
 <span class="sd">        The SF_law inplementation assumes a Kennicutt-Schmidt star formation law</span>
 <span class="sd">        and combines it to the known input star formation history in order to</span>
 <span class="sd">        derive the mass of the gas reservoir at every timestep.</span>
+
 <span class="sd">        Default value : False (deactivated)</span>
 
 <span class="sd">    sfe : float</span>
+
 <span class="sd">        Used in : SF_law and DM_evolution modes</span>
+
 <span class="sd">        Star formation efficiency present in the Kennicutt-Schmidt law.</span>
+
 <span class="sd">        Default value : 0.1</span>
 
 <span class="sd">    f_dyn : float</span>
+
 <span class="sd">        Used in : SF_law and DM_evolution modes</span>
+
 <span class="sd">        Scaling factor used to calculate the star formation timescale present in</span>
 <span class="sd">        the Kennicutt-Schmidt law.  We assume that this timescale is equal to a</span>
 <span class="sd">        fraction of the dynamical timescale of the virialized system (dark and</span>
 <span class="sd">        baryonic matter), t_star = f_dyn * t_dyn.</span>
+
 <span class="sd">        Default value : 0.1</span>
 
 <span class="sd">    m_DM_0 : float</span>
+
 <span class="sd">        Used in : SF_law and DM_evolution modes</span>
+
 <span class="sd">        Current dark matter halo mass of the galaxy, in [Mo], at the end of the</span>
 <span class="sd">        simulations.</span>
+
 <span class="sd">        Default value : 1.0e+11 </span>
 
 <span class="sd">    t_star : float</span>
+
 <span class="sd">        Used in : SF_law and DM_evolution modes</span>
+
 <span class="sd">        Star formation timescale, in [yr], used in the Kennicutt-Schmidt law.</span>
+
 <span class="sd">        Default value = -1.0 (deactivated)</span>
+
 <span class="sd">        Special note : A positive value activates the use of this parameter, </span>
-<span class="sd">                       which bypasses the f_dyn parameter.</span>
+<span class="sd">        which bypasses the f_dyn parameter.</span>
 
 <span class="sd">    DM_evolution : boolean</span>
+
 <span class="sd">        The DM_evolution implementation is an extention of the SF_law option.</span>
 <span class="sd">        In addition of using a Kennicutt-Schmidt star formation law, it assumes</span>
 <span class="sd">        an evolution in the total mass of the galaxy as function of time.  With</span>
 <span class="sd">        this prescription, the mass-loading factor has a mass dependency.  The</span>
 <span class="sd">        mass_loading parameter then only represents the final value at the end</span>
 <span class="sd">        of the simulation. </span>
+
 <span class="sd">        Default value : False (deactivated)</span>
 
 <span class="sd">    exp_ml : float</span>
+
 <span class="sd">        Used in : DM_evolution mode</span>
+
 <span class="sd">        Exponent of the mass dependency of the mass-loading factor.  This last</span>
 <span class="sd">        factor is proportional to M_vir**(-exp_ml/3), where M_vir is the sum of</span>
 <span class="sd">        dark and baryonic matter.</span>
+
 <span class="sd">        Default value : 2.0    </span>
-
-
 
 <span class="sd">    ================</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+
     <span class="c">#Combine docstrings from chem_evol with sygma docstring</span>
     <span class="n">__doc__</span> <span class="o">=</span> <span class="n">__doc__</span><span class="o">+</span><span class="n">chem_evol</span><span class="o">.</span><span class="n">__doc__</span>
 
@@ -243,7 +308,8 @@
                  <span class="n">imf_type</span><span class="o">=</span><span class="s">&#39;kroupa&#39;</span><span class="p">,</span> <span class="n">alphaimf</span><span class="o">=</span><span class="mf">2.35</span><span class="p">,</span> <span class="n">imf_bdys</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mi">100</span><span class="p">],</span> \
                  <span class="n">sn1a_rate</span><span class="o">=</span><span class="s">&#39;power_law&#39;</span><span class="p">,</span> <span class="n">iniZ</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">special_timesteps</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> \
                  <span class="n">tend</span><span class="o">=</span><span class="mf">13e9</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">transitionmass</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">iolevel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> \
-                 <span class="n">ini_alpha</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s">&#39;yield_tables/isotope_yield_table.txt&#39;</span><span class="p">,</span> \
+                 <span class="n">ini_alpha</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> \
+                 <span class="n">table</span><span class="o">=</span><span class="s">&#39;yield_tables/isotope_yield_table_MESA_only.txt&#39;</span><span class="p">,</span> \
                  <span class="n">hardsetZ</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sn1a_on</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>\
                  <span class="n">sn1a_table</span><span class="o">=</span><span class="s">&#39;yield_tables/sn1a_t86.txt&#39;</span><span class="p">,</span>\
                  <span class="n">iniabu_table</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
@@ -255,7 +321,7 @@
                  <span class="n">nb_1a_per_m</span><span class="o">=</span><span class="mf">1.0e-3</span><span class="p">,</span> <span class="n">f_arfo</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> \
                  <span class="n">imf_yields_range</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">30</span><span class="p">],</span><span class="n">exclude_masses</span><span class="o">=</span><span class="p">[</span><span class="mi">32</span><span class="p">,</span><span class="mi">60</span><span class="p">],</span> \
 		 <span class="n">netyields_on</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">wiersmamod</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">skip_zero</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>\
-                 <span class="n">redshift_f</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">print_off</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                 <span class="n">redshift_f</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">print_off</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">long_range_ref</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
 
         <span class="c"># Announce the beginning of the simulation </span>
         <span class="k">print</span> <span class="s">&#39;OMEGA run in progress..&#39;</span>
@@ -305,6 +371,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">skip_zero</span> <span class="o">=</span> <span class="n">skip_zero</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redshift_f</span> <span class="o">=</span> <span class="n">redshift_f</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">print_off</span> <span class="o">=</span> <span class="n">print_off</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">long_range_ref</span> <span class="o">=</span> <span class="n">long_range_ref</span>
 
         <span class="c"># Set cosmological parameters - Dunkley et al. (2009)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">omega_0</span>   <span class="o">=</span> <span class="mf">0.257</span>   <span class="c"># Current mass density parameter</span>
@@ -338,6 +405,9 @@
                     <span class="n">need_t_raf</span> <span class="o">=</span> <span class="bp">True</span>
                     <span class="k">break</span>
             <span class="k">if</span> <span class="n">need_t_raf</span><span class="p">:</span>
+              <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">long_range_ref</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rafine_steps_lr</span><span class="p">()</span>
+              <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__rafine_steps</span><span class="p">()</span>
 
         <span class="c"># Declare arrays used to follow the evolution of the galaxy</span>
@@ -452,6 +522,65 @@
                 <span class="c"># Split the step</span>
                 <span class="k">for</span> <span class="n">i_sp_st</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nb_split</span><span class="p">):</span>
                     <span class="n">new_dt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">[</span><span class="n">i_rs</span><span class="p">]</span><span class="o">/</span><span class="n">nb_split</span><span class="p">)</span>
+
+            <span class="c"># If ok, don&#39;t change anything</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_dt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">[</span><span class="n">i_rs</span><span class="p">])</span>
+
+        <span class="c"># Update the timestep information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_timesteps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_dt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span> <span class="o">=</span> <span class="n">new_dt</span>
+
+        <span class="c"># Update/redeclare all the arrays</span>
+        <span class="n">ymgal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_iniabu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">len_ymgal</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ymgal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mdot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ymgal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ymgal_massive</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ymgal_agb</span><span class="p">,</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">ymgal_1a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdot_massive</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdot_agb</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdot_1a</span><span class="p">,</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">sn1a_numbers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sn2_numbers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">imf_mass_ranges</span><span class="p">,</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">imf_mass_ranges_contribution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">imf_mass_ranges_mtot</span> <span class="o">=</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_storing_arrays</span><span class="p">(</span><span class="n">ymgal</span><span class="p">)</span>
+
+
+    <span class="c">##############################################</span>
+    <span class="c">#              Rafine Steps LR               #</span>
+    <span class="c">##############################################</span>
+    <span class="k">def</span> <span class="nf">__rafine_steps_lr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This function increases the number of timesteps if the star formation</span>
+<span class="sd">        will eventually consume all the gas, which occur when dt &gt; (t_star/sfe).</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c"># Declaration of the new timestep array</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_off</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;..Time rafinement (long range)..&#39;</span>
+        <span class="n">new_dt</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># For every timestep ...</span>
+        <span class="k">for</span> <span class="n">i_rs</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">)):</span>
+
+            <span class="c"># Calculate the critital time delay</span>
+            <span class="n">t_raf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_SF_t</span><span class="p">[</span><span class="n">i_rs</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfe</span>
+
+            <span class="c"># If the step needs to be rafined ...</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">[</span><span class="n">i_rs</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">t_raf</span><span class="p">:</span>
+
+                <span class="c"># Calculate the number of remaining steps</span>
+                <span class="n">nb_step_rem</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">)</span> <span class="o">-</span> <span class="n">i_rs</span>
+                <span class="n">t_rem</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="k">for</span> <span class="n">i_rs</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">)):</span>
+                    <span class="n">t_rem</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">[</span><span class="n">i_rs</span><span class="p">]</span>
+
+                <span class="c"># Calculate the split factor</span>
+                <span class="n">nb_split</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t_rem</span> <span class="o">/</span> <span class="n">t_raf</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="c"># Split the step</span>
+                <span class="k">for</span> <span class="n">i_sp_st</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nb_split</span><span class="p">):</span>
+                    <span class="n">new_dt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t_rem</span><span class="o">/</span><span class="n">nb_split</span><span class="p">)</span>
+
+                <span class="c"># Quit the for loop</span>
+                <span class="k">break</span>
 
             <span class="c"># If ok, don&#39;t change anything</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1076,7 +1205,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">eta_outflow_t</span><span class="p">[</span><span class="n">i_ceo</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_loading</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">m_outflow_t</span><span class="p">[</span><span class="n">i_ceo</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta_outflow_t</span><span class="p">[</span><span class="n">i_ceo</span><span class="p">]</span> <span class="o">*</span> \
                         <span class="bp">self</span><span class="o">.</span><span class="n">sfr_input</span><span class="p">[</span><span class="n">i_ceo</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">[</span><span class="n">i_ceo</span><span class="p">]</span>
-
+                  
             <span class="c"># If the mass of the dark matter halo is evolving</span>
             <span class="k">else</span><span class="p">:</span>
 
@@ -6465,6 +6594,10 @@
 
 	<span class="k">return</span> <span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span>
 
+
+    <span class="c">##############################################</span>
+    <span class="c">#                Fig Standard                #</span>
+    <span class="c">##############################################</span>
     <span class="k">def</span> <span class="nf">__fig_standard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ax</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">lwtickboth</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">lwtickmajor</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">markersize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
@@ -6495,7 +6628,50 @@
     <span class="c">##############################################</span>
     <span class="c">#              Plot Mass-Loading             #</span>
     <span class="c">##############################################</span>
-<div class="viewcode-block" id="omega.plot_mass_loading"><a class="viewcode-back" href="../omega.html#omega.omega.plot_mass_loading">[docs]</a>    <span class="k">def</span> <span class="nf">plot_mass_loading</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+<div class="viewcode-block" id="omega.plot_mass_loading"><a class="viewcode-back" href="../omega.html#omega.omega.plot_mass_loading">[docs]</a>    <span class="k">def</span> <span class="nf">plot_mass_loading</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
+            <span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>\
+            <span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	This function plots the mass-loading factor, which is the ratio</span>
+<span class="sd">	between the mass outflow rate and the star formation rate, as a</span>
+<span class="sd">	function of time.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        fig : string, float</span>
+<span class="sd">	     Figure name.</span>
+<span class="sd">	marker : string</span>
+<span class="sd">	     Figure marker.</span>
+<span class="sd">	shape : string</span>
+<span class="sd">	     Line style.</span>
+<span class="sd">	color : string</span>
+<span class="sd">	     Line color.</span>
+<span class="sd">	label : string</span>
+<span class="sd">	     Figure label.</span>
+<span class="sd">	fsize : 2D float array</span>
+<span class="sd">	     Figure dimension/size.</span>
+<span class="sd">	fontsize : integer</span>
+<span class="sd">	     Font size of the numbers on the X and Y axis.</span>
+<span class="sd">	rspace : float</span>
+<span class="sd">	     Extra space on the right for the legend.</span>
+<span class="sd">	bspace : float</span>
+<span class="sd">	     Extra space at the bottom for the Y axis label.</span>
+<span class="sd">	labelsize : integer</span>
+<span class="sd">	     Font size of the X and Y axis labels.</span>
+<span class="sd">	legend_fontsize : integer</span>
+<span class="sd"> 	       Font size of the legend.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	&gt;&gt;&gt; o1.plot_mass_loading(label=&#39;Mass-Loading Factor&#39;)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c"># Define variable only used for plot visual</span>
+        <span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span>
 
         <span class="c">#Plot only if in the open box scenario</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
@@ -6513,7 +6689,8 @@
             <span class="n">mass_lo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">eta_outflow_t</span>
 
             <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">mass_lo</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">mass_lo</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>\
+                     <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
 
             <span class="c">#Save plot</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;mass-loading&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">mass_lo</span><span class="p">])</span>
@@ -6524,13 +6701,54 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
 
 
     <span class="c">##############################################</span>
     <span class="c">#              Plot Outflow Rate             #</span>
     <span class="c">##############################################</span></div>
-<div class="viewcode-block" id="omega.plot_outflow_rate"><a class="viewcode-back" href="../omega.html#omega.omega.plot_outflow_rate">[docs]</a>    <span class="k">def</span> <span class="nf">plot_outflow_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+<div class="viewcode-block" id="omega.plot_outflow_rate"><a class="viewcode-back" href="../omega.html#omega.omega.plot_outflow_rate">[docs]</a>    <span class="k">def</span> <span class="nf">plot_outflow_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
+            <span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>\
+            <span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	This function plots the mass outflow rate as a function of time</span>
+<span class="sd">        in units of [Mo/yr].</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        fig : string, float</span>
+<span class="sd">	     Figure name.</span>
+<span class="sd">	marker : string</span>
+<span class="sd">	     Figure marker.</span>
+<span class="sd">	shape : string</span>
+<span class="sd">	     Line style.</span>
+<span class="sd">	color : string</span>
+<span class="sd">	     Line color.</span>
+<span class="sd">	label : string</span>
+<span class="sd">	     Figure label.</span>
+<span class="sd">	fsize : 2D float array</span>
+<span class="sd">	     Figure dimension/size.</span>
+<span class="sd">	fontsize : integer</span>
+<span class="sd">	     Font size of the numbers on the X and Y axis.</span>
+<span class="sd">	rspace : float</span>
+<span class="sd">	     Extra space on the right for the legend.</span>
+<span class="sd">	bspace : float</span>
+<span class="sd">	     Extra space at the bottom for the Y axis label.</span>
+<span class="sd">	labelsize : integer</span>
+<span class="sd">	     Font size of the X and Y axis labels.</span>
+<span class="sd">	legend_fontsize : integer</span>
+<span class="sd"> 	       Font size of the legend.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	&gt;&gt;&gt; o1.plot_outflow_rate(label=&#39;Outflow Rate&#39;)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c"># Define variable only used for plot visual</span>
+        <span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span>
 
         <span class="c">#Plot only if in the open box scenario</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
@@ -6545,10 +6763,15 @@
 
             <span class="c">#Copy data for x and y axis</span>
             <span class="n">age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">age</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">outflow_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">m_outflow_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span>
+            <span class="n">outflow_plot</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i_op</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">age</span><span class="p">)):</span>
+                <span class="n">outflow_plot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">m_outflow_t</span><span class="p">[</span><span class="n">i_op</span><span class="p">]</span> <span class="o">/</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">[</span><span class="n">i_op</span><span class="p">])</span>
+            <span class="n">outflow_plot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
             <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">outflow_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">outflow_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>\
+                     <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
 
             <span class="c">#Save plot</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;outflow rate&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">outflow_plot</span><span class="p">])</span>
@@ -6559,13 +6782,54 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
 
 
     <span class="c">##############################################</span>
     <span class="c">#              Plot Inflow Rate              #</span>
     <span class="c">##############################################</span></div>
-<div class="viewcode-block" id="omega.plot_inflow_rate"><a class="viewcode-back" href="../omega.html#omega.omega.plot_inflow_rate">[docs]</a>    <span class="k">def</span> <span class="nf">plot_inflow_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+<div class="viewcode-block" id="omega.plot_inflow_rate"><a class="viewcode-back" href="../omega.html#omega.omega.plot_inflow_rate">[docs]</a>    <span class="k">def</span> <span class="nf">plot_inflow_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
+            <span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>\
+            <span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	This function plots the mass inflow rate as a function of time</span>
+<span class="sd">        in units of [Mo/yr].</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        fig : string, float</span>
+<span class="sd">	     Figure name.</span>
+<span class="sd">	marker : string</span>
+<span class="sd">	     Figure marker.</span>
+<span class="sd">	shape : string</span>
+<span class="sd">	     Line style.</span>
+<span class="sd">	color : string</span>
+<span class="sd">	     Line color.</span>
+<span class="sd">	label : string</span>
+<span class="sd">	     Figure label.</span>
+<span class="sd">	fsize : 2D float array</span>
+<span class="sd">	     Figure dimension/size.</span>
+<span class="sd">	fontsize : integer</span>
+<span class="sd">	     Font size of the numbers on the X and Y axis.</span>
+<span class="sd">	rspace : float</span>
+<span class="sd">	     Extra space on the right for the legend.</span>
+<span class="sd">	bspace : float</span>
+<span class="sd">	     Extra space at the bottom for the Y axis label.</span>
+<span class="sd">	labelsize : integer</span>
+<span class="sd">	     Font size of the X and Y axis labels.</span>
+<span class="sd">	legend_fontsize : integer</span>
+<span class="sd"> 	       Font size of the legend.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	&gt;&gt;&gt; o1.plot_inflow_rate(label=&#39;Inflow Rate&#39;)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c"># Define variable only used for plot visual</span>
+        <span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span>
 
         <span class="c">#Plot only if in the open box scenario</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
@@ -6580,10 +6844,14 @@
 
             <span class="c">#Copy data for x and y axis</span>
             <span class="n">age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">age</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">inflow_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">m_inflow_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span>
+            <span class="n">inflow_plot</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i_op</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">age</span><span class="p">)):</span>
+                <span class="n">inflow_plot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">m_inflow_t</span><span class="p">[</span><span class="n">i_op</span><span class="p">]</span> <span class="o">/</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">timesteps</span><span class="p">[</span><span class="n">i_op</span><span class="p">])</span>
 
             <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">inflow_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">inflow_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>\
+                     <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
 
             <span class="c">#Save plot</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;inflow rate&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">inflow_plot</span><span class="p">])</span>
@@ -6594,18 +6862,59 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
 
 
     <span class="c">##############################################</span>
     <span class="c">#              Plot Dark Matter              #</span>
     <span class="c">##############################################</span></div>
-<div class="viewcode-block" id="omega.plot_dark_matter"><a class="viewcode-back" href="../omega.html#omega.omega.plot_dark_matter">[docs]</a>    <span class="k">def</span> <span class="nf">plot_dark_matter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+<div class="viewcode-block" id="omega.plot_dark_matter"><a class="viewcode-back" href="../omega.html#omega.omega.plot_dark_matter">[docs]</a>    <span class="k">def</span> <span class="nf">plot_dark_matter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
+            <span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> \
+            <span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
 
-        <span class="c">#Plot only if in the open box scenario</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	This function plots the dark matter halo mass of the galaxy as a </span>
+<span class="sd">	function of time.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        fig : string, float</span>
+<span class="sd">	     Figure name.</span>
+<span class="sd">	marker : string</span>
+<span class="sd">	     Figure marker.</span>
+<span class="sd">	shape : string</span>
+<span class="sd">	     Line style.</span>
+<span class="sd">	color : string</span>
+<span class="sd">	     Line color.</span>
+<span class="sd">	label : string</span>
+<span class="sd">	     Figure label.</span>
+<span class="sd">	fsize : 2D float array</span>
+<span class="sd">	     Figure dimension/size.</span>
+<span class="sd">	fontsize : integer</span>
+<span class="sd">	     Font size of the numbers on the X and Y axis.</span>
+<span class="sd">	rspace : float</span>
+<span class="sd">	     Extra space on the right for the legend.</span>
+<span class="sd">	bspace : float</span>
+<span class="sd">	     Extra space at the bottom for the Y axis label.</span>
+<span class="sd">	labelsize : integer</span>
+<span class="sd">	     Font size of the X and Y axis labels.</span>
+<span class="sd">	legend_fontsize : integer</span>
+<span class="sd"> 	       Font size of the legend.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	&gt;&gt;&gt; o1.plot_dark_matter(label=&#39;Dark Matter&#39;)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c"># Define variable only used for plot visual</span>
+        <span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span>
+
+        <span class="c"># Plot only if in the open box scenario</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
 
-            <span class="c">#Define visual aspects</span>
+            <span class="c"># Define visual aspects</span>
             <span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__msc</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="p">)</span>
 	    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
@@ -6618,10 +6927,12 @@
             <span class="n">DM_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">m_DM_t</span>
 
             <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">DM_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">DM_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>\
+                     <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
 
             <span class="c">#Save plot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;dark matter halo mass&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">DM_plot</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;dark matter halo mass&#39;</span><span class="p">],</span>\
+                           <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">DM_plot</span><span class="p">])</span>
 
             <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__fig_standard</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="n">labelsize</span><span class="p">,</span>\
@@ -6629,83 +6940,54 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
-
-
-    <span class="c">##############################################</span>
-    <span class="c">#                 Plot Sigma                 #</span>
-    <span class="c">##############################################</span></div>
-<div class="viewcode-block" id="omega.plot_sigma"><a class="viewcode-back" href="../omega.html#omega.omega.plot_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">plot_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
-
-        <span class="c">#Plot only if in the open box scenario</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
-
-            <span class="c">#Define visual aspects</span>
-            <span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__msc</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="p">)</span>
-	    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-
-            <span class="c">#Display axis labels</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Age [yrs]&#39;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Velocity dispersion [km/s]&#39;</span><span class="p">)</span>	
-
-            <span class="c">#Copy data for x and y axis</span>
-            <span class="n">age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">age</span>
-            <span class="n">sigma_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">sigma_t</span>
-
-            <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">sigma_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
-
-            <span class="c">#Save plot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;velocity dispersion&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">sigma_plot</span><span class="p">])</span>
-
-            <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__fig_standard</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="n">labelsize</span><span class="p">,</span>\
-                <span class="n">rspace</span><span class="o">=</span><span class="n">rspace</span><span class="p">,</span> <span class="n">bspace</span><span class="o">=</span><span class="n">bspace</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="n">legend_fontsize</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
-
-
-    <span class="c">##############################################</span>
-    <span class="c">#                Plot Hubble                 #</span>
-    <span class="c">##############################################</span></div>
-<div class="viewcode-block" id="omega.plot_hubble"><a class="viewcode-back" href="../omega.html#omega.omega.plot_hubble">[docs]</a>    <span class="k">def</span> <span class="nf">plot_hubble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
-
-        <span class="c">#Plot only if in the open box scenario</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
-
-            <span class="c">#Define visual aspects</span>
-            <span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__msc</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="p">)</span>
-	    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-
-            <span class="c">#Display axis labels</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Age [yrs]&#39;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Hubble parameter [km/s/Mpc]&#39;</span><span class="p">)</span>	
-
-            <span class="c">#Copy data for x and y axis</span>
-            <span class="n">age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">age</span>
-            <span class="n">hubble_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">H_t</span>
-
-            <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">hubble_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
-
-            <span class="c">#Save plot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;Hubble parameter&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">hubble_plot</span><span class="p">])</span>
-
-            <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__fig_standard</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="n">labelsize</span><span class="p">,</span>\
-                <span class="n">rspace</span><span class="o">=</span><span class="n">rspace</span><span class="p">,</span> <span class="n">bspace</span><span class="o">=</span><span class="n">bspace</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="n">legend_fontsize</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
 
 
     <span class="c">##############################################</span>
     <span class="c">#             Plot SF Timescale              #</span>
     <span class="c">##############################################</span></div>
-<div class="viewcode-block" id="omega.plot_sf_timescale"><a class="viewcode-back" href="../omega.html#omega.omega.plot_sf_timescale">[docs]</a>    <span class="k">def</span> <span class="nf">plot_sf_timescale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+<div class="viewcode-block" id="omega.plot_sf_timescale"><a class="viewcode-back" href="../omega.html#omega.omega.plot_sf_timescale">[docs]</a>    <span class="k">def</span> <span class="nf">plot_sf_timescale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
+            <span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>\
+            <span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	This function plots the star formation timescale as a function of time</span>
+<span class="sd">        in units of [yr].</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        fig : string, float</span>
+<span class="sd">	     Figure name.</span>
+<span class="sd">	marker : string</span>
+<span class="sd">	     Figure marker.</span>
+<span class="sd">	shape : string</span>
+<span class="sd">	     Line style.</span>
+<span class="sd">	color : string</span>
+<span class="sd">	     Line color.</span>
+<span class="sd">	label : string</span>
+<span class="sd">	     Figure label.</span>
+<span class="sd">	fsize : 2D float array</span>
+<span class="sd">	     Figure dimension/size.</span>
+<span class="sd">	fontsize : integer</span>
+<span class="sd">	     Font size of the numbers on the X and Y axis.</span>
+<span class="sd">	rspace : float</span>
+<span class="sd">	     Extra space on the right for the legend.</span>
+<span class="sd">	bspace : float</span>
+<span class="sd">	     Extra space at the bottom for the Y axis label.</span>
+<span class="sd">	labelsize : integer</span>
+<span class="sd">	     Font size of the X and Y axis labels.</span>
+<span class="sd">	legend_fontsize : integer</span>
+<span class="sd"> 	       Font size of the legend.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	&gt;&gt;&gt; o1.plot_sf_timescale(label=&#39;Star Formation Timescale&#39;)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c"># Define variable only used for plot visual</span>
+        <span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span>
 
         <span class="c">#Plot only if in the open box scenario</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
@@ -6726,10 +7008,12 @@
             <span class="n">t_SF_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">t_SF_t</span>
 
             <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">t_SF_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">t_SF_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>\
+                     <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
 
             <span class="c">#Save plot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;star formation timescale&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">t_SF_plot</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;star formation timescale&#39;</span><span class="p">],</span>\
+                                   <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">t_SF_plot</span><span class="p">])</span>
 
             <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__fig_standard</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="n">labelsize</span><span class="p">,</span>\
@@ -6737,13 +7021,53 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
 
 
     <span class="c">##############################################</span>
     <span class="c">#               Plot Redshift                #</span>
     <span class="c">##############################################</span></div>
-<div class="viewcode-block" id="omega.plot_redshift"><a class="viewcode-back" href="../omega.html#omega.omega.plot_redshift">[docs]</a>    <span class="k">def</span> <span class="nf">plot_redshift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+<div class="viewcode-block" id="omega.plot_redshift"><a class="viewcode-back" href="../omega.html#omega.omega.plot_redshift">[docs]</a>    <span class="k">def</span> <span class="nf">plot_redshift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
+            <span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>\
+            <span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	This function plots the redshift a function of time.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        fig : string, float</span>
+<span class="sd">	     Figure name.</span>
+<span class="sd">	marker : string</span>
+<span class="sd">	     Figure marker.</span>
+<span class="sd">	shape : string</span>
+<span class="sd">	     Line style.</span>
+<span class="sd">	color : string</span>
+<span class="sd">	     Line color.</span>
+<span class="sd">	label : string</span>
+<span class="sd">	     Figure label.</span>
+<span class="sd">	fsize : 2D float array</span>
+<span class="sd">	     Figure dimension/size.</span>
+<span class="sd">	fontsize : integer</span>
+<span class="sd">	     Font size of the numbers on the X and Y axis.</span>
+<span class="sd">	rspace : float</span>
+<span class="sd">	     Extra space on the right for the legend.</span>
+<span class="sd">	bspace : float</span>
+<span class="sd">	     Extra space at the bottom for the Y axis label.</span>
+<span class="sd">	labelsize : integer</span>
+<span class="sd">	     Font size of the X and Y axis labels.</span>
+<span class="sd">	legend_fontsize : integer</span>
+<span class="sd"> 	       Font size of the legend.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	&gt;&gt;&gt; o1.plot_redshift(label=&#39;Redshift&#39;)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c"># Define variable only used for plot visual</span>
+        <span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span>
 
         <span class="c">#Plot only if in the open box scenario</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
@@ -6761,7 +7085,8 @@
             <span class="n">redshift_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">redshift_t</span>
 
             <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">redshift_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">redshift_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>\
+                     <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
 
             <span class="c">#Save plot</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;redshift&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">redshift_plot</span><span class="p">])</span>
@@ -6772,89 +7097,79 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
-
-    <span class="c">##############################################</span>
-    <span class="c">#                 Plot R_vir                 #</span>
-    <span class="c">##############################################</span></div>
-<div class="viewcode-block" id="omega.plot_r_vir"><a class="viewcode-back" href="../omega.html#omega.omega.plot_r_vir">[docs]</a>    <span class="k">def</span> <span class="nf">plot_r_vir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
-
-        <span class="c">#Plot only if in the open box scenario</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
-
-            <span class="c">#Define visual aspects</span>
-            <span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__msc</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="p">)</span>
-	    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-
-            <span class="c">#Display axis labels</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Age [yrs]&#39;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;R_vir [kpc]&#39;</span><span class="p">)</span>	
-
-            <span class="c">#Copy data for x and y axis</span>
-            <span class="n">age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">age</span>
-            <span class="n">r_vir_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">r_vir_DM_t</span>
-
-            <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">r_vir_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
-
-            <span class="c">#Save plot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;r_vir&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">r_vir_plot</span><span class="p">])</span>
-
-            <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__fig_standard</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="n">labelsize</span><span class="p">,</span>\
-                <span class="n">rspace</span><span class="o">=</span><span class="n">rspace</span><span class="p">,</span> <span class="n">bspace</span><span class="o">=</span><span class="n">bspace</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="n">legend_fontsize</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
-
-
-    <span class="c">##############################################</span>
-    <span class="c">#                 Plot V_vir                 #</span>
-    <span class="c">##############################################</span></div>
-<div class="viewcode-block" id="omega.plot_v_vir"><a class="viewcode-back" href="../omega.html#omega.omega.plot_v_vir">[docs]</a>    <span class="k">def</span> <span class="nf">plot_v_vir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
-        <span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>\
-        <span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
-
-        <span class="c">#Plot only if in the open box scenario</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_box</span><span class="p">:</span>
-
-            <span class="c">#Define visual aspects</span>
-            <span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__msc</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-
-            <span class="c">#Display axis labels</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Age [yrs]&#39;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;V_vir [km/s]&#39;</span><span class="p">)</span>	
-
-            <span class="c">#Copy data for x and y axis</span>
-            <span class="n">age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">age</span>
-            <span class="n">v_vir_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">v_vir_DM_t</span>
-
-            <span class="c">#Plot data</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span><span class="n">v_vir_plot</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
-
-            <span class="c">#Save plot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;v_vir&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">age</span><span class="p">,</span><span class="n">v_vir_plot</span><span class="p">])</span>
-
-            <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__fig_standard</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="n">labelsize</span><span class="p">,</span>\
-                <span class="n">rspace</span><span class="o">=</span><span class="n">rspace</span><span class="p">,</span> <span class="n">bspace</span><span class="o">=</span><span class="n">bspace</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="n">legend_fontsize</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;Not available with a closed box.&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;Add the parameter open_box=True when creating a SYGMA instance.&#39;</span>
 
 
     <span class="c">###################################################</span>
     <span class="c">#                  Plot Iso Ratio                 #</span>
     <span class="c">###################################################</span></div>
-<div class="viewcode-block" id="omega.plot_iso_ratio"><a class="viewcode-back" href="../omega.html#omega.omega.plot_iso_ratio">[docs]</a>    <span class="k">def</span> <span class="nf">plot_iso_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
-        <span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>\
-        <span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">return_x_y</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-        <span class="n">xaxis</span><span class="o">=</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="n">yaxis</span><span class="o">=</span><span class="s">&#39;C-12/C-13&#39;</span><span class="p">,</span><span class="n">markevery</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>\
+<div class="viewcode-block" id="omega.plot_iso_ratio"><a class="viewcode-back" href="../omega.html#omega.omega.plot_iso_ratio">[docs]</a>    <span class="k">def</span> <span class="nf">plot_iso_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">return_x_y</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="n">yaxis</span><span class="o">=</span><span class="s">&#39;C-12/C-13&#39;</span><span class="p">,</span>\
         <span class="n">solar_ab</span><span class="o">=</span><span class="s">&#39;yield_tables/iniabu/iniab2.0E-02GN93.ppn&#39;</span><span class="p">,</span>\
-        <span class="n">solar_iso</span><span class="o">=</span><span class="s">&#39;solar_normalization/Asplund_et_al_2009_iso.txt&#39;</span><span class="p">):</span>
+        <span class="n">solar_iso</span><span class="o">=</span><span class="s">&#39;solar_normalization/Asplund_et_al_2009_iso.txt&#39;</span><span class="p">,</span>\
+        <span class="n">fig</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
+        <span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>\
+        <span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	This function plots the evolution of an isotopic ratio as a function</span>
+<span class="sd">	of time, as a function of an abundance ratio, or as a function of</span>
+<span class="sd">	another isotopic ratio.  Isotopic ratios are given in the</span>
+<span class="sd">	delta notation and abundances ratios are given in spectroscopic notation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">	return_x_y : boolean</span>
+<span class="sd">	     If False, show the plot.  If True, return two arrays containing</span>
+<span class="sd">	     the X and Y axis data, respectively.</span>
+<span class="sd">	xaxis : string</span>
+<span class="sd">	     X axis, either &#39;age&#39;, an abundance ratio such as &#39;[Fe/H]&#39;, or an</span>
+<span class="sd">	     isotopic ratio such as &#39;C-12/C-13&#39;.</span>
+<span class="sd">	yaxis : string</span>
+<span class="sd">	     Y axis, isotopic ratio such as &#39;C-12/C-13&#39;.</span>
+<span class="sd">	solar_ab : string</span>
+<span class="sd">	     Path to the solar abundances used to normalize abundance ratios.</span>
+<span class="sd">	solar_iso : string</span>
+<span class="sd">	     Path to the solar isotopes used to normalize the isotopic ratios.</span>
+<span class="sd">        fig : string, float</span>
+<span class="sd">	     Figure name.</span>
+<span class="sd">        source : string</span>
+<span class="sd">            Specificies if yields come from</span>
+<span class="sd">	    all sources (&#39;all&#39;) or from</span>
+<span class="sd">	    distinctive sources:</span>
+<span class="sd">	    only AGB stars (&#39;agb&#39;), only</span>
+<span class="sd">	    SN Ia (&#39;sn1a&#39;), or only massive stars</span>
+<span class="sd">	    (&#39;massive&#39;)</span>
+<span class="sd">	marker : string</span>
+<span class="sd">	     Figure marker.</span>
+<span class="sd">	shape : string</span>
+<span class="sd">	     Line style.</span>
+<span class="sd">	color : string</span>
+<span class="sd">	     Line color.</span>
+<span class="sd">	label : string</span>
+<span class="sd">	     Figure label.</span>
+<span class="sd">	fsize : 2D float array</span>
+<span class="sd">	     Figure dimension/size.</span>
+<span class="sd">	fontsize : integer</span>
+<span class="sd">	     Font size of the numbers on the X and Y axis.</span>
+<span class="sd">	rspace : float</span>
+<span class="sd">	     Extra space on the right for the legend.</span>
+<span class="sd">	bspace : float</span>
+<span class="sd">	     Extra space at the bottom for the Y axis label.</span>
+<span class="sd">	labelsize : integer</span>
+<span class="sd">	     Font size of the X and Y axis labels.</span>
+<span class="sd">	legend_fontsize : integer</span>
+<span class="sd"> 	       Font size of the legend.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	&gt;&gt;&gt; o1.plot_iso_ratio(xaxis=&#39;[Fe/H]&#39;, yaxis=&#39;C-12/C-13&#39;)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c"># Marker on the plots</span>
+        <span class="n">markevery</span><span class="o">=</span><span class="mi">500</span>
 
         <span class="c"># Declaration of the array to plot</span>
         <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
@@ -6986,12 +7301,6 @@
             <span class="n">x1_sol</span><span class="p">,</span> <span class="n">x2_sol</span><span class="p">,</span> <span class="n">y1_sol</span><span class="p">,</span> <span class="n">y2_sol</span> <span class="o">=</span> \
                 <span class="bp">self</span><span class="o">.</span><span class="n">__read_solar_iso</span><span class="p">(</span><span class="n">solar_iso</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">y_1</span><span class="p">,</span> <span class="n">y_2</span><span class="p">)</span>
 
-        <span class="c"># Calculate the isotope ratios (mass ratio)</span>
-        <span class="c">#for k in range(0,len(yields_evol)):</span>
-        <span class="c">#    if xaxis_ratio:</span>
-        <span class="c">#        x.append( yields_evol[k][idx_1] / yields_evol[k][idx_2] )</span>
-        <span class="c">#    y.append( yields_evol[k][idy_1] / yields_evol[k][idy_2] )</span>
-
         <span class="c"># Calculate the isotope ratios (delta notation)</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">yields_evol</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">xaxis_ratio</span><span class="p">:</span>
@@ -7003,7 +7312,11 @@
                            <span class="p">(</span><span class="n">y2_at_nb</span> <span class="o">/</span> <span class="n">y1_at_nb</span><span class="p">)</span>
             <span class="n">ratio_std</span> <span class="o">=</span> <span class="n">y1_sol</span> <span class="o">/</span> <span class="n">y2_sol</span>
             <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">((</span><span class="n">ratio_sample</span><span class="o">/</span><span class="n">ratio_std</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
-    
+  
+        <span class="c"># Make sure the length of array are the same when xaxis = &#39;[X/Y]&#39;</span>
+        <span class="n">too_much</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">too_much</span><span class="p">:]</span>
+
         <span class="c">#Reserved for plotting</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">return_x_y</span><span class="p">:</span>
             <span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__msc</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="n">shape</span><span class="p">,</span><span class="n">marker</span><span class="p">,</span><span class="n">color</span><span class="p">)</span>
@@ -7011,8 +7324,8 @@
         <span class="c">#Reserved for plotting</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">return_x_y</span><span class="p">:</span>
            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-           <span class="k">if</span> <span class="n">xaxis</span> <span class="o">==</span> <span class="s">&#39;age&#39;</span><span class="p">:</span>
-               <span class="n">plt</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s">&#39;log&#39;</span><span class="p">)</span>
+               <span class="c">#if xaxis == &#39;age&#39;:</span>
+               <span class="c">#plt.xscale(&#39;log&#39;)</span>
            <span class="c">#plt.yscale(&#39;log&#39;)</span>
            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&quot;$\delta$($^{&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">y1_at_nb</span><span class="p">))</span><span class="o">+</span><span class="s">&quot;}$&quot;</span><span class="o">+</span><span class="n">y1_elem</span><span class="o">+</span><span class="s">&quot;/$^{&quot;</span><span class="o">+</span>\
                            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">y2_at_nb</span><span class="p">))</span><span class="o">+</span><span class="s">&quot;}$&quot;</span><span class="o">+</span><span class="n">y2_elem</span><span class="o">+</span><span class="s">&quot;)&quot;</span><span class="p">)</span>
@@ -7079,12 +7392,71 @@
     <span class="c">##############################################</span>
     <span class="c">#                  Plot MDF                  #</span>
     <span class="c">##############################################</span>
-<div class="viewcode-block" id="omega.plot_mdf"><a class="viewcode-back" href="../omega.html#omega.omega.plot_mdf">[docs]</a>    <span class="k">def</span> <span class="nf">plot_mdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">axis_mdf</span> <span class="o">=</span> <span class="s">&#39;[Fe/H]&#39;</span><span class="p">,</span> <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>\
-        <span class="n">solar_ab</span><span class="o">=</span><span class="s">&#39;yield_tables/iniabu/iniab2.0E-02GN93.ppn&#39;</span><span class="p">,</span>
-        <span class="n">return_x_y</span><span class="o">=</span><span class="bp">False</span> <span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span>\
+<div class="viewcode-block" id="omega.plot_mdf"><a class="viewcode-back" href="../omega.html#omega.omega.plot_mdf">[docs]</a>    <span class="k">def</span> <span class="nf">plot_mdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">return_x_y</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">axis_mdf</span> <span class="o">=</span> <span class="s">&#39;[Fe/H]&#39;</span><span class="p">,</span>\
+        <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">solar_ab</span><span class="o">=</span><span class="s">&#39;yield_tables/iniabu/iniab2.0E-02GN93.ppn&#39;</span><span class="p">,</span>\
+        <span class="n">sigma_gauss</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">nb_sigma</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">,</span>\
+        <span class="n">marker</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>\
         <span class="n">color</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">fsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mf">4.5</span><span class="p">],</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">rspace</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>\
-        <span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span><span class="n">markevery</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>\
-        <span class="n">sigma_gauss</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">nb_sigma</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">):</span>
+        <span class="n">bspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	This function plots the stellar metallicity distribution function (MDF),</span>
+<span class="sd">	or the distribution function of any other abundance ratio.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">	return_x_y : boolean</span>
+<span class="sd">	     If False, show the plot.  If True, return two arrays containing</span>
+<span class="sd">	     the X and Y axis data, respectively.</span>
+<span class="sd">	axis_mdf : string</span>
+<span class="sd">	     Abundance ratio for the distribution such as &#39;[Fe/H]&#39; or &#39;[Mg/H]&#39;.</span>
+<span class="sd">	dx : float</span>
+<span class="sd">	     Bin resolution of the distribution.</span>
+<span class="sd">	solar_ab : string</span>
+<span class="sd">	     Path to the solar abundances used to normalize abundance ratios.</span>
+<span class="sd">	sigma_gauss : float</span>
+<span class="sd">	     Each point in the MDF can be associated with a gaussian. This implies</span>
+<span class="sd">	     that in reality, the metallicity should have a certain dispersion </span>
+<span class="sd">	     when stars form at each timestep (instead of using only a single</span>
+<span class="sd">	     average value).  The sigma_guass parameter sets the sigma value eac</span>
+<span class="sd">	     gaussian function.</span>
+<span class="sd">	nb_sigma : float</span>
+<span class="sd">	     When sigma_gauss is greater than zero, nb_sigma is the number of</span>
+<span class="sd">	     sigma by which the X axis range is expanded.</span>
+<span class="sd">        fig : string, float</span>
+<span class="sd">	     Figure name.</span>
+<span class="sd">	marker : string</span>
+<span class="sd">	     Figure marker.</span>
+<span class="sd">	shape : string</span>
+<span class="sd">	     Line style.</span>
+<span class="sd">	color : string</span>
+<span class="sd">	     Line color.</span>
+<span class="sd">	label : string</span>
+<span class="sd">	     Figure label.</span>
+<span class="sd">	fsize : 2D float array</span>
+<span class="sd">	     Figure dimension/size.</span>
+<span class="sd">	fontsize : integer</span>
+<span class="sd">	     Font size of the numbers on the X and Y axis.</span>
+<span class="sd">	rspace : float</span>
+<span class="sd">	     Extra space on the right for the legend.</span>
+<span class="sd">	bspace : float</span>
+<span class="sd">	     Extra space at the bottom for the Y axis label.</span>
+<span class="sd">	labelsize : integer</span>
+<span class="sd">	     Font size of the X and Y axis labels.</span>
+<span class="sd">	legend_fontsize : integer</span>
+<span class="sd"> 	       Font size of the legend.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	&gt;&gt;&gt; o1.plot_mdf(axis_mdf=&#39;[Fe/H]&#39;, sigma_gauss=0.2)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c"># Define variable only used for plot visual</span>
+        <span class="n">source</span><span class="o">=</span><span class="s">&#39;all&#39;</span>
+        <span class="n">markevery</span> <span class="o">=</span> <span class="mi">10000</span>
 
         <span class="c"># Get the [X/Y] values</span>
         <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">x_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_XY</span><span class="p">(</span><span class="n">axis_mdf</span><span class="p">,</span> <span class="n">solar_ab</span><span class="p">)</span>
@@ -7137,12 +7509,6 @@
               <span class="k">elif</span> <span class="n">mdf_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x_all</span><span class="p">[</span><span class="n">i_sim</span><span class="p">]</span> <span class="ow">and</span> \
                 <span class="n">x_all</span><span class="p">[</span><span class="n">i_sim</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">mdf_x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
                   <span class="n">mdf_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x_all</span><span class="p">[</span><span class="n">i_sim</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x_all</span><span class="p">[</span><span class="n">i_sim</span><span class="p">])</span> <span class="o">*</span> <span class="n">f_mlocked</span>
-
-        <span class="c">#aa=0.0</span>
-        <span class="c">#for i in range(0,len(self.history.m_locked)):</span>
-        <span class="c">#    if np.isfinite(x_all[i]):</span>
-        <span class="c">#        aa+=self.history.m_locked[i]</span>
-        <span class="c">#print aa / sum(mdf_y)</span>
 
         <span class="c"># Correct the x axis to use the middle value of each bin</span>
         <span class="n">x_cor</span> <span class="o">=</span> <span class="n">dx</span><span class="o">/</span><span class="mf">2.0</span>

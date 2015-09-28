@@ -53,10 +53,12 @@
             
   <div class="section" id="omega-module">
 <h1>OMEGA Module<a class="headerlink" href="#omega-module" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-omega"></span><p>OMEGA (One-zone Model for the Evolution of GAlaxies)</p>
+<span class="target" id="module-omega"></span><p>GCE OMEGA (One-zone Model for the Evolution of Galaxies) modle</p>
 <div class="section" id="functionality">
 <h2>Functionality<a class="headerlink" href="#functionality" title="Permalink to this headline">¶</a></h2>
-<p>To be filled ...</p>
+<p>This tool allows to simulate the chemical evolution of single-zone galaxies.
+Having the star formation history as one of the input parameters, OMEGA can
+target local galaxies by using observational data found in the literature.</p>
 </div>
 <div class="section" id="made-by">
 <h2>Made by<a class="headerlink" href="#made-by" title="Permalink to this headline">¶</a></h2>
@@ -76,126 +78,161 @@ the NuGrid collaboration</dd>
 </div>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p>To be filled ...</p>
+<p>Import the module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">omega</span> <span class="kn">as</span> <span class="nn">o</span>
+</pre></div>
+</div>
+<p>Get help:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">help</span> <span class="n">o</span>
+</pre></div>
+</div>
+<p>Get more information:</p>
+<div class="highlight-python"><div class="highlight"><pre>&gt;&gt;&gt; o.omega?
+</pre></div>
+</div>
+<p>Create an costum galaxy (closed box):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">omega</span><span class="p">(</span><span class="n">cte_sfr</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1.5e10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Simulate a known galaxy (open box):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o2</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">omega</span><span class="p">(</span><span class="n">galaxy</span><span class="o">=</span><span class="s">&#39;sculptor&#39;</span><span class="p">,</span> <span class="n">in_out_control</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">mass_loading</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">in_out_ratio</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Analysis functions: See the Sphinx documentation</p>
 <dl class="class">
 <dt id="omega.omega">
-<em class="property">class </em><code class="descclassname">omega.</code><code class="descname">omega</code><span class="sig-paren">(</span><em>galaxy='none', in_out_control=False, SF_law=False, DM_evolution=False, Z_trans=1e-20, f_dyn=0.1, sfe=0.1, outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, m_DM_0=100000000000.0, mass_loading=1.0, t_star=-1.0, sfh_file='none', in_out_ratio=1.0, stellar_mass_0=-1.0, z_dependent=True, exp_ml=2.0, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1, 100], sn1a_rate='power_law', iniZ=0.0, dt=1000000.0, special_timesteps=30, tend=13000000000.0, mgal=-1, transitionmass=8, iolevel=0, ini_alpha=True, table='yield_tables/isotope_yield_table.txt', hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt', iniabu_table='', extra_source_on=False, extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', pop3_table='yield_tables/popIII_heger10.txt', imf_bdys_pop3=[0.1, 100], imf_yields_range_pop3=[10, 30], starbursts=[], beta_pow=-1.0, gauss_dtd=[1000000000.0, 660000000.0], exp_dtd=2000000000.0, nb_1a_per_m=0.001, f_arfo=1, imf_yields_range=[1, 30], exclude_masses=[32, 60], netyields_on=False, wiersmamod=False, skip_zero=False, redshift_f=0.0, print_off=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">omega.</code><code class="descname">omega</code><span class="sig-paren">(</span><em>galaxy='none', in_out_control=False, SF_law=False, DM_evolution=False, Z_trans=1e-20, f_dyn=0.1, sfe=0.1, outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, m_DM_0=100000000000.0, mass_loading=1.0, t_star=-1.0, sfh_file='none', in_out_ratio=1.0, stellar_mass_0=-1.0, z_dependent=True, exp_ml=2.0, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1, 100], sn1a_rate='power_law', iniZ=0.0, dt=1000000.0, special_timesteps=30, tend=13000000000.0, mgal=-1, transitionmass=8, iolevel=0, ini_alpha=True, table='yield_tables/isotope_yield_table_MESA_only.txt', hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt', iniabu_table='', extra_source_on=False, extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', pop3_table='yield_tables/popIII_heger10.txt', imf_bdys_pop3=[0.1, 100], imf_yields_range_pop3=[10, 30], starbursts=[], beta_pow=-1.0, gauss_dtd=[1000000000.0, 660000000.0], exp_dtd=2000000000.0, nb_1a_per_m=0.001, f_arfo=1, imf_yields_range=[1, 30], exclude_masses=[32, 60], netyields_on=False, wiersmamod=False, skip_zero=False, redshift_f=0.0, print_off=False, long_range_ref=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">chem_evol.chem_evol</span></code></p>
 <p>Important : By default, a closed box model is always assumed.</p>
-<dl class="docutils">
-<dt>galaxy <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first">Name of the target galaxy.  By using a known galaxy, the code
+<p>galaxy : string</p>
+<blockquote>
+<div><p>Name of the target galaxy.  By using a known galaxy, the code
 automatically selects the corresponding star formation history, stellar
 mass, and total mass (when available).  By using &#8216;none&#8217;, the user has
-the perfect control on these three last parameters.
-Choices : &#8216;milky_way&#8217;, &#8216;milky_way_cte&#8217;, &#8216;sculptor&#8217;, &#8216;carina&#8217;, &#8216;fornax&#8217;,</p>
+the perfect control on these three last parameters.</p>
+<p>Choices : &#8216;milky_way&#8217;, &#8216;milky_way_cte&#8217;, &#8216;sculptor&#8217;, &#8216;carina&#8217;, &#8216;fornax&#8217;,
+&#8216;none&#8217;</p>
+<p>Default value : &#8216;none&#8217;</p>
+<p>Special note : The &#8216;milky_way_cte&#8217; option uses the Milky Way&#8217;s
+characteristics, but with a constant star formation history.</p>
+</div></blockquote>
+<p>cte_sfr : float</p>
 <blockquote>
-<div>&#8216;none&#8217;</div></blockquote>
-<p>Default value : &#8216;none&#8217; 
-Special note : The &#8216;milky_way_cte&#8217; option uses the Milky Way&#8217;s</p>
-<blockquote class="last">
-<div>characteristics, but with a constant star formation
-history.</div></blockquote>
-</dd>
-<dt>cte_sfr <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Constant star formation history in [Mo/yr].
-Default value : 1.0</dd>
-<dt>rand_sfh <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first">Maximum possible ratio between the maximum and the minium values of a star
-formation history that is randomly generated.
-Default value : 0.0 (deactivated)
-Special note : A value greater than zero automatically generates a random</p>
-<blockquote class="last">
-<div>star formation history, which pypasses the use of the
-cte_sfr parameter.</div></blockquote>
-</dd>
-<dt>sfh_file <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first">Path to a file containing an input star formation history.  The first and
+<div><p>Constant star formation history in [Mo/yr].</p>
+<p>Default value : 1.0</p>
+</div></blockquote>
+<p>rand_sfh : float</p>
+<blockquote>
+<div><p>Maximum possible ratio between the maximum and the minium values of a star
+formation history that is randomly generated.</p>
+<p>Default value : 0.0 (deactivated)</p>
+<p>Special note : A value greater than zero automatically generates a random
+star formation history, which pypasses the use of the cte_sfr parameter.</p>
+</div></blockquote>
+<p>sfh_file : string</p>
+<blockquote>
+<div><p>Path to a file containing an input star formation history.  The first and
 second columns must be the age of the galaxy in [yr] and the star
-formation rate in [Mo/yr].
-Default value : &#8216;none&#8217; (deactivated)
-Special note : When a path is specified, it by passes the cte_sfr and the</p>
-<blockquote class="last">
-<div>rand_sfh parameters.</div></blockquote>
-</dd>
-<dt>stellar_mass_0 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Current stellar mass of the galaxy, in [Mo], at the end of the simulation.
-Default value : -1.0 (you need to specify a value with unkown galaxies)</dd>
-<dt>in_out_control <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>The in_out_control implementation enables to control the outflow and
+formation rate in [Mo/yr].</p>
+<p>Default value : &#8216;none&#8217; (deactivated)</p>
+<p>Special note : When a path is specified, it by passes the cte_sfr and the
+and_sfh parameters.</p>
+</div></blockquote>
+<p>stellar_mass_0 : float</p>
+<blockquote>
+<div><p>Current stellar mass of the galaxy, in [Mo], at the end of the simulation.</p>
+<p>Default value : -1.0 (you need to specify a value with unkown galaxies)</p>
+</div></blockquote>
+<p>in_out_control : boolean</p>
+<blockquote>
+<div><p>The in_out_control implementation enables to control the outflow and
 the inflow rates independently by using constant values (see outflow_rate
 and inflow_rate) or by using a mass-loading factor that connects the
-rates to the star formation history (see mass_loading and in_out_ratio).
-Default value : False (deactivated)</dd>
-<dt>mass_loading <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Ratio between the outflow rate and the star formation rate.
-Default value : 1.0</dd>
-<dt>outflow_rate <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first">Constant outflow rate in [Mo/yr].
-Default value : -1.0 (deactivated)
-Special note : A value greater or equal to zero activates the constant</p>
-<blockquote class="last">
-<div>outflow mode, which bypasses the use of the mass_loading
-parameter.</div></blockquote>
-</dd>
-<dt>in_out_ratio <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Used in : in_out_control mode
-Ratio between the inflow rate and the outflow rate.  This parameter is
-used to calculate the inflow rate, not the outflow rate.
-Default value : 1.0</dd>
-<dt>inflow_rate <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first">Used in : in_out_control mode
-Constant inflow rate in [Mo/yr].
-Default value : -1.0 (deactivated)
-Special note : A value greater or equal to zero activates the constant</p>
-<blockquote class="last">
-<div>inflow mode, which bypasses the use of the in_out_ratio
-parameter.</div></blockquote>
-</dd>
-<dt>SF_law <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>The SF_law inplementation assumes a Kennicutt-Schmidt star formation law
+rates to the star formation history (see mass_loading and in_out_ratio).</p>
+<p>Default value : False (deactivated)</p>
+</div></blockquote>
+<p>mass_loading : float</p>
+<blockquote>
+<div><p>Ratio between the outflow rate and the star formation rate.</p>
+<p>Default value : 1.0</p>
+</div></blockquote>
+<p>outflow_rate : float</p>
+<blockquote>
+<div><p>Constant outflow rate in [Mo/yr].</p>
+<p>Default value : -1.0 (deactivated)</p>
+<p>Special note : A value greater or equal to zero activates the constant
+utflow mode, which bypasses the use of the mass_loading parameter.</p>
+</div></blockquote>
+<p>in_out_ratio : float</p>
+<blockquote>
+<div><p>Used in : in_out_control mode</p>
+<p>Ratio between the inflow rate and the outflow rate.  This parameter is
+used to calculate the inflow rate, not the outflow rate.</p>
+<p>Default value : 1.0</p>
+</div></blockquote>
+<p>inflow_rate : float</p>
+<blockquote>
+<div><p>Used in : in_out_control mode</p>
+<p>Constant inflow rate in [Mo/yr].</p>
+<p>Default value : -1.0 (deactivated)</p>
+<p>Special note : A value greater or equal to zero activates the constant
+inflow mode, which bypasses the use of the in_out_ratio parameter.</p>
+</div></blockquote>
+<p>SF_law : boolean</p>
+<blockquote>
+<div><p>The SF_law inplementation assumes a Kennicutt-Schmidt star formation law
 and combines it to the known input star formation history in order to
-derive the mass of the gas reservoir at every timestep.
-Default value : False (deactivated)</dd>
-<dt>sfe <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Used in : SF_law and DM_evolution modes
-Star formation efficiency present in the Kennicutt-Schmidt law.
-Default value : 0.1</dd>
-<dt>f_dyn <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Used in : SF_law and DM_evolution modes
-Scaling factor used to calculate the star formation timescale present in
+derive the mass of the gas reservoir at every timestep.</p>
+<p>Default value : False (deactivated)</p>
+</div></blockquote>
+<p>sfe : float</p>
+<blockquote>
+<div><p>Used in : SF_law and DM_evolution modes</p>
+<p>Star formation efficiency present in the Kennicutt-Schmidt law.</p>
+<p>Default value : 0.1</p>
+</div></blockquote>
+<p>f_dyn : float</p>
+<blockquote>
+<div><p>Used in : SF_law and DM_evolution modes</p>
+<p>Scaling factor used to calculate the star formation timescale present in
 the Kennicutt-Schmidt law.  We assume that this timescale is equal to a
 fraction of the dynamical timescale of the virialized system (dark and
-baryonic matter), t_star = f_dyn * t_dyn.
-Default value : 0.1</dd>
-<dt>m_DM_0 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Used in : SF_law and DM_evolution modes
-Current dark matter halo mass of the galaxy, in [Mo], at the end of the
-simulations.
-Default value : 1.0e+11</dd>
-<dt>t_star <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first">Used in : SF_law and DM_evolution modes
-Star formation timescale, in [yr], used in the Kennicutt-Schmidt law.
-Default value = -1.0 (deactivated)
-Special note : A positive value activates the use of this parameter,</p>
-<blockquote class="last">
-<div>which bypasses the f_dyn parameter.</div></blockquote>
-</dd>
-<dt>DM_evolution <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>The DM_evolution implementation is an extention of the SF_law option.
+baryonic matter), t_star = f_dyn * t_dyn.</p>
+<p>Default value : 0.1</p>
+</div></blockquote>
+<p>m_DM_0 : float</p>
+<blockquote>
+<div><p>Used in : SF_law and DM_evolution modes</p>
+<p>Current dark matter halo mass of the galaxy, in [Mo], at the end of the
+simulations.</p>
+<p>Default value : 1.0e+11</p>
+</div></blockquote>
+<p>t_star : float</p>
+<blockquote>
+<div><p>Used in : SF_law and DM_evolution modes</p>
+<p>Star formation timescale, in [yr], used in the Kennicutt-Schmidt law.</p>
+<p>Default value = -1.0 (deactivated)</p>
+<p>Special note : A positive value activates the use of this parameter, 
+which bypasses the f_dyn parameter.</p>
+</div></blockquote>
+<p>DM_evolution : boolean</p>
+<blockquote>
+<div><p>The DM_evolution implementation is an extention of the SF_law option.
 In addition of using a Kennicutt-Schmidt star formation law, it assumes
 an evolution in the total mass of the galaxy as function of time.  With
 this prescription, the mass-loading factor has a mass dependency.  The
 mass_loading parameter then only represents the final value at the end
-of the simulation. 
-Default value : False (deactivated)</dd>
-<dt>exp_ml <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Used in : DM_evolution mode
-Exponent of the mass dependency of the mass-loading factor.  This last
+of the simulation.</p>
+<p>Default value : False (deactivated)</p>
+</div></blockquote>
+<p>exp_ml : float</p>
+<blockquote>
+<div><p>Used in : DM_evolution mode</p>
+<p>Exponent of the mass dependency of the mass-loading factor.  This last
 factor is proportional to M_vir**(-exp_ml/3), where M_vir is the sum of
-dark and baryonic matter.
-Default value : 2.0</dd>
-</dl>
+dark and baryonic matter.</p>
+<p>Default value : 2.0</p>
+</div></blockquote>
 <dl class="docutils">
 <dt>special_timesteps <span class="classifier-delimiter">:</span> <span class="classifier">integer</span></dt>
 <dd>Number of special timesteps.  This option (already activated by default)
@@ -289,23 +326,225 @@ Default value : 0</dd>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="omega.omega.plot_dark_matter">
-<code class="descname">plot_dark_matter</code><span class="sig-paren">(</span><em>fig=11, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_dark_matter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_dark_matter" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="omega.omega.plot_hubble">
-<code class="descname">plot_hubble</code><span class="sig-paren">(</span><em>fig=14, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_hubble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_hubble" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot_dark_matter</code><span class="sig-paren">(</span><em>fig=11, marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_dark_matter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_dark_matter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the dark matter halo mass of the galaxy as a 
+function of time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fig</strong> : string, float</p>
+<blockquote>
+<div><p>Figure name.</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>Figure marker.</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>Line style.</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>Line color.</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>Figure label.</p>
+</div></blockquote>
+<p><strong>fsize</strong> : 2D float array</p>
+<blockquote>
+<div><p>Figure dimension/size.</p>
+</div></blockquote>
+<p><strong>fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the numbers on the X and Y axis.</p>
+</div></blockquote>
+<p><strong>rspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space on the right for the legend.</p>
+</div></blockquote>
+<p><strong>bspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space at the bottom for the Y axis label.</p>
+</div></blockquote>
+<p><strong>labelsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the X and Y axis labels.</p>
+</div></blockquote>
+<p><strong>legend_fontsize</strong> : integer</p>
+<blockquote class="last">
+<div><p>Font size of the legend.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_dark_matter</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Dark Matter&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_inflow_rate">
-<code class="descname">plot_inflow_rate</code><span class="sig-paren">(</span><em>fig=10, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_inflow_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_inflow_rate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot_inflow_rate</code><span class="sig-paren">(</span><em>fig=10, marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_inflow_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_inflow_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the mass inflow rate as a function of time
+in units of [Mo/yr].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fig</strong> : string, float</p>
+<blockquote>
+<div><p>Figure name.</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>Figure marker.</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>Line style.</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>Line color.</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>Figure label.</p>
+</div></blockquote>
+<p><strong>fsize</strong> : 2D float array</p>
+<blockquote>
+<div><p>Figure dimension/size.</p>
+</div></blockquote>
+<p><strong>fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the numbers on the X and Y axis.</p>
+</div></blockquote>
+<p><strong>rspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space on the right for the legend.</p>
+</div></blockquote>
+<p><strong>bspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space at the bottom for the Y axis label.</p>
+</div></blockquote>
+<p><strong>labelsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the X and Y axis labels.</p>
+</div></blockquote>
+<p><strong>legend_fontsize</strong> : integer</p>
+<blockquote class="last">
+<div><p>Font size of the legend.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_inflow_rate</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Inflow Rate&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_iso_ratio">
-<code class="descname">plot_iso_ratio</code><span class="sig-paren">(</span><em>fig=18, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, return_x_y=False, xaxis='age', yaxis='C-12/C-13', markevery=500, solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn', solar_iso='solar_normalization/Asplund_et_al_2009_iso.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_iso_ratio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_iso_ratio" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot_iso_ratio</code><span class="sig-paren">(</span><em>return_x_y=False, xaxis='age', yaxis='C-12/C-13', solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn', solar_iso='solar_normalization/Asplund_et_al_2009_iso.txt', fig=18, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_iso_ratio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_iso_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the evolution of an isotopic ratio as a function
+of time, as a function of an abundance ratio, or as a function of
+another isotopic ratio.  Isotopic ratios are given in the
+delta notation and abundances ratios are given in spectroscopic notation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>return_x_y</strong> : boolean</p>
+<blockquote>
+<div><p>If False, show the plot.  If True, return two arrays containing
+the X and Y axis data, respectively.</p>
+</div></blockquote>
+<p><strong>xaxis</strong> : string</p>
+<blockquote>
+<div><p>X axis, either &#8216;age&#8217;, an abundance ratio such as &#8216;[Fe/H]&#8217;, or an
+isotopic ratio such as &#8216;C-12/C-13&#8217;.</p>
+</div></blockquote>
+<p><strong>yaxis</strong> : string</p>
+<blockquote>
+<div><p>Y axis, isotopic ratio such as &#8216;C-12/C-13&#8217;.</p>
+</div></blockquote>
+<p><strong>solar_ab</strong> : string</p>
+<blockquote>
+<div><p>Path to the solar abundances used to normalize abundance ratios.</p>
+</div></blockquote>
+<p><strong>solar_iso</strong> : string</p>
+<blockquote>
+<div><p>Path to the solar isotopes used to normalize the isotopic ratios.</p>
+</div></blockquote>
+<p><strong>fig</strong> : string, float</p>
+<blockquote>
+<div><p>Figure name.</p>
+</div></blockquote>
+<p><strong>source</strong> : string</p>
+<blockquote>
+<div><p>Specificies if yields come from
+all sources (&#8216;all&#8217;) or from
+distinctive sources:
+only AGB stars (&#8216;agb&#8217;), only
+SN Ia (&#8216;sn1a&#8217;), or only massive stars
+(&#8216;massive&#8217;)</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>Figure marker.</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>Line style.</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>Line color.</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>Figure label.</p>
+</div></blockquote>
+<p><strong>fsize</strong> : 2D float array</p>
+<blockquote>
+<div><p>Figure dimension/size.</p>
+</div></blockquote>
+<p><strong>fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the numbers on the X and Y axis.</p>
+</div></blockquote>
+<p><strong>rspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space on the right for the legend.</p>
+</div></blockquote>
+<p><strong>bspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space at the bottom for the Y axis label.</p>
+</div></blockquote>
+<p><strong>labelsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the X and Y axis labels.</p>
+</div></blockquote>
+<p><strong>legend_fontsize</strong> : integer</p>
+<blockquote class="last">
+<div><p>Font size of the legend.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_iso_ratio</span><span class="p">(</span><span class="n">xaxis</span><span class="o">=</span><span class="s">&#39;[Fe/H]&#39;</span><span class="p">,</span> <span class="n">yaxis</span><span class="o">=</span><span class="s">&#39;C-12/C-13&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_mass">
@@ -366,8 +605,67 @@ SN1a (&#8216;SN1a&#8217;), or only massive stars
 
 <dl class="method">
 <dt id="omega.omega.plot_mass_loading">
-<code class="descname">plot_mass_loading</code><span class="sig-paren">(</span><em>fig=8, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_mass_loading"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_mass_loading" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot_mass_loading</code><span class="sig-paren">(</span><em>fig=8, marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_mass_loading"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_mass_loading" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the mass-loading factor, which is the ratio
+between the mass outflow rate and the star formation rate, as a
+function of time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fig</strong> : string, float</p>
+<blockquote>
+<div><p>Figure name.</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>Figure marker.</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>Line style.</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>Line color.</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>Figure label.</p>
+</div></blockquote>
+<p><strong>fsize</strong> : 2D float array</p>
+<blockquote>
+<div><p>Figure dimension/size.</p>
+</div></blockquote>
+<p><strong>fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the numbers on the X and Y axis.</p>
+</div></blockquote>
+<p><strong>rspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space on the right for the legend.</p>
+</div></blockquote>
+<p><strong>bspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space at the bottom for the Y axis label.</p>
+</div></blockquote>
+<p><strong>labelsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the X and Y axis labels.</p>
+</div></blockquote>
+<p><strong>legend_fontsize</strong> : integer</p>
+<blockquote class="last">
+<div><p>Font size of the legend.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_mass_loading</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Mass-Loading Factor&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_mass_range_contributions">
@@ -494,33 +792,284 @@ if &#8216;ini&#8217;, normalization ot initial abundance</p>
 
 <dl class="method">
 <dt id="omega.omega.plot_mdf">
-<code class="descname">plot_mdf</code><span class="sig-paren">(</span><em>fig=19, axis_mdf='[Fe/H]', dx=0.05, solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn', return_x_y=False, marker='', shape='', source='all', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, markevery=10000, sigma_gauss=0.0, nb_sigma=3.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_mdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_mdf" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot_mdf</code><span class="sig-paren">(</span><em>fig=19, return_x_y=False, axis_mdf='[Fe/H]', dx=0.05, solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn', sigma_gauss=0.0, nb_sigma=3.0, marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_mdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_mdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the stellar metallicity distribution function (MDF),
+or the distribution function of any other abundance ratio.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>return_x_y</strong> : boolean</p>
+<blockquote>
+<div><p>If False, show the plot.  If True, return two arrays containing
+the X and Y axis data, respectively.</p>
+</div></blockquote>
+<p><strong>axis_mdf</strong> : string</p>
+<blockquote>
+<div><p>Abundance ratio for the distribution such as &#8216;[Fe/H]&#8217; or &#8216;[Mg/H]&#8217;.</p>
+</div></blockquote>
+<p><strong>dx</strong> : float</p>
+<blockquote>
+<div><p>Bin resolution of the distribution.</p>
+</div></blockquote>
+<p><strong>solar_ab</strong> : string</p>
+<blockquote>
+<div><p>Path to the solar abundances used to normalize abundance ratios.</p>
+</div></blockquote>
+<p><strong>sigma_gauss</strong> : float</p>
+<blockquote>
+<div><p>Each point in the MDF can be associated with a gaussian. This implies
+that in reality, the metallicity should have a certain dispersion 
+when stars form at each timestep (instead of using only a single
+average value).  The sigma_guass parameter sets the sigma value eac
+gaussian function.</p>
+</div></blockquote>
+<p><strong>nb_sigma</strong> : float</p>
+<blockquote>
+<div><p>When sigma_gauss is greater than zero, nb_sigma is the number of
+sigma by which the X axis range is expanded.</p>
+</div></blockquote>
+<p><strong>fig</strong> : string, float</p>
+<blockquote>
+<div><p>Figure name.</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>Figure marker.</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>Line style.</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>Line color.</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>Figure label.</p>
+</div></blockquote>
+<p><strong>fsize</strong> : 2D float array</p>
+<blockquote>
+<div><p>Figure dimension/size.</p>
+</div></blockquote>
+<p><strong>fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the numbers on the X and Y axis.</p>
+</div></blockquote>
+<p><strong>rspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space on the right for the legend.</p>
+</div></blockquote>
+<p><strong>bspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space at the bottom for the Y axis label.</p>
+</div></blockquote>
+<p><strong>labelsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the X and Y axis labels.</p>
+</div></blockquote>
+<p><strong>legend_fontsize</strong> : integer</p>
+<blockquote class="last">
+<div><p>Font size of the legend.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_mdf</span><span class="p">(</span><span class="n">axis_mdf</span><span class="o">=</span><span class="s">&#39;[Fe/H]&#39;</span><span class="p">,</span> <span class="n">sigma_gauss</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_outflow_rate">
-<code class="descname">plot_outflow_rate</code><span class="sig-paren">(</span><em>fig=9, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_outflow_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_outflow_rate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="omega.omega.plot_r_vir">
-<code class="descname">plot_r_vir</code><span class="sig-paren">(</span><em>fig=17, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_r_vir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_r_vir" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot_outflow_rate</code><span class="sig-paren">(</span><em>fig=9, marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_outflow_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_outflow_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the mass outflow rate as a function of time
+in units of [Mo/yr].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fig</strong> : string, float</p>
+<blockquote>
+<div><p>Figure name.</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>Figure marker.</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>Line style.</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>Line color.</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>Figure label.</p>
+</div></blockquote>
+<p><strong>fsize</strong> : 2D float array</p>
+<blockquote>
+<div><p>Figure dimension/size.</p>
+</div></blockquote>
+<p><strong>fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the numbers on the X and Y axis.</p>
+</div></blockquote>
+<p><strong>rspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space on the right for the legend.</p>
+</div></blockquote>
+<p><strong>bspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space at the bottom for the Y axis label.</p>
+</div></blockquote>
+<p><strong>labelsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the X and Y axis labels.</p>
+</div></blockquote>
+<p><strong>legend_fontsize</strong> : integer</p>
+<blockquote class="last">
+<div><p>Font size of the legend.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_outflow_rate</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Outflow Rate&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_redshift">
-<code class="descname">plot_redshift</code><span class="sig-paren">(</span><em>fig=16, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_redshift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_redshift" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot_redshift</code><span class="sig-paren">(</span><em>fig=16, marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_redshift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_redshift" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the redshift a function of time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fig</strong> : string, float</p>
+<blockquote>
+<div><p>Figure name.</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>Figure marker.</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>Line style.</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>Line color.</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>Figure label.</p>
+</div></blockquote>
+<p><strong>fsize</strong> : 2D float array</p>
+<blockquote>
+<div><p>Figure dimension/size.</p>
+</div></blockquote>
+<p><strong>fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the numbers on the X and Y axis.</p>
+</div></blockquote>
+<p><strong>rspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space on the right for the legend.</p>
+</div></blockquote>
+<p><strong>bspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space at the bottom for the Y axis label.</p>
+</div></blockquote>
+<p><strong>labelsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the X and Y axis labels.</p>
+</div></blockquote>
+<p><strong>legend_fontsize</strong> : integer</p>
+<blockquote class="last">
+<div><p>Font size of the legend.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_redshift</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Redshift&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_sf_timescale">
-<code class="descname">plot_sf_timescale</code><span class="sig-paren">(</span><em>fig=15, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_sf_timescale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_sf_timescale" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="omega.omega.plot_sigma">
-<code class="descname">plot_sigma</code><span class="sig-paren">(</span><em>fig=13, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_sigma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_sigma" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot_sf_timescale</code><span class="sig-paren">(</span><em>fig=15, marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_sf_timescale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_sf_timescale" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the star formation timescale as a function of time
+in units of [yr].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fig</strong> : string, float</p>
+<blockquote>
+<div><p>Figure name.</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>Figure marker.</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>Line style.</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>Line color.</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>Figure label.</p>
+</div></blockquote>
+<p><strong>fsize</strong> : 2D float array</p>
+<blockquote>
+<div><p>Figure dimension/size.</p>
+</div></blockquote>
+<p><strong>fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the numbers on the X and Y axis.</p>
+</div></blockquote>
+<p><strong>rspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space on the right for the legend.</p>
+</div></blockquote>
+<p><strong>bspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space at the bottom for the Y axis label.</p>
+</div></blockquote>
+<p><strong>labelsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the X and Y axis labels.</p>
+</div></blockquote>
+<p><strong>legend_fontsize</strong> : integer</p>
+<blockquote class="last">
+<div><p>Font size of the legend.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_sf_timescale</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Star Formation Timescale&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_sn_distr">
@@ -741,11 +1290,6 @@ SN1a (&#8216;sn1a&#8217;), or only massive stars
 </pre></div>
 </div>
 </dd></dl>
-
-<dl class="method">
-<dt id="omega.omega.plot_v_vir">
-<code class="descname">plot_v_vir</code><span class="sig-paren">(</span><em>fig=18, source='all', marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_v_vir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_v_vir" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_yield_input">
