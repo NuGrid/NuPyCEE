@@ -18,7 +18,19 @@ JUNE2015: B. Cote
 Usage
 =====
 
-To be filled ...
+Import the module:
+
+>>> import stellab
+
+Load the data:
+
+>>> s = stellab.stellab()
+
+Plot [Mg/Fe] vs [Fe/H] for the Fornax dwarf spheoridal galaxy:
+
+>>> s.plot_spectro(xaxis='[Fe/H]', yaxis='[Mg/Fe]', galaxy='fornax')
+
+See the Sphinx documentation for more options
 
 '''
 
@@ -45,10 +57,7 @@ global_path=global_path+'/'
 class stellab():
 
     '''
-    Input parameters
-    ================
-
-      See the plot_spectro() function.
+    See the plot_spectro() function to plot the data.
 
     '''
 
@@ -400,29 +409,97 @@ class stellab():
         [X/Y] = log10(n_X/n_Y) - log10(n_X/n_Y)_solar where 'n_X' and 'n_Y' are
         the number densities of elements X and Y.
         
-        Arguments
-        =========
+        Parameters
+        ---------
 
         galaxy : string
+
             Name of the target galaxy.  The code then automatically selects
             the corresponding data sets (when available).
+
             Choices : 'milky_way', 'sculptor', 'carina', 'fornax'
+
             Default value : 'milky_way' 
 
         xaxis : string
+
             Elements on the x axis in the form of '[X/Y]'.
+
             Default value : '[Fe/H]'
 
         yaxis : string
+
             Elements on the y axis in the form of '[X/Y]'.
+
             Default value : '[Mg/Fe]'
 
         norm : string
-            Common solar normalization used to scale all the data.  When not
-            defined, each data uses the solar normalization of the reference
-            paper.
 
-        To be filled!!
+            Common solar normalization used to scale all the data.  Use the
+            list_solar_norm() function for a list of available normalizations.
+            When not specified, each data uses the solar normalization of the
+            reference paper.  
+
+            Example : norm='Anders_Grevesse_1989'
+
+        obs : string array
+
+            Personal selection of observational data.  Use the list_ref_papers()
+            function for a list of availble data sets.  When not specified, all
+            the available data for the selected galaxy will be plotted.
+
+            Example : obs=['milky_way_data/Venn_et_al_2004_stellab',
+            'milky_way_data/Hinkel_et_al_2014_stellab']
+
+        show_err : boolean
+
+            If True, show error bars when available in the code.
+
+            Default value : False
+
+        show_mean_err : boolean
+
+            If True, print the mean X and Y errors when error bars are available
+            in the code.
+
+            Default value : False
+
+        return_xy : boolean
+
+            If True, return the X and Y axis arrays instead of plotting the data.
+
+            Default value = False
+
+            Example : x, y = stellab.plot_spectro(return_xy=True)
+
+        fsize : 2D float array
+
+	     Figure dimension/size.
+
+	fontsize : integer
+
+	     Font size of the numbers on the X and Y axis.
+
+	rspace : float
+
+	     Extra space on the right for the legend.
+
+	bspace : float
+
+	     Extra space at the bottom for the Y axis label.
+
+	labelsize : integer
+
+	     Font size of the X and Y axis labels.
+
+	legend_fontsize : integer
+
+ 	     Font size of the legend.
+
+        Examples
+	----------
+
+	>>> stellab.plot_spectro(yaxis='[Ti/H]',xaxis='[Mg/H]',galaxy='sculptor',norm='Anders_Grevesse_1989',show_err=True)
 
         '''
 
@@ -852,6 +929,7 @@ class stellab():
         '''
 	Internal function in order to get standardized figure font sizes.
 	It is used in the plotting functions.
+
         '''
 
         plt.legend(loc=2,prop={'size':legend_fontsize})
@@ -874,6 +952,11 @@ class stellab():
     ##############################################
     def list_solar_norm(self):
 
+        '''
+        This function plots the list of solar normalizations available.
+
+        '''
+
         # Print every available solar abundances
         for i_lsn in range(0,len(self.paths_norm)):
             print self.paths_norm[i_lsn] 
@@ -883,6 +966,12 @@ class stellab():
     #              List Ref Papers               #
     ##############################################
     def list_ref_papers(self):
+
+        '''
+        This function plots the list of data sets available.
+
+        '''
+
 
         # Print every available observational reference papers
         for i_lsn in range(0,len(self.paths)):
