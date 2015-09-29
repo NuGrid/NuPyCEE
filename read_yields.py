@@ -198,6 +198,116 @@ class read_nugrid_yields():
         self.lum_bands=lum_bands
         self.m_final=m_final
 
+    def set(self,M=0,Z=-1,specie='',value=0):
+
+	'''
+	    Replace the values in column 3 which
+	    are usually the yields with value.
+	    Use in combination with the write routine
+	    to write out modification into new file.
+
+	    M: initial mass to be modified
+	    Z: initial Z to 
+	    specie: quantity (e.g. yield) of specie will be modified
+
+        '''
+
+        inp='(M='+str(float(M))+',Z='+str(float(Z))+')'
+        idx=self.table_idx[inp]
+        data=self.yield_data[idx]
+        idx_col=self.col_attrs.index('Yields')
+        set1=self.yield_data[idx][idx_col]
+        specie_all= data[0]
+        for k in range(len(set1)):
+                    if specie == specie_all[k]:
+                        #return set1[k]
+			self.yield_data[idx][idx_col][k] = value
+
+    def write_table(self,filename='isotope_yield_table_mod.txt'):
+
+	'''
+		Allows to write out table in NuGrid yield table format.
+
+		fname: Table name
+
+		needs ascii_table.py from NuGrid python tools
+
+	'''
+	#part of the NuGrid python tools
+	import ascii_table as ascii1
+
+	import getpass
+	user=getpass.getuser()
+	import time
+	date=time.strftime("%d %b %Y", time.localtime())
+	
+	
+	tables=self.table_mz
+
+
+	#write header attrs
+	f=open(filename,'w')
+	self.header_attrs
+	
+	out=''
+	l='H NuGrid yields Set1: '+self.header_attrs['NuGrid yields Set1']+'\n'
+	out = out +l
+	l='H Data prepared by: '+user+'\n'	
+	out=out +l
+	l='H Data prepared date: '+date+'\n'
+	out=out +l	
+	l='H Isotopes: '+ self.header_attrs['Isotopes'] +'\n'
+	out = out +l
+	l='H Number of metallicities: '+self.header_attrs['Number of metallicities']+'\n'
+	out = out +l
+	l='H Units: ' + self.header_attrs['Units'] + '\n'
+	out = out + l
+	f.write(out)
+	f.close()
+
+	for k in range(len(tables)):
+		print 'Write table ',tables[k]
+		mass=float(self.table_mz[k].split(',')[0].split('=')[1])
+		metallicity=float(self.table_mz[k].split(',')[1].split('=')[1][:-1])
+		data=self.yield_data[k]	
+		idx_y=self.col_attrs.index('Yields')
+		yields=data[idx_y]
+		idx_x0=self.col_attrs.index('X0')
+		mass_frac_ini=data[idx_x0]
+		idx_specie=self.col_attrs.index(self.col_attrs[0])
+		species=data[idx_specie]
+		remn_mass=self.m_final[k][0]
+		finalmheader='Mfinal: '+'{:.3E}'.format(remn_mass)
+		special_header='Table: (M='+str(mass)+',Z='+str(metallicity)+')'
+	
+		dcols=[self.col_attrs[0],'Yields','X0']
+		data=[species,list(yields),mass_frac_ini]
+
+		ascii1.writeGCE_table(filename=filename,headers=[special_header,finalmheader],data=data,dcols=dcols)
+
+		#add ages
+		time=self.age[k]
+		
+		f1=open(filename,'r')
+		lines=f1.readlines()
+		f1.close()
+		i=-1
+		line1=''
+		while (True):
+			i+=1
+			if i>len(lines)-1:
+				break
+			line=lines[i]
+			line1+=lines[i]
+			if tables[k] in lines[i]:
+				line1+=('H Lifetime: '+'{:.3E}'.format(time)+'\n')
+		f1=open(filename,'w')
+		f1.write(line1)
+		f1.close()
+
+
+
+
 
     def get(self,M=0,Z=-1,quantity='',specie=''):
 
