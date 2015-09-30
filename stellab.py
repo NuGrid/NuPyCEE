@@ -70,6 +70,7 @@ class stellab():
         self.galaxy_name.append('sculptor')
         self.galaxy_name.append('fornax')
         self.galaxy_name.append('carina')
+        self.galaxy_name.append('lmc')
 
         # Declaration of arrays containing information on every data set
         self.elem_list = []  # Available elements
@@ -115,6 +116,8 @@ class stellab():
         self.paths.append('carina_data/Fabrizio_et_al_2015_stellab')
         self.paths.append('carina_data/Lemasle_et_al_2012_stellab')
         self.paths.append('carina_data/Venn_et_al_2012_stellab')
+        self.paths.append('lmc_data/Lapenna_et_al_2012_stellab')
+        self.paths.append('lmc_data/Pompeia_et_al_2008_stellab')
 
         # List of all the solar values used in the data sets
         for i_path in range(0,len(self.paths)):
@@ -154,6 +157,8 @@ class stellab():
         self.cs.append('og') # Fabrizio et al. (2015)
         self.cs.append('ob') # Lemasle et al. (2012)
         self.cs.append('or') # Venn et al. (2012)
+        self.cs.append('ob') # Lapenna et al. (2012)
+        self.cs.append('or') # Pompeia et al. (2008)
 
         # List of legends associated to data sets
         self.leg.append('Frebel (2010)')
@@ -189,6 +194,8 @@ class stellab():
         self.leg.append('Fabrizio et al. (2015)')
         self.leg.append('Lemasle et al. (2012)')
         self.leg.append('Venn et al. (2012)')
+        self.leg.append('Lapenna et al. (2012)')
+        self.leg.append('Pompeia et al. (2008)')
 
         # For every data set ...
         for i_entry in range(0,len(self.paths)):
@@ -701,7 +708,8 @@ class stellab():
                 err_plot = err_temp
 
                 # If a plot is generated
-                if not return_xy:
+                if not return_xy and len(xy_plot[0])>0 and len(xy_plot[1])>0:
+
                     if re_norm and not sol_ab_found:
                         leg_temp = self.leg[i_ds]+' **'
                     else:
