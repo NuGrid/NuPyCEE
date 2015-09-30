@@ -1766,7 +1766,10 @@ class omega( chem_evol ):
                 #in case no contribution during timestep
                 x1=yields_evol[k][elem_idx1]/sum(yields_evol[k])
                 x2=yields_evol[k][elem_idx2]/sum(yields_evol[k])
-                spec=np.log10(x1/x2) - np.log10(x_elem1_ini/x_elem2_ini)
+                if x1 <= 0.0 or x2 <= 0.0:
+                    spec = -30.0
+                else:
+                    spec=np.log10(x1/x2) - np.log10(x_elem1_ini/x_elem2_ini)
                 x.append(spec)
             #Operations associated with plot visual aspects
             if not return_x_y and not sub_plot:
@@ -1796,7 +1799,10 @@ class omega( chem_evol ):
             #in case no contribution during timestep
             x1=yields_evol[k][elem_idx1]/sum(yields_evol[k])
             x2=yields_evol[k][elem_idx2]/sum(yields_evol[k])
-            spec=np.log10(x1/x2) - np.log10(x_elem1_ini/x_elem2_ini)
+            if x1 <= 0.0 or x2 <= 0.0:
+                spec = -30.0
+            else:
+                spec=np.log10(x1/x2) - np.log10(x_elem1_ini/x_elem2_ini)
             y.append(spec)
             if xaxis=='age':
                 x.append(x_age[k])
@@ -1827,7 +1833,8 @@ class omega( chem_evol ):
           x_temp = []
           y_temp = []
           for i_temp in range(0,len(x)):
-              if np.isfinite(x[i_temp]) and np.isfinite(y[i_temp]):
+              if np.isfinite(x[i_temp]) and np.isfinite(y[i_temp])\
+                 and x[i_temp] > -20.0 and y[i_temp] > -20.0:
                   x_temp.append(x[i_temp])
                   y_temp.append(y[i_temp])
           x = x_temp
@@ -2458,7 +2465,7 @@ class omega( chem_evol ):
     #              Plot Mass-Loading             #
     ##############################################
     def plot_mass_loading(self,fig=8,marker='',shape='',\
-            color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
+            color='',label='Mass-loading',fsize=[10,4.5],fontsize=14,rspace=0.6,\
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
@@ -2536,7 +2543,7 @@ class omega( chem_evol ):
     #              Plot Outflow Rate             #
     ##############################################
     def plot_outflow_rate(self,fig=9,marker='',shape='',\
-            color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
+            color='',label='Outflow',fsize=[10,4.5],fontsize=14,rspace=0.6,\
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
@@ -2617,7 +2624,7 @@ class omega( chem_evol ):
     #              Plot Inflow Rate              #
     ##############################################
     def plot_inflow_rate(self,fig=10,marker='',shape='',color='',\
-            label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,\
+            label='Inflow',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,\
             labelsize=15,legend_fontsize=14):
 
         '''
@@ -2697,7 +2704,7 @@ class omega( chem_evol ):
     #              Plot Dark Matter              #
     ##############################################
     def plot_dark_matter(self,fig=11,marker='',shape='',\
-            color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6, \
+            color='',label='Dark matter',fsize=[10,4.5],fontsize=14,rspace=0.6, \
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
@@ -2856,7 +2863,7 @@ class omega( chem_evol ):
     #               Plot Redshift                #
     ##############################################
     def plot_redshift(self,fig=16,marker='',shape='',\
-            color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
+            color='',label='Redshift',fsize=[10,4.5],fontsize=14,rspace=0.6,\
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
