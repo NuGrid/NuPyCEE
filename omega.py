@@ -1,6 +1,6 @@
 '''
 
-GCE OMEGA (One-zone Model for the Evolution of Galaxies) modle
+GCE OMEGA (One-zone Model for the Evolution of Galaxies) module
 
 
 Functionality
