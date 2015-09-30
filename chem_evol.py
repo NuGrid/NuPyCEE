@@ -2178,6 +2178,16 @@ class chem_evol(object):
         spline_lifetime = self.spline_lifetime
         spline_min_time = 10**grid_lifetimes[0]
 
+	#tarray=range(1e6,1e9)
+	#marray=[]
+	#for k in range(len(tarray)):
+	#	m=self.spline_lifetime(np.log10(tarray[k]))
+	#	marray.append(m)
+	#plt.plot(tarray,marray)
+	#plt.title('Test')
+
+
+
         # Return all the lifetimes (log) and the miminum lifetime
         return spline_lifetime, spline_min_time
 

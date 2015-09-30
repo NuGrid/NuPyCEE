@@ -286,7 +286,7 @@ class sygma( chem_evol ):
         '''
 	import read_yields as ry
 	import re
-	y_table=ry.read_nugrid_yields(table)
+	y_table=ry.read_nugrid_yields(global_path+table)
         plt.figure(fig, figsize=(fsize[0],fsize[1]))
 	spec=False
 	if '[' in yaxis:
