@@ -1823,12 +1823,20 @@ class omega( chem_evol ):
 
         if not plot_data:
 
+          # Filtrate bad value
+          x_temp = []
+          y_temp = []
+          for i_temp in range(0,len(x)):
+              if np.isfinite(x[i_temp]) and np.isfinite(y[i_temp]):
+                  x_temp.append(x[i_temp])
+                  y_temp.append(y[i_temp])
+          x = x_temp
+          y = y_temp
+
           #If this function is supposed to return the x, y arrays only ...
           if return_x_y:
 
             return x, y
-
-
 
           #If this is a sub-figure managed by an external module
           elif sub_plot:
