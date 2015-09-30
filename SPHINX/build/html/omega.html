@@ -668,66 +668,6 @@ function of time.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="omega.omega.plot_mass_range_contributions">
-<code class="descname">plot_mass_range_contributions</code><span class="sig-paren">(</span><em>fig=7, specie='C', prodfac=False, rebin=1, time=-1, label='', shape='-', marker='o', color='r', markevery=20, extralabel=False, log=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_mass_range_contributions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_mass_range_contributions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots yield contribution (Msun) of a certain mass range
-versus initial mass. Each stellar ejecta in one mass range 
-is represented by the same yields, yields from certain stellar simulation.
-Be aware that a larger mass range means also a larger amount
-of yield for that range.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>specie</strong> : string</p>
-<blockquote>
-<div><p>Element or isotope name in the form &#8216;C&#8217; or &#8216;C-12&#8217;</p>
-</div></blockquote>
-<p><strong>prodfac</strong> : boolean</p>
-<blockquote>
-<div><p>if true, calculate stellar production factor for each mass range.
-It is the final stellar yield divided by the initial (IMF-weighted)
-total mass (ISM+stars) in that region.</p>
-</div></blockquote>
-<p><strong>rebin</strong> : change the bin size to uniform mass intervals of size &#8216;rebin&#8217;</p>
-<blockquote>
-<div><p>default 0, bin size is defined by ranges of (stellar) yield inputs</p>
-</div></blockquote>
-<p><strong>log</strong> : boolean</p>
-<blockquote>
-<div><p>if true, use log yaxis</p>
-</div></blockquote>
-<p><strong>label</strong> : string</p>
-<blockquote>
-<div><p>figure label</p>
-</div></blockquote>
-<p><strong>marker</strong> : string</p>
-<blockquote>
-<div><p>figure marker</p>
-</div></blockquote>
-<p><strong>shape</strong> : string</p>
-<blockquote>
-<div><p>line style</p>
-</div></blockquote>
-<p><strong>color</strong> : string</p>
-<blockquote>
-<div><p>color of line</p>
-</div></blockquote>
-<p><strong>fig</strong> : string,float</p>
-<blockquote class="last">
-<div><p>to name the plot figure</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass_range_contribution</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="s">&#39;C&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="omega.omega.plot_massfrac">
 <code class="descname">plot_massfrac</code><span class="sig-paren">(</span><em>fig=2, xaxis='age', yaxis='O-16', source='all', norm='no', label='', shape='', marker='', color='', markevery=20, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_massfrac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_massfrac" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots mass fraction of isotope or element
@@ -1292,85 +1232,10 @@ SN1a (&#8216;sn1a&#8217;), or only massive stars
 </dd></dl>
 
 <dl class="method">
-<dt id="omega.omega.plot_yield_input">
-<code class="descname">plot_yield_input</code><span class="sig-paren">(</span><em>fig=8, xaxis='mini', yaxis='C-12', iniZ=0.0001, masses=[], marker='o', color='r', shape='-', table='yield_tables/isotope_yield_table.txt', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_yield_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_yield_input" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>Plots the yields of the yield input grid vesus initial mass or
-Z or [Fe/H]. Yield can be plotted in solar masses or in spectroscopic notation.</div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>xaxis</strong> : string</p>
-<blockquote>
-<div><p>if &#8216;mini&#8217;: use initial mass; if of the form [specie1/specie2] use spec. notation of</p>
-</div></blockquote>
-<p><strong>yaxis</strong> : string</p>
-<blockquote>
-<div><p>specifies isotopes or elements with &#8216;C-12&#8217; or &#8216;C&#8217;: plot yield of isotope;
-if chosen spectros: use form [specie3/specie4]</p>
-</div></blockquote>
-<p><strong>iniZ</strong> : float</p>
-<blockquote>
-<div><p>specifies the metallicity to be plotted</p>
-</div></blockquote>
-<p><strong>masses</strong> : list</p>
-<blockquote>
-<div><p>if empty plot all available masses for metallicity iniZ; else choose only masses in list masses</p>
-</div></blockquote>
-<p><strong>table</strong> : string</p>
-<blockquote class="last">
-<div><p>table to plot data from; default sygma input table</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="omega.omega.save_data">
 <code class="descname">save_data</code><span class="sig-paren">(</span><em>header=[]</em>, <em>data=[]</em>, <em>filename='plot_data.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.save_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.save_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes data into a text file. data entries
 can have different lengths</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="omega.omega.write_evol_table">
-<code class="descname">write_evol_table</code><span class="sig-paren">(</span><em>elements=['H'], isotopes=['H-1'], table_name='gce_table.txt', interact=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.write_evol_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.write_evol_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes out evolution of time, metallicity
-and each isotope in the following format
-(each timestep in a line):</p>
-<p>&amp;Age       &amp;H-1       &amp;H-2  ....</p>
-<p>&amp;0.000E+00 &amp;1.000E+00 &amp;7.600E+08 &amp; ...</p>
-<p>This method has a notebook and normal version. If you are
-using a python notebook the function will
-opem a link to a page containing the table.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>table_name</strong> : string,optional</p>
-<blockquote>
-<div><p>Name of table. In case you use a notebook version, setting a name
-is not necessary.</p>
-</div></blockquote>
-<p><strong>elements</strong> : array</p>
-<blockquote>
-<div><p>Containing the elmements with the name scheme &#8216;H&#8217;,&#8217;C&#8217;</p>
-</div></blockquote>
-<p><strong>isotopes</strong> : array</p>
-<blockquote class="last">
-<div><p>If elements list empty, ignore elements input and use isotopes input; Containing the isotopes with the name scheme &#8216;H-1&#8217;, &#8216;C-12&#8217;</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">write_evol_table</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;H&#39;</span><span class="p">,</span><span class="s">&#39;C&#39;</span><span class="p">,</span><span class="s">&#39;O&#39;</span><span class="p">],</span><span class="n">table_name</span><span class="o">=</span><span class="s">&#39;testoutput.txt&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 </dd></dl>
