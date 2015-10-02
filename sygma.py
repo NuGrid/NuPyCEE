@@ -508,6 +508,98 @@ class sygma( chem_evol ):
 
 
 
+    def plot_mass_ratio(self,fig=0,species_ratio='C/N',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,logy=True):
+
+        '''
+	 mass evolution (in Msun) of an element or isotope vs time.
+	
+
+        Parameters
+        ----------
+
+
+	specie : string
+             1) isotope or element name, in the form 'C' or 'C-12'
+	     2) ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 	
+	source : string
+             Specifies if yields come from
+	     all sources ('all'), including
+	     AGB+SN1a, massive stars. Or from
+	     distinctive sources:
+	     only agb stars ('agb'), only
+	     SN1a ('SN1a'), or only massive stars
+             ('massive')
+        norm : boolean
+             If True, normalize to current total ISM mass
+	label : string
+	     figure label
+	marker : string
+	     figure marker
+	shape : string
+	     line style	
+	color : string
+	     color of line
+        fig : string,float
+	     to name the plot figure       
+	logy : bool
+             if yes, choose xaxis in log scale 	      
+ 
+        Examples
+	----------
+
+	>>> s.plot_mass_ratio('C-12')
+
+        '''
+	if len(label)<1:
+		if source=='agb':
+			label=species_ratio+', AGB'
+		if source=='massive':
+			label=species_ratio+', Massive'
+		if source=='sn1a':
+			label=species_ratio+', SNIa'
+
+        #Reserved for plotting
+        if not return_x_y:
+            shape,marker,color=self.__msc(source,shape,marker,color)
+
+
+
+ 
+	specie1=species_ratio.split('/')[0]
+	specie2=species_ratio.split('/')[1]
+
+        x,y1=self.plot_mass(fig=0,specie=specie1,source=source,norm=norm,label=label,shape=shape,marker=marker,color=color,markevery=20,multiplot=False,return_x_y=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14)
+
+        x,y2=self.plot_mass(fig=0,specie=specie2,source=source,norm=norm,label=label,shape=shape,marker=marker,color=color,markevery=20,multiplot=False,return_x_y=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14)
+ 
+        
+	y=np.array(y1)/np.array(y2)
+         #Reserved for plotting
+        if not return_x_y:
+           plt.figure(fig, figsize=(fsize[0],fsize[1]))
+           plt.xscale('log')
+           plt.xlabel('log-scaled age [yrs]')
+           if norm == False:
+               plt.ylabel('Yield ratio')
+	       if logy==True:
+                   plt.yscale('log')
+           else:
+               plt.ylabel('(IMF-weighted) fraction of ejecta')
+        self.y=y
+        #If x and y need to be returned ...
+        if return_x_y:
+            return x, y
+
+        else:
+            plt.plot(x,y,label=label,linestyle=shape,marker=marker,color=color,markevery=markevery)
+            plt.legend()
+            ax=plt.gca()
+            self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+	    plt.xlim(self.history.dt,self.history.tend)	
+	    #self.save_data(header=['Age[yrs]',specie],data=[x,y])
+
+       
+
 
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
     
@@ -520,7 +612,8 @@ class sygma( chem_evol ):
 
 
 	specie : string
-             isotope or element name, in the form 'C' or 'C-12'
+             1) isotope or element name, in the form 'C' or 'C-12'
+	     2) ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 	
 	source : string
              Specifies if yields come from
 	     all sources ('all'), including
@@ -545,7 +638,7 @@ class sygma( chem_evol ):
         Examples
 	----------
 
-	>>> s.plot('C-12')
+	>>> s.plot_mass(specie='C')
 
         '''
 	yaxis=specie

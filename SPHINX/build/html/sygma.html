@@ -246,7 +246,10 @@ Default value : 0</dd>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>specie</strong> : string</p>
 <blockquote>
-<div><p>isotope or element name, in the form &#8216;C&#8217; or &#8216;C-12&#8217;</p>
+<div><ol class="arabic simple">
+<li>isotope or element name, in the form &#8216;C&#8217; or &#8216;C-12&#8217;</li>
+<li>ratio of element or isotope, e.g. &#8216;C/O&#8217;, &#8216;C-12/O-12&#8217;</li>
+</ol>
 </div></blockquote>
 <p><strong>source</strong> : string</p>
 <blockquote>
@@ -287,7 +290,7 @@ SN1a (&#8216;SN1a&#8217;), or only massive stars
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s">&#39;C-12&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass</span><span class="p">(</span><span class="n">specie</span><span class="o">=</span><span class="s">&#39;C&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -348,6 +351,70 @@ total mass (ISM+stars) in that region.</p>
 </table>
 <p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass_range_contribution</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="s">&#39;C&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="sygma.sygma.plot_mass_ratio">
+<code class="descname">plot_mass_ratio</code><span class="sig-paren">(</span><em>fig=0, species_ratio='C/N', source='all', norm=False, label='', shape='', marker='', color='', markevery=20, multiplot=False, return_x_y=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, logy=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_mass_ratio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_mass_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>mass evolution (in Msun) of an element or isotope vs time.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>specie</strong> : string</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>isotope or element name, in the form &#8216;C&#8217; or &#8216;C-12&#8217;</li>
+<li>ratio of element or isotope, e.g. &#8216;C/O&#8217;, &#8216;C-12/O-12&#8217;</li>
+</ol>
+</div></blockquote>
+<p><strong>source</strong> : string</p>
+<blockquote>
+<div><p>Specifies if yields come from
+all sources (&#8216;all&#8217;), including
+AGB+SN1a, massive stars. Or from
+distinctive sources:
+only agb stars (&#8216;agb&#8217;), only
+SN1a (&#8216;SN1a&#8217;), or only massive stars
+(&#8216;massive&#8217;)</p>
+</div></blockquote>
+<p><strong>norm</strong> : boolean</p>
+<blockquote>
+<div><p>If True, normalize to current total ISM mass</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>figure label</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>figure marker</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>line style</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>color of line</p>
+</div></blockquote>
+<p><strong>fig</strong> : string,float</p>
+<blockquote>
+<div><p>to name the plot figure</p>
+</div></blockquote>
+<p><strong>logy</strong> : bool</p>
+<blockquote class="last">
+<div><p>if yes, choose xaxis in log scale</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass_ratio</span><span class="p">(</span><span class="s">&#39;C-12&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
