@@ -521,8 +521,7 @@ class sygma( chem_evol ):
 
 
 	specie : string
-             1) isotope or element name, in the form 'C' or 'C-12'
-	     2) ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 	
+	     ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 	
 	source : string
              Specifies if yields come from
 	     all sources ('all'), including
@@ -544,7 +543,7 @@ class sygma( chem_evol ):
         fig : string,float
 	     to name the plot figure       
 	logy : bool
-             if yes, choose xaxis in log scale 	      
+             if yes, choose yaxis in log scale 	      
  
         Examples
 	----------
