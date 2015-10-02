@@ -511,8 +511,10 @@ class sygma( chem_evol ):
     def plot_mass_ratio(self,fig=0,species_ratio='C/N',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,logy=True):
 
         '''
-	 mass evolution (in Msun) of an element or isotope vs time.
-	
+	Mass ratio of two species indicated by species_ratio over time.
+	Choice can either be elemental ratio or isotopic ratios.
+	Masses of species are in solar masses.
+	Note: Similar to plot_mass but with ratios of masses. 
 
         Parameters
         ----------
