@@ -1,24 +1,31 @@
-
 Content:
 
+The iniabu dir contains for example
+the initial abundances for
+the five metallicities provided
+by NuGrid.
+
+## Name scheme of NuGrid-format yield tables
+
+isotope_yield_table.txt : default table file; should be MESA; ye fallback
+
+fryer12 : with Fryer 2012 mass cut prescription
+yemcut  : mass cut at ye jump; classical approach
+
+MESA_only : tables only with MESA models
+
+table_portinari98_marigo01 : Combined yields from Portinari 1998 and Marigo 2001
+
+##for testing :
+
+isotope_yield_table_cnoni.txt
+isotope_yield_table_h1.txt
+
 The .txt files contain yields
-for bb (bb_*) , sn1a (sn1a_*) 
-as well as the NuGrid yield tables
-isotope_yield_table.txt in solar masses.
+for bb (bb_*) , sn1a (sn1a_*)
 
 The SN1a abundances of Seitenzahl13 are either
 provided divided in stable and unstable ones
 or in a mix of both types.
 
-The iniabu dir contains
-the initial abundances the
-the five metallicities provided
-by NuGrid.
-
-nugrid yield tables notes:
-isotope_yield_table.txt
-isotope_yield_table_july14.txt file with M4,M6,M7
-isotope_yield_table_dec14.txt file with out M4,6,7
-isotope_yield_table_jan15.txt 
-> difference in time when..
  
