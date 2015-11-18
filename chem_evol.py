@@ -187,7 +187,7 @@ class chem_evol(object):
     Run example
     ===========
 
-    See omega.py and omega.py
+    See sygma.py and omega.py
 
     '''
 
@@ -2616,7 +2616,7 @@ class chem_evol(object):
 
             # Get the closest available metallicity (favoring lower boundary)
             Z_gridpoint = self.__get_Z_wiersma(Z, Z_grid)
-
+	    print 'Take yields from Z closest to: ',Z,' found: ',Z_gridpoint
             # Get all initial masses at the selected closest metallicity
             m_stars = ytables.get(Z=Z_gridpoint, quantity='masses')
 
@@ -2657,6 +2657,10 @@ class chem_evol(object):
                     print 'inimass', inimass, \
                           'problem wiht massejected',massejected
                 return massejected
+
+	self.func_total_ejecta=func_total_ejecta
+	self.m_stars=m_stars
+	self.yields=yields
         '''
         if self.iolevel>0:
             mtests=np.arange(m_stars[0],m_stars[-1],0.1) 
@@ -2854,6 +2858,7 @@ class chem_evol(object):
           Z_grid : Available metallicity grid points.
 
         '''
+	import decimal
 
         # For every available metallicities ...
         for tz in Z_grid:
@@ -2873,8 +2878,9 @@ class chem_evol(object):
                 break
 
             # If Z is exactly one of the available Z, use the given Z
-            if Z == tz:
-                Z_gridpoint = Z
+	    # round here to precision given in yield table
+            if round(Z,abs(decimal.Decimal(str(tz)).as_tuple().exponent)) == tz: #Z == tz:
+                Z_gridpoint = tz#Z
                 if self.iolevel >= 2:
                     print 'Z = Zgrid'
                 break
@@ -2915,7 +2921,7 @@ class chem_evol(object):
         X_ymgal_t = []
         for p in range(len(ymgal_t)):
             X_ymgal_t.append(ymgal_t[p] / sum(ymgal_t))
-     
+ 
         if not Z_gridpoint==0: #X0 is not in popIII tables and not necessary for popIII setting
              # Get the initial abundances used for the stellar model calculation
              X0 = ytables.get(Z=Z_gridpoint, M=m_stars[0], quantity='X0')
