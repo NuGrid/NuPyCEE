@@ -6,7 +6,7 @@ GCE OMEGA (One-zone Model for the Evolution of Galaxies) module
 Functionality
 =============
 
-This tool allows to simulate the chemical evolution of single-zone galaxies.
+This tool allows one to simulate the chemical evolution of single-zone galaxies.
 Having the star formation history as one of the input parameters, OMEGA can
 target local galaxies by using observational data found in the literature.
 
@@ -19,7 +19,7 @@ FEB2015: C. Ritter, B. Cote
 MAY2015: B. Cote
 
 The code inherits the chem_evol class, which contains common functions shared by
-SYGMA and OMEGA.  The code in chem_evol have been developped by :
+SYGMA and OMEGA.  The code in chem_evol has been developed by :
 
 v0.1 NOV2013: C. Fryer, C. Ritter
 
@@ -49,7 +49,7 @@ Get more information:
 
 >>> o.omega?
 
-Create an costum galaxy (closed box):
+Create a custom galaxy (closed box):
 
 >>> o1 = o.omega(cte_sfr=1.0, mgal=1.5e10)
 
@@ -84,7 +84,7 @@ class omega( chem_evol ):
         Name of the target galaxy.  By using a known galaxy, the code
         automatically selects the corresponding star formation history, stellar
         mass, and total mass (when available).  By using 'none', the user has
-        the perfect control on these three last parameters.
+        perfect control of these three last parameters.
 
         Choices : 'milky_way', 'milky_way_cte', 'sculptor', 'carina', 'fornax',
         'none'
@@ -102,7 +102,7 @@ class omega( chem_evol ):
 
     rand_sfh : float
 
-        Maximum possible ratio between the maximum and the minium values of a star
+        Maximum possible ratio between the maximum and the minimum values of a star
         formation history that is randomly generated.
 
         Default value : 0.0 (deactivated)
@@ -125,11 +125,11 @@ class omega( chem_evol ):
 
         Current stellar mass of the galaxy, in [Mo], at the end of the simulation.
         
-        Default value : -1.0 (you need to specify a value with unkown galaxies)
+        Default value : -1.0 (you need to specify a value with unknown galaxies)
 
     in_out_control : boolean
 
-        The in_out_control implementation enables to control the outflow and
+        The in_out_control implementation enables control of the outflow and
         the inflow rates independently by using constant values (see outflow_rate
         and inflow_rate) or by using a mass-loading factor that connects the
         rates to the star formation history (see mass_loading and in_out_ratio).
@@ -220,8 +220,8 @@ class omega( chem_evol ):
 
     DM_evolution : boolean
 
-        The DM_evolution implementation is an extention of the SF_law option.
-        In addition of using a Kennicutt-Schmidt star formation law, it assumes
+        The DM_evolution implementation is an extension of the SF_law option.
+        In addition to using a Kennicutt-Schmidt star formation law, it assumes
         an evolution in the total mass of the galaxy as function of time.  With
         this prescription, the mass-loading factor has a mass dependency.  The
         mass_loading parameter then only represents the final value at the end
@@ -329,16 +329,16 @@ class omega( chem_evol ):
         self.lambda_0  = 0.742   # Current dark energy density parameter
         self.H_0       = 71.9    # Hubble constant [km s^-1 Mpc^-1]
 
-        # Look for error in the input parameters
+        # Look for errors in the input parameters
         self.__check_inputs_omega()
 
-        # Define wether the open box scenario is used or not
+        # Define whether the open box scenario is used or not
         if self.in_out_control or self.SF_law or self.DM_evolution:
             self.open_box = True
         else:
             self.open_box = False
 
-        # Check if the timesteps need to be rafined
+        # Check if the timesteps need to be refined
         if self.SF_law or self.DM_evolution:
             self.t_SF_t = []
             self.redshift_t = []
@@ -442,28 +442,28 @@ class omega( chem_evol ):
 
 
     ##############################################
-    #                Rafine Steps                #
+    #                Refine Steps                #
     ##############################################
     def __rafine_steps(self):
 
         '''
         This function increases the number of timesteps if the star formation
-        will eventually consume all the gas, which occur when dt > (t_star/sfe).
+        will eventually consume all the gas, which occurs when dt > (t_star/sfe).
 
         '''
 
         # Declaration of the new timestep array
         if not self.print_off:
-            print '..Time rafinement..'
+            print '..Time refinement..'
         new_dt = []
 
         # For every timestep ...
         for i_rs in range(0,len(self.history.timesteps)):
 
-            # Calculate the critital time delay
+            # Calculate the critical time delay
             t_raf = self.t_SF_t[i_rs] / self.sfe
 
-            # If the step needs to be rafined ...
+            # If the step needs to be refined ...
             if self.history.timesteps[i_rs] > t_raf:
 
                 # Calculate the split factor
@@ -498,22 +498,22 @@ class omega( chem_evol ):
 
         '''
         This function increases the number of timesteps if the star formation
-        will eventually consume all the gas, which occur when dt > (t_star/sfe).
+        will eventually consume all the gas, which occurs when dt > (t_star/sfe).
 
         '''
 
         # Declaration of the new timestep array
         if not self.print_off:
-            print '..Time rafinement (long range)..'
+            print '..Time refinement (long range)..'
         new_dt = []
 
         # For every timestep ...
         for i_rs in range(0,len(self.history.timesteps)):
 
-            # Calculate the critital time delay
+            # Calculate the critical time delay
             t_raf = self.t_SF_t[i_rs] / self.sfe
 
-            # If the step needs to be rafined ...
+            # If the step needs to be refined ...
             if self.history.timesteps[i_rs] > t_raf:
 
                 # Calculate the number of remaining steps
@@ -640,7 +640,7 @@ class omega( chem_evol ):
             self.stellar_mass_0 = 7.8e6
             self.stellar_mass_0 = self.stellar_mass_0 * 0.5
 
-            #Read deBoer et al. (2012) SFH
+            # Read deBoer et al. (2012) SFH
             self.__copy_sfr_input('sculptor_data/sfh_deBoer12.txt')
 
         # Fornax dwarf galaxy ...
@@ -651,7 +651,7 @@ class omega( chem_evol ):
             self.stellar_mass_0 = 4.3e7
             self.stellar_mass_0 = self.stellar_mass_0 * 0.5
 
-            #Read deBoer et al. (2012) SFH
+            # Read deBoer et al. (2012) SFH
             self.__copy_sfr_input('fornax_data/sfh_fornax_deboer_et_al_2012.txt')
 
         # Carina dwarf galaxy ...
@@ -662,10 +662,10 @@ class omega( chem_evol ):
             self.stellar_mass_0 = 1.07e6
             self.stellar_mass_0 = self.stellar_mass_0 * 0.5
 
-            #Read deBoer et al. (2014) SFH
+            # Read deBoer et al. (2014) SFH
             self.__copy_sfr_input('carina_data/sfh_deBoer14.txt')
 
-        #Keep the SFH in memory
+        # Keep the SFH in memory
         self.history.sfr_abs = self.sfr_input
 
 
@@ -676,14 +676,14 @@ class omega( chem_evol ):
 
         '''
         This function reads a SFH input file and interpolates its values so it
-        can be inserted in the arraw "sfr_input", which contains the SFR for each
+        can be inserted in the array "sfr_input", which contains the SFR for each
         OMEGA timestep.
 
         Note
         ====
 
           The input file does not need to have constant time step lengths, and 
-          does not need to have the same number of timesteps than the number of 
+          does not need to have the same number of timesteps as the number of 
           OMEGA timesteps.
 
         Important
@@ -788,7 +788,7 @@ class omega( chem_evol ):
         SFH can affects the results.
 
         The self.rand_sfh sets the maximum ratio between the maximum and the
-        minium values for the SFR.  This parameter sets how "bursty" or constant
+        minimum values for the SFR.  This parameter sets how "bursty" or constant
         a SFH is.  self.rand_sfh = 1 means a constant SFH.
          
         '''
@@ -827,7 +827,7 @@ class omega( chem_evol ):
         # Execute this function only if needed
         if self.in_out_control or self.SF_law or self.DM_evolution:
 
-            # Calculate the resdhift for every timestep, if needed
+            # Calculate the redshift for every timestep, if needed
             self.__calculate_redshift_t()
 
             # Calculate the mass of the dark matter halo at every timestep
@@ -892,7 +892,7 @@ class omega( chem_evol ):
     def __calculate_redshift_t(self):
 
         '''
-        This functions calculates the redshift associated to every timestep
+        This function calculates the redshift associated to every timestep
         assuming that 'tend' represents redshift zero.
 
         '''
@@ -970,7 +970,7 @@ class omega( chem_evol ):
                     self.m_DM_t[i_cmdt] = 10**log_m_dm_low * \
                                             self.m_DM_0 / 10**poly_low_dm[3]
 
-                # If the dark matter mass can be interpolate
+                # If the dark matter mass can be interpolated
                 else:
 
                     # Use a linear interpolation with the log of the mass
@@ -979,7 +979,7 @@ class omega( chem_evol ):
                     b = log_m_dm_up - a * poly_up_dm[3]
                     self.m_DM_t[i_cmdt] = 10**( a * math.log10(self.m_DM_0) + b )
 
-            # If the simulation do not stop at redshift zero ...
+            # If the simulation does not stop at redshift zero ...
             if not self.redshift_f == 0.0:
 
                 # Scale the DM mass (because the fits look at M_DM_0 at z=0)
@@ -995,7 +995,7 @@ class omega( chem_evol ):
     def __get_DM_bdy(self):
 
         '''
-        This functions calculates and returns the fit coefficients for the
+        This function calculates and returns the fit coefficients for the
         interpolation of the evolution of the dark matter mass as a function 
         of time.
 
@@ -1008,7 +1008,7 @@ class omega( chem_evol ):
             line_str = m_dm_file.readline()
             parts_1 = [float(x) for x in line_str.split()]
 
-            # If the input dark matter mass if higher than the ones provided
+            # If the input dark matter mass is higher than the ones provided
             # by the fits ...
             if math.log10(self.m_DM_0) > parts_1[3]:
 
@@ -1051,7 +1051,7 @@ class omega( chem_evol ):
     def __calculate_t_SF_t(self):
 
         '''
-        This functions calculates the star formation timescale at every timestep.
+        This function calculates the star formation timescale at every timestep.
 
         '''
 
@@ -1090,7 +1090,7 @@ class omega( chem_evol ):
     def __calculate_m_tot_ISM_t(self):
 
         '''
-        This functions calculates the mass of the gas reservoir at every 
+        This function calculates the mass of the gas reservoir at every 
         timestep using a classical star formation law.
 
         '''
@@ -1127,7 +1127,7 @@ class omega( chem_evol ):
     def __calculate_outflow_t(self):
 
         '''
-        This functions calculates the mass-loading factor and the mass of outflow 
+        This function calculates the mass-loading factor and the mass of outflow 
         at every timestep.
 
         '''
@@ -1168,13 +1168,13 @@ class omega( chem_evol ):
                 # For each timestep ...
                 for i_ceo in range(0, self.nb_timesteps):
 
-                    # Calculate the mass-loading factor with redshift depen
+                    # Calculate the mass-loading factor with redshift dependence
                     if self.z_dependent:
                         self.eta_outflow_t[i_ceo] = eta_norm * \
                             self.m_DM_t[i_ceo]**((-0.3333)*self.exp_ml) * \
                                 (1+self.redshift_t[i_ceo])**(-(0.5)*self.exp_ml)
 
-                    # Calculate the mass-loading factor without redshift depen
+                    # Calculate the mass-loading factor without redshift dependence
                     else:
                         self.eta_outflow_t[i_ceo] = eta_norm * \
                             self.m_DM_t[i_ceo]**((-0.3333)*self.exp_ml)
@@ -1207,7 +1207,7 @@ class omega( chem_evol ):
             # If the open box scenario is used ...
             if self.open_box:
 
-                # Calculate the total mass of the gas reservoir at timstep i
+                # Calculate the total mass of the gas reservoir at timestep i
                 # after the star formation and the stellar ejecta
                 m_tot_current = 0.0
                 for k_op in range(0, self.nb_isotopes):
@@ -1223,7 +1223,7 @@ class omega( chem_evol ):
                     for k_op in range(0, self.nb_isotopes):
 		        self.ymgal[i][k_op] += ym_inflow[k_op]
                 
-                #Calculate the fraction of gas removed by the outflow
+                # Calculate the fraction of gas removed by the outflow
                 if not (m_tot_current + m_inflow_current) == 0.0:
                     frac_rem = self.m_outflow_t[i-1] / \
                         (m_tot_current + m_inflow_current)
@@ -1358,7 +1358,7 @@ class omega( chem_evol ):
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
     
         '''
-	 mass evolution (in Msun) of an element or isotope vs time.
+	mass evolution (in Msun) of an element or isotope vs time.
 	
 
         Parameters
@@ -1691,7 +1691,7 @@ class omega( chem_evol ):
 
         '''
 
-        #Error message if there is the "subplot" has not been provided
+        #Error message if the "subplot" has not been provided
         if sub_plot and sub == 1:
             print '!! Error - You need to use the \'sub\' parameter and provide the frame for the plot !!'
             return
@@ -1829,7 +1829,7 @@ class omega( chem_evol ):
 
         if not plot_data:
 
-          # Filtrate bad value
+          # Filter bad value
           x_temp = []
           y_temp = []
           for i_temp in range(0,len(x)):
@@ -1905,7 +1905,7 @@ class omega( chem_evol ):
 	    sources (see below)
 
         source : string
-            specificies if yields come from
+            specifies if yields come from
 	    all sources ('all'), including
 	    AGB+SN1a, massive stars. Or from
 	    distinctive sources:
@@ -2055,7 +2055,7 @@ class omega( chem_evol ):
             if true, calculate rate [1/century] 
             else calculate numbers
 	fraction ; boolean
-	    if true, ignorate rate and calculate number fraction of SNIa per WD
+	    if true, ignore rate and calculate number fraction of SNIa per WD
         rate_only : string
 	    if empty string, plot both rates (default)
 
@@ -2090,7 +2090,7 @@ class omega( chem_evol ):
         sn1anumbers=self.history.sn1a_numbers#[:-1]
         sn2numbers=self.history.sn2_numbers
 	if xaxis=='redshift':
-		print 'this features is not tested yet.'
+		print 'this feature is not tested yet.'
 		return 0
 		age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
 		age=[0]+age
@@ -2227,8 +2227,8 @@ class omega( chem_evol ):
 
     def save_data(self,header=[],data=[],filename='plot_data.txt'):
 	'''
-		Writes data into a text file. data entries
-		can have different lengths
+	Writes data into a text file. Data entries
+	can have different lengths
 	'''
 	out=' '
         #header
@@ -2401,7 +2401,7 @@ class omega( chem_evol ):
 	Function checks if either of shape,color,marker
 	is set. If not then assign in each case
 	a unique property related to the source ('agb','massive'..)
-	to the variable and returns all three
+	to the variable and return all three
 	'''
 
 	if source=='all':
@@ -2867,7 +2867,7 @@ class omega( chem_evol ):
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the redshift a function of time.
+	This function plots the redshift as a function of time.
 
         Parameters
         ----------
@@ -2950,7 +2950,7 @@ class omega( chem_evol ):
 	This function plots the evolution of an isotopic ratio as a function
 	of time, as a function of an abundance ratio, or as a function of
 	another isotopic ratio.  Isotopic ratios are given in the
-	delta notation and abundances ratios are given in spectroscopic notation.
+	delta notation and abundance ratios are given in spectroscopic notation.
 
         Parameters
         ----------
@@ -3075,7 +3075,7 @@ class omega( chem_evol ):
                     else:
                         x_2 += xaxis[ix]
             if len(x_2) == 0:
-                print '!! xaxis not valid.  Need to be \'age\' or a ratio !!'
+                print '!! x-axis not valid.  Needs to be \'age\' or a ratio !!'
                 return
 
         # Verify the Y-axis
@@ -3091,7 +3091,7 @@ class omega( chem_evol ):
                 else:
                     y_2 += yaxis[iy]
         if len(y_2) == 0:
-            print '!! yaxis not valid.  Need to be a ratio !!'
+            print '!! y-axis not valid.  Needs to be a ratio !!'
             return
 
         # Get the isotopes for X-axis
@@ -3104,7 +3104,7 @@ class omega( chem_evol ):
             x1_at_nb = float(x_1.split('-')[1])
             x2_at_nb = float(x_2.split('-')[1])
           else:
-            print '!! Isotopes in xaxis are not valid !!'
+            print '!! Isotopes in x-axis are not valid !!'
             return
 
         # Get the isotopes for Y-axis
@@ -3116,7 +3116,7 @@ class omega( chem_evol ):
             y1_at_nb = float(y_1.split('-')[1])
             y2_at_nb = float(y_2.split('-')[1])
         else:
-            print '!! Isotopes in yaxis are not valid !!'
+            print '!! Isotopes in y-axis are not valid !!'
             return
 
         # Set the default label .. if not defined
@@ -3149,7 +3149,7 @@ class omega( chem_evol ):
             ratio_std = y1_sol / y2_sol
             y.append( ((ratio_sample/ratio_std) - 1) * 1000)
   
-        # Make sure the length of array are the same when xaxis = '[X/Y]'
+        # Make sure the length of arrays are the same when xaxis = '[X/Y]'
         too_much = len(y)-len(x)
         y = y[too_much:]
 
@@ -3255,7 +3255,7 @@ class omega( chem_evol ):
 	     Each point in the MDF can be associated with a gaussian. This implies
 	     that in reality, the metallicity should have a certain dispersion 
 	     when stars form at each timestep (instead of using only a single
-	     average value).  The sigma_guass parameter sets the sigma value eac
+	     average value).  The sigma_gauss parameter sets the sigma value of each
 	     gaussian function.
 	nb_sigma : float
 	     When sigma_gauss is greater than zero, nb_sigma is the number of
