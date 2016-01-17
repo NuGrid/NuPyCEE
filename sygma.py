@@ -260,6 +260,171 @@ class sygma( chem_evol ):
 ###############################################################################################
 
 
+    def plot_lifetimes(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+	
+		Plots the lifetimes versus  initial mass.
+
+        Parameters
+        ----------
+
+        xaxis : string
+             if 'mini': use initial mass
+        iniZ  : float 
+	      Metallicity of interest
+	masses: list
+	      List of initial masses to be plotted
+
+	table: string
+	      Yield table	
+	
+
+
+	'''
+
+        import read_yields as ry
+        import re
+        y_table=ry.read_nugrid_yields(global_path+table)
+
+        #find all available masses
+        if len(masses)==0:
+                allheader=y_table.table_mz
+                for k in range(len(allheader)):
+                        if str(iniZ) in allheader[k]:
+                                mfound=float(allheader[k].split(',')[0].split('=')[1])
+                                masses.append(mfound)
+                print 'Found masses: ',masses
+
+        ltimes=[]
+        for k in range(len(masses)):
+                ltimes.append(y_table.get(Z=iniZ, M=masses[k], quantity='Lifetime'))
+
+        plt.plot(masses,ltimes,label=label,marker=marker,color=color,linestyle=shape)
+        ax=plt.gca()
+        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+        plt.ylabel('Lifetimes/yrs')
+        plt.xlabel('Initial mass/Msun')
+	plt.yscale('log')
+
+
+    def plot_remnant_input(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+
+		Plots the remnant masses versus initial mass.
+        	Parameter
+
+        Parameters
+        ----------
+
+        xaxis : string
+             if 'mini': use initial mass; if of the form [specie1/specie2] use spec. notation of 
+        yaxis : string
+
+
+	'''
+        import read_yields as ry
+        import re
+        y_table=ry.read_nugrid_yields(global_path+table)
+
+        #find all available masses
+        if len(masses)==0:
+                allheader=y_table.table_mz
+                for k in range(len(allheader)):
+                        if str(iniZ) in allheader[k]:
+                                mfound=float(allheader[k].split(',')[0].split('=')[1])
+                                masses.append(mfound)
+                print 'Found masses: ',masses
+	
+	mfinals=[]
+	for k in range(len(masses)):	
+		mfinals.append(y_table.get(Z=iniZ, M=masses[k], quantity='Mfinal'))
+
+	plt.plot(masses,mfinals,label=label,marker=marker,color=color,linestyle=shape)
+        ax=plt.gca()
+        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+	plt.ylabel('Remnant mass/Msun')
+	plt.xlabel('Initial mass/Msun')
+
+
+    def plot_yield_mtot(self,fig=8,plot_imf_mass_ranges=True,fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+
+	'''
+		Plots total mass ejected by stars (!). To distinguish between the total mass of yields from the table and fitted total mass
+	'''
+
+	plt.figure(8)
+	yall=[]
+	for k in range(len(self.yields)):
+	    yall.append(sum(self.yields[k]))
+	mall=self.m_stars
+	x=[]
+	ms=[]
+	for m in np.arange(self.imf_bdys[0],self.imf_bdys[-1],1):
+	    x.append(self.func_total_ejecta(m))
+	    ms.append(m)
+	plt.plot(ms,x,linestyle=':',label='fit')
+	plt.plot(mall,yall,marker='x',color='k',linestyle='',label='input yield grid')
+	plt.xlabel('Initial mass/Msun')
+	plt.ylabel('Total yields/Msun')
+	plt.legend()
+
+	if plot_imf_mass_ranges==True:
+		ranges=self.imf_mass_ranges
+		for k in range(len(ranges)):
+		    plt.vlines(ranges[k][0],0,100,linestyle='--')
+		plt.vlines(ranges[-1][1],0,100,linestyle='--')
+
+        ax=plt.gca()
+        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+
+
+    def plot_yield_input_mass(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+
+	'''
+	
+
+	'''
+
+        #find all available masses
+        if len(masses)==0:
+                allheader=y_table.table_mz
+                for k in range(len(allheader)):
+                        if str(iniZ) in allheader[k]:
+                                mfound=float(allheader[k].split(',')[0].split('=')[1])
+                                masses.append(mfound)
+                print 'Found masses: ',masses
+	if True:
+                x=[]
+                y=[]
+                for mini in masses:
+                                x.append(mini)
+                                plt.xlabel('Initial mass/Msun')
+                                headerx='Mini/Msun'
+
+                                if netyields==True:
+                                        y_ini=ini_isos_frac[ini_isos.index(yaxis)]
+                                        miniadd=(y_ini*(mini-mfinal))
+                                        y.append(y_delay.get(M=mini,Z=Z,specie=yaxis) + miniadd)
+                                else:
+                                        y.append(y_delay.get(M=mini,Z=Z,specie=yaxis))
+                                plt.ylabel('Yield/Msun')
+                                headery='Yields/Msun'
+
+                if len(label)==0:
+                        plt.plot(x,y,label='Z='+str(Z),marker=marker,color=color,linestyle=shape)
+                else:
+                        plt.plot(x,y,label=label,marker=marker,color=color,linestyle=shape)
+
+
+        ax=plt.gca()
+        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+        #return x,y
+        self.save_data(header=[headerx,headery],data=[x,y])
+
+
+
     def plot_yield_input(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab='',netyields_iniabu=''):
 
         '''
@@ -320,13 +485,14 @@ class sygma( chem_evol ):
 			#ini_species=ini_elems
 			#ini_species_frac=ini_elems_frac
 		#get isotopes
-		if True:
+		if True:	
+			ini_isos=[]
 			ini_isos_frac=[]
                         for k in range(len(isonames)):
                                 elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
                                 A=int(re.split('(\d+)',isonames[k])[1])
 				newname=elem+'-'+str(A)
-				#ini_isos.append(newname)
+				ini_isos.append(newname)
 				ini_isos_frac.append(iniabu.iso_abundance(elem+'-'+str(A)))
                         #ini_species=ini_isos
                         #ini_species_frac=ini_isos_frac
@@ -507,7 +673,6 @@ class sygma( chem_evol ):
         self.save_data(header=[headerx,headery],data=[x,y])
 
 
-
     def plot_mass_ratio(self,fig=0,species_ratio='C/N',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,logy=True):
 
         '''
@@ -602,7 +767,7 @@ class sygma( chem_evol ):
        
 
 
-    def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,linewidth=2):
     
         '''
 	 mass evolution (in Msun) of an element or isotope vs time.
@@ -712,7 +877,7 @@ class sygma( chem_evol ):
             return x, y
 
         else:
-            plt.plot(x,y,label=label,linestyle=shape,marker=marker,color=color,markevery=markevery)
+            plt.plot(x,y,label=label,linestyle=shape,marker=marker,color=color,markevery=markevery,linewidth=linewidth)
             plt.legend()
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
@@ -1780,6 +1945,7 @@ class sygma( chem_evol ):
 
     def plot_mass_range_contributions(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
+
         '''
 	Plots yield contribution (Msun) of a certain mass range
 	versus initial mass. Each stellar ejecta in one mass range 
@@ -1815,8 +1981,95 @@ class sygma( chem_evol ):
         >>> s.plot_mass_range_contribution(element='C')
 
         '''
-        figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
+	figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
+
+
+	#e.g. for testing: ratio
+	#ratio, e.g. C/Fe
+	if '/' in specie:
+		specie1=specie.split('/')[0]
+		mean_val,bin_bdys,y1,color,label=self.__plot_mass_range_contributions_single(fig,specie1,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
+		specie2=specie.split('/')[1]
+		mean_val,bin_bdys,y2,color,label=self.__plot_mass_range_contributions_single(fig,specie2,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
+
+		y=np.array(y1)/np.array(y2)
+		label=specie
+	#to get the total mass
+	if 'all' in specie:
+		eles=self.history.elements
+		for k in range(len(eles)):
+			specie=eles[k]
+			ytmp=0
+			mean_val,bin_bdys,ytmp,color,labeltmp=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
+			if k==0:
+				y=np.array(ytmp)
+			else:
+				y= y+np.array(ytmp)
+	#default, mass, C, C-12
+	else:
+		mean_val,bin_bdys,y,color,label=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
+
+
+
+	if prodfac==True:
+        	p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label)
+	else:
+		p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label)
+        #'''
+	if len(label)>0:
+		plt.legend()
+        #ax1 = figure.add_subplot(111)
+        #ax1.set_xscale('log')
+        #ax2 = ax1.twiny()
+    #       ax2.set_xticklabels(tick_function(new_tick_locations))
+        #plt.plot(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label)
+        #ax1.errorbar(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label,xerr=0.05)
+	ax1=plt.gca()
+        #self.__fig_standard(ax=ax1,fontsize=18,labelsize=18)
+	if log==True:		
+        	ax1.set_xlabel('log-scaled initial mass [Msun]')
+	else:
+		ax1.set_xlabel('initial mass [Msun]')
+	if prodfac==False:
+		ax1.set_ylabel('IMF-weighted yields [Msun]')
+	else:
+	        ax1.set_ylabel('production factor')
+	if log==True:
+       		ax1.set_yscale('log')
+        #ax1.set_yscale('log')
+        #ax1.legend(numpoints = 1)
+	#fontsize=18
+	#labelsize=18
+	lwtickboth=[6,2]
+	lwtickmajor=[10,3]
+	plt.xlim(min(bin_bdys),max(bin_bdys))
+        plt.legend(loc=2,prop={'size':legend_fontsize})
+        plt.rcParams.update({'font.size': fontsize})
+        ax1.yaxis.label.set_size(labelsize)
+        ax1.xaxis.label.set_size(labelsize)
+        #ax.xaxis.set_tick_params(width=2)
+        #ax.yaxis.set_tick_params(width=2)              
+        ax1.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
+        ax1.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
+        #Add that line below at some point
+        #ax.xaxis.set_tick_params(width=2)
+        #ax.yaxis.set_tick_params(width=2)
+        ax1.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
+	self.save_data(header=['Mean mass','mass bdys (bins)','Yields'],data=[mean_val,bin_bdys,y])
+        plt.subplots_adjust(right=rspace)
+        plt.subplots_adjust(bottom=bspace)
+
+	#print [mean_val,bin_bdys,y]
+	return
+
+
+    def __plot_mass_range_contributions_single(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+	Internal plotting function for function  plot_mass_range_contributions
+        '''
+    
 
         if len(label)==0:
             label=specie
@@ -1976,57 +2229,9 @@ class sygma( chem_evol ):
 	#print yields
 	#print bin_bdys
 	#print mean_val
-	if prodfac==True:
-        	p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label)
-	else:
-		p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label)
-        #'''
-	if len(label)>0:
-		plt.legend()
-        #ax1 = figure.add_subplot(111)
-        #ax1.set_xscale('log')
-        #ax2 = ax1.twiny()
-    #       ax2.set_xticklabels(tick_function(new_tick_locations))
-        #plt.plot(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label)
-        #ax1.errorbar(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label,xerr=0.05)
-	ax1=plt.gca()
-        #self.__fig_standard(ax=ax1,fontsize=18,labelsize=18)
-	if log==True:		
-        	ax1.set_xlabel('log-scaled initial mass [Msun]')
-	else:
-		ax1.set_xlabel('initial mass [Msun]')
-	if prodfac==False:
-		ax1.set_ylabel('IMF-weighted yields [Msun]')
-	else:
-	        ax1.set_ylabel('production factor')
-	if log==True:
-       		ax1.set_yscale('log')
-        #ax1.set_yscale('log')
-        #ax1.legend(numpoints = 1)
-	#fontsize=18
-	#labelsize=18
-	lwtickboth=[6,2]
-	lwtickmajor=[10,3]
-	plt.xlim(min(bin_bdys),max(bin_bdys))
-        plt.legend(loc=2,prop={'size':legend_fontsize})
-        plt.rcParams.update({'font.size': fontsize})
-        ax1.yaxis.label.set_size(labelsize)
-        ax1.xaxis.label.set_size(labelsize)
-        #ax.xaxis.set_tick_params(width=2)
-        #ax.yaxis.set_tick_params(width=2)              
-        ax1.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
-        ax1.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
-        #Add that line below at some point
-        #ax.xaxis.set_tick_params(width=2)
-        #ax.yaxis.set_tick_params(width=2)
-        ax1.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
-	self.save_data(header=['Mean mass','mass bdys (bins)','Yields'],data=[mean_val,bin_bdys,y])
-        plt.subplots_adjust(right=rspace)
-        plt.subplots_adjust(bottom=bspace)
 
+	return mean_val,bin_bdys,y,color,label
 
-	#print [mean_val,bin_bdys,y]
-	return
 
     def write_evol_table(self,elements=['H'],isotopes=['H-1'],table_name='gce_table.txt', path="",interact=False):
 

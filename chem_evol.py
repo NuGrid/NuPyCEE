@@ -179,6 +179,10 @@ class chem_evol(object):
         Path pointing toward the table of initial abuncances in mass fraction.
         Default value : 'yield_tables/iniabu/iniab2.0E-02GN93.ppn'
 
+    yield_interp : if 'None' : no yield interpolation, no interpolation of total ejecta
+		   if 'lin' - Simple linear yield interpolation.
+                   if 'wiersma' - Interpolation method from Wiersma+ (2009)
+
     iolevel : int
         Specifies the amount of output for testing purposes (up to 3).
         Default value : 0
@@ -187,7 +191,7 @@ class chem_evol(object):
     Run example
     ===========
 
-    See omega.py and omega.py
+    See sygma.py and omega.py
 
     '''
 
@@ -206,7 +210,8 @@ class chem_evol(object):
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=-1, \
-                 f_arfo=1, imf_yields_range=[1,30],exclude_masses=[32,60],netyields_on=False,wiersmamod=False):
+                 f_arfo=1, imf_yields_range=[1,30],exclude_masses=[32,60],netyields_on=False,wiersmamod=False,
+		 yield_interp='lin'):
 
         # Initialize the history class which keeps in memory the simulation
 	self.history = self.__history()
@@ -263,6 +268,7 @@ class chem_evol(object):
         self.exclude_masses=exclude_masses
         self.netyields_on=netyields_on
 	self.wiersmamod=wiersmamod
+	self.yield_interp=yield_interp
         # Normalisation constants for the Kroupa IMF
         if imf_type == 'kroupa':
             self.p0 = 1.0
@@ -872,7 +878,6 @@ class chem_evol(object):
         # Interpolate yields in the mass-metallicity plane
         mstars, yields_all, func_total_ejecta, yields_extra = \
             self.__inter_mm_plane(i)
-	#print 'testtse',mstars
         # Get the mass fraction of stars that contribute to the stellar ejecta
         # relative the total stellar mass within imf_bdys.
         mfac = self.__get_mfac()
@@ -890,12 +895,12 @@ class chem_evol(object):
             print 'Stars under consideration', \
                   '(take into account user-selected imf ends):'
 	    for kk in range(len(mass_bdys)-1):
-		print mass_bdys[kk],'|',mstars[kk],'|',mass_bdys[kk+1]
+	    	print mass_bdys[kk],'|',mstars[kk],'|',mass_bdys[kk+1]
 	    print 'lens: ',len(mass_bdys),len(mstars)
             #print mstars
             #print 'with (corrected) mass bdys:####'
             #print mass_bdys
-            print 'Scaling factor for gas mass (mfac)', mfac
+            #print 'Scaling factor for gas mass (mfac)', mfac
 
         # Calculate the mass lock away from the old ejecta of massive and AGB stars
         massfac = self.__mlock_agb_massive(mstars,mfac,mftot,massfac,mass_bdys,i)
@@ -933,7 +938,6 @@ class chem_evol(object):
           i : Index of the current timestep
 
         '''
-        
         # If Zmetal is above the lowest non-zero Z available in the yields ...
         if self.zmetal >= self.ytables.metallicities[-1]:
             # Get the interpolated stellar yields for the current metallicity.
@@ -1418,6 +1422,8 @@ class chem_evol(object):
             elif break_bol:
                 break
 
+	    self.history.t_m_bdys.append([minm1, maxm1])
+
             # Calculate the number of stars contributing in this timestep j
             number_stars = p_number * (self._imf(minm1, maxm1, 1))
 
@@ -1542,8 +1548,11 @@ class chem_evol(object):
         '''
 
         # Scale the total yields (see func_total_eject)
-        scalefactor = (func_total_ejecta(minm1) + \
+	if not (self.yield_interp == 'None'):
+        	scalefactor = (func_total_ejecta(minm1) + \
                               func_total_ejecta(maxm1)) / 2.0 / sum(yields)
+	else:
+		scalefactor = 1
 
         # Output information
         if self.iolevel > 1:
@@ -2568,7 +2577,7 @@ class chem_evol(object):
     ##############################################
     #             Interpolate Yields             #
     ##############################################
-    def __interpolate_yields(self, Z, ymgal_t, ytables, type_inter='lin'):
+    def __interpolate_yields(self, Z, ymgal_t, ytables):
 
         '''
         This function takes input yields and interpolate them to return the
@@ -2599,8 +2608,30 @@ class chem_evol(object):
         # Get all available metallicities
         Z_grid = ytables.metallicities
 
+	# Simplest case: No interpolation of any kind for the yields 
+	if (self.yield_interp == 'None'):
+	    
+	    #to choose the grid metallicity closest to Z
+            z1, z2 = self.__get_Z_bdys(Z, Z_grid)
+	    if abs(Z-z1) > abs(Z-z2):
+		Z_gridpoint=z2
+	    else:	
+		Z_gridpoint=z1
+	    m_stars = ytables.get(Z=Z_gridpoint, quantity='masses') 
+	    yields=[]
+	    for k in range(len(m_stars)):
+	    	y1 = ytables.get(Z=Z_gridpoint, M=m_stars[k], quantity='Yields') 
+		yields.append(y1)
+
+	    # func_total_ejecta is skipped for self.yield_interp == 'None', 
+	    # hence return not relevant
+	    def func_total_ejecta(inimass):
+		return inimass
+	    return m_stars, yields, func_total_ejecta
+	
+
         # If the interpolation is linear between grid points ...
-        if (type_inter == 'lin') and (not self.netyields_on):
+        if (self.yield_interp == 'lin') and (not self.netyields_on):
 
             # Get the lower and upper Z boundaries for the interpolation
             z1, z2 = self.__get_Z_bdys(Z, Z_grid)
@@ -2612,11 +2643,11 @@ class chem_evol(object):
             m_stars, yields = self.__lin_int_yields(z1, z2, m1, m2, ytables, Z)
 	    #print m_stars
         # If the "interpolation" is taken from Wiersma et al. (2009) ....   
-        elif (type_inter == 'wiersma') or (self.netyields_on==True):
+        elif (self.yield_interp == 'wiersma') or (self.netyields_on==True):
 
             # Get the closest available metallicity (favoring lower boundary)
             Z_gridpoint = self.__get_Z_wiersma(Z, Z_grid)
-
+	    print 'Take yields from Z closest to: ',Z,' found: ',Z_gridpoint
             # Get all initial masses at the selected closest metallicity
             m_stars = ytables.get(Z=Z_gridpoint, quantity='masses')
 
@@ -2657,6 +2688,10 @@ class chem_evol(object):
                     print 'inimass', inimass, \
                           'problem wiht massejected',massejected
                 return massejected
+
+	self.func_total_ejecta=func_total_ejecta
+	self.m_stars=m_stars
+	self.yields=yields
         '''
         if self.iolevel>0:
             mtests=np.arange(m_stars[0],m_stars[-1],0.1) 
@@ -2854,6 +2889,7 @@ class chem_evol(object):
           Z_grid : Available metallicity grid points.
 
         '''
+	import decimal
 
         # For every available metallicities ...
         for tz in Z_grid:
@@ -2873,8 +2909,9 @@ class chem_evol(object):
                 break
 
             # If Z is exactly one of the available Z, use the given Z
-            if Z == tz:
-                Z_gridpoint = Z
+	    # round here to precision given in yield table
+            if round(Z,abs(decimal.Decimal(str(tz)).as_tuple().exponent)) == tz: #Z == tz:
+                Z_gridpoint = tz#Z
                 if self.iolevel >= 2:
                     print 'Z = Zgrid'
                 break
@@ -2915,7 +2952,7 @@ class chem_evol(object):
         X_ymgal_t = []
         for p in range(len(ymgal_t)):
             X_ymgal_t.append(ymgal_t[p] / sum(ymgal_t))
-     
+ 
         if not Z_gridpoint==0: #X0 is not in popIII tables and not necessary for popIII setting
              # Get the initial abundances used for the stellar model calculation
              X0 = ytables.get(Z=Z_gridpoint, M=m_stars[0], quantity='X0')
@@ -3608,5 +3645,4 @@ class chem_evol(object):
             self.ism_elem_yield_1a = []
             self.sn1a_numbers = []
             self.sn2_numbers = []
-
-
+	    self.t_m_bdys = []

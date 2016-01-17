@@ -1,4 +1,4 @@
-H Table: (M=0.837,Z=0.02)
+H Table: (M=0.837,Z=0.0127)
 H Lifetime: 1.999E+10
 H Mfinal: 5.406E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -13,7 +13,7 @@ H Mfinal: 5.406E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=0.868,Z=0.02)
+H Table: (M=0.868,Z=0.0127)
 H Lifetime: 1.756E+10
 H Mfinal: 5.559E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -28,7 +28,7 @@ H Mfinal: 5.559E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=0.934,Z=0.02)
+H Table: (M=0.934,Z=0.0127)
 H Lifetime: 1.357E+10
 H Mfinal: 5.353E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -43,7 +43,7 @@ H Mfinal: 5.353E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.005,Z=0.02)
+H Table: (M=1.005,Z=0.0127)
 H Lifetime: 1.052E+10
 H Mfinal: 5.450E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -58,7 +58,7 @@ H Mfinal: 5.450E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.082,Z=0.02)
+H Table: (M=1.082,Z=0.0127)
 H Lifetime: 8.176E+09
 H Mfinal: 5.452E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -73,7 +73,7 @@ H Mfinal: 5.452E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.163,Z=0.02)
+H Table: (M=1.163,Z=0.0127)
 H Lifetime: 6.414E+09
 H Mfinal: 5.572E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -88,7 +88,7 @@ H Mfinal: 5.572E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.248,Z=0.02)
+H Table: (M=1.248,Z=0.0127)
 H Lifetime: 5.079E+09
 H Mfinal: 5.605E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -103,7 +103,7 @@ H Mfinal: 5.605E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.334,Z=0.02)
+H Table: (M=1.334,Z=0.0127)
 H Lifetime: 4.087E+09
 H Mfinal: 5.680E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -118,7 +118,7 @@ H Mfinal: 5.680E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.42,Z=0.02)
+H Table: (M=1.42,Z=0.0127)
 H Lifetime: 3.344E+09
 H Mfinal: 5.848E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -133,7 +133,7 @@ H Mfinal: 5.848E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.504,Z=0.02)
+H Table: (M=1.504,Z=0.0127)
 H Lifetime: 2.788E+09
 H Mfinal: 5.829E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -148,7 +148,7 @@ H Mfinal: 5.829E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.588,Z=0.02)
+H Table: (M=1.588,Z=0.0127)
 H Lifetime: 2.352E+09
 H Mfinal: 5.800E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -163,7 +163,7 @@ H Mfinal: 5.800E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.672,Z=0.02)
+H Table: (M=1.672,Z=0.0127)
 H Lifetime: 2.006E+09
 H Mfinal: 5.920E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -178,7 +178,7 @@ H Mfinal: 5.920E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.756,Z=0.02)
+H Table: (M=1.756,Z=0.0127)
 H Lifetime: 1.728E+09
 H Mfinal: 5.950E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -193,7 +193,7 @@ H Mfinal: 5.950E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.839,Z=0.02)
+H Table: (M=1.839,Z=0.0127)
 H Lifetime: 1.503E+09
 H Mfinal: 6.150E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -208,7 +208,7 @@ H Mfinal: 6.150E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=1.923,Z=0.02)
+H Table: (M=1.923,Z=0.0127)
 H Lifetime: 1.316E+09
 H Mfinal: 6.160E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -223,7 +223,7 @@ H Mfinal: 6.160E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=2.0,Z=0.02)
+H Table: (M=2.0,Z=0.0127)
 H Lifetime: 1.172E+09
 H Mfinal: 6.270E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -238,7 +238,7 @@ H Mfinal: 6.270E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=2.2,Z=0.02)
+H Table: (M=2.2,Z=0.0127)
 H Lifetime: 8.889E+08
 H Mfinal: 6.510E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -253,7 +253,7 @@ H Mfinal: 6.510E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=2.5,Z=0.02)
+H Table: (M=2.5,Z=0.0127)
 H Lifetime: 6.200E+08
 H Mfinal: 6.850E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -268,7 +268,7 @@ H Mfinal: 6.850E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=3.0,Z=0.02)
+H Table: (M=3.0,Z=0.0127)
 H Lifetime: 3.787E+08
 H Mfinal: 7.860E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -283,7 +283,7 @@ H Mfinal: 7.860E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=3.5,Z=0.02)
+H Table: (M=3.5,Z=0.0127)
 H Lifetime: 2.545E+08
 H Mfinal: 8.430E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -298,7 +298,7 @@ H Mfinal: 8.430E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=4.0,Z=0.02)
+H Table: (M=4.0,Z=0.0127)
 H Lifetime: 1.829E+08
 H Mfinal: 9.020E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -313,7 +313,7 @@ H Mfinal: 9.020E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=4.5,Z=0.02)
+H Table: (M=4.5,Z=0.0127)
 H Lifetime: 1.382E+08
 H Mfinal: 9.580E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -328,7 +328,7 @@ H Mfinal: 9.580E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=5.0,Z=0.02)
+H Table: (M=5.0,Z=0.0127)
 H Lifetime: 1.084E+08
 H Mfinal: 9.970E-01
 &Isotopes &Yields     &X0        &Z &A 
@@ -343,7 +343,7 @@ H Mfinal: 9.970E-01
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=6.0,Z=0.02)
+H Table: (M=6.0,Z=0.0127)
 H Lifetime: 7.270E+07
 H Mfinal: 1.300E+00
 &Isotopes &Yields     &X0        &Z &A 
@@ -358,7 +358,7 @@ H Mfinal: 1.300E+00
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=7.0,Z=0.02)
+H Table: (M=7.0,Z=0.0127)
 H Lifetime: 5.285E+07
 H Mfinal: 1.300E+00
 &Isotopes &Yields     &X0        &Z &A 
@@ -373,7 +373,7 @@ H Mfinal: 1.300E+00
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=9.0,Z=0.02)
+H Table: (M=9.0,Z=0.0127)
 H Lifetime: 3.263E+07
 H Mfinal: 1.306E+00
 &Isotopes &Yields     &X0        &Z &A 
@@ -388,7 +388,7 @@ H Mfinal: 1.306E+00
 &S-32     &5.920E-02  &0.000E+00 &16&32
 &Ca-40    &1.134E-02  &0.000E+00 &20&40
 &Fe-56    &4.780E-02  &0.000E+00 &26&56
-H Table: (M=12.0,Z=0.02)
+H Table: (M=12.0,Z=0.0127)
 H Lifetime: 1.989E+07
 H Mfinal: 1.440E+00
 &Isotopes &Yields     &X0        &Z &A 
@@ -403,7 +403,7 @@ H Mfinal: 1.440E+00
 &S-32     &5.697E-02  &0.000E+00 &16&32
 &Ca-40    &9.748E-03  &0.000E+00 &20&40
 &Fe-56    &1.082E-01  &0.000E+00 &26&56
-H Table: (M=15.0,Z=0.02)
+H Table: (M=15.0,Z=0.0127)
 H Lifetime: 1.413E+07
 H Mfinal: 1.875E+00
 &Isotopes &Yields     &X0        &Z &A 
@@ -418,7 +418,7 @@ H Mfinal: 1.875E+00
 &S-32     &8.940E-02  &0.000E+00 &16&32
 &Ca-40    &9.536E-03  &0.000E+00 &20&40
 &Fe-56    &8.255E-02  &0.000E+00 &26&56
-H Table: (M=20.0,Z=0.02)
+H Table: (M=20.0,Z=0.0127)
 H Lifetime: 9.598E+06
 H Mfinal: 2.107E+00
 &Isotopes &Yields     &X0        &Z &A 
@@ -433,7 +433,7 @@ H Mfinal: 2.107E+00
 &S-32     &1.491E-01  &0.000E+00 &16&32
 &Ca-40    &1.575E-02  &0.000E+00 &20&40
 &Fe-56    &1.653E-01  &0.000E+00 &26&56
-H Table: (M=30.0,Z=0.02)
+H Table: (M=30.0,Z=0.0127)
 H Lifetime: 6.174E+06
 H Mfinal: 7.184E+00
 &Isotopes &Yields     &X0        &Z &A 
@@ -448,7 +448,7 @@ H Mfinal: 7.184E+00
 &S-32     &0.000E+00  &0.000E+00 &16&32
 &Ca-40    &0.000E+00  &0.000E+00 &20&40
 &Fe-56    &0.000E+00  &0.000E+00 &26&56
-H Table: (M=40.0,Z=0.02)
+H Table: (M=40.0,Z=0.0127)
 H Lifetime: 4.858E+06
 H Mfinal: 2.059E+00
 &Isotopes &Yields     &X0        &Z &A 
@@ -463,7 +463,7 @@ H Mfinal: 2.059E+00
 &S-32     &1.393E-01  &0.000E+00 &16&32
 &Ca-40    &1.305E-02  &0.000E+00 &20&40
 &Fe-56    &8.832E-02  &0.000E+00 &26&56
-H Table: (M=60.0,Z=0.02)
+H Table: (M=60.0,Z=0.0127)
 H Lifetime: 3.844E+06
 H Mfinal: 2.090E+00
 &Isotopes &Yields     &X0        &Z &A 
@@ -478,7 +478,7 @@ H Mfinal: 2.090E+00
 &S-32     &1.580E-01  &0.000E+00 &16&32
 &Ca-40    &1.524E-02  &0.000E+00 &20&40
 &Fe-56    &1.660E-01  &0.000E+00 &26&56
-H Table: (M=100.0,Z=0.02)
+H Table: (M=100.0,Z=0.0127)
 H Lifetime: 3.401E+06
 H Mfinal: 2.119E+00
 &Isotopes &Yields     &X0        &Z &A 
