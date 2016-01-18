@@ -215,7 +215,7 @@ class sygma( chem_evol ):
 
                     # Use the input value
                     sfr_i.append(self.starbursts[i-1])
-                    history.sfr.append(sfr_i[i-1])
+                    self.history.sfr.append(sfr_i[i-1])
 
             # If an input file is read for the SFR ...
             if self.sfr == 'input':
