@@ -6,7 +6,7 @@ Functionality
 =============
 
 This tool allows the modeling of simple stellar populations.  Creating a SYGMA 
-instance runs the simulation while extensive analyzsis can be done with the plot_*
+instance runs the simulation while extensive analysis can be done with the plot_*
 functions found in the chem_evol_plot module.  See the DOC directory for a detailed
 documentation.
 
@@ -37,7 +37,7 @@ Get help with
 >>> help s
 
 Now start a calculation by providing the initial metal fraction
-iniZ, the final evolution time tend and the total mass of the SSP:
+iniZ, the final evolution time tend, and the total mass of the SSP:
 
 >>> s1=s.sygma(iniZ=0.0001, tend=5e9, mgal=1e5)
 
@@ -57,19 +57,19 @@ ejecta of a SSP via
 >>> s.write_evol_table(elements=['H','C','O'])
 
 Yield tables are available in the NUPYCEE subdirectory 
-yield\textunderscore tables. Add your yield tables to
-this directory and SYGMA will be able read the table
+yield/textunderscore tables. Add your yield tables to
+this directory and SYGMA will be able to read the table
 if you have specified the $table$ variable. Only
-for table of Z=0 the variable $pop3\textunderscore table$ is used.
+for tables with Z=0 is the variable $pop3/textunderscore table$ used.
 Both tables need yields specified in the SYGMA (and OMEGA)
-yield input format. See for the structure the default table.
+yield input format. See the default table for the structure.
 It is important to provide an initial abundance
-file which has to match the number of species provided in the yield tables.
-Provide the file in the iniAbu directory inside the directory yield\textunderscore tables.
-The input variable with which the table file can be specified is $iniabu\textunderscore table$.
+file which must match the number of species provided in the yield tables.
+Provide the file in the iniAbu directory inside the directory yield/extunderscore tables.
+The input variable with which the table file can be specified is $iniabu/textunderscore table$.
 For the necessary structure see again the default choice of that variable.
 
-For example with artifical yields of only H-1, you can try
+For example with artificial yields of only H-1, you can try
 
 >>> s2 = s.sygma(iniZ=0.0001,dt=1e8,tend=1.5e10, mgal=1e11,table='yield_tables/isotope_yield_table_h1.txt',
     sn1a_table='yield_tables/sn1a_h1.txt',iniabu_table='yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt')
@@ -90,15 +90,15 @@ class sygma( chem_evol ):
     ================
 
     sfr : string
-	Description of the star formation, usualy a instantaneous burst.
-        Choices : 'input' - read and use the sfr_input file to set the pourcentage
+	Description of the star formation, usually an instantaneous burst.
+        Choices : 'input' - read and use the sfr_input file to set the percentage
                             of gas that is converted into stars at each timestep.
                   'schmidt' - use an adapted Schmidt law (see Timmes95)
         Default value : 'input'
     
     ================
     '''
-    #Combine docstrings from chem_evol with sygma docstring
+    # Combine docstrings from chem_evol with sygma docstring
     __doc__ = __doc__+chem_evol.__doc__
 
     ##############################################
@@ -250,7 +250,7 @@ class sygma( chem_evol ):
                 sfr_i.append(B/mgas) * (timesteps[i-1] / 1.e9) # mass fraction
                 self.history.sfr.append(sfr_i[i-1])
 
-        #Return the SFR (mass fraction) of every timestep
+        # Return the SFR (mass fraction) of every timestep
         return sfr_i
 
 
@@ -264,7 +264,7 @@ class sygma( chem_evol ):
 
         '''
 	
-		Plots the lifetimes versus  initial mass.
+	Plots the lifetimes versus initial mass.
 
         Parameters
         ----------
@@ -278,7 +278,6 @@ class sygma( chem_evol ):
 
 	table: string
 	      Yield table	
-	
 
 
 	'''
@@ -287,7 +286,7 @@ class sygma( chem_evol ):
         import re
         y_table=ry.read_nugrid_yields(global_path+table)
 
-        #find all available masses
+        # find all available masses
         if len(masses)==0:
                 allheader=y_table.table_mz
                 for k in range(len(allheader)):
@@ -312,8 +311,7 @@ class sygma( chem_evol ):
 
         '''
 
-		Plots the remnant masses versus initial mass.
-        	Parameter
+	Plots the remnant masses versus initial mass.
 
         Parameters
         ----------
@@ -328,7 +326,7 @@ class sygma( chem_evol ):
         import re
         y_table=ry.read_nugrid_yields(global_path+table)
 
-        #find all available masses
+        # find all available masses
         if len(masses)==0:
                 allheader=y_table.table_mz
                 for k in range(len(allheader)):
@@ -351,7 +349,9 @@ class sygma( chem_evol ):
     def plot_yield_mtot(self,fig=8,plot_imf_mass_ranges=True,fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
 	'''
-		Plots total mass ejected by stars (!). To distinguish between the total mass of yields from the table and fitted total mass
+
+	Plots total mass ejected by stars (!). To distinguish between the total mass of yields from the table and fitted total mass
+	
 	'''
 
 	plt.figure(8)
@@ -387,7 +387,7 @@ class sygma( chem_evol ):
 
 	'''
 
-        #find all available masses
+        # find all available masses
         if len(masses)==0:
                 allheader=y_table.table_mz
                 for k in range(len(allheader)):
@@ -428,14 +428,15 @@ class sygma( chem_evol ):
     def plot_yield_input(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab='',netyields_iniabu=''):
 
         '''
-		Plots the yields of the yield input grid vesus initial mass or
-		Z or [Fe/H]. Yield can be plotted in solar masses or in spectroscopic notation.
+
+	Plots the yields of the yield input grid versus initial mass or
+	Z or [Fe/H]. Yield can be plotted in solar masses or in spectroscopic notation.
 
         Parameters
         ----------
 
 	xaxis : string
-	     if 'mini': use initial mass; if of the form [specie1/specie2] use spec. notation of 
+	     if 'mini': use initial mass; if of the form [specie1/specie2] use spec. notation
 	yaxis : string
 	     specifies isotopes or elements with 'C-12' or 'C': plot yield of isotope;
 	     if chosen spectros: use form [specie3/specie4]
@@ -448,7 +449,8 @@ class sygma( chem_evol ):
 	table : string
 	     table to plot data from; default sygma input table
 
-        '''
+        
+	'''
 	import read_yields as ry
 	import re
 	y_table=ry.read_nugrid_yields(global_path+table)
@@ -457,7 +459,7 @@ class sygma( chem_evol ):
 	if '[' in yaxis:
 		spec=True
 	
-	#for spectroscopic notation need initial abundance of elements or isotopes
+	# for spectroscopic notation need initial abundance of elements or isotopes
 	if True: #spec==True or '[' in xaxis:
                 ini_list=['iniab1.0E-02GN93.ppn' ,'iniab1.0E-03GN93_alpha.ppn','iniab1.0E-04GN93_alpha.ppn','iniab2.0E-02GN93.ppn' ,'iniab6.0E-03GN93_alpha.ppn','iniab1.0E-05GN93_alpha_scaled.ppn','iniab1.0E-06GN93_alpha_scaled.ppn']
                 iniZs=[0.01,0.001,0.0001,0.02,0.006,0.00001,0.000001]
@@ -497,7 +499,7 @@ class sygma( chem_evol ):
                         #ini_species=ini_isos
                         #ini_species_frac=ini_isos_frac
 
-	####GEt solar Z either from 
+	####Get solar Z either from 
 	if len(solar_ab) ==0:
 		iniabu=ry.iniabu(global_path+'yield_tables/iniabu/iniab2.0E-02GN93.ppn')
 	else:
@@ -770,7 +772,7 @@ class sygma( chem_evol ):
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,linewidth=2):
     
         '''
-	 mass evolution (in Msun) of an element or isotope vs time.
+	mass evolution (in Msun) of an element or isotope vs time.
 	
 
         Parameters
@@ -888,8 +890,8 @@ class sygma( chem_evol ):
     def __plot_mass_multi(self,fig=1,specie=['C'],ylims=[],source='all',norm=False,label=[],shape=['-'],marker=['o'],color=['r'],markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
     	'''
-	Use multile times the function plot_mass
-	mass evolution (in Msun) of an element or isotope vs time.
+	Use the function plot_mass multiple times
+	Mass evolution (in Msun) of an element or isotope vs time.
 	
 
         Parameters
@@ -1167,7 +1169,7 @@ class sygma( chem_evol ):
         ----------
 
 	xaxis : string
-            Elements spectroscopic notation e.g. [Fe/H]
+            Spectroscopic notation of elements e.g. [Fe/H]
 	    if 'age': time evolution in years
 	yaxis : string
                 Elements in spectroscopic notation, e.g. [C/Fe]
@@ -1378,7 +1380,7 @@ class sygma( chem_evol ):
     def __plot_abu_distr(self,fig=0,t=-1,x_axis='A',solar_norm=True,marker1=2,linest=0,y_range=[],label='CHEM  module',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	EXPTERIMENTAL: DO NOT USE
+	EXPERIMENTAL: DO NOT USE
 	Plots abundance distribution of stable isotopes
 	of certain time t (X/X_sol vs A).:
 
@@ -1507,7 +1509,7 @@ class sygma( chem_evol ):
 
     def plot_totmasses(self,fig=4,mass='gas',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,log=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
         '''
-	Plots either gas or star mass in fraction of total mass
+	Plots either gas or star mass as fraction of total mass
 	vs time.
         
         Parameters
@@ -1515,10 +1517,10 @@ class sygma( chem_evol ):
 
         mass : string
             either 'gas' for ISM gas mass
-            or 'stars' for gas locked away in stars (totalgas - ISM gas)
+            or 'stars' for gas locked away in stars (total gas - ISM gas)
 
         norm : string
-            normalization, either 'no' for no normalization (total gass mass in solar masses),
+            normalization, either 'no' for no normalization (total gas mass in solar masses),
 
 	    for normalization to the initial gas mass (mgal) with 'ini',
 
@@ -1527,7 +1529,7 @@ class sygma( chem_evol ):
 	    sources (see below)
 
         source : string
-            specificies if yields come from
+            specifies if yields come from
 	    all sources ('all'), including
 	    AGB+SN1a, massive stars. Or from
 	    distinctive sources:
@@ -2067,7 +2069,7 @@ class sygma( chem_evol ):
     def __plot_mass_range_contributions_single(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	Internal plotting function for function  plot_mass_range_contributions
+	Internal plotting function for function plot_mass_range_contributions
         '''
     
 
@@ -2248,16 +2250,16 @@ class sygma( chem_evol ):
 	
 	This method has a notebook and normal version. If you are
 	using a python notebook the function will
-	opem a link to a page containing the table.
+	open a link to a page containing the table.
 	
 
         Parameters
         ----------
         table_name : string,optional
-          Name of table. In case you use a notebook version, setting a name
+          Name of table. If you use a notebook version, setting a name
 	  is not necessary.
 	elements : array
-		Containing the elmements with the name scheme 'H','C'
+		Containing the elements with the name scheme 'H','C'
 	isotopes : array
 		If elements list empty, ignore elements input and use isotopes input; Containing the isotopes with the name scheme 'H-1', 'C-12'
 	interact: bool
@@ -2405,7 +2407,7 @@ class sygma( chem_evol ):
 	Function checks if either of shape,color,marker
 	is set. If not then assign in each case
 	a unique property related to the source ('agb','massive'..)
-	to the variable and returns all three
+	to the variable and return all three
 	'''
 
 	if source=='all':
@@ -2475,7 +2477,7 @@ class sygma( chem_evol ):
         x = []
         y = []
 
-        #Access solar abundance
+        # Access solar abundance
         iniabu=ry.iniabu(global_path+solar_ab)
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
         elements,x_ini=self._iso_abu_to_elem(x_ini_iso)

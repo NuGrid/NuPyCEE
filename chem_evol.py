@@ -213,10 +213,10 @@ class chem_evol(object):
                  f_arfo=1, imf_yields_range=[1,30],exclude_masses=[32,60],netyields_on=False,wiersmamod=False,
 		 yield_interp='lin'):
 
-        # Initialize the history class which keeps in memory the simulation
+        # Initialize the history class which keeps the simulation in memory
 	self.history = self.__history()
 
-        # If we need to assume the current baryinoc ratio ...
+        # If we need to assume the current baryonic ratio ...
         if mgal < 0.0:
 
             # Use a temporary mgal value for chem_evol __init__ function
@@ -269,14 +269,14 @@ class chem_evol(object):
         self.netyields_on=netyields_on
 	self.wiersmamod=wiersmamod
 	self.yield_interp=yield_interp
-        # Normalisation constants for the Kroupa IMF
+        # Normalization constants for the Kroupa IMF
         if imf_type == 'kroupa':
             self.p0 = 1.0
             self.p1 = 0.08**(-0.3 + 1.3)
             self.p2 = 0.5**(-1.3 + 2.3)
             self.p3 = 1**(-2.3 +2.3)
 
-        # Parameter that tells if not enough gas is available for star formation
+        # Parameter that determines if not enough gas is available for star formation
         self.not_enough_gas_count = 0
         self.not_enough_gas = False
 
@@ -351,7 +351,7 @@ class chem_evol(object):
     def __check_inputs(self):
 
         '''
-        This function checks for incompatible input entries, and stops
+        This function checks for incompatible input entries and stops
         the simulation if needed.
 
         '''
@@ -360,7 +360,7 @@ class chem_evol(object):
         self.need_to_quit = False
         # Total duration of the simulation
         if self.history.tend > 1.3e10:
-            print 'Error - tend must less or equal to 1.3e10 years.'
+            print 'Error - tend must be less than or equal to 1.3e10 years.'
             self.need_to_quit = True
 
         # Timestep
@@ -396,7 +396,7 @@ class chem_evol(object):
             self.need_to_quit = True
         if (self.transitionmass<self.imf_yields_range[0])\
              or (self.transitionmass>self.imf_yields_range[1]):
-            print 'Transitionmass outside imf yield range'
+            print 'Error - Transitionmass outside imf yield range'
             self.need_to_quit = True
 
 
@@ -859,7 +859,7 @@ class chem_evol(object):
 
         '''
         This function calculates the stellar yields per isotope from the
-        stars recently formed.  Theses yields are distributed in the mdot
+        stars recently formed. These yields are distributed in the mdot
         array to progressively release the ejecta with time (in the upcoming
         timesteps), using stellar lifetimes.
 
@@ -879,14 +879,14 @@ class chem_evol(object):
         mstars, yields_all, func_total_ejecta, yields_extra = \
             self.__inter_mm_plane(i)
         # Get the mass fraction of stars that contribute to the stellar ejecta
-        # relative the total stellar mass within imf_bdys.
+        # relative to the total stellar mass within imf_bdys.
         mfac = self.__get_mfac()
 
         # Get the mass boundaries on which each star yields will be applied.
         # Ex: 12 Mo model yields might be used for all stars from 8 to 12.5 Mo.
         mass_bdys,mstars = self.__get_mass_bdys(mstars)
       
-        # Apply the IMF on the mass bondaries
+        # Apply the IMF on the mass boundaries
         mass_bdys, mstars, yields_all, massfac, mftot = \
             self.__apply_imf_mass_bdys( mass_bdys, mstars, yields_all )
 
@@ -902,7 +902,7 @@ class chem_evol(object):
             #print mass_bdys
             #print 'Scaling factor for gas mass (mfac)', mfac
 
-        # Calculate the mass lock away from the old ejecta of massive and AGB stars
+        # Calculate the mass locked away from the old ejecta of massive and AGB stars
         massfac = self.__mlock_agb_massive(mstars,mfac,mftot,massfac,mass_bdys,i)
 
         # Save the contribution of each mass range interval
@@ -964,7 +964,7 @@ class chem_evol(object):
             if self.iolevel > 0:
                 print 'Taking POPIII yields from yield_tables/popIII_heger10.txt'
                 print 'Currently only PopIII massive stars between 10Msun and', \
-                      '100Msun with their yielda contributions included'
+                      '100Msun with their yield contributions included'
                 print ' lower IMF minimum (imf_bdys) fixed to 10Msun for now'
 
             # Use PopIII stars yields
@@ -1012,7 +1012,7 @@ class chem_evol(object):
     def __get_mfac(self):
 
         '''
-        This function calculates and return the mass fraction of stars
+        This function calculates and returns the mass fraction of stars
         contributing to the stellar ejecta (yield tables) relative to
         the total mass of a stellar population weighted by the IMF having
         lower and upper mass limits set by imf_bdys.
@@ -1022,7 +1022,7 @@ class chem_evol(object):
 
         '''
 
-        # Select the apropriate IMF mass boundary and yield range
+        # Select the appropriate IMF mass boundary and yield range
         if (self.zmetal > self.Z_trans) or (self.hardsetZ > 0.0): 
             bd_gm = self.imf_bdys
             yr_gm = self.imf_yields_range
@@ -1064,11 +1064,11 @@ class chem_evol(object):
         This function returns the array mass_bdys containing the initial stellar
         masses where the code switches from the yields of a certain stellar model
         to another.  The yields of each stellar model available in the input tables
-        table are applied to all the stars within a certain mass boundary.  The
+        are applied to all the stars within a certain mass boundary.  The
         array mass_bdys represents those mass boundaries.
 
-        This funmction also adds the transition mass in mass_bdys.  This must be
-        done in order to force the code to have a fix transition between AGB stars
+        This function also adds the transition mass in mass_bdys.  This must be
+        done in order to force the code to have a fixed transition between AGB stars
         and massive stars.
 
         '''
@@ -1156,7 +1156,7 @@ class chem_evol(object):
 
         '''
         This function applies the IMF to the yields mass boundaries to know how
-        many stars and how much mass are in each bin.  That information will be
+        many stars and how much mass is in each bin.  That information will be
         used to scale the specific yields used in each mass bin.
 
         Arguments
@@ -1177,8 +1177,8 @@ class chem_evol(object):
         # Declaration of local variables
         mftot = 0.0      # Total mass of the yield range limited by the IMF
         massfac = []     # Number of stars in each mass bin (weighted by the IMF)
-        mstars1 = []     # Copy of mstars by limited by the IMF
-        yields_all1 = [] # Copy of yields_all by limited by the IMF
+        mstars1 = []     # Copy of mstars but limited by the IMF
+        yields_all1 = [] # Copy of yields_all but limited by the IMF
         mass_bdys1 = []  # Copy of mass_bdys but limited by the IMF
 
         # For each stellar mass bin ...
@@ -1226,7 +1226,7 @@ class chem_evol(object):
         mstars = mstars1
         yields_all = yields_all1
 
-        # Keep the mass bondaries in memory
+        # Keep the mass boundaries in memory
         self.history.mass_bdys = mass_bdys
         # Return the IMF corrected arrays
         return mass_bdys, mstars, yields_all, massfac, mftot
@@ -1246,7 +1246,7 @@ class chem_evol(object):
 
           mstars : Initial mass of stellar models available in the input yields.
           mfac : Mass fraction of stars that contribute to the stellar ejecta
-                 relative the total stellar mass within imf_bdys.
+                 relative to the total stellar mass within imf_bdys.
           mftot : Total mass of the yield range limited by the IMF
           massfac :  Number of stars in each mass bin (weighted by the IMF)
           mass_bdys : Stellar mass boundaries where yields are applied.
@@ -1296,7 +1296,7 @@ class chem_evol(object):
         '''
         This function calculates the ejecta coming from the stars that are forming
         during the current timestep.  The ejecta is then distributed over time, in
-        the futur upcoming timesteps, according to the stellar lifetimes.
+        the future upcoming timesteps, according to the stellar lifetimes.
 
         Arguments
         =========
@@ -1347,7 +1347,7 @@ class chem_evol(object):
             count_numbers_c += massfac[w]
 
             # Get imf (number) coefficient in mass interval
-            # This is the normalisation constant of the IMF wit Mtot = m_locked
+            # This is the normalisation constant of the IMF with Mtot = m_locked
             p_number = massfac[w] / (self._imf(minm, maxm, 1))
 
             # Keep the contribution of this mass bin in memory
@@ -1357,7 +1357,7 @@ class chem_evol(object):
                     self.imf_mass_ranges_contribution[i][k] += \
                         (np.array(yields) * massfac[w])
 
-            # Distribute the yields in current and futur timesteps
+            # Distribute the yields in current and future timesteps
             self.__distribute_yields(i, count_numbers_c, count_numbers_f, yields, \
             yields_extra, maxm, minm, lifetimemin, lifetimemax, p_number, \
             mstars, w, func_total_ejecta)
@@ -1372,8 +1372,8 @@ class chem_evol(object):
 
         '''
         This function distributes the ejecta of a specific stellar mass bin over
-        the current and the next following timesteps.  In practical terms, this
-        function adds the contribution the specific stellar mass bin to the mdot
+        the current and the next following timesteps. In practical terms, this
+        function adds the contribution of the specific stellar mass bin to the mdot
         arrays.
 
         Arguments
@@ -1386,7 +1386,7 @@ class chem_evol(object):
           yields_extra : Stellar yields from extra source.
           maxm : Maximum stellar mass in the considered bin.
           minm : Minimum stellar mass in the considered bin.
-          lifetimemin : Miminum stellar lifetime in the considered bin.
+          lifetimemin : Minimum stellar lifetime in the considered bin.
           lifetimemax : Maximum stellar lifetime in the considered bin.
           p_number : IMF (number) coefficient in the mass interval.
           mstars : Initial mass of stellar models available in the input yields.
@@ -1403,10 +1403,10 @@ class chem_evol(object):
         minm1 = 0.0
         maxm1 = 0.0
 
-        # For every timesteps, begining with the current timestep ...
+        # For every timestep, beginning with the current timestep ...
         for j in range(i-1, self.nb_timesteps):
 
-            # Lifetimes limits given by the timestep j (will be modified below)
+            # Lifetime limits given by the timestep j (will be modified below)
             lifetimemin1 = tt 
             tt += self.history.timesteps[j]
             lifetimemax1 = tt
@@ -1503,7 +1503,7 @@ class chem_evol(object):
         # Set firstmin to False since first ejecta is considered at this point
         firstmin = False
  
-        # If the lifetime of the considered star last beyong this timestep j...
+        # If the lifetime of the considered star lasts beyond this timestep j...
         # Find minm1 from lifetime max1
         if tt < lifetimemax:
             minm1 = self.__find_lifetimes(round(self.zmetal,6), \
@@ -1526,18 +1526,18 @@ class chem_evol(object):
 
         '''
         This function adds the yields of the stars formed during timestep i
-        in a futur upcoming timestep j.  The stars here are only a fraction
+        in a future upcoming timestep j.  The stars here are only a fraction
         of the whole stellar population that just formed.
 
         Arguments
         =========
 
-          minm1 : Miminum stellar mass having ejecta in this timestep j.
-          maxm1 : Miminum stellar mass having ejecta in this timestep j.
+          minm1 : Minimum stellar mass having ejecta in this timestep j.
+          maxm1 : Minimum stellar mass having ejecta in this timestep j.
           yields : Stellar yields for the considered mass bin.
           yields_extra : Stellar yields from extra source.
           i : Index of the current timestep.
-          j : Index of the futur timestep where add ejecta.
+          j : Index of the future timestep where ejecta is added.
           w : Index of the stellar model providing the yields.
           number_stars : Number of stars having ejecta in timestep j.
           mstars : Initial mass of stellar models available in the input yields.
@@ -1558,7 +1558,7 @@ class chem_evol(object):
         if self.iolevel > 1:
             print 'Scalefactor:', scalefactor
 
-        # For every isotopes ...
+        # For every isotope ...
         for k in range(len(self.ymgal[i])):
 
             # Add the total ejecta
@@ -1592,7 +1592,7 @@ class chem_evol(object):
                 self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
                     yields[k] * scalefactor * number_stars
 
-        # Count the number core-collapse SNe
+        # Count the number of core-collapse SNe
         if mstars[w] > self.transitionmass:
             self.sn2_numbers[j] += number_stars
         if ((minm1 >= 3) and (maxm1 <= 8)) or ((minm1 < 3) and (maxm1 > 8)):
@@ -1611,7 +1611,7 @@ class chem_evol(object):
         else:
             break_bol = False
 
-        # Return wether the parent function needs to break or not
+        # Return whether the parent function needs to break or not
         return break_bol
 
 
@@ -1668,7 +1668,7 @@ class chem_evol(object):
         sn1a_sum = 0
         tt = 0
 
-        # For every upcoming timesteps j, starting with the current one ...
+        # For every upcoming timestep j, starting with the current one ...
         for j in range(i-1, self.nb_timesteps):
 
             # Set the upper and lower time boundary of the timestep j
@@ -1680,7 +1680,7 @@ class chem_evol(object):
             if self.history.sn1a_rate=='vogelsberger':
             	n1a = self.__vogelsberger13(timemin, timemax)
 
-            # No SN Ia if the minimum current stellar lifetime is to long
+            # No SN Ia if the minimum current stellar lifetime is too long
             if spline_min_time > timemax:
                 n1a = 0
 
@@ -1742,7 +1742,7 @@ class chem_evol(object):
 
         '''
         This function returns the number of SNe Ia occuring within a given time
-        interval using the Volgersberger et al. (2013) delay-time distribution
+        interval using the Vogelsberger et al. (2013) delay-time distribution
         function.
    
         Arguments
@@ -1781,8 +1781,8 @@ class chem_evol(object):
             print 'With Vogelsberger SNIa implementation selected mass', \
                   'range not possible.'
             import sys
-            sys.exit('Chose mass range which either fully includes' + \
-                     'range from 3 to 8Msun or full excludes it'+ \
+            sys.exit('Choose mass range which either fully includes' + \
+                     'range from 3 to 8Msun or fully excludes it'+ \
                      'or use other SNIa implementations')
 
         # Return the number of SNe Ia per Mo
@@ -1817,7 +1817,7 @@ class chem_evol(object):
     def __spline1(self, t_s):
 
         '''
-        This function returns the lower mass boundary of the SN Ia progeniors
+        This function returns the lower mass boundary of the SN Ia progenitors
         from a given stellar population age.
    
         Arguments
@@ -1968,8 +1968,8 @@ class chem_evol(object):
 
         '''
         This function returns the rate of SNe Ia, at a given stellar population
-        age, coming from stars having a given initial mass.  It uses exponential
-        delay- time distribution of Wiersma et al. (2009).
+        age, coming from stars having a given initial mass. It uses the exponential
+        delay-time distribution of Wiersma et al. (2009).
    
         Arguments
         =========
@@ -2071,8 +2071,8 @@ class chem_evol(object):
 
         '''
         This function returns the rate of SNe Ia, at a given stellar population
-        age, coming from stars having a given initial mass.  It uses gaussian
-        delay- time distribution similar to Wiersma09.
+        age, coming from stars having a given initial mass.  It uses a gaussian
+        delay-time distribution similar to Wiersma09.
    
         Arguments
         =========
@@ -2176,7 +2176,7 @@ class chem_evol(object):
         grid_lifetimes = list(zm_lifetime_grid[2][idx_z])[::-1]
         grid_masses = list(zm_lifetime_grid[1])[::-1]
 
-        # Information for sline functions 
+        # Information for spline functions 
         spline_degree1 = 2
         smoothing1 = 0
         boundary = [None, None]
@@ -2278,7 +2278,7 @@ class chem_evol(object):
                 self.imfnorm = 1.0 / quad(self.__g2_power_law, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
-	# Costum IMF with the file imf_input.py
+	# Custom IMF with the file imf_input.py
 	if self.imf_type=='input':
 
             # Load the file
@@ -2309,7 +2309,7 @@ class chem_evol(object):
                 self.imfnorm = 1.0 / quad(self.__g2_chabrier, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
-	# Chabrier - Alpha costum - IMF
+	# Chabrier - Alpha custom - IMF
 	elif self.imf_type=='chabrieralpha':
 
             # Choose the right option
@@ -2395,13 +2395,13 @@ class chem_evol(object):
 
 	'''
         This function returns the number of stars having a certain stellar mass
-        with a costum IMF.
+        with a custom IMF.
 
         Arguments
         =========
 
           mass : Stellar mass.
-          ci : File containing the costum IMF.
+          ci : File containing the custom IMF.
 
         '''
 
@@ -2416,13 +2416,13 @@ class chem_evol(object):
 
 	'''
         This function returns the total mass of stars having a certain stellar
-        mass with a costum IMF.
+        mass with a custom IMF.
 
         Arguments
         =========
 
           mass : Stellar mass.
-          ci : File containing the costum IMF.
+          ci : File containing the custom IMF.
 
         '''
 
@@ -2580,11 +2580,11 @@ class chem_evol(object):
     def __interpolate_yields(self, Z, ymgal_t, ytables):
 
         '''
-        This function takes input yields and interpolate them to return the
+        This function takes input yields and interpolates them to return the
         yields at the desired metallicity (if the metallicity is not available
         in the grid).
 
-	It also returns the func_total_ejecta function that calculates the 
+	It also returns the func_total_ejecta function which calculates the 
         total mass ejected as a function of the stellar initial mass.
 
         Arguments
@@ -2602,7 +2602,7 @@ class chem_evol(object):
         if self.iolevel >= 2:
              print 'Start interpolating yields'
 
-        # Reduce the number of decimal in the metallicity variable
+        # Reduce the number of decimal places in the metallicity variable
         Z = round(Z, 6)
 
         # Get all available metallicities
@@ -2611,7 +2611,7 @@ class chem_evol(object):
 	# Simplest case: No interpolation of any kind for the yields 
 	if (self.yield_interp == 'None'):
 	    
-	    #to choose the grid metallicity closest to Z
+	    # to choose the grid metallicity closest to Z
             z1, z2 = self.__get_Z_bdys(Z, Z_grid)
 	    if abs(Z-z1) > abs(Z-z2):
 		Z_gridpoint=z2
@@ -2636,7 +2636,7 @@ class chem_evol(object):
             # Get the lower and upper Z boundaries for the interpolation
             z1, z2 = self.__get_Z_bdys(Z, Z_grid)
 
-            # Get all initial stellar masses available in each Z boundaries
+            # Get all initial stellar masses available in each Z boundary
             m1 = ytables.get(Z=z1, quantity='masses')
             m2 = ytables.get(Z=z2, quantity='masses')
             # Get the stellar masses and the interpolated yields at Z
@@ -2645,13 +2645,13 @@ class chem_evol(object):
         # If the "interpolation" is taken from Wiersma et al. (2009) ....   
         elif (self.yield_interp == 'wiersma') or (self.netyields_on==True):
 
-            # Get the closest available metallicity (favoring lower boundary)
+            # Get the closest available metallicity (favouring lower boundary)
             Z_gridpoint = self.__get_Z_wiersma(Z, Z_grid)
 	    print 'Take yields from Z closest to: ',Z,' found: ',Z_gridpoint
             # Get all initial masses at the selected closest metallicity
             m_stars = ytables.get(Z=Z_gridpoint, quantity='masses')
 
-            # Get the yields corrected the different initial abundances
+            # Get the yields corrected for the different initial abundances
             yields = self.__correct_iniabu(ymgal_t, ytables, Z_gridpoint, m_stars)
 
         # Output information
@@ -2725,7 +2725,7 @@ class chem_evol(object):
 
         '''
 
-        # For every available metallicities ...
+        # For every available metallicity ...
         for tz in Z_grid:
 
             # If Z is above the grid range, use max available Z
@@ -2777,7 +2777,7 @@ class chem_evol(object):
 
         '''
         This function returns the stellar masses and the interpolated yields
-        at a given metallitity.  It uses a linear interpolation.
+        at a given metallicity.  It uses a linear interpolation.
         
 
         Arguments
@@ -2880,7 +2880,7 @@ class chem_evol(object):
 
         '''
         This function returns the closest available metallicity grid point 
-        for a given Z.  It always favors the lower boundary.
+        for a given Z.  It always favours the lower boundary.
 
         Arguments
         =========
@@ -2891,7 +2891,7 @@ class chem_evol(object):
         '''
 	import decimal
 
-        # For every available metallicities ...
+        # For every available metallicity ...
         for tz in Z_grid:
 
             # If Z is above the grid range, use max available Z
@@ -2995,7 +2995,7 @@ class chem_evol(object):
                     yi = 0
 		yi_all.append(yi)
 	 
-	    #do the normalization
+	    # do the normalization
 	    norm = (m-mfinal)/sum(yi_all)
 	    yi_all= np.array(yi_all) * norm 	
 	   	
@@ -3006,7 +3006,7 @@ class chem_evol(object):
 
 
     ##############################################
-    #                Correct Iniabu               #
+    #                Mass Ejected Fit            #
     ##############################################
     def __fit_mej_mini(self, m_stars, yields):
 
@@ -3034,7 +3034,7 @@ class chem_evol(object):
         if self.iolevel>0:
             plt.figure()
 
-        # Calculate the linear fit for all stellar mass bin
+        # Calculate the linear fit for all stellar mass bins
         for h in range(len(x_all)-1):
             x=np.array([x_all[h],x_all[h+1]])
             y=np.array([y_all[h],y_all[h+1]])
@@ -3058,7 +3058,7 @@ class chem_evol(object):
     def __interpolate_yields_pop3(self, zmetal,ymgal_t, ytables):
  
         '''
-        This function returns PopIII star yields the func_total_ejecta that
+        This function returns PopIII star yields and the func_total_ejecta that
         calculates the total mass ejected as a function of the stellar initial
         mass.
 
@@ -3067,7 +3067,7 @@ class chem_evol(object):
 
           Z : Current metallicity of the gas reservoir (Z = 0).
           ymgal_t : mass of the gas reservoir of last timestep/current gas reservoir (for 'wiersma' setting). 
-          ytables : Ojbect containing the yield tables.
+          ytables : Object containing the yield tables.
 
         '''	
 
@@ -3093,7 +3093,7 @@ class chem_evol(object):
 
         
         if self.netyields_on==True:
-            # Get the yields corrected the different initial abundances
+            # Get the yields corrected for the different initial abundances
             yields = self.__correct_iniabu(ymgal_t, self.ytables_pop3, 0, m_stars)
 
 
@@ -3261,7 +3261,7 @@ class chem_evol(object):
         all_masses1 = np.linspace(fit_massmin,fit_massmax,2901) 
 
 
-        # if fit over metallicity not necessary of possible, get seperate fit results
+        # if fit over metallicity not necessary or possible, get separate fit results
 	if len(metallicity)==1:
                 if iolevel>0:
                         print 'Only 1 metallicity provided, no fit over lifetime' 
@@ -3288,12 +3288,12 @@ class chem_evol(object):
 
  		
         # Initialisation of the interpolation parameters for M vs Z ?
-        #for 2 Z do linear interpolation
+        # for 2 Z do linear interpolation
 	if len(metallicity)==2:
 		spline_degree1 = 1
                 smoothing1 = 3
                 if self.iolevel>0:
-                        print 'Only 2 metallicity provided, do linear fit over lifetime'	
+                        print 'Only 2 metallicities provided, do linear fit over lifetime'	
 	else:	
         	spline_degree1 = 1#4           # 1, 2
         	smoothing1 = 1#3               # 0, 1, 2, 3
@@ -3420,7 +3420,7 @@ class chem_evol(object):
             mrangemin=mass[0]#round(np.log10(mass[0]),precision)
             mrangemax=mass[1]#round(np.log10(mass[1]),precision)
             lifetime=np.log10(lifetime)
-            #for retriving masses, in certain mass range given by 
+            #for retrieving masses, in certain mass range given by 
             #mrangemin,mrangemax
             #for given metallicity Z and lifetime lifetime
             idx_z = (np.abs(zm_lifetime_grid[0]-metallicity)).argmin()
@@ -3517,7 +3517,7 @@ class chem_evol(object):
 
         '''
         Returns the metallicity of the gas reservoir at step i.
-        Metals are defined aseverything heavier than lithium.
+        Metals are defined as everything heavier than lithium.
 
         Argument
         ========
@@ -3570,7 +3570,7 @@ class chem_evol(object):
     def _iso_abu_to_elem(self, yields_iso):
 
         '''
-        This function converts isotopes yields in elements and returns the result. 
+        This function converts isotope yields in elements and returns the result. 
 
         Argument
         ========
