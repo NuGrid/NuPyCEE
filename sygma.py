@@ -118,7 +118,7 @@ class sygma( chem_evol ):
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
                  nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0, \
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[32,60], \
-                 netyields_on=False,wiersmamod=False):
+                 netyields_on=False,wiersmamod=False,yield_interp='lin'):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
@@ -134,7 +134,8 @@ class sygma( chem_evol ):
                  starbursts=starbursts, beta_pow=beta_pow,gauss_dtd=gauss_dtd,exp_dtd=exp_dtd,\
                  nb_1a_per_m=nb_1a_per_m,direct_norm_1a=direct_norm_1a, Z_trans=Z_trans, f_arfo=f_arfo, \
                  imf_yields_range=imf_yields_range,exclude_masses=exclude_masses\
-                 ,netyields_on=netyields_on,wiersmamod=wiersmamod)
+                 ,netyields_on=netyields_on,wiersmamod=wiersmamod,\
+                 yield_interp=yield_interp)
 
         if self.need_to_quit:
             return
