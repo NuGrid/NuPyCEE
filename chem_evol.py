@@ -2182,10 +2182,6 @@ class chem_evol(object):
         boundary = [None, None]
 
         # Define the spline
-	#print grid_lifetimes[::-1]
-	#plt.plot(grid_masses, grid_lifetimes, label=str(self.iniZ))
-	#plt.legend()
-	#np.savetxt('lifetimes.txt', grid_lifetimes)
         self.spline_lifetime = UnivariateSpline(grid_lifetimes, \
             np.log10(grid_masses), bbox=boundary, k=spline_degree1, s=smoothing1)
         spline_lifetime = self.spline_lifetime
@@ -3264,10 +3260,6 @@ class chem_evol(object):
 	    smoothing1 = len(mass[m]) + spline_degree1
             s = UnivariateSpline(x,z,bbox=boundary,k=spline_degree1,s=7)
             spline_metallicity.append(s)
-	    #plt.plot(x, z, marker='x', linestyle='None')
-	    #plt.plot(np.log10(all_masses1), s(np.log10(all_masses1)), label=str(metallicity[m]))
-	    #plt.legend()
-	    #np.savetxt('masses.txt', s(np.log10(all_masses1)))
 
         # if fit over metallicity not necessary or possible, get separate fit results
 	if len(metallicity)==1:
