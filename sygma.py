@@ -116,9 +116,13 @@ class sygma( chem_evol ):
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
-                 nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0, \
+                 nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0.0, \
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[32,60], \
-                 netyields_on=False,wiersmamod=False,yield_interp='lin'):
+                 netyields_on=False,wiersmamod=False,yield_interp='lin', \
+                 dt_in=np.array([]),\
+                 ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
+                 isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
+                 zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
@@ -131,11 +135,18 @@ class sygma( chem_evol ):
                  extra_source_table=extra_source_table, pop3_table=pop3_table, \
                  imf_bdys_pop3=imf_bdys_pop3, \
                  imf_yields_range_pop3=imf_yields_range_pop3, \
-                 starbursts=starbursts, beta_pow=beta_pow,gauss_dtd=gauss_dtd,exp_dtd=exp_dtd,\
-                 nb_1a_per_m=nb_1a_per_m,direct_norm_1a=direct_norm_1a, Z_trans=Z_trans, f_arfo=f_arfo, \
-                 imf_yields_range=imf_yields_range,exclude_masses=exclude_masses\
-                 ,netyields_on=netyields_on,wiersmamod=wiersmamod,\
-                 yield_interp=yield_interp)
+                 starbursts=starbursts, beta_pow=beta_pow, \
+                 gauss_dtd=gauss_dtd,exp_dtd=exp_dtd,\
+                 nb_1a_per_m=nb_1a_per_m,direct_norm_1a=direct_norm_1a, \
+                 Z_trans=Z_trans, f_arfo=f_arfo, \
+                 imf_yields_range=imf_yields_range,exclude_masses=exclude_masses,\
+                 netyields_on=netyields_on,wiersmamod=wiersmamod,\
+                 yield_interp=yield_interp, \
+                 ytables_in=ytables_in, \
+                 zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
+                 isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
+                 zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
+                 ytables_1a_in=ytables_1a_in,dt_in=dt_in)
 
         if self.need_to_quit:
             return

@@ -68,6 +68,7 @@ import math
 import random
 
 # Import the class inherited by SYGMA
+import sygma
 from chem_evol import *
 
 
@@ -268,10 +269,23 @@ class omega( chem_evol ):
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0, gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
-                 nb_1a_per_m=1.0e-3, f_arfo=1, \
+                 nb_1a_per_m=1.0e-3, f_arfo=1, t_merge=-1.0,\
                  imf_yields_range=[1,30],exclude_masses=[32,60], \
 		 netyields_on=False,wiersmamod=False,skip_zero=False,\
-                 redshift_f=0.0,print_off=False,long_range_ref=False):
+                 redshift_f=0.0,print_off=False,long_range_ref=False,\
+                 f_s_enhance=1.0,m_gas_f=1.0e10,cl_SF_law=False,\
+                 external_control=False, calc_SSP_ej=False,\
+                 input_yields=False, popIII_on=True,\
+                 sfh_array=np.array([]),ism_ini=np.array([]),\
+                 mdot_ini=np.array([]), mdot_ini_t=np.array([]),\
+                 ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
+                 isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
+                 zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
+                 dt_in=np.array([]), dt_split_info=np.array([]),\
+                 ej_massive=np.array([]), ej_agb=np.array([]),\
+                 ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
+                 ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
+                 dt_ssp=np.array([])):
 
         # Announce the beginning of the simulation 
         print 'OMEGA run in progress..'
@@ -292,8 +306,19 @@ class omega( chem_evol ):
                  starbursts=starbursts, beta_pow=beta_pow, \
                  gauss_dtd = gauss_dtd, exp_dtd = exp_dtd, \
                  nb_1a_per_m=nb_1a_per_m, Z_trans=Z_trans, f_arfo=f_arfo, \
-                 imf_yields_range=imf_yields_range,exclude_masses=exclude_masses,\
-                 netyields_on=netyields_on,wiersmamod=wiersmamod)
+                 imf_yields_range=imf_yields_range,exclude_masses=exclude_masses, \
+                 netyields_on=netyields_on,wiersmamod=wiersmamod, \
+                 input_yields=input_yields,\
+                 t_merge=t_merge,popIII_on=popIII_on,\
+                 ism_ini=ism_ini,ytables_in=ytables_in,\
+                 zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
+                 isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
+                 zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
+                 ytables_1a_in=ytables_1a_in,dt_in=dt_in,\
+                 dt_split_info=dt_split_info,ej_massive=ej_massive,\
+                 ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
+                 ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\
+                 ej_sn1a_coef=ej_sn1a_coef,dt_ssp=dt_ssp)
 
         if self.need_to_quit:
             return
@@ -322,6 +347,12 @@ class omega( chem_evol ):
         self.redshift_f = redshift_f
         self.print_off = print_off
         self.long_range_ref = long_range_ref
+        self.sfh_array = sfh_array
+        self.mdot_ini = mdot_ini
+        self.mdot_ini_t = mdot_ini_t
+        self.m_gas_f = m_gas_f
+        self.cl_SF_law = cl_SF_law
+        self.external_control = external_control
 
         # Set cosmological parameters - Dunkley et al. (2009)
         self.omega_0   = 0.257   # Current mass density parameter
@@ -360,8 +391,44 @@ class omega( chem_evol ):
               else:
                 self.__rafine_steps()
 
+            # Re-Create entries for the mass-loss rate of massive stars
+            self.massive_ej_rate = []
+            for k in range(self.nb_timesteps + 1):
+                self.massive_ej_rate.append(0.0)
+
         # Declare arrays used to follow the evolution of the galaxy
         self.__declare_evol_arrays()
+
+        # If the mass fraction ejected by SSPs needs to be calculated ...
+        # Need to be before self.__initialize_gal_prop()!!
+        self.mass_frac_SSP = -1.0
+        if calc_SSP_ej:
+
+            # Run SYGMA with five different metallicities
+            Z = [0.02, 0.01, 0.006, 0.001, 0.0001]
+            s_inst = []
+            self.mass_frac_SSP = 0.0
+            for i_Z_SSP in range(0,len(Z)):
+                s_inst = sygma.sygma(imf_type=imf_type, alphaimf=alphaimf,\
+                 imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=Z[i_Z_SSP], dt=dt, \
+                 special_timesteps=special_timesteps, tend=tend, mgal=1.0, \
+                 transitionmass=transitionmass, iolevel=iolevel, \
+                 ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
+                 sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
+                 iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
+                 extra_source_table=extra_source_table, pop3_table=pop3_table, \
+                 imf_bdys_pop3=imf_bdys_pop3, \
+                 imf_yields_range_pop3=imf_yields_range_pop3, \
+                 starbursts=starbursts, beta_pow=beta_pow, \
+                 gauss_dtd = gauss_dtd, exp_dtd = exp_dtd, \
+                 nb_1a_per_m=nb_1a_per_m, Z_trans=Z_trans, f_arfo=f_arfo, \
+                 imf_yields_range=imf_yields_range,exclude_masses=exclude_masses,\
+                 netyields_on=netyields_on,wiersmamod=wiersmamod)
+                self.mass_frac_SSP += sum(s_inst.ymgal[-1])
+
+            # Calculate the average mass fraction returned
+            self.mass_frac_SSP = self.mass_frac_SSP / len(Z)
+            print 'Average SSP mass fraction returned = ',self.mass_frac_SSP
 
         # Set the general properties of the selected galaxy
         self.__initialize_gal_prop()
@@ -376,28 +443,21 @@ class omega( chem_evol ):
                 prim_comp_table, self.history.isotopes)
 
         # Assume the baryonic ratio for the initial gas reservoir, if needed
-        if self.bar_ratio:
+        if len(self.ism_ini) == 0:
+          if self.bar_ratio and not self.cl_SF_law:
             scale_m_tot = self.m_DM_0 * self.omega_b_0 / (self.omega_0*self.mgal)
             for k_cm in range(len(self.ymgal[0])):
                 self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
 
-        # Run the simulation
-        self.__run_simulation()
+        # Add the stellar ejecta coming from external galaxies that just merged
+        if len(self.mdot_ini) > 0:
+            self.__add_ext_mdot()
 
-        # Do the final update of the history class
-        self._update_history_final()
+        # If the timestep are not control by an external program ...
+        if not self.external_control:
 
-        # Add the evolution arrays to the history class
-        self.history.m_DM_t = self.m_DM_t
-        self.history.m_tot_ISM_t = self.m_tot_ISM_t
-        self.history.m_outflow_t = self.m_outflow_t
-        self.history.m_inflow_t = self.m_inflow_t
-        self.history.eta_outflow_t = self.eta_outflow_t
-        self.history.t_SF_t = self.t_SF_t
-        self.history.redshift_t = self.redshift_t
-
-        # Announce the end of the simulation
-        print '   OMEGA run completed -',self._gettime()
+            # Run the simulation
+            self.__run_simulation()
 
 
     ##############################################
@@ -490,6 +550,11 @@ class omega( chem_evol ):
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
+        # Initialisation of the composition of the gas reservoir
+        if len(self.ism_ini) > 0:
+            for i_ini in range(0,self.len_ymgal):
+                self.ymgal[0][i_ini] = self.ism_ini[i_ini]
+
 
     ##############################################
     #              Rafine Steps LR               #
@@ -549,6 +614,11 @@ class omega( chem_evol ):
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
+        # Initialisation of the composition of the gas reservoir
+        if len(self.ism_ini) > 0:
+            for i_ini in range(0,self.len_ymgal):
+                self.ymgal[0][i_ini] = self.ism_ini[i_ini]
+
 
     ##############################################
     #            Declare Evol Arrays             #
@@ -604,9 +674,17 @@ class omega( chem_evol ):
         # No specific galaxy - Use input parameters
         if self.galaxy == 'none':
             
+            #If an array is used for the SFH ..
+            if len(self.sfh_array) > 0:
+                self.__copy_sfr_array()
+
             # If an input file is used for the SFH ...
             if not self.sfh_file == 'none':
                 self.__copy_sfr_input(self.sfh_file)
+
+            # If a star formation law is used in a closed box ...
+            elif self.cl_SF_law and not self.open_box:
+                self.__calculate_sfe_cl()
 
             # If a random SFH is chosen ...
             elif self.rand_sfh > 0.0:
@@ -667,6 +745,184 @@ class omega( chem_evol ):
 
         # Keep the SFH in memory
         self.history.sfr_abs = self.sfr_input
+
+
+    ##############################################
+    ##             Copy SFR Array               ##
+    ##############################################
+    def __copy_sfr_array(self):
+
+        '''
+        See copy_sfr_input() for more info.
+
+        '''
+   
+        # Variable to keep track of the SYGMA's time step
+        i_dt_csa = 0
+        t_csa = self.history.timesteps[0]
+        nb_dt_csa = len(self.history.timesteps) + 1
+
+        # Variable to keep track of the total stellar mass from the input SFH
+        m_stel_sfr_in = 0.0
+
+        # For every timestep given in the array (starting at the second step)
+        for i_csa in range(1,len(self.sfh_array)):
+
+            # While we stay in the same time bin ...
+            while t_csa <= self.sfh_array[i_csa][0]:
+
+                # Keep the same SFR INSIDE this time bin (it's why i_csa-1)
+                self.sfr_input[i_dt_csa] = self.sfh_array[i_csa-1][1]
+
+                # Go to the next time step
+                i_dt_csa += 1
+
+                # Exit the loop if the array is full
+                if i_dt_csa >= nb_dt_csa:
+                    break
+
+                # Calculate the new time
+                t_csa += self.history.timesteps[i_dt_csa]
+
+            # Exit the loop if the array is full
+            if i_dt_csa >= nb_dt_csa:
+                break
+
+            # Calculate the time spent in the previous array time bin
+            dt_prev_array = self.history.timesteps[i_dt_csa] - \
+                 t_csa + self.sfh_array[i_csa][0]
+ 
+            # Calculate the mass formed during the OMEGA's timestep
+            m_stel_omega = dt_prev_array * self.sfh_array[i_csa-1][1] + \
+                (t_csa - self.sfh_array[i_csa][0])*self.sfh_array[i_csa][1]
+
+            # Assign the average SFR
+            self.sfr_input[i_dt_csa] = m_stel_omega / \
+                 self.history.timesteps[i_dt_csa]
+
+            # Go to the next time step
+            i_dt_csa += 1
+
+            # Exit the loop if the array is full
+            if i_dt_csa >= nb_dt_csa:
+                break
+
+            # Calculate the new time
+            t_csa += self.history.timesteps[i_dt_csa]
+
+        # If the array has been read completely, but the sfr_input array is
+        # not full, fil the rest of the array with the last read value
+        while i_dt_csa < nb_dt_csa:
+            self.sfr_input[i_dt_csa] = self.sfr_input[i_dt_csa-1]
+            i_dt_csa += 1
+
+
+    ##############################################
+    ##             Calculate SFE Cl.            ##
+    ##############################################
+    def __calculate_sfe_cl(self):
+
+        '''
+        Calculate the star formation efficiency and the initial mass of gas
+        for a closed box model, given the final gas mass and the current
+        stellar mass.
+
+        '''
+   
+        # Get the average return gas fraction of SSPs
+        if self.mass_frac_SSP == -1.0:
+            f_ej = 0.35
+        else:
+            f_ej = self.mass_frac_SSP
+
+        # Calculate the initial mass of gas
+        m_gas_ini = self.m_gas_f + self.stellar_mass_0
+
+        # Scale the initial mass of all isotopes
+        scale_m_tot = m_gas_ini / self.mgal
+        for k_cm in range(len(self.ymgal[0])):
+            self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
+
+        # Initialization for finding the right SFE
+        sfe_gcs = 1.8e-10
+        sfe_max = 1.0
+        sfe_min = 0.0
+        m_gas_f_try = self.__get_m_gas_f(m_gas_ini, sfe_gcs, f_ej)
+
+        # While the SFE is not the right one ...
+        while abs(m_gas_f_try - self.m_gas_f) > 0.01:
+
+            # If the SFE needs to be increased ...
+            if (m_gas_f_try / self.m_gas_f) > 1.0:
+
+              # Set the lower limit of the SFE interval
+              sfe_min = sfe_gcs
+
+              # If an upper limit is already defined ...
+              if sfe_max < 1.0:
+
+                # Set the SFE to the middle point of the interval
+                sfe_gcs = (sfe_max + sfe_gcs) * 0.5
+
+              # If an upper limit is not already defined ...
+              else:
+
+                # Try a factor of 2
+                sfe_gcs = sfe_gcs * 2.0
+
+            # If the SFE needs to be decreased ...
+            else:
+
+              # Set the upper limit of the SFE interval
+              sfe_max = sfe_gcs
+
+              # If a lower limit is already defined ...
+              if sfe_min > 0.0:
+
+                # Set the SFE to the middle point of the interval
+                sfe_gcs = (sfe_min + sfe_gcs) * 0.5
+
+              # If a lower limit is not already defined ...
+              else:
+
+                # Try a factor of 2
+                sfe_gcs = sfe_gcs * 0.5
+
+            # Get the approximated final mass of gas
+            m_gas_f_try = self.__get_m_gas_f(m_gas_ini, sfe_gcs, f_ej)
+
+        # Keep the SFE in memory
+        self.sfe_gcs = sfe_gcs
+
+
+    ##############################################
+    ##               Get M_gas_f                ##
+    ##############################################
+    def __get_m_gas_f(self, m_gas_ini, sfe_gcs, f_ej):
+
+        '''
+        Return the final mass of gas, given the initial mass of the gas
+        reservoir and the star formation efficiency.  The function uses
+        a simple star formation law in the form of SFR(t) = sfe * M_gas(t)
+
+        '''
+
+        # Initialisation of the integration
+        m_gas_loop = m_gas_ini
+        t_gmgf = 0.0
+
+        # For every timestep ...
+        for i_gmgf in range(0,self.nb_timesteps):
+
+            # Calculate the new mass of gass
+            t_gmgf += self.history.timesteps[i_gmgf]
+
+            #self.sfr_input[i_gmgf] = sfe_gcs * m_gas_loop
+            m_gas_loop -= sfe_gcs * (1-f_ej) * m_gas_loop * \
+                self.history.timesteps[i_gmgf]
+
+        # Return the final mass of gas
+        return m_gas_loop
 
 
     ##############################################
@@ -1121,7 +1377,7 @@ class omega( chem_evol ):
                 self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
 
 
-    ####################a##########################
+    ##############################################
     #              Calculate Outflow             #
     ##############################################
     def __calculate_outflow_t(self):
@@ -1185,6 +1441,92 @@ class omega( chem_evol ):
 
 
     ##############################################
+    #                Add Ext. M_dot              #
+    ##############################################
+    def __add_ext_mdot(self):
+
+        '''
+        This function adds the stellar ejecta of external galaxies that
+        just merged in the mdot array of the current galaxy.  This function
+        assumes that the times and the number of timesteps of the merging
+        galaxies are different from the current galaxy.
+
+        Notes
+        =====
+
+            i_ext : Step index in the "external" merging mdot array
+            i_cur : Step index in the "current" galaxy mdot array
+            t_cur_prev : Lower time limit in the current i_cur bin
+            t_cur : Upper time limit in the current i_cur bin
+
+            M_dot_ini has an extra slot in the isotopes for the time,
+            which is t = 0.0 for i_ext = 0.
+         
+        '''
+
+        # For every merging galaxy (every branch of a merger tree)
+        for i_merg in range(0,len(self.mdot_ini)):
+
+            # Initialisation of the local variables
+            i_ext = 0
+            i_cur = 0
+            t_cur_prev = 0.0
+            t_cur = self.history.timesteps[0]
+            t_ext_prev = 0.0
+            t_ext = self.mdot_ini_t[i_merg][i_ext+1]
+
+            # While the external ejecta has not been fully transfered...
+            len_mdot_ini_i_merg = len(self.mdot_ini[i_merg])
+            while i_ext < len_mdot_ini_i_merg and i_cur < self.nb_timesteps:
+
+                # While we need to change the external time bin ...
+                while t_ext <= t_cur:
+
+                    # Calculate the overlap time between ext. and cur. bins
+                    dt_trans = t_ext - max([t_ext_prev, t_cur_prev])
+
+                    # Calculate the mass fraction that needs to be transfered
+                    f_dt = dt_trans / (t_ext - t_ext_prev)
+
+                    # Transfer all isotopes in the current mdot array
+                    for i_iso in range(0,self.nb_isotopes):
+                        self.mdot[i_cur][i_iso] += \
+                            self.mdot_ini[i_merg][i_ext][i_iso] * f_dt
+
+                    # Move to the next external bin
+                    i_ext += 1
+                    if i_ext == len_mdot_ini_i_merg:
+                        break
+                    t_ext_prev = t_ext
+                    t_ext = self.mdot_ini_t[i_merg][i_ext+1]
+
+                # Quit the loop if all external bins have been considered
+                if i_ext == len_mdot_ini_i_merg:
+                    break
+
+                # While we need to change the current time bin ...
+                while t_cur < t_ext:
+
+                    # Calculate the overlap time between ext. and cur. bins
+                    dt_trans = t_cur - max([t_ext_prev, t_cur_prev]) 
+
+                    # Calculate the mass fraction that needs to be transfered
+                    f_dt = dt_trans / (t_ext - t_ext_prev)
+
+                    # Transfer all isotopes in the current mdot array
+                    for i_iso in range(0,self.nb_isotopes):
+                        self.mdot[i_cur][i_iso] += \
+                            self.mdot_ini[i_merg][i_ext][i_iso] * f_dt
+
+                    # Move to the next current bin
+                    i_cur += 1
+                    if i_cur == self.nb_timesteps:
+                        break
+                    t_cur_prev = t_cur
+                    t_cur += self.history.timesteps[i_cur]
+
+
+    ##############################################
     #                Run Simulation              #
     ##############################################
     def __run_simulation(self):
@@ -1198,16 +1540,72 @@ class omega( chem_evol ):
         # For every timestep i considered in the simulation ...
         for i in range(1, self.nb_timesteps+1):
 
+            # Run a timestep using the input SFR
+            self.run_step(i, self.sfr_input[i-1])
+            
+        # Calculate the last SFR at the end point of the simulation
+        if self.cl_SF_law and not self.open_box:
+            self.history.sfr_abs[-1] = self.sfe_gcs * sum(self.ymgal[i])
+
+
+    ##############################################
+    #                   Run Step                 #
+    ##############################################
+    def run_step(self, i, sfr_rs, m_added = np.array([]), m_lost = 0.0):
+
+        '''
+        This function calculates the evolution of one single step in the
+        chemical evolution.
+
+        Argument
+        ========
+
+          i : Index of the timestep.
+          sfr_rs : Input star formation rate [Mo/yr] for the step i.
+          m_added : Mass (and composition) added for the step i.
+          m_lost : Mass lost for the step i.
+         
+        '''
+
+        # Make sure that the the number of timestep is not exceeded
+        if not i == (self.nb_timesteps+1):
+
+            #test
+            if i == 1:
+                self.sfr_test = sfr_rs
+
             # Calculate the current mass fraction of gas converted into stars
-            self.__cal_m_frac_stars(i)
-                
-            # Run the timestep i
+            self.__cal_m_frac_stars(i, sfr_rs)
+
+            # Run the timestep i (!need to be right after __cal_m_frac_stars!)
             self._evol_stars(i)
+
+            # Add the incoming gas (if any)
+            len_m_added = len(m_added)
+            for k_op in range(0, len_m_added):
+                self.ymgal[i][k_op] += m_added[k_op]
+
+            # If gas needs to be removed ...
+            if m_lost > 0.0:
+
+                # Calculate the gas fraction lost
+                f_lost = m_lost / sum(self.ymgal[i])
+                if f_lost > 1.0:
+                    f_lost = 1.0
+                    print '!!Warning -- Remove more mass than available!!'
+                
+                # Remove the mass for each isotope
+                f_lost_2 = (1.0 - f_lost)
+                for k_op in range(0, self.nb_isotopes):
+                    self.ymgal[i][k_op] = f_lost_2 * self.ymgal[i][k_op]
+                    self.ymgal_agb[i][k_op] = f_lost_2 * self.ymgal_agb[i][k_op]
+                    self.ymgal_1a[i][k_op] = f_lost_2 * self.ymgal_1a[i][k_op]
+                    self.ymgal_massive[i][k_op] = f_lost_2*self.ymgal_massive[i][k_op]
 
             # If the open box scenario is used ...
             if self.open_box:
 
-                # Calculate the total mass of the gas reservoir at timestep i
+                # Calculate the total mass of the gas reservoir at timstep i
                 # after the star formation and the stellar ejecta
                 m_tot_current = 0.0
                 for k_op in range(0, self.nb_isotopes):
@@ -1221,15 +1619,14 @@ class omega( chem_evol ):
                     ym_inflow = self.prim_comp.get(quantity='Yields') * \
                                 m_inflow_current
                     for k_op in range(0, self.nb_isotopes):
-		        self.ymgal[i][k_op] += ym_inflow[k_op]
+                        self.ymgal[i][k_op] += ym_inflow[k_op]
                 
-                # Calculate the fraction of gas removed by the outflow
+                #Calculate the fraction of gas removed by the outflow
                 if not (m_tot_current + m_inflow_current) == 0.0:
                     frac_rem = self.m_outflow_t[i-1] / \
                         (m_tot_current + m_inflow_current)
                 else:
                     frac_rem = 0.0
-
 
                 # Limit the outflow mass to the amount of available gas
                 if frac_rem > 1.0:
@@ -1241,14 +1638,14 @@ class omega( chem_evol ):
                           'It has been reduced to the amount of available gas.'
 
                 # Remove mass from the ISM because of the outflow
-		for k_op in range(0, self.nb_isotopes):
-		    self.ymgal[i][k_op] = (1.0 - frac_rem) * \
+                for k_op in range(0, self.nb_isotopes):
+                    self.ymgal[i][k_op] = (1.0 - frac_rem) * \
                         self.ymgal[i][k_op]
-		    self.ymgal_agb[i][k_op] = (1.0 - frac_rem) * \
+                    self.ymgal_agb[i][k_op] = (1.0 - frac_rem) * \
                         self.ymgal_agb[i][k_op]
-		    self.ymgal_1a[i][k_op] = (1.0 - frac_rem) * \
+                    self.ymgal_1a[i][k_op] = (1.0 - frac_rem) * \
                         self.ymgal_1a[i][k_op]
-		    self.ymgal_massive[i][k_op] = (1.0 - frac_rem) * \
+                    self.ymgal_massive[i][k_op] = (1.0 - frac_rem) * \
                         self.ymgal_massive[i][k_op]
 
             # Get the new metallicity of the gas
@@ -1257,11 +1654,37 @@ class omega( chem_evol ):
             # Update the history class
             self._update_history(i)
 
+            # If this is the last step ...
+            if i == self.nb_timesteps:
+
+                # Do the final update of the history class
+                self._update_history_final()
+
+                # Add the evolution arrays to the history class
+                self.history.m_DM_t = self.m_DM_t
+                self.history.m_tot_ISM_t = self.m_tot_ISM_t
+                self.history.m_outflow_t = self.m_outflow_t
+                self.history.m_inflow_t = self.m_inflow_t
+                self.history.eta_outflow_t = self.eta_outflow_t
+                self.history.t_SF_t = self.t_SF_t
+                self.history.redshift_t = self.redshift_t
+
+                # If external control ...
+                if self.external_control:
+                    self.history.sfr_abs[i] = self.history.sfr_abs[i-1]
+
+                # Announce the end of the simulation
+                print '   OMEGA run completed -',self._gettime()
+
+        # Error message
+        else:
+            print 'The simulation is already over.'
+
 
     ##############################################
     #              Cal M Frac Stars              #
     ##############################################
-    def __cal_m_frac_stars(self, i):
+    def __cal_m_frac_stars(self, i, sfr_rs):
 
         '''
         This function calculates the mass fraction of the gas reservoir that
@@ -1270,12 +1693,21 @@ class omega( chem_evol ):
         Argument
         ========
 
-          i : Index of the timestep. 
+          i : Index of the timestep.
+          sfr_rs : Star formation rate [Mo/yr] for the timestep i
 
         '''
 
-        # Calculate the total mass of stars formed during this timestep
-        self.sfrin = self.sfr_input[i-1] * self.history.timesteps[i-1]
+        # If the SFR is calculated from a star formation law (closed box)
+        if self.cl_SF_law and not self.open_box:
+            self.history.sfr_abs[i-1] = self.sfe_gcs * sum(self.ymgal[i-1])
+            self.sfrin = self.history.sfr_abs[i-1] * self.history.timesteps[i-1]
+
+        else:
+
+            # Calculate the total mass of stars formed during this timestep
+            self.sfrin = sfr_rs * self.history.timesteps[i-1]
+            self.history.sfr_abs[i-1] = sfr_rs
 
         # Calculate the mass fraction of gas converted into stars
         mgal_tot = 0.0
@@ -1285,7 +1717,7 @@ class omega( chem_evol ):
 
         # Modify the history of SFR if there is not enough gas
         if self.sfrin > 1.0:
-            self.history.sfr_abs[i-1] = mgal_tot / self.history.timesteps[i-1]
+           self.history.sfr_abs[i-1] = mgal_tot / self.history.timesteps[i-1]
 
 
     ##############################################
@@ -1358,7 +1790,7 @@ class omega( chem_evol ):
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
     
         '''
-	mass evolution (in Msun) of an element or isotope vs time.
+	 mass evolution (in Msun) of an element or isotope vs time.
 	
 
         Parameters
@@ -1652,7 +2084,7 @@ class omega( chem_evol ):
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 	self.save_data(header=[xaxis,yaxis],data=[x,y])
 
-    def plot_spectro(self,fig=3,xaxis='age',yaxis='[Fe/H]',source='all',label='',shape='-',marker='o',color='k',markevery=100,show_data=False,show_sculptor=False,show_legend=True,return_x_y=False,sub_plot=False,linewidth=3,sub=1,plot_data=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab=''):
+    def plot_spectro(self,fig=3,xaxis='age',yaxis='[Fe/H]',source='all',label='',shape='-',marker='o',color='k',markevery=100,show_data=False,show_sculptor=False,show_legend=True,return_x_y=False,sub_plot=False,linewidth=3,sub=1,plot_data=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,only_one_iso=False,solar_ab=''):
         '''
         Plots elements in spectroscopic notation:
 
@@ -1691,7 +2123,7 @@ class omega( chem_evol ):
 
         '''
 
-        #Error message if the "subplot" has not been provided
+        #Error message if there is the "subplot" has not been provided
         if sub_plot and sub == 1:
             print '!! Error - You need to use the \'sub\' parameter and provide the frame for the plot !!'
             return
@@ -1739,8 +2171,8 @@ class omega( chem_evol ):
 
             #Operations associated with plot visual aspects
             if not return_x_y and not sub_plot:
-                plt.xscale('log')
-                plt.xlabel('Log-scaled age [yrs]')
+                #plt.xscale('log')
+                plt.xlabel('Age [yr]')
 
             self.x=x
         else:
@@ -1758,6 +2190,12 @@ class omega( chem_evol ):
             #X-axis gce values
             elem_idx1=self.history.elements.index(xaxis_elem1)
             elem_idx2=self.history.elements.index(xaxis_elem2)
+
+            # Take only 56-Fe is needed
+            if only_one_iso:
+                if yaxis_elem1 == 'Fe':
+                    yields_evol = self.history.ism_iso_yield
+                    elem_idx1 = self.history.isotopes.index('Fe-56')
 
             x=[]
             for k in range(0,len(yields_evol)):
@@ -1777,17 +2215,26 @@ class omega( chem_evol ):
             self.x=x
 
 
-
         yaxis_elem1=yaxis.split('/')[0][1:]
         yaxis_elem2=yaxis.split('/')[1][:-1]
 
         #y=axis ini values
         x_elem1_ini=x_ini[elements.index(yaxis_elem1)]
         x_elem2_ini=x_ini[elements.index(yaxis_elem2)]
+        #print 'Fe_sol = ',x_elem1_ini,' , H_sol = ',x_elem2_ini
 
         #Y-axis gce values
         elem_idx1=self.history.elements.index(yaxis_elem1)
         elem_idx2=self.history.elements.index(yaxis_elem2)
+
+        # Take only 56-Fe is needed
+        if only_one_iso:
+            if yaxis_elem1 == 'Fe':
+                yields_evol = self.history.ism_iso_yield
+                elem_idx1 = self.history.isotopes.index('Fe-56')
+            elif yaxis_elem2 == 'Fe':
+                yields_evol = self.history.ism_iso_yield
+                elem_idx2 = self.history.isotopes.index('Fe-56')
 
         y=[]
         if xaxis=='age':
@@ -1802,6 +2249,7 @@ class omega( chem_evol ):
             if x1 <= 0.0 or x2 <= 0.0:
                 spec = -30.0
             else:
+                #print 'Fe_sim = ',x1, ' , H_sim = ',x2
                 spec=np.log10(x1/x2) - np.log10(x_elem1_ini/x_elem2_ini)
             y.append(spec)
             if xaxis=='age':
@@ -1829,7 +2277,7 @@ class omega( chem_evol ):
 
         if not plot_data:
 
-          # Filter bad value
+          # Filtrate bad value
           x_temp = []
           y_temp = []
           for i_temp in range(0,len(x)):
@@ -1905,7 +2353,7 @@ class omega( chem_evol ):
 	    sources (see below)
 
         source : string
-            specifies if yields come from
+            specificies if yields come from
 	    all sources ('all'), including
 	    AGB+SN1a, massive stars. Or from
 	    distinctive sources:
@@ -2055,7 +2503,7 @@ class omega( chem_evol ):
             if true, calculate rate [1/century] 
             else calculate numbers
 	fraction ; boolean
-	    if true, ignore rate and calculate number fraction of SNIa per WD
+	    if true, ignorate rate and calculate number fraction of SNIa per WD
         rate_only : string
 	    if empty string, plot both rates (default)
 
@@ -2090,7 +2538,7 @@ class omega( chem_evol ):
         sn1anumbers=self.history.sn1a_numbers#[:-1]
         sn2numbers=self.history.sn2_numbers
 	if xaxis=='redshift':
-		print 'this feature is not tested yet.'
+		print 'this features is not tested yet.'
 		return 0
 		age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
 		age=[0]+age
@@ -2100,7 +2548,7 @@ class omega( chem_evol ):
 		sn1anumbers=sn1anumbers[idx:]
 	else:
 		plt.xlabel('Log-scaled age [yrs]')
-		plt.xscale('log')
+		#plt.xscale('log')
         if rate and not fraction:
 	    if xaxis=='redshift':
 			sn1a_rate=np.array(sn1anumbers)/ (np.array(timesteps)/100.)
@@ -2178,7 +2626,7 @@ class omega( chem_evol ):
 			age1.append(age[k])
 		plt.plot(age1,ratio)
 		plt.yscale('log')
-		plt.xscale('log')
+		#plt.xscale('log')
 		plt.ylabel('Number of SNIa going off per WD born')
 		label='SNIafractionperWD';label='sn1a '+label
 		x=age1
@@ -2227,8 +2675,8 @@ class omega( chem_evol ):
 
     def save_data(self,header=[],data=[],filename='plot_data.txt'):
 	'''
-	Writes data into a text file. Data entries
-	can have different lengths
+		Writes data into a text file. data entries
+		can have different lengths
 	'''
 	out=' '
         #header
@@ -2401,7 +2849,7 @@ class omega( chem_evol ):
 	Function checks if either of shape,color,marker
 	is set. If not then assign in each case
 	a unique property related to the source ('agb','massive'..)
-	to the variable and return all three
+	to the variable and returns all three
 	'''
 
 	if source=='all':
@@ -2867,7 +3315,7 @@ class omega( chem_evol ):
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the redshift as a function of time.
+	This function plots the redshift a function of time.
 
         Parameters
         ----------
@@ -2950,7 +3398,7 @@ class omega( chem_evol ):
 	This function plots the evolution of an isotopic ratio as a function
 	of time, as a function of an abundance ratio, or as a function of
 	another isotopic ratio.  Isotopic ratios are given in the
-	delta notation and abundance ratios are given in spectroscopic notation.
+	delta notation and abundances ratios are given in spectroscopic notation.
 
         Parameters
         ----------
@@ -3075,7 +3523,7 @@ class omega( chem_evol ):
                     else:
                         x_2 += xaxis[ix]
             if len(x_2) == 0:
-                print '!! x-axis not valid.  Needs to be \'age\' or a ratio !!'
+                print '!! xaxis not valid.  Need to be \'age\' or a ratio !!'
                 return
 
         # Verify the Y-axis
@@ -3091,7 +3539,7 @@ class omega( chem_evol ):
                 else:
                     y_2 += yaxis[iy]
         if len(y_2) == 0:
-            print '!! y-axis not valid.  Needs to be a ratio !!'
+            print '!! yaxis not valid.  Need to be a ratio !!'
             return
 
         # Get the isotopes for X-axis
@@ -3104,7 +3552,7 @@ class omega( chem_evol ):
             x1_at_nb = float(x_1.split('-')[1])
             x2_at_nb = float(x_2.split('-')[1])
           else:
-            print '!! Isotopes in x-axis are not valid !!'
+            print '!! Isotopes in xaxis are not valid !!'
             return
 
         # Get the isotopes for Y-axis
@@ -3116,7 +3564,7 @@ class omega( chem_evol ):
             y1_at_nb = float(y_1.split('-')[1])
             y2_at_nb = float(y_2.split('-')[1])
         else:
-            print '!! Isotopes in y-axis are not valid !!'
+            print '!! Isotopes in yaxis are not valid !!'
             return
 
         # Set the default label .. if not defined
@@ -3149,7 +3597,7 @@ class omega( chem_evol ):
             ratio_std = y1_sol / y2_sol
             y.append( ((ratio_sample/ratio_std) - 1) * 1000)
   
-        # Make sure the length of arrays are the same when xaxis = '[X/Y]'
+        # Make sure the length of array are the same when xaxis = '[X/Y]'
         too_much = len(y)-len(x)
         y = y[too_much:]
 
@@ -3255,7 +3703,7 @@ class omega( chem_evol ):
 	     Each point in the MDF can be associated with a gaussian. This implies
 	     that in reality, the metallicity should have a certain dispersion 
 	     when stars form at each timestep (instead of using only a single
-	     average value).  The sigma_gauss parameter sets the sigma value of each
+	     average value).  The sigma_guass parameter sets the sigma value eac
 	     gaussian function.
 	nb_sigma : float
 	     When sigma_gauss is greater than zero, nb_sigma is the number of
