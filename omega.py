@@ -1373,7 +1373,7 @@ class omega( chem_evol ):
                         self.t_SF_t[i_cm] / self.sfe
 
             # Scale the initial gas reservoir that was already set
-            scale_m_tot = self.m_tot_ISM_t[0] / self.mgal
+            scale_m_tot = self.m_tot_ISM_t[0] / sum(self.ymgal[0])
             for k_cm in range(len(self.ymgal[0])):
                 self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
 
