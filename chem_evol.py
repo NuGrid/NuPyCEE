@@ -46,6 +46,7 @@ import re
 from pylab import polyfit
 from scipy.integrate import quad
 from scipy.integrate import dblquad
+from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from mpl_toolkits.mplot3d import Axes3D
 from imp import *
@@ -2418,6 +2419,9 @@ class chem_evol(object):
         boundary = [None, None]
 
         # Define the spline
+	#plt.plot(grid_masses, grid_lifetimes, label=str(self.iniZ))
+	#plt.legend()
+	#np.savetxt('lifetimes.txt', grid_lifetimes)
         self.spline_lifetime = UnivariateSpline(grid_lifetimes, \
             np.log10(grid_masses), bbox=boundary, k=spline_degree1, s=smoothing1)
         spline_lifetime = self.spline_lifetime
@@ -3628,10 +3632,10 @@ class chem_evol(object):
                 z.append(spline_metallicity[k](all_masses[m]))  #same mass
                 y.append(metallicity[k])
             x = [all_masses[m]]*len(y)
-            s = UnivariateSpline(y[::-1],z[::-1],bbox=boundary,k=spline_degree1,s=smoothing1)
-            for metal in all_metallicities:
-                all_lifetimes[-1].append(s(metal))
-
+	    lifetimes_m = np.interp(all_metallicities, y[::-1], z[::-1]) #1D interpolation to address increasing values in distribution tail
+	    for m in lifetimes_m:
+		all_lifetimes[-1].append(m)
+	
         # Sorting
         all_lifetimes1=[]
         for k in range(len(all_lifetimes[0])):
@@ -3639,7 +3643,6 @@ class chem_evol(object):
             for j in range(len(all_lifetimes)):
                 all_lifetimes1[-1].append(all_lifetimes[j][k])
         all_lifetimes = all_lifetimes1
-
 
         # Creating the return array (masses in solar mass, no log anymore)
         zm_lifetime_grid = [np.array(all_metallicities), \
