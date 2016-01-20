@@ -2182,6 +2182,10 @@ class chem_evol(object):
         boundary = [None, None]
 
         # Define the spline
+	#print grid_lifetimes[::-1]
+	#plt.plot(grid_masses, grid_lifetimes, label=str(self.iniZ))
+	#plt.legend()
+	#np.savetxt('lifetimes.txt', grid_lifetimes)
         self.spline_lifetime = UnivariateSpline(grid_lifetimes, \
             np.log10(grid_masses), bbox=boundary, k=spline_degree1, s=smoothing1)
         spline_lifetime = self.spline_lifetime
@@ -3240,9 +3244,13 @@ class chem_evol(object):
         resolution_mass = 2e2
         resolution_metallicity = 1e6 # 100
         spline_degree1 = 2           # 1, 2
-        smoothing1 = 0               # 0, 1, 2, 3
+        #smoothing1 = 0               # 0, 1, 2, 3 (defined later now)
         all_masses = []
         spline_metallicity = []
+
+        mmin = np.log10(fit_massmin) # min(all_masses)
+        mmax = np.log10(fit_massmax) # max(all_masses)
+        all_masses1 = np.linspace(fit_massmin,fit_massmax,2901) 
 
         # Fit lifetimes over the mass ranges
         for m in range(len(metallicity)):
@@ -3253,13 +3261,13 @@ class chem_evol(object):
             y=len(mass[m])*[metallicity[m]]
             z=np.log10(lifetimes[m])
             boundary=[None,None]
-            s = UnivariateSpline(x,z,bbox=boundary,k=spline_degree1,s=smoothing1)
+	    smoothing1 = len(mass[m]) + spline_degree1
+            s = UnivariateSpline(x,z,bbox=boundary,k=spline_degree1,s=7)
             spline_metallicity.append(s)
-
-        mmin = np.log10(fit_massmin) # min(all_masses)
-        mmax = np.log10(fit_massmax) # max(all_masses)
-        all_masses1 = np.linspace(fit_massmin,fit_massmax,2901) 
-
+	    #plt.plot(x, z, marker='x', linestyle='None')
+	    #plt.plot(np.log10(all_masses1), s(np.log10(all_masses1)), label=str(metallicity[m]))
+	    #plt.legend()
+	    #np.savetxt('masses.txt', s(np.log10(all_masses1)))
 
         # if fit over metallicity not necessary or possible, get separate fit results
 	if len(metallicity)==1:
@@ -3296,7 +3304,7 @@ class chem_evol(object):
                         print 'Only 2 metallicities provided, do linear fit over lifetime'	
 	else:	
         	spline_degree1 = 1#4           # 1, 2
-        	smoothing1 = 1#3               # 0, 1, 2, 3
+        	smoothing1 = len(metallicity)+spline_degree1 #3               # 0, 1, 2, 3
 
         # ...
         all_masses = np.linspace(fit_massmin,fit_massmax,2901)
@@ -3311,7 +3319,7 @@ class chem_evol(object):
                 z.append(spline_metallicity[k](all_masses[m]))  #same mass
                 y.append(metallicity[k])
             x = [all_masses[m]]*len(y)
-            s = UnivariateSpline(y,z,bbox=boundary,k=spline_degree1,s=smoothing1)
+            s = UnivariateSpline(y[::-1],z[::-1],bbox=boundary,k=spline_degree1,s=smoothing1)
             for metal in all_metallicities:
                 all_lifetimes[-1].append(s(metal))
 
