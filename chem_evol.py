@@ -42,6 +42,7 @@ import copy
 import math
 import random
 import os
+import re
 from pylab import polyfit
 from scipy.integrate import quad
 from scipy.integrate import dblquad
@@ -200,18 +201,29 @@ class chem_evol(object):
     ##               Constructor                ##
     ##############################################
     def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
-                 sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
-                 tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
-                 ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
-                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
-                 iniabu_table='', \
-                 extra_source_on=False, \
-                 extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
-                 pop3_table='yield_tables/popIII_heger10.txt', \
-                 imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
-                 starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=-1, \
-                 f_arfo=1, imf_yields_range=[1,30],exclude_masses=[32,60],netyields_on=False,wiersmamod=False,
-		 yield_interp='lin'):
+             sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
+             tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
+             ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
+             hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
+             iniabu_table='', \
+             extra_source_on=False, \
+             extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
+             pop3_table='yield_tables/popIII_heger10.txt', \
+             imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
+             starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
+             exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=-1, \
+             f_arfo=1, imf_yields_range=[1,30],exclude_masses=[32,60],\
+             netyields_on=False,wiersmamod=False,yield_interp='lin',\
+             input_yields=False,t_merge=-1.0,\
+             popIII_on=True,ism_ini=np.array([]),\
+             ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
+             isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
+             zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
+             dt_in=np.array([]),dt_split_info=np.array([]),\
+             ej_massive=np.array([]), ej_agb=np.array([]),\
+             ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
+             ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
+             dt_ssp=np.array([])):
 
         # Initialize the history class which keeps the simulation in memory
 	self.history = self.__history()
@@ -269,6 +281,10 @@ class chem_evol(object):
         self.netyields_on=netyields_on
 	self.wiersmamod=wiersmamod
 	self.yield_interp=yield_interp
+        self.t_merge = t_merge
+        self.ism_ini = ism_ini
+        self.dt_in = dt_in
+
         # Normalization constants for the Kroupa IMF
         if imf_type == 'kroupa':
             self.p0 = 1.0
@@ -283,8 +299,26 @@ class chem_evol(object):
         # Check for incompatible inputs - Error messages
         self.__check_inputs()
 	
-	# Initialisation of the yield tables
-        self.__set_yield_tables()
+        # If the yield tables has already been read previously ...
+        if input_yields:
+
+            # Assign the input yields and lifetimes
+            self.ytables = ytables_in
+            self.zm_lifetime_grid_nugrid = zm_lifetime_grid_nugrid_in
+            self.history.isotopes = isotopes_in
+            self.nb_isotopes = len(self.history.isotopes)
+            self.ytables_pop3 = ytables_pop3_in
+            self.zm_lifetime_grid_pop3 = zm_lifetime_grid_pop3_in
+            self.ytables_1a = ytables_1a_in
+            self.default_yields = True
+            self.extra_source_on = False
+            self.ytables_extra = 0
+
+        # If the yield tables need to be read from the files ...
+        else:
+
+            # Initialisation of the yield tables
+            self.__set_yield_tables()
 
         # Initialisation of the composition of the gas reservoir
         ymgal = self._get_iniabu()
@@ -301,6 +335,11 @@ class chem_evol(object):
         imf_mass_ranges_contribution, imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
+        # Initialisation of the composition of the gas reservoir
+        if len(self.ism_ini) > 0:
+            for i_ini in range(0,self.len_ymgal):
+                ymgal[0][i_ini] = self.ism_ini[i_ini]
+
         # Output information
         if iolevel >= 1:
              print 'Number of timesteps: ', '{:.1E}'.format(len(timesteps))
@@ -316,6 +355,11 @@ class chem_evol(object):
         self.history.m_locked = []
         self.history.m_locked_agb = []
         self.history.m_locked_massive = []
+
+        # Keep track of the mass-loss rate of massive stars
+        self.massive_ej_rate = []
+        for k in range(self.nb_timesteps + 1):
+            self.massive_ej_rate.append(0.0)
 
         # Attribute arrays and variables to the current object
         self.mdot = mdot
@@ -339,6 +383,9 @@ class chem_evol(object):
         self.history.age.append(self.t)
         self.zmetal = zmetal
 
+        # Get coefficients for the fraction of white dwarfs fit (2nd poly)
+        self.__get_coef_wd_fit()
+
         # Output information
         if iolevel > 0:
             print '### Start with initial metallicity of ','{:.4E}'.format(zmetal)
@@ -359,8 +406,8 @@ class chem_evol(object):
         import sys
         self.need_to_quit = False
         # Total duration of the simulation
-        if self.history.tend > 1.3e10:
-            print 'Error - tend must be less than or equal to 1.3e10 years.'
+        if self.history.tend > 1.5e10:
+            print 'Error - tend must be less than or equal to 1.5e10 years.'
             self.need_to_quit = True
 
         # Timestep
@@ -378,7 +425,7 @@ class chem_evol(object):
 
         # IMF
         if not self.imf_type in ['salpeter','chabrier','kroupa','input', \
-            'alphaimf','chabrieralpha']:
+            'alphaimf','chabrieralpha','fpp']:
             print 'Error - Selected imf_type is not available.'
             self.need_to_quit = True
 
@@ -525,38 +572,79 @@ class chem_evol(object):
         # Declaration of the array containing the timesteps
         timesteps_gt = []
 
-        # If all the timesteps have the same duration ...
-        if self.special_timesteps <= 0:
+        # If the timesteps are given as an input ...
+        if len(self.dt_in) > 0:
 
-            # Make sure the last timestep is equal to tend
-            counter = 0
-            step = 1
-            laststep = False
-            t = 0
-            t0 = 0
-            while(True):
-                counter+=step
-                if (self.history.tend/self.history.dt)==0:
-                    if (self.history.dt*counter)>self.history.tend:
-                        break
-                else:
-                    if laststep==True:
-                        break
-                    if (self.history.dt*counter+step)>self.history.tend:
-                        counter=(self.history.tend/self.history.dt)
-                        laststep=True
-                t=counter
-                timesteps_gt.append(int(t-t0)*self.history.dt)
-                t0=t
+            # Copy the timesteps
+            timesteps_gt = self.dt_in
 
-        # If the special timestep option is chosen ...
-	if self.special_timesteps > 0:
+        # If the timesteps need to be calculated ...
+        else:
 
-            # Use a logarithm scheme
-            times1 = np.logspace(np.log10(self.history.dt), \
-                     np.log10(self.history.tend), self.special_timesteps)
-            times1 = [0] + list(times1)
-            timesteps_gt = np.array(times1[1:]) - np.array(times1[:-1])
+            # If all the timesteps have the same duration ...
+            if self.special_timesteps <= 0:
+
+                # Make sure the last timestep is equal to tend
+                counter = 0
+                step = 1
+                laststep = False
+                t = 0
+                t0 = 0
+                while(True):
+                    counter+=step
+                    if (self.history.tend/self.history.dt)==0:
+                        if (self.history.dt*counter)>self.history.tend:
+                            break
+                    else:
+                        if laststep==True:
+                            break
+                        if (self.history.dt*counter+step)>self.history.tend:
+                            counter=(self.history.tend/self.history.dt)
+                            laststep=True
+                    t=counter
+                    timesteps_gt.append(int(t-t0)*self.history.dt)
+                    t0=t
+
+            # If the special timestep option is chosen ...
+            if self.special_timesteps > 0:
+
+                # Use a logarithm scheme
+                times1 = np.logspace(np.log10(self.history.dt), \
+                         np.log10(self.history.tend), self.special_timesteps)
+                times1 = [0] + list(times1)
+                timesteps_gt = np.array(times1[1:]) - np.array(times1[:-1])
+
+        # If a timestep needs to be added to be synchronized with
+        # the external program managing merger trees ...
+        if self.t_merge > 0.0:
+
+            # Declare the new timestep array
+            timesteps_new = []
+
+            # Find the interval where the step needs to be added
+            i_temp = 0
+            t_temp = timesteps_gt[0]
+            while t_temp < self.t_merge:
+                timesteps_new.append(timesteps_gt[i_temp])
+                i_temp += 1
+                t_temp += timesteps_gt[i_temp]
+
+            # Add the extra timestep
+            dt_up_temp = t_temp - self.t_merge
+            dt_low_temp = timesteps_gt[i_temp] - dt_up_temp
+            timesteps_new.append(dt_low_temp)
+            timesteps_new.append(dt_up_temp)
+
+            # Keep the t_merger index in memory
+            self.i_t_merger = i_temp
+
+            # Add the rest of the timesteps
+            # Skip the current one that just has been split
+            for i_dtnew in range(i_temp+1,len(timesteps_gt)):
+                timesteps_new.append(timesteps_gt[i_dtnew])
+
+            # Replace the timesteps array to be returned
+            timesteps_gt = timesteps_new
 
         # Return the duration of all timesteps
         return timesteps_gt
@@ -625,6 +713,76 @@ class chem_evol(object):
         return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, mdot_massive, \
                mdot_agb, mdot_1a, sn1a_numbers, sn2_numbers, imf_mass_ranges, \
                imf_mass_ranges_contribution, imf_mass_ranges_mtot
+
+
+    ##############################################
+    #               Get Coef WD Fit              #
+    ##############################################
+    def __get_coef_wd_fit(self):
+
+        '''
+        This function calculates the coefficients for the fraction of white
+        dwarfs fit in the form of f_wd = a*lg(t)**2 + b*lg(t) + c.  Only 
+        progenitor stars for SNe Ia are considered. 
+
+        '''
+
+        # Get the number of masses per metallicity in the grid
+        nb_m_per_z = len(self.ytables.table_mz) / \
+                     len(self.ytables.metallicities)
+
+        # Extract the masses of each metallicity
+        m_per_z = []
+        for i_gcwf in range(0,nb_m_per_z):
+            m_temp = re.findall("\d+.\d+", \
+                     self.ytables.table_mz[i_gcwf])
+            m_per_z.append(float(m_temp[0]))
+
+        # Create the complete M-axis in a 1-D array
+        m_complete = []
+        for i_gcwf in range(0,len(self.ytables.metallicities)):
+            m_complete += m_per_z
+
+        # Only consider stars between 3 and 8 Mo
+        lg_m_fit = []
+        lg_t_fit = []
+        for i_gcwf in range(0,len(m_complete)):
+            if m_complete[i_gcwf] >= 3.0 and m_complete[i_gcwf] <= 8.0:
+                lg_m_fit.append(np.log10(m_complete[i_gcwf]))
+                lg_t_fit.append(np.log10(self.ytables.age[i_gcwf]))
+
+        # Create fit lgt = a*lgM**2 + b*lgM + c
+        a_fit, b_fit, c_fit = polyfit(lg_m_fit, lg_t_fit, 2)
+
+        # Array of lifetimes
+        t_f_wd = []
+        m_f_wd = []
+        t_max_f_wd = 10**(a_fit*0.47712**2 + b_fit*0.47712 + c_fit)
+        t_min_f_wd = 10**(a_fit*0.90309**2 + b_fit*0.90309 + c_fit)
+        self.t_3_0 = t_max_f_wd
+        self.t_8_0 = t_min_f_wd
+        nb_m = 15
+        dm_wd = (8.0 - 3.0) / nb_m
+        m_temp = 3.0
+        for i_gcwf in range(0,nb_m):
+            m_f_wd.append(m_temp)
+            t_f_wd.append(10**(a_fit*np.log10(m_temp)**2 + \
+                               b_fit*np.log10(m_temp) + c_fit))
+            m_temp += dm_wd
+
+        # Calculate the total number of progenitor stars
+        n_tot_prog_inv = 1 / self._imf(3.0,8.0,1)
+
+        # For each lifetime ...
+        f_wd = []
+        for i_gcwf in range(0,len(t_f_wd)):
+
+            # Calculate the fraction of white dwarfs
+            f_wd.append(self._imf(m_f_wd[i_gcwf],8.0,1)*n_tot_prog_inv)
+
+        # Calculate the coefficients for the fit f_wd vs t
+        self.a_wd, self.b_wd, self.c_wd, self.d_wd = \
+            polyfit(t_f_wd, f_wd, 3)
 
 
     ##############################################
@@ -717,6 +875,13 @@ class chem_evol(object):
         self.ymgal_1a[i] = np.array(self.ymgal_1a[i]) + np.array(self.mdot_1a[i-1])
         self.ymgal_massive[i] = np.array(self.ymgal_massive[i]) + \
                                 np.array(self.mdot_massive[i-1])
+
+        # Convert the mass ejected by massive stars into rate
+        if self.history.timesteps[i-1] == 0.0:
+            self.massive_ej_rate[i-1] = 0.0
+        else:
+            self.massive_ej_rate[i-1] = sum(self.mdot_massive[i-1]) / \
+                self.history.timesteps[i-1]
 
 
     ##############################################
@@ -878,6 +1043,7 @@ class chem_evol(object):
         # Interpolate yields in the mass-metallicity plane
         mstars, yields_all, func_total_ejecta, yields_extra = \
             self.__inter_mm_plane(i)
+
         # Get the mass fraction of stars that contribute to the stellar ejecta
         # relative to the total stellar mass within imf_bdys.
         mfac = self.__get_mfac()
@@ -938,8 +1104,10 @@ class chem_evol(object):
           i : Index of the current timestep
 
         '''
+
         # If Zmetal is above the lowest non-zero Z available in the yields ...
         if self.zmetal >= self.ytables.metallicities[-1]:
+
             # Get the interpolated stellar yields for the current metallicity.
             mstars, yields_all, func_total_ejecta = self.__interpolate_yields( \
                 self.zmetal, self.ymgal[i-1], self.ytables)
@@ -1145,6 +1313,7 @@ class chem_evol(object):
         if self.iolevel >= 1:
             print '__get_mass_bdys: mass_bdys: ',mass_bdys
             print '__get_mass_bdys: m_stars',m_stars
+
         # Return the array containing the boundary masses for applying yields
         return mass_bdys,m_stars
 
@@ -1228,6 +1397,7 @@ class chem_evol(object):
 
         # Keep the mass boundaries in memory
         self.history.mass_bdys = mass_bdys
+
         # Return the IMF corrected arrays
         return mass_bdys, mstars, yields_all, massfac, mftot
 
@@ -1950,12 +2120,78 @@ class chem_evol(object):
         spline1_timemin = float(self.__spline1(timemin))
 
         # Calculate the number of SNe Ia per Mo of star formed
-        n1a = self.A_maoz * quad(self.__maoz_sn_rate_int, timemin, timemax)[0]
+        #n1a = self.A_maoz * quad(self.__maoz_sn_rate_int, timemin, timemax)[0]
+
+        # Initialisation of the number of SNe Ia (IMPORTANT)
+        n1a = 0.0
+
+        # If SNe Ia occur during this time interval ...
+        if timemax > self.t_8_0 and timemin < 13.0e9:
+
+            # If the fraction of white dwarfs needs to be integrated ...
+            if timemin < self.t_3_0:
+
+                # Get the upper and lower time limits for this integral part
+                t_temp_up = min(self.t_3_0,timemax)
+                t_temp_low = max(self.t_8_0,timemin)
+
+                # Calculate a part of the integration
+                temp_up = self.a_wd * t_temp_up**(self.beta_pow+4.0) / \
+                             (self.beta_pow+4.0) + \
+                          self.b_wd * t_temp_up**(self.beta_pow+3.0) / \
+                             (self.beta_pow+3.0) + \
+                          self.c_wd * t_temp_up**(self.beta_pow+2.0) / \
+                             (self.beta_pow+2.0)
+                temp_low = self.a_wd * t_temp_low**(self.beta_pow+4.0) / \
+                              (self.beta_pow+4.0) + \
+                           self.b_wd * t_temp_low**(self.beta_pow+3.0) / \
+                              (self.beta_pow+3.0) + \
+                           self.c_wd * t_temp_low**(self.beta_pow+2.0) / \
+                              (self.beta_pow+2.0)
+
+                # Natural logarithm if beta_pow == -1.0
+                if self.beta_pow == -1.0:
+                    temp_up += self.d_wd*np.log(t_temp_up)
+                    temp_low += self.d_wd*np.log(t_temp_low)
+
+                # Normal integration if beta_pow != -1.0
+                else:
+                    temp_up += self.d_wd * t_temp_up**(self.beta_pow+1.0) / \
+                                  (self.beta_pow+1.0)
+                    temp_low += self.d_wd * t_temp_low**(self.beta_pow+1.0) / \
+                                   (self.beta_pow+1.0)
+
+                # Add the number of SNe Ia (with the wrong units)
+                n1a = (temp_up - temp_low)
+
+            # If the integration continues beyond the point where all 
+            # progenitor white dwarfs are present (this should not be an elif)
+            if timemax > self.t_3_0:
+
+                # Get the upper and lower time limits for this integral part
+                t_temp_up = min(13.0e9,timemax)
+                t_temp_low = max(self.t_3_0,timemin)
+
+                # Natural logarithm if beta_pow == -1.0
+                if self.beta_pow == -1.0:
+                    temp_int = np.log(t_temp_up) - np.log(t_temp_low)
+
+                # Normal integration if beta_pow != -1.0
+                else:
+                    temp_int = (t_temp_up**(self.beta_pow+1.0) - \
+                         t_temp_low*(self.beta_pow+1.0)) / (self.beta_pow+1.0)
+
+                # Add the number of SNe Ia (with the wrong units)
+                n1a += temp_int
+
+            # Add the right units 
+            n1a = n1a * self.A_maoz * 4.0e-13 / 10**(9*self.beta_pow)
 
         # Calculate the number of white dwarfs
-        number_wd = quad(self.__wd_number, spline1_timemax, maxm_prog1a, \
-            args=timemax)[0] - quad(self.__wd_number, spline1_timemin, \
-                maxm_prog1a, args=timemin)[0]
+        #number_wd = quad(self.__wd_number, spline1_timemax, maxm_prog1a, \
+        #    args=timemax)[0] - quad(self.__wd_number, spline1_timemin, \
+        #        maxm_prog1a, args=timemin)[0]
+        number_wd = 1.0 # Temporary .. should be modified if nb_wd is needed..
 
         # Return the number of SNe Ia (per Mo formed) and white dwarfs
         return n1a, number_wd
@@ -2195,8 +2431,6 @@ class chem_evol(object):
 	#plt.plot(tarray,marray)
 	#plt.title('Test')
 
-
-
         # Return all the lifetimes (log) and the miminum lifetime
         return spline_lifetime, spline_min_time
 
@@ -2217,16 +2451,42 @@ class chem_evol(object):
         '''
 
         # Set the maximum mass of progenitors of SNe Ia
-        maxm_prog1a = 8.0
-        if maxm_prog1a > self.imf_bdys[1]:
-            maxm_prog1a = self.imf_bdys[1]
+#        maxm_prog1a = 8.0
+#        if maxm_prog1a > self.imf_bdys[1]:
+#            maxm_prog1a = self.imf_bdys[1]
 
         # Maximum time of integration
-        ageofuniverse = 1.3e10
+#        ageofuniverse = 1.3e10
 
         # Calculate the normalisation constant
-        self.A_maoz = self.nb_1a_per_m / quad(self.__maoz_sn_rate_int, \
-            spline_min_time, ageofuniverse)[0]
+#        self.A_maoz = self.nb_1a_per_m / quad(self.__maoz_sn_rate_int, \
+#            spline_min_time, ageofuniverse)[0]
+#        print self.A_maoz
+
+        # Calculate the first part of the integral
+        temp_8_0 = self.a_wd*self.t_8_0**(self.beta_pow+4.0)/(self.beta_pow+4.0)+\
+                   self.b_wd*self.t_8_0**(self.beta_pow+3.0)/(self.beta_pow+3.0)+\
+                   self.c_wd*self.t_8_0**(self.beta_pow+2.0)/(self.beta_pow+2.0)
+        temp_3_0 = self.a_wd*self.t_3_0**(self.beta_pow+4.0)/(self.beta_pow+4.0)+\
+                   self.b_wd*self.t_3_0**(self.beta_pow+3.0)/(self.beta_pow+3.0)+\
+                   self.c_wd*self.t_3_0**(self.beta_pow+2.0)/(self.beta_pow+2.0)
+
+        # Natural logarithm if beta_pow == -1.0
+        if self.beta_pow == -1.0:
+            temp_8_0 += self.d_wd*np.log(self.t_8_0)
+            temp_3_0 += self.d_wd*np.log(self.t_3_0)
+            temp_13gys = np.log(13.0e9) - np.log(self.t_3_0)
+
+        # Normal integration if beta_pow != -1.0
+        else:
+            temp_8_0 += self.d_wd*self.t_8_0**(self.beta_pow+1.0)/(self.beta_pow+1.0)
+            temp_3_0 += self.d_wd*self.t_3_0**(self.beta_pow+1.0)/(self.beta_pow+1.0)
+            temp_13gys = (13.0e9**(self.beta_pow+1.0) - \
+                         self.t_3_0**(self.beta_pow+1.0)) / (self.beta_pow+1.0)
+
+        # Calculate the normalization constant
+        self.A_maoz = self.nb_1a_per_m * 10**(9*self.beta_pow) / 4.0e-13 / \
+                   (temp_3_0 - temp_8_0 + temp_13gys)
 
         # Avoid renormalizing during the next timesteps
         self.normalized = True
@@ -2335,7 +2595,21 @@ class chem_evol(object):
                 return quad(self.__g2_kroupa, mmin, mmax)[0]
             if inte == -1:
                 self.imfnorm = 1.0 / quad(self.__g2_kroupa, \
-                    self.imf_bdys[0], self.imf_bdys[1])[0]	
+                    self.imf_bdys[0], self.imf_bdys[1])[0]
+
+	# Ferrini, Pardi & Penco (1990)
+	elif self.imf_type=='fpp':
+
+            # Choose the right option
+            if inte == 0:
+                return self.imfnorm * self.__g1_fpp(mass)
+            if inte == 1:
+                return quad(self.__g1_fpp, mmin, mmax)[0]
+            if inte == 2:
+                return quad(self.__g2_fpp, mmin, mmax)[0]
+            if inte == -1:
+                self.imfnorm = 1.0 / quad(self.__g2_fpp, \
+                    self.imf_bdys[0], self.imf_bdys[1])[0]
 
 
     ##############################################
@@ -2575,6 +2849,48 @@ class chem_evol(object):
 
 
     ##############################################
+    #                   G1 FPP                   #
+    ##############################################
+    def __g1_fpp(self, mass):
+
+	'''
+        This function returns the number of stars having a certain stellar mass
+        with a Ferrini, Pardi & Penco (1990) IMF.
+
+        Arguments
+        =========
+
+          mass : Stellar mass.
+
+        '''
+
+        # Calculate the number of stars
+        lgmm = np.log10(mass)
+        return 2.01 * mass**(-1.52) / 10**((2.07*lgmm**2+1.92*lgmm+0.73)**0.5)
+
+
+    ##############################################
+    #                   G2 FPP                   #
+    ##############################################
+    def __g2_fpp(self, mass):
+
+	'''
+        This function returns the total mass of stars having a certain stellar
+        mass with a Ferrini, Pardi & Penco (1990) IMF.
+
+        Arguments
+        =========
+
+          mass : Stellar mass.
+
+        '''
+
+        # Calculate the mass of stars
+        lgmm = np.log10(mass)
+        return 2.01 * mass**(-0.52) / 10**((2.07*lgmm**2+1.92*lgmm+0.73)**0.5)
+
+
+    ##############################################
     #             Interpolate Yields             #
     ##############################################
     def __interpolate_yields(self, Z, ymgal_t, ytables):
@@ -2642,6 +2958,7 @@ class chem_evol(object):
             # Get the stellar masses and the interpolated yields at Z
             m_stars, yields = self.__lin_int_yields(z1, z2, m1, m2, ytables, Z)
 	    #print m_stars
+
         # If the "interpolation" is taken from Wiersma et al. (2009) ....   
         elif (self.yield_interp == 'wiersma') or (self.netyields_on==True):
 
