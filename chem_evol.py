@@ -3258,7 +3258,7 @@ class chem_evol(object):
             z=np.log10(lifetimes[m])
             boundary=[None,None]
 	    smoothing1 = len(mass[m]) + spline_degree1
-            s = UnivariateSpline(x,z,bbox=boundary,k=spline_degree1,s=7)
+            s = UnivariateSpline(x,z,bbox=boundary,k=spline_degree1,s=smoothing1)
             spline_metallicity.append(s)
 
         # if fit over metallicity not necessary or possible, get separate fit results
