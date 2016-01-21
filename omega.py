@@ -443,9 +443,10 @@ class omega( chem_evol ):
                 prim_comp_table, self.history.isotopes)
 
         # Assume the baryonic ratio for the initial gas reservoir, if needed
-        if len(self.ism_ini) == 0:
+        if len(self.ism_ini) == 0 and not self.SF_law and not self.DM_evolution:
           if self.bar_ratio and not self.cl_SF_law:
-            scale_m_tot = self.m_DM_0 * self.omega_b_0 / (self.omega_0*self.mgal)
+            scale_m_tot = self.m_DM_0 * self.omega_b_0 / \
+            (self.omega_0*sum(self.ymgal[0]))
             for k_cm in range(len(self.ymgal[0])):
                 self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
 
@@ -1372,7 +1373,7 @@ class omega( chem_evol ):
                         self.t_SF_t[i_cm] / self.sfe
 
             # Scale the initial gas reservoir that was already set
-            scale_m_tot = self.m_tot_ISM_t[0] / self.mgal
+            scale_m_tot = self.m_tot_ISM_t[0] / sum(self.ymgal[0])
             for k_cm in range(len(self.ymgal[0])):
                 self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
 
