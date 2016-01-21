@@ -3480,7 +3480,6 @@ class chem_evol(object):
         fit_massmax = self.imf_yields_range_pop3[1]
 
         # Define the parameters of the interpolation
-        resolution_mass = 2e2
         spline_degree1 = 2  # Other choices : 1, 2
         smoothing1 = 0      # Other choices : 0, 1, 2, 3
         x = np.log10(masses)
@@ -3533,7 +3532,7 @@ class chem_evol(object):
         lifetimes_all = tables.get('Lifetime')
         sim_ids = tables.get('Table (M,Z)')
 
-        # Get the available Z, M, and lifetimes
+        # Get the available Z, M, and lifetimes from yield table
         z_all = []
         m_all = []
         mass = []
@@ -3550,26 +3549,21 @@ class chem_evol(object):
                 lifetimes.append([])
             mass[-1].append(float(m))
             lifetimes[-1].append(lifetimes_all[k])
+	#save values for test plotting further below
         mass_save=mass
         metallicity_save=metallicity
         lifetimes_save=lifetimes
-        # Initialisation of the interpolation parameters for M vs lifetime
+        # Initialisation of the interpolation values for mass range
         fit_massmin = self.imf_yields_range[0]
         fit_massmax = self.imf_yields_range[1]
-        fit_metalmin = 1e-6
-        fit_metalmax = 2e-2
-        resolution_mass = 2e2
-        resolution_metallicity = 1e6 # 100
+        mmin = np.log10(fit_massmin) 
+        mmax = np.log10(fit_massmax) 
+        all_masses1 = np.linspace(fit_massmin,fit_massmax,2901)
+
+        # Fit lifetimes over the mass ranges for yield metallicity grid
         spline_degree1 = 2           # 1, 2
-        #smoothing1 = 0               # 0, 1, 2, 3 (defined later now)
         all_masses = []
         spline_metallicity = []
-
-        mmin = np.log10(fit_massmin) # min(all_masses)
-        mmax = np.log10(fit_massmax) # max(all_masses)
-        all_masses1 = np.linspace(fit_massmin,fit_massmax,2901) 
-
-        # Fit lifetimes over the mass ranges
         for m in range(len(metallicity)):
             x=np.log10(mass[m])
             for k in range(len(mass[m])):
@@ -3597,7 +3591,8 @@ class chem_evol(object):
         	# Return array with M, t, Z (see function definition)
         	return zm_lifetime_grid
 
-        # Declaration of the wanted metallicity step
+	'''
+        # First guess of the metallicity steps
         all_metallicities = np.array([1e-06, 2e-06, 3e-06, 4e-06, 5e-06, 6e-06, \
                             7e-06, 8e-06, 9e-06, 1e-05, 2e-05, 3e-05, 4e-05, 5e-05,\
                             6e-05, 7e-05, 8e-05, 9e-05, 0.0001, 0.0002, 0.0003, \
@@ -3605,9 +3600,27 @@ class chem_evol(object):
                             0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009,\
                             0.01,0.011,0.012,0.013,0.014,0.015,0.016,0.017,0.018, \
                             0.019,0.02])
+	'''
 
+	#we limit metallicity range to range provided in yield input grid
+	#since we do a linear interpolation below and values outside the yield input
+	#grid would be constant. __find_lifetimes returns constant values if outside the
+	#z grid range
+	zmin=min(metallicity) #from yield input grid
+	zmax=max(metallicity) #from yield input grid
+	#create metallicity in steps log steps ..1e-X,2e-X,3e-X,..1e-(X+1),2e-(X+1)
+	all_metallicities=[]
+	zdum=zmin
+	dum=1
+	while True:
+		if zdum*dum>zmax:
+			break
+		all_metallicities.append(zdum*dum)
+		dum=dum+1
+		if dum==10:
+			dum=1
+			zdum=zdum*10
 
- 		
         # Initialisation of the interpolation parameters for M vs Z ?
         # for 2 Z do linear interpolation
 	if len(metallicity)==2:
@@ -3621,7 +3634,6 @@ class chem_evol(object):
 
         # ...
         all_masses = np.linspace(fit_massmin,fit_massmax,2901)
-        #all_masses1 = np.linspace(fit_massmin,fit_massmax,2901)
         all_masses = np.log10(all_masses)
         all_lifetimes = []
         for m in range(len(all_masses)):
@@ -3689,8 +3701,9 @@ class chem_evol(object):
 	is done by using the mass and metallicity dependent
 	lifetime values from the 'table' input (which should be
 	the nugrid table file). Only those fits are tested.
-	If metallicity is above 2e-2 and below 1e-4 lifetimes
-	for the 2e-2 and 1e-4 case are used respectively.
+	If metallicity is above the upper metallicity and 
+	below the lower metallicity the lifetimes
+	at those upper and lower boundaries are used respectively.
 
         Notes 
         =====
