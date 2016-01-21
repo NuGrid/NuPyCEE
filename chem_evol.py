@@ -1051,11 +1051,13 @@ class chem_evol(object):
 
         # Get the mass boundaries on which each star yields will be applied.
         # Ex: 12 Mo model yields might be used for all stars from 8 to 12.5 Mo.
-        mass_bdys,mstars = self.__get_mass_bdys(mstars)
+	# also modifies mstars since some stars could lie outside yield range
+	# therefore we also have to create the yields variable
+        mass_bdys,mstars,yields = self.__get_mass_bdys(mstars,yields_all)
       
         # Apply the IMF on the mass boundaries
-        mass_bdys, mstars, yields_all, massfac, mftot = \
-            self.__apply_imf_mass_bdys( mass_bdys, mstars, yields_all )
+        mass_bdys, mstars, yields, massfac, mftot = \
+            self.__apply_imf_mass_bdys( mass_bdys, mstars, yields)
 
         # Output information
         if self.iolevel >= 1:
@@ -1227,7 +1229,7 @@ class chem_evol(object):
     ##############################################
     #               Get Mass Bdys                #
     ##############################################
-    def __get_mass_bdys(self, mstars):
+    def __get_mass_bdys(self, mstars,yields):
 
         '''
         This function returns the array mass_bdys containing the initial stellar
@@ -1249,36 +1251,47 @@ class chem_evol(object):
         # Lowest stellar mass contributing to the ejecta
         mass_bdys = [yr_gmb[0]]
 
+	#reduce masses and yields according to yields range
+	mstars1=[]
+	yields1=[]
+	for k in range(len(mstars)):
+		if mstars[k]>yr_gmb[1]:
+			break
+		if mstars[k]<yr_gmb[0]:
+			continue
+		mstars1.append(mstars[k])
+		yields1.append(yields[k])
+
         m_stars=[]
         # For every stellar initial mass already in the old mass array ...
-        for w in range(len(mstars)):
+        for w in range(len(mstars1)):
             #print w,mass_bdys
             # Add the transition mass if we are at the right mass
-            if (mstars[w-1] < self.transitionmass) and \
-                   (mstars[w] > self.transitionmass):
+            if (mstars1[w-1] < self.transitionmass) and \
+                   (mstars1[w] > self.transitionmass):
                 mass_bdys.append(self.transitionmass)
-                if (w == len(mstars) - 1):
+                if (w == len(mstars1) - 1):
                     mass_bdys.append(yr_gmb[1]) 
-		m_stars.append(mstars[w-1])
+		m_stars.append(mstars1[w-1])
                 continue
 
             # Calculate the mass where the code switches to another star yield. 
-            if (w>0) and (w < len(mstars) - 1):
+            if (w>0) and (w < len(mstars1) - 1):
                 #inside imf interval
-                newbdy=(mstars[w-1] + mstars[w]) / 2.e0
+                newbdy=(mstars1[w-1] + mstars1[w]) / 2.e0
                 if (newbdy > yr_gmb[0]) and (newbdy<yr_gmb[1]):
                     mass_bdys.append(newbdy)
-                    if not mstars[w-1] in m_stars:
-                        m_stars.append(mstars[w-1])
+                    if not mstars1[w-1] in m_stars:
+                        m_stars.append(mstars1[w-1])
 		if (newbdy > yr_gmb[0]) and (newbdy>=yr_gmb[1]):
-                    if not mstars[w-1] in m_stars:
-                        m_stars.append(mstars[w-1])		    
+                    if not mstars1[w-1] in m_stars:
+                        m_stars.append(mstars1[w-1])		    
 		    mass_bdys.append(yr_gmb[1])
 		    break
                 #print newbdy,yr_gmb[0]
-            if mstars[w] == yr_gmb[0]:
-                    if not mstars[w] in m_stars:
-                        m_stars.append(mstars[w])
+            if mstars1[w] == yr_gmb[0]:
+                    if not mstars1[w] in m_stars:
+                        m_stars.append(mstars1[w])
 	    '''
       	    if mstars[w] == yr_gmb[1]:
 		    newbdy=(mstars[w-1] + mstars[w]) / 2.e0
@@ -1289,20 +1302,20 @@ class chem_evol(object):
 		    break
 	    '''
             # Highest stellar masses contributing to the ejecta 
-            if ((w == len(mstars) - 1) or mstars[w] == yr_gmb[1]):
-                newbdy=(mstars[w-1] + mstars[w]) / 2.e0
-                oldnewbdy=(mstars[w-2] + mstars[w-1]) / 2.e0
+            if ((w == len(mstars1) - 1) or mstars1[w] == yr_gmb[1]):
+                newbdy=(mstars1[w-1] + mstars1[w]) / 2.e0
+                oldnewbdy=(mstars1[w-2] + mstars1[w-1]) / 2.e0
                 if newbdy < yr_gmb[1]:
 		    if not newbdy in mass_bdys:
                     	mass_bdys.append(newbdy)
-		    if not mstars[w-1] in m_stars:
-                    	m_stars.append(mstars[w-1])
-		    if not mstars[w] in m_stars: 
+		    if not mstars1[w-1] in m_stars:
+                    	m_stars.append(mstars1[w-1])
+		    if not mstars1[w] in m_stars: 
 		    #if not mstars[w] == yr_gmb[1]:
-                    	m_stars.append(mstars[w])
+                    	m_stars.append(mstars1[w])
                 elif oldnewbdy<yr_gmb[1]:
-		    if not mstars[w-1] in m_stars:
-                    	m_stars.append(mstars[w-1])
+		    if not mstars1[w-1] in m_stars:
+                    	m_stars.append(mstars1[w-1])
                 if not newbdy == yr_gmb[1]:
 		    if not yr_gmb[1] in mass_bdys:
                     	mass_bdys.append(yr_gmb[1])
@@ -1316,7 +1329,7 @@ class chem_evol(object):
             print '__get_mass_bdys: m_stars',m_stars
 
         # Return the array containing the boundary masses for applying yields
-        return mass_bdys,m_stars
+        return mass_bdys,m_stars,yields1
 
 
     ##############################################
