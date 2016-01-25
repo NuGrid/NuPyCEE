@@ -3657,11 +3657,11 @@ class chem_evol(object):
                 z.append(spline_metallicity[k](all_masses[m]))  #same mass
                 y.append(metallicity[k])
             x = [all_masses[m]]*len(y)
-	    lifetimes_m = np.interp(all_metallicities, y[::-1], z[::-1]) #1D interpolation to address increasing values in distribution tail
-	    for m in lifetimes_m:
-		all_lifetimes[-1].append(m)
-	
-        # Sorting
+	    lifetimes_z = np.interp(all_metallicities, y[::-1], z[::-1]) #1D interpolation to address increasing values in distribution tail
+	    for l in lifetimes_z:
+		all_lifetimes[-1].append(l)
+
+	# Sorting
         all_lifetimes1=[]
         for k in range(len(all_lifetimes[0])):
             all_lifetimes1.append([])
@@ -3699,6 +3699,12 @@ class chem_evol(object):
                 plt.xlabel('log Mini')
                 plt.ylabel('log lifetime')
                 plt.legend();plt.title('Lifetime fit')
+	    for ind, m in enumerate(zm_lifetime_grid[1]):
+		if m == np.max(zm_lifetime_grid[1]):
+		    for ltind, ltarray in enumerate(zm_lifetime_grid[2]):
+			if ltarray[ind] != np.min(ltarray):
+			    print 'Warning! Maximum mass does not correspond to minimum lifetime for Z=%.04f.' %zm_lifetime_grid[0][ltind]
+			    print 'Lifetime for max mass:', ltarray[ind], 'Minimum lifetime:', np.min(ltarray)
         # Return array with M, t, Z (see function definition)
         return zm_lifetime_grid
 
