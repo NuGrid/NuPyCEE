@@ -1,0 +1,144 @@
+Sphinx Info
+===========
+Sphinx is a python tool to improve the process of producing
+documentation. Part of the Sphinx package is an extension that enables
+Sphinx to automatically generate documentation from python docstrings.
+
+Numpydoc is a sphinx extension used by Numpy and Matplotlib to modify
+the Sphinx documentation syntax so that it is readable even in raw form.
+This way the readability of the python docstrings do not suffer from
+using the Sphinx tools.
+
+The source files used by Sphinx are '.rst'. The are contained in the
+source directorie. Each ".rst" file is a mixture of Sphinx commands
+markup and commands added by Sphinx extensions. Also in the source
+directorie is the Sphinx project configuration file "conf.py", this
+python file contains the configuration info for the Sphinx project,
+including which Sphinx extenshions to include.
+
+When building the documentation on a Linux system use the commands,
+"make clean" to remove the built documentation and "make html" to build
+a html documentation web page. For more build options enter "make".
+The built documentation can be found inside the build directorie.
+
+Basic Formatting
+================
+Sphinx uses reStructuredText (reST) as the markup language when
+generating formatted text. Sphinx has its own syntax for preforming
+documentation specific formatting, like formatting function definitions
+or parameter lists. On top of that Numpydoc modifies some of the Sphinx
+syntax while not changing the resulting formatted text. The basic
+formatting rules for the combination of Sphinx is as follows.
+
+1. Blocks of text are taken to be one paragraph. If you want the blocks
+   of text to be separate paragraphs then they must be separated by one
+   or more blank lines.
+
+2. Blocks of text must have the same indentation level, while separate
+   paragraphs may be on different levels. When the text is formatted
+   paragraphs on separate indentation levels will be indented
+   appropriately.
+
+3. Headers must be preceded and or followed by a line of continuous
+   punctuation characters. Usually a header is followed by a line of '='
+   which must be at least as long as the header line. Numpydoc headers
+   only use the character '-'.
+
+Documentation Formatting
+========================
+The Numpydoc extension remaps some of the documentation specific syntax
+from Sphinx to be easier to read in the raw form. The main syntax for
+documenting a function is as follows.
+
+The fist part of the function or method documentation is usually a
+description of the function, this section is formatted with reST.
+
+Next comes the parameters section. The first line of the section is a
+Numpydoc header with the text "Parameters". Then all of the parameters
+of the function or method are listed using the form, argument name then
+a colon followed by a list of the anticipated data types, or it can be
+omitted if all data is accepted. If the parameter is optional then the
+type list should be preceded by the word optional. The next line should
+contain a description of the variable and if it is optional it should
+state the default value. This description must be indented from the
+parameter name, and is exempt from the reST formatting syntax forbidding
+mixed indentation.
+
+If the function or method returns data, the returns section can be used.
+This section starts with the Numpydoc header "Returns" and has similar
+formatting to the parameters section except rather than the type being
+optional, the name section is optional but the return type must be
+given. 
+
+Another useful section is the examples section, it starts with the
+Numpydoc header "Examples". All of the text following the examples
+header up to the end of the docstring or to the next section is
+formatted using the standard Sphinx / reST formatting. The examples in
+this section can be formatting using a doctest formatting Each doctest
+block must be separated above and below by blank lines, and at least
+the first line should start with ">>> ".
+
+Here is some example documentation for a function, 
+"def foo(arg_1, arg_2, arg_3=True)". ::
+    
+    This function preforms some operation on various parameters. Using
+    some algorithm.
+    
+    Parameters
+    ----------
+    arg_1 : integer
+        This is the arg_1 an does nothing.
+    arg_2 : string, list
+        This argument can handle any data with the form of either a
+        string or a list.
+    arg_3 : boolean, optional
+        If True one thing happens, else something else happens.  The
+        default is True.
+        
+    Returns
+    -------
+    list
+        Some useful data.
+    
+    Examples
+    --------
+    The normal use of the function is as follows
+    
+    >>> foo(1, "bar")
+    [1,2,3]
+    
+Useful reST Formatting
+======================
+Some useful reST markup syntax.
+
+- Bullet points are started with one of the characters '-', '*' or '+'
+  followed by a space and then the content of the bullet point, if the
+  contents of the point continues on the next line then the text must
+  have consistent indentation. The line before and after a set of bullet
+  points must be blank, but individual points may or may not be
+  separated by a blank line.
+
+- Enumerated lists start with the enumerator of the item followed by a
+  period and then a space ie. "3. ". The enumerators may be numbers
+  roman numerals or single letters, also the list can be auto enumerated
+  by using a '#' rather than one of the listed enumerators.
+
+- When plain text is necessary one option is to use "line blocks".
+  Line blocks preserve the indentation and formatting of the original
+  block. Each line in the line block starts with the pipe character
+  followed by a space ie. "| ".
+
+Further Reading
+===============
+For more information on how to use Sphinx, reST and Numpydoc refer to
+the guides below.
+
+- Quick guide to reStructuredText <http://docutils.sourceforge.net/docs/user/rst/quickref.html>.
+- Documentation using Sphinx <http://pythonhosted.org/an_example_pypi_project/sphinx.html>.
+- Guide to Numpydoc <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>
+
+For project web page refer to the sites below.
+
+- Sphinx project <http://sphinx-doc.org/>
+- reStructuredText project <http://docutils.sourceforge.net/rst.html>
+- Numpydoc project <https://github.com/numpy/numpydoc>

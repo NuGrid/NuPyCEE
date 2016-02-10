@@ -1,0 +1,346 @@
+% *********** Document name and reference:
+% Title of document
+\renewcommand{\ndoctitle}{NUPYCEE} 
+% Document category acronym 
+\renewcommand{\ndocname}{NUPYCEE}                      
+% svn dir
+\renewcommand{\svndir}{svn://forum.astro.keele.ac.uk/utils/GCE/NUPYCEE}  
+% Contributors to this document
+\renewcommand{\ndoccontribs}{Christian Ritter, Benoit C\^ot\'e}
+
+%\input{chap}
+
+Document name: \ndocname \\
+SVN directory: \svndir\\
+Contributors: \ndoccontribs\\
+Please send any feedback to critter@uvic.ca or bcote@uvic.ca. Thank you.
+
+
+{  \textbf{Abstract:} %\slshape{}
+%\begin{abstract}
+\noindent The Nugrid-Python-Chemical-evolution environment, short NuPyCEE, provides
+a framework to simulate the ejecta of simple stellar populations with the 1-zone code
+Stellar Yields for Galactic Modeling Applications as well as galaxies
+with the One-zone Model for the Evolution of Galaxies.
+Various chemical evolution input parameter can be specified through a python-based interface.
+Both tools provide extraction and plotting methods.
+We also provide a web interface with limited capabilities which allows to download
+yield tables containing the ejecta of SSP's. 
+To compare the results to observational data the user can utilize the STELLAB module
+which provides various spectroscopic abundance ratios of stars such as
+Milky Way and dwarf galaxies.
+%\end{abstract}
+}
+
+%##############################################################
+%# Section: Introduction
+%##############################################################
+
+
+\section{Introduction}
+\index{\ndocname}
+Welcome to the \ndocname\ user Guide. The purpose of \ndocname\ is to 
+provide the user with a framework to perform chemical evolution calculations.
+The focus lies on simplification and user-friendliness.
+The user can choose between the \textit{Stellar Yields for Galactic Modeling Applications} (SYGMA) module 
+and the \textit{One-zone Model for the Evolution of Galaxies} (OMEGA) module.
+SYGMA allows to follow the ejecta of simple stellar populations in a closed box while OMEGA deals with
+the simulation of galaxies with inflows and outflows.
+Both tools can be used in a similar manner through the ipython command line or
+ipython notebooks.
+%However included are low-mass, intermediate and massive star contributions, including
+%SN2 and SN1a.
+
+%This section will provide the user with a 
+%tutorial and walk through of the tools contained within \ndocname\ and
+%how a typical user would go about using and working with this python module.
+%Note also that each SYGMA version provides a python-based function documentation (Sphinx) 
+%in Sphinx\textunderscore DOC which can be accessed with the web brower through build/html/index.hmtl.
+
+\subsection{Fastest possible instruction}
+
+Download the code at
+
+\url{http://nupycee.bitbucket.org/}
+
+Install ipython with numpy and matplotlib.
+Start ipython in NUPYCEE with
+
+\begin{verbatim}
+ipython -pylab -p numpy
+\end{verbatim}
+
+To run a SYGMA calculation:
+
+\begin{verbatim}
+import sygma as s
+s1=s.sygma()
+\end{verbatim}
+
+That's it! To plot the total  mass ejected:
+
+\begin{verbatim}
+s1.plot_totmasses(source='all')	
+\end{verbatim}
+
+%More plot functions are available: s1.plot$<$tab$>$.
+%Use a question mark after the plotting function
+%for more infos.
+
+To run OMEGA:
+
+\begin{verbatim}
+import omega as o
+o1=o.omega()
+\end{verbatim}
+
+\begin{verbatim}
+o1.plot_spectro(xaxis='[Fe/H]',yaxis='[O/Fe]')
+\end{verbatim}
+
+Now you might want to compare the prediction with
+observations through the STELLAB module.
+
+\begin{verbatim}
+import stellab as st
+st1=st.stellab()
+st1.plot_spectro(xaxis='[Fe/H]', yaxis='[O/Fe]')
+\end{verbatim}
+
+
+
+
+%Check out the documentation in Section \ref{sect_omega}. 
+
+\subsection{Preparing the environment}%Tutorial and Walkthough}
+
+To take advantage of the interactive ipython environment 
+SYGMA and OMEGA are both launched after starting
+ipython with
+
+
+\begin{verbatim}
+ipython -pylab -p numpy
+\end{verbatim}
+
+where the modules numpy and matploblib have to be installed.
+Also you might need to install other python modules (e.g., h5py).
+
+A necessary dependence is NuGrid's pylib toolbox nugridpy which
+contains a number of python scripts.  It can simply be installed via
+pip:
+
+\begin{verbatim}
+pip install nugridpy
+\end{verbatim}
+
+
+%Make sure your PYTHONPATH variable is pointing to this directory.
+
+\subsection{SYGMA}
+
+\subsubsection{General concepts}
+
+In order to follow the chemical enrichment via gas particles
+in N-body simulations one has to describe the ejecta of material
+from such star particles, essentially simple stellar populations. 
+With SYGMA one can follow the ejecta of such populations via
+diagrams and by extracting the ejecta in tables.
+
+\subsubsection{Getting started}
+
+If one wants to start SYGMA from outside the SYGMA directory
+one has to specify the $SYGMADIR$ variable which
+points to the SYGMA dir.
+
+Import the module:
+
+\begin{verbatim}
+import sygma as s
+\end{verbatim}
+
+Next, we create an SSP instance, initiate a class instance $s1$ of SYGMA:
+
+
+\begin{verbatim}
+s1=sygma.sygma(iniZ=0.0001,tend=1e10,mgal=1e9)
+\end{verbatim}
+
+A single stellar population of mass $1\times10^{9}\msun$ and metal fraction
+of $0.0001$ is created and evolved in time steps of $10^{8}$ years
+to the final time of 1e10 years. Other not specified and hence
+default parameter include for example the choice of the initial-mass function.
+%range of $1\msun$ up to $30\msun$ is used. NuGrid tables 
+%and SN1a yields from Thielemann86 are taken
+
+
+One can check the definition of these input parameter online via
+\url{http://nupycee.bitbucket.org/SPHINX/build/html/sygma.html}.
+
+
+No yield tables are defined and hence the NuGrid tables as the
+default choice were selected. These are the Set1 and Set1extension
+yields which are
+%\begin{verbatim}
+%s1=sygma.sygma(alphaimf=2.35,sfr='input',iniZ=0.0001,dt=1e8,tend=1e10,mgal=1e9,
+% table='yield_tables/isotope_yield_table.txt',
+% sn1a_table='yield_tables/sn1a_t86.txt',
+% bb_table='yield_tables/bb_walker91.txt')
+%\end{verbatim} 
+AGB and massive star yields for five different metallicities.
+In this mode the user specifies $iniZ$
+which can be either $Z=2e-2, 1e-2, 6e-3, 1e-3, 1e-4$ and $0.0$.
+Scaled abundances for Z=1e-t65, 1e-6 will be available soon.
+Currently for $Z=0$ the PopIII stars from \cite{heger:10} are set
+as default.
+
+\subsubsection{Providing your own yield tables}
+
+Yield tables are available in the NUPYCEE subdirectory 
+yield\textunderscore tables. Add your yield tables to
+this directory and SYGMA will be able read the table
+if you have specified the $table$ variable. Only
+for table of Z=0 the variable $pop3\textunderscore table$ is used.
+Both tables need yields specified in the SYGMA (and OMEGA)
+yield input format. See for the structure the default table.
+It is important to provide an initial abundance
+file which has to match the number of species provided in the yield tables.
+Provide the file in the iniAbu directory inside the directory yield\textunderscore tables.
+The input variable with which the table file can be specified is $iniabu\textunderscore table$.
+For the necessary structure see again the default choice of that variable.
+%Another subdirectory,
+%plotting\textunderscore scripts, contains various 
+%plotting scripts. The latter use SYGMA's plotting functions.
+
+
+\subsubsection{What do I get out?}
+
+
+The output during execution shows some initial parameters,
+e.g. the isotopes being part of chemical evolution,
+as well as the time and metallicity evolution.
+Also shown is the contribution time of stars of 
+certain initial mass.
+
+
+
+%For more examples, see the SYGMA ipython notebooks available
+%at \\http://208.75.74.161:8888/tree/Publicnotebooks/intro\textunderscore SYGMA.
+
+To analyze the run afterwards we provide a variety of plotting  functions
+which are described in detail at \url{http://nupycee.bitbucket.org/SPHINX/build/html/sygma.html}.
+In following we give some examples. The function plot\textunderscore mass() shows the evolution
+of the yield in solar masses.
+
+
+\begin{verbatim}
+s1.plot_mass()
+\end{verbatim}
+
+With SYGMA you can look at different contributions
+for AGB stars, massive stars, and SN~Ia.
+
+\begin{verbatim}
+s1.plot_mass(source='agb')
+s1.plot_mass(source='massive')
+s1.plot_mass(source='sn1a')
+
+\end{verbatim}
+
+Note that those lines appear all in one figure.
+%The solar abundance distribution is taken from GN93 (NuGrid file).
+
+%To get an overview over the available abundance distribution
+%(in mass fraction divided by solar mass fraction) of the gas
+%reservoir at a certain timestep, a function
+%called plot\textunderscore abu\textunderscore distr() is available.
+The function $plot\textunderscore mass\textunderscore range\textunderscore contributions()$
+shows the yield contribution of stars as a function of their initial mass.
+It allows to identify which mass range contributes to certain elements.
+%Also plotted is to each yield (grid input) corresponding mass range
+%as vertical lines. In these intervals the yields are the same (for one 
+%simple stellar population).
+To monitor the evolution of the mass of the gas reservoir ejected
+masses over time, use plot\textunderscore totmasses().
+The star formation rate as a function of time can be plotted with the function $plot\textunderscore sfr()$.
+In the case you want to write out detailed chemical evolution tables
+of isotopes, use the function $write\textunderscore evol\textunderscore table()$.
+It writes out the mass of isotopes ejected by stars as a function of time
+(each line represents a timestep).
+
+\subsection{OMEGA}
+
+OMEGA is a classical one-zone galaxy model with
+an input star formation history
+where stars form and inject new elements within
+the same gas reservoir, using SYGMA to create a SSP at every timestep.
+A complete description of OMEGA's input parameters and functions can
+be found in the Sphinx documentation.  
+
+OMEGA can mimic known local galaxies, such as Sculptor and Fornax, by
+using their specific star formation history and current mass, which is taken
+from the literature.  The code offers three different prescriptions for treating
+gas inflows and outflows (see the OMEGA Userguide ipython notebook).
+
+All the parameters associated with simple stellar populations are treated as
+in the SYGMA module.
+
+
+\subsection{Getting Started with OMEGA}
+
+Steps what to do with omega.
+
+
+inflows and outflow implementation;
+star formation input ...
+
+\subsection{Stellab}
+
+Cool stuff about stellab here.
+
+\section{Disclaimer}
+
+		
+\section{History} 
+This document history complements the svn log.
+
+\begin{tabular*}{\textwidth}{lll}
+\hline
+Authors & yymmdd & Comment \\
+\hline
+CR & 130926 & creation \\
+\end{tabular*}
+
+
+\subsection{Contact}
+If any bugs do appear or if there are any questions, please email critter@uvic.ca
+% --------------- latex template below ---------------------------
+\begin{verbatim}
+
+\end{verbatim}
+
+
+%\begin{figure}[htbp]
+%   \centering
+%%   \includegraphics[width=\textwidth]{layers.jpg} % 
+%      \caption{}   \includegraphics[width=0.48\textwidth]{FIGURES/HRD90ms.png}  
+%   \includegraphics[width=0.48\textwidth]{FIGURES/HRD150ms.png}  
+%
+%   \label{fig:one}
+%\end{figure}
+%
+%\begin{equation}
+%Y\_a = Y\_k + \sum\_{i \neq k} Y\_i
+%\end{equation}
+%
+%{
+%%\color{ForestGreen}
+%\sffamily 
+%  {\center  --------------- \hfill {\bf START: Some special text} \hfill ---------------}\\
+%$Y\_c$ does not contain ZZZ but we may assign one $Y_n$ to XYZ which is the decay product of the unstable nitrogen isotope JJHJ. %
+%
+%{\center ---------------  \hfill {\bf END:Some special text} \hfill ---------------}\\
+%}
+
+
+

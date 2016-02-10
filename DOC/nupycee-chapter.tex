@@ -1,0 +1,56 @@
+%\documentclass[11pt]{article}
+\documentclass[11pt]{aastex}
+%\documentclass[11pt]{book}
+% *** nugrid style sets the formatting for the Title and section/subsection headings  
+%     it also contains newcommands etc. this is the place to put your newcommands
+\usepackage{nugrid}
+\usepackage{makeidx}
+\usepackage{geometry}          % See geometry.pdf to learn the layout options. There are lots.
+\geometry{a4paper
+}             % ... or letterpaper or a5paper or ... 
+%\geometry{landscape}          % Activate for for rotated page geometry
+\usepackage[parfill]{parskip}  % Activate to begin paragraphs with an empty line rather 
+                               % than an indent
+
+% *** Graphics: pdflatex allows you to include matrix graphics and pdf images, but no 
+% *** traditional ps files. You have to transform those into pdf to include with pdflatex.
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+% *** references are handled in ApJ style
+\bibliographystyle{apj}
+\usepackage{natbib}
+%\fontfamily{\familydefault}
+%\usefont{T1}{cmr}{m}{n}
+
+% I need to set this variables to something so that they can be 
+% reset in the individual documents
+\newcommand{\ndoctitle}{One Chapter of Developer's Documentation} % Title of document
+\newcommand{\ndocname}{wrapper}                       % Document name (acronym from title)
+\newcommand{\svndir}{svn://forum.astro.keele.ac.uk/docs}                      % svn dir
+\newcommand{\ndoccontribs}{CR,BC}                     % Contributers to this document, add yourself!
+
+\title{\ndoctitle}
+\author{The NuGrid collaboration\\ \small http://forum.astro.keele.ac.uk:8080/nugrid}
+\makeindex
+
+% http://www.maths.manchester.ac.uk/~kd/latextut/pdfbyex.htm
+
+\begin{document}
+
+\include{nupycee}
+
+
+\newpage{}
+
+%\bibliographystyle{apj}
+\bibliography{astro}
+
+
+%\bibliography{ngastro}
+ \addcontentsline{toc}{chapter}{Bibliography}
+ \addcontentsline{toc}{chapter}{Index}
+ \printindex
+\end{document}  
