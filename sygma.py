@@ -337,7 +337,7 @@ class sygma( chem_evol ):
         import read_yields as ry
         import re
         y_table=ry.read_nugrid_yields(global_path+table)
-
+	plt.figure(fig)
         # find all available masses
         if len(masses)==0:
                 allheader=y_table.table_mz
@@ -356,7 +356,7 @@ class sygma( chem_evol ):
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 	plt.ylabel('Remnant mass/Msun')
 	plt.xlabel('Initial mass/Msun')
-
+	plt.minorticks_on()
 
     def plot_yield_mtot(self,fig=8,plot_imf_mass_ranges=True,fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
@@ -436,6 +436,42 @@ class sygma( chem_evol ):
         self.save_data(header=[headerx,headery],data=[x,y])
 
 
+    def plot_net_yields(self,fig=91,species='[C-12/Fe-56]',netyields_iniabu='yield_tables/iniabu/iniab_solar_Wiersma.ppn'):
+
+	'''
+		Plots net yields as calculated in the code when using netyields_on=True.
+	'''
+
+	iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
+	isonames=iniabu.names
+        specie1=species.split('/')[0][1:]
+        specie2=species.split('/')[1][:-1]
+	for k in range(len(isonames)):
+		elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
+		A=int(re.split('(\d+)',isonames[k])[1])
+		if specie1 == elem+'-'+str(A):
+			x1sol=iniabu.iso_abundance(elem+'-'+str(A))
+		if specie2 == elem+'-'+str(A):
+			x2sol=iniabu.iso_abundance(elem+'-'+str(A))
+
+	specie1=species.split('/')[0][1:]
+	specie2=species.split('/')[1][:-1]
+	idx1=self.history.isotopes.index(specie1)
+	idx2=self.history.isotopes.index(specie2)
+	y=[]
+	x=range(len(self.history.netyields))
+	x=self.history.age
+	x=self.history.netyields_masses
+	for k in range(len(self.history.netyields)):
+	    x1=self.history.netyields[k][idx1]/sum(self.history.netyields[k])
+	    x2=self.history.netyields[k][idx2]/sum(self.history.netyields[k])
+	    y.append(np.log10(x1/x2 / (x1sol/x2sol)))
+	print 'create figure'
+	plt.figure(fig)
+	plt.plot(x,y,marker='o')
+	plt.ylabel(species)
+	plt.xlabel('Initial mass [Msun]')
+	#plt.xscale('log')
 
     def plot_yield_input(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab='',netyields_iniabu=''):
 
@@ -862,6 +898,8 @@ class sygma( chem_evol ):
         else:
             print 'Isotope or element not available'
             return 0
+
+	print 'Use index ',idx
         for k in range(0,len(yields_evol)):
             if norm == False:
                 y.append(yields_evol[k][idx])
@@ -1627,14 +1665,15 @@ class sygma( chem_evol ):
 	for k in range(0,len(gas_evol)):
 	    if (gas_evol[k]==0) or (gas_mass[k]==0):
 		continue
-	    x.append(x_all[k])
             if norm=='ini':
 	        ism_gasm.append(gas_evol[k]/self.history.mgal)
 	        star_m.append((self.history.mgal-gas_evol[k])/self.history.mgal)
+		x.append(x_all[k])
             if norm == 'current':
 	        if not self.history.gas_mass[k] ==0.:
 	              ism_gasm.append(gas_evol[k]/gas_mass[k])
 	              star_m.append((self.history.mgal-gas_evol[k])/gas_mass[k])
+		      x.append(x_all[k])
 	    #else:
 	     #   ism_gasm.append(0.)
 	      #  star_m.append(0.)
