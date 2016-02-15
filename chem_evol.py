@@ -3332,8 +3332,11 @@ class chem_evol(object):
 	    # do the normalization
 	    norm = (m-mfinal)/sum(yi_all)
 	    yi_all= np.array(yi_all) * norm 	
-	   	
             yields.append(yi_all)
+	    # save calculated net yields and corresponding masses
+            self.history.netyields=yields           
+            self.history.netyields_masses=m_stars
+
 	    #print 'star ',m,(m-mfinal),sum(yields[-1])
         # Return the corrected yields
         return yields
