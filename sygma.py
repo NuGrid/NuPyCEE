@@ -899,7 +899,6 @@ class sygma( chem_evol ):
             print 'Isotope or element not available'
             return 0
 
-	print 'Use index ',idx
         for k in range(0,len(yields_evol)):
             if norm == False:
                 y.append(yields_evol[k][idx])
@@ -1680,6 +1679,7 @@ class sygma( chem_evol ):
             elif norm == 'no':
 	        ism_gasm.append(gas_evol[k])
 	        star_m.append(self.history.mgal-gas_evol[k])
+		x.append(x_all[k])
         if mass == 'gas':
 	    y=ism_gasm
         if mass == 'stars':
