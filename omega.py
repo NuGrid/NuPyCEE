@@ -270,7 +270,7 @@ class omega( chem_evol ):
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0, gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
                  nb_1a_per_m=1.0e-3, f_arfo=1, t_merge=-1.0,\
-                 imf_yields_range=[1,30],exclude_masses=[32,60], \
+                 imf_yields_range=[1,30],exclude_masses=[], \
 		 netyields_on=False,wiersmamod=False,skip_zero=False,\
                  redshift_f=0.0,print_off=False,long_range_ref=False,\
                  f_s_enhance=1.0,m_gas_f=1.0e10,cl_SF_law=False,\
