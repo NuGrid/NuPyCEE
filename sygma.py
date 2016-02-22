@@ -117,7 +117,7 @@ class sygma( chem_evol ):
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
                  nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0.0, \
-                 f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[32,60], \
+                 f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
                  dt_in=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
