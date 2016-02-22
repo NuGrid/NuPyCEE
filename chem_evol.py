@@ -165,9 +165,7 @@ class chem_evol(object):
         Default value : 8.0
 
     exclude_masses : list
-        Contains initial masses to be excluded from the simulation; default exclude 32Msun and 60Msun of solar Z because
-        they are usable only in Z=0.02 SSP simulations
-
+        Contains initial masses in yield tables to be excluded from the simulation;
 
     table : string
         Path pointing toward the stellar yield tables for massive and AGB stars.
