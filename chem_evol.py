@@ -976,9 +976,7 @@ class chem_evol(object):
             self.default_yields = False
 
         # Read stellar yields
-	print 'exclude the  following masses: ',self.exclude_masses,' for ',global_path + self.table
         ytables = ry.read_nugrid_yields(global_path + self.table,excludemass=self.exclude_masses)
-	print 'masses: ',ytables.get(Z=0.0127,quantity='masses')
         self.ytables = ytables
 
         # Interpolate stellar lifetimes
