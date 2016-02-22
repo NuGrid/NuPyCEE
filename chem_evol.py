@@ -183,7 +183,7 @@ class chem_evol(object):
 
     yield_interp : if 'None' : no yield interpolation, no interpolation of total ejecta
 		   if 'lin' - Simple linear yield interpolation.
-                   if 'wiersma' - Interpolation method from Wiersma+ (2009)
+                   if 'wiersma' - Interpolation method from Wiersma+ (2009) and does not require net yields.
 
     iolevel : int
         Specifies the amount of output for testing purposes (up to 3).
@@ -2977,7 +2977,7 @@ class chem_evol(object):
 	    #print m_stars
 
         # If the "interpolation" is taken from Wiersma et al. (2009) ....   
-        elif (self.yield_interp == 'wiersma') or (self.netyields_on==True):
+        elif (self.yield_interp == 'wiersma'):
 
             # Get the closest available metallicity (favouring lower boundary)
             Z_gridpoint = self.__get_Z_wiersma(Z, Z_grid)
@@ -3271,6 +3271,7 @@ class chem_evol(object):
         between the initial abundances used in the stellar model calculations
         and the ones in the gas reservoir at the moment of star formation.
         See Wiersma et al. (2009) for more information on this approach.
+	Note that tabulated net yields are not required for this approach.
 
         Arguments
         =========
@@ -3305,11 +3306,12 @@ class chem_evol(object):
 	    yi_all=[]
             # Correct every isotope and make sure the ejecta is always positive
             for p in range(len(X_ymgal_t)):
-                if self.netyields_on == True:
+		#assume your yields are net yields
+                if (self.netyields_on==True):
 		    if self.wiersmamod: #for Wiesma09 tests
 			    # initial amount depending on the simulation Z + net production factors 
 			    if (m>8) and (iso_name[p] in ['C-12','Mg-24','Fe-56']):
-				yi = (X_ymgal_t[p]*(m-mfinal) + y[p])
+				yi = (X_ymgal_t[p]*(m-mfinal) + y[p]) #total yields, Eq. 4 in Wiersma09
 				if iso_name[p] in ['C-12','Fe-56']:
 					#print iso_name[p]
 					yi = yi*0.5
@@ -3321,7 +3323,8 @@ class chem_evol(object):
                     	yi = (X_ymgal_t[p]*(m-mfinal) + y[p])
                     #print yi,(m-mfinal),y[p],X_ymgal_t[p]
                 else:
-                    yi = y[p] + ( X_ymgal_t[p] - X0) * sum(y)
+		    #assume your yields are NOT net yields
+                    yi = y[p] + ( X_ymgal_t[p] - X0) * sum(y) #total yields yi, Eq. 7 in Wiersma09
                 if yi < 0:
 		    if self.iolevel>0:
 		    	print 'set ',iso_name[p],' for star ',m,' with ',yi,' to 0, ', \
