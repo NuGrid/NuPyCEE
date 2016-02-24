@@ -272,7 +272,7 @@ class sygma( chem_evol ):
 ###############################################################################################
 
 
-    def plot_lifetimes(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_table_lifetimes(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
 	
@@ -319,7 +319,7 @@ class sygma( chem_evol ):
 	plt.yscale('log')
 
 
-    def plot_remnant_input(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_table_remnant(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
 
@@ -392,7 +392,7 @@ class sygma( chem_evol ):
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
 
-    def plot_yield_input_mass(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_table_yield_mass(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
 	'''
 	
@@ -473,7 +473,7 @@ class sygma( chem_evol ):
 	plt.xlabel('Initial mass [Msun]')
 	#plt.xscale('log')
 
-    def plot_yield_input(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab='',netyields_iniabu=''):
+    def plot_table_yield(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab='',netyields_iniabu=''):
 
         '''
 
@@ -817,7 +817,7 @@ class sygma( chem_evol ):
        
 
 
-    def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,linewidth=2):
+    def plot_mass(self,fig=0,specie='C',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,linewidth=2):
     
         '''
 	mass evolution (in Msun) of an element or isotope vs time.
@@ -839,7 +839,9 @@ class sygma( chem_evol ):
 	     SN1a ('SN1a'), or only massive stars
              ('massive')
         norm : boolean
-             If True, normalize to current total ISM mass
+	    if 'no', no normalization
+            If 'current', normalize to current total amount of specie
+
 	label : string
 	     figure label
 	marker : string
@@ -900,11 +902,12 @@ class sygma( chem_evol ):
             return 0
 
         for k in range(0,len(yields_evol)):
-            if norm == False:
+            if norm == 'no':
                 y.append(yields_evol[k][idx])
-            else:
+            elif norm == 'current':
                 y.append( yields_evol[k][idx]/yields_evol_all[k][idx])
-
+	    else:
+		print 'wrong specification of norm parameter'
 
         x=x[1:]
         y=y[1:]

@@ -285,7 +285,7 @@ class omega( chem_evol ):
                  ej_massive=np.array([]), ej_agb=np.array([]),\
                  ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
                  ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
-                 dt_ssp=np.array([])):
+                 dt_ssp=np.array([]),yield_interp='lin'):
 
         # Announce the beginning of the simulation 
         print 'OMEGA run in progress..'
@@ -318,7 +318,8 @@ class omega( chem_evol ):
                  dt_split_info=dt_split_info,ej_massive=ej_massive,\
                  ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
                  ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\
-                 ej_sn1a_coef=ej_sn1a_coef,dt_ssp=dt_ssp)
+                 ej_sn1a_coef=ej_sn1a_coef,dt_ssp=dt_ssp,\
+		 yield_interp=yield_interp)
 
         if self.need_to_quit:
             return

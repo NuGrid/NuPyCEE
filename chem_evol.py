@@ -42,6 +42,7 @@ import copy
 import math
 import random
 import os
+import sys
 import re
 from pylab import polyfit
 from scipy.integrate import quad
@@ -160,6 +161,10 @@ class chem_evol(object):
         Number of SNe Ia per stellar mass formed in a simple stellar population.
         Default value : 1.0e-03
 
+    direct_norm_1a : float
+	Normalization coefficient for SNIa rate integral. 
+	By default deactived but replaces the usage of teh nb_1a_per_m when its value is larger than zero.
+	
     transitionmass : float
         Initial mass which marks the transition from AGB to massive stars [Mo].
         Default value : 8.0
@@ -179,9 +184,18 @@ class chem_evol(object):
         Path pointing toward the table of initial abuncances in mass fraction.
         Default value : 'yield_tables/iniabu/iniab2.0E-02GN93.ppn'
 
-    yield_interp : if 'None' : no yield interpolation, no interpolation of total ejecta
-		   if 'lin' - Simple linear yield interpolation.
-                   if 'wiersma' - Interpolation method from Wiersma+ (2009) and does not require net yields.
+    yield_interp : string
+	if 'None' : no yield interpolation, no interpolation of total ejecta
+	if 'lin' - Simple linear yield interpolation.
+        if 'wiersma' - Interpolation method which makes use of net yields
+			as used e.g. in Wiersma+ (2009); Does not require net yields.
+			if netyields_on is true than makes use of given net yields
+			else calculates net yields from given X0 in yield table.
+
+    netyields_on : boolean
+	if true assumes that yields (input from table parameter) 
+	are net yields. Default false.
+
 
     total_ejecta_interp : if true then interpolates total ejecta given in yield tables 
 			  over initial mass range.  
@@ -407,7 +421,6 @@ class chem_evol(object):
 
         '''
         
-        import sys
         self.need_to_quit = False
         # Total duration of the simulation
         if self.history.tend > 1.5e10:
@@ -1003,7 +1016,6 @@ class chem_evol(object):
             self.__interpolate_lifetimes_pop3(self.ytables_pop3)
 
         # Read SN Ia yields
-        import sys
         sys.stdout.flush()
         self.ytables_1a = ry.read_yield_sn1a_tables( \
             global_path + self.sn1a_table, isotopes)
@@ -1968,7 +1980,6 @@ class chem_evol(object):
             print '!!!!!IMPORTANT!!!!'
             print 'With Vogelsberger SNIa implementation selected mass', \
                   'range not possible.'
-            import sys
             sys.exit('Choose mass range which either fully includes' + \
                      'range from 3 to 8Msun or fully excludes it'+ \
                      'or use other SNIa implementations')
@@ -2968,10 +2979,8 @@ class chem_evol(object):
 	    def func_total_ejecta(inimass):
 		return inimass
 	    return m_stars, yields, func_total_ejecta
-	
-
         # If the interpolation is linear between grid points ...
-        if (self.yield_interp == 'lin') and (not self.netyields_on):
+        elif (self.yield_interp == 'lin') and (not self.netyields_on):
 
             # Get the lower and upper Z boundaries for the interpolation
             z1, z2 = self.__get_Z_bdys(Z, Z_grid)
@@ -2991,9 +3000,10 @@ class chem_evol(object):
 	    print 'Take yields from Z closest to: ',Z,' found: ',Z_gridpoint
             # Get all initial masses at the selected closest metallicity
             m_stars = ytables.get(Z=Z_gridpoint, quantity='masses')
-	    print 'ytables get ',m_stars
             # Get the yields corrected for the different initial abundances
             yields = self.__correct_iniabu(ymgal_t, ytables, Z_gridpoint, m_stars)
+	else:
+            sys.exit('Choice of parameter value of yield_interp not valid!') 
 
         # Output information
         if self.iolevel >= 3:
@@ -3320,18 +3330,25 @@ class chem_evol(object):
 			    if (m>8) and (iso_name[p] in ['C-12','Mg-24','Fe-56']):
 				yi = (X_ymgal_t[p]*(m-mfinal) + y[p]) #total yields, Eq. 4 in Wiersma09
 				if iso_name[p] in ['C-12','Fe-56']:
-					#print iso_name[p]
+					#print 'M=',m,' Reduce ',iso_name[p],' by 0.5'
 					yi = yi*0.5
 				else:
+					#print 'M=',m,' Multiply ',iso_name[p],' by 2.'
 					yi = yi*2.
 			    else:
 				yi = (X_ymgal_t[p]*(m-mfinal) + y[p])
+				#if iso_name[p] in ['C-12','N-14']:
+					#print Z_gridpoint,'M=',m,X_ymgal_t[p],mfinal,y[p]
+					#' Reduce ',iso_name[p],' by 0.5'
+					#yi = yi*0.5
 		    else:
                     	yi = (X_ymgal_t[p]*(m-mfinal) + y[p])
                     #print yi,(m-mfinal),y[p],X_ymgal_t[p]
                 else:
 		    #assume your yields are NOT net yields
-                    yi = y[p] + ( X_ymgal_t[p] - X0) * sum(y) #total yields yi, Eq. 7 in Wiersma09
+		    if iso_name[p] in ['C-12']:
+			print  'C12: Current gas fraction and X0: ',X_ymgal_t[p],X0[p]
+                    yi = y[p] + ( X_ymgal_t[p] - X0[p]) * (m-mfinal) #sum(y) #total yields yi, Eq. 7 in Wiersma09
                 if yi < 0:
 		    if self.iolevel>0:
 		    	print 'set ',iso_name[p],' for star ',m,' with ',yi,' to 0, ', \
@@ -3438,8 +3455,8 @@ class chem_evol(object):
         m_stars = mstars
         yields = yields_all
 
-        
-        if self.netyields_on==True:
+        # The wiersma interpolation below has to be checked.
+        if self.yield_interp == 'wiersma': #self.netyields_on==True:
             # Get the yields corrected for the different initial abundances
             yields = self.__correct_iniabu(ymgal_t, self.ytables_pop3, 0, m_stars)
 
@@ -3922,7 +3939,6 @@ class chem_evol(object):
                     print 'ymgal[i][k]<0',self.ymgal[i][k],self.history.isotopes[k]
                     error = 1
                 if error == 1:
-                    import sys
                     sys.exit('ERROR: zmetal<0 in getmetal routine')
 
         # Return the metallicity of the gas reservoir
