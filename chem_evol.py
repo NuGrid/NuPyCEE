@@ -3148,71 +3148,83 @@ class chem_evol(object):
         m_stars = []
         yields = []
 	
-        # If yields need to be interpolated ...
+        # If yields need to be interpolated between metallicities z1 and z2
         if not z1 == z2:
 
-            # Extract stellar common in both Z1 and Z2
-            for p in range(len(m1)):
-                for k in range(len(m2)):
-                    if  m1[p] == m2[k]:
-                        m_stars.append(m1[p])
+	    #Decide for mass sparsity of grid: Choose grid which has a metallicity closest to Z
+	    if abs(Z-z2) < abs(Z-z1):
+		Z_negl=z1 #not z1
+		Z_choice=z2 #decide for z2
+		m_stars = m2
+		m_negl = m1
+	    else:
+                Z_negl=z2
+                Z_choice=z1
+                m_stars = m1
+		m_negl= m2		
+	    m_bdy=[]
 	    m_missing=[]
-	    zs_missing=[]
-	    #print 'mstars',m_stars
-	    for p in range(len(m1)):
-		if not m1[p] in m_stars:
-	    		if abs(Z-z1) < abs(Z-z2):
-				m_stars.append(m1[p])
-				m_missing.append(m1[p])
-				zs_missing.append(z1)
-	    for p in range(len(m2)):
-		if not m2[p] in m_stars:
-	    		if abs(Z-z2) < abs(Z-z1):
-				m_stars.append(m2[p])
-				m_missing.append(m2[p])
-				zs_missing.append(z2)
-	    '''			
-	    if (not len(m_stars) == len(m2)) or (not len(m_stars) == len(m1)):
-	            print 'Warning: Different masses for different Z',z1,z2,'  in yield input.'
-		    print m1,m2
-                    print 'Cannot interpolate yields between metallicities!'
-                    print 'Take yield for Z closest to current metallicity'
-                    if abs(Z-z1) < abs(Z-z2):
-                        m_stars=m1
-                        z=z1
-                    else:
-                        m_stars=m2
-                        z=z2
-                    yields=[]
-                    for m in m_stars:
-                        yields.append(ytables.get(Z=z, M=m, quantity='Yields'))    
-                    return m_stars,yields
-	    '''
-	    #print 'Zs: ',z1,z2,Z
+	    #print 'm_stars: ',m_stars
+	    #print 'm_neglt: ',m_negl
+	    #find for each mass not available at Z_negl masses m_byd[] (at Z_negl) for a linear interpolation 
+	    # to derive yields for the mass only available at Z_choice.
+	    for p in range(len(m_stars)):
+		if m_stars[p] not in m_negl:
+				#print m_stars[p]
+				m_missing.append(m_stars[p])
+				m_bdy.append([0,0])
+				for m in m_negl:
+					if m<m_stars[p]:
+						m_bdy[-1][0]=m
+					if m>m_stars[p]:
+						#in case no lower boundary
+						if m_bdy[-1][0] ==0:
+							m_bdy[-1][0]=m
+						m_bdy[-1][1]=m
+						break
+				#in case no upper boundary
+				if m_bdy[-1][1] ==0:
+					m_bdy[-1][1]=m_bdy[-1][0]
+				#print 'found  boundary: ',m_bdy[-1]	
 	    #print 'missing masses: ',m_missing,zs_missing
 	    m_stars=np.sort(m_stars)
-            # Interpolate each isotope of each stellar model
+            # For each mass interpolate each isotope
             for m in m_stars:
 		yields.append([])
 		if m in m_missing:
+			#when masses are missing do a interpolation of the yields using m_bdy
 			idx=m_missing.index(m)
-			z_missing=zs_missing[idx]
-			yi = ytables.get(Z=z_missing, M=m, quantity='Yields')
-			yields[-1]=yi
-			print 'Take ',m,' from ',z_missing
-			#do not interpolate
-		else:	
-                	y1 = ytables.get(Z=z1, M=m, quantity='Yields')
-                	y2 = ytables.get(Z=z2, M=m,quantity='Yields')
-                	for p in range(len(y1)):
-                		y1i = y1[p]
-               	   		y2i = y2[p]
-                    		slope = (y2i - y1i) / (z2 - z1)
-                    		b = y2i - slope * z2
-                    		yi = slope * Z + b
-                    		yields[-1].append(yi)
+			#print 'M=',m,'not available at Z=',Z_negl,': interpolate!'
+			#print 'boundary : ',m_bdy[idx][0],m_bdy[idx][1],'for ',m
+			if m_bdy[idx][0] == m_bdy[idx][1]:
+				#no interpolation possible, take at available mass
+				y1 = ytables.get(Z=Z_negl, M=m_bdy[idx][0], quantity='Yields')
+			else:
+				#do interpolation in mass for Z_negl
+				y_min_negl = ytables.get(Z=Z_negl, M=m_bdy[idx][0], quantity='Yields')
+				y_max_negl = ytables.get(Z=Z_negl, M=m_bdy[idx][1], quantity='Yields')
+				y_interp_negl=[]
+				for p in range(len(y_min_negl)):		
+					slope = (y_max_negl[p] - y_min_negl[p]) / (m_bdy[idx][1] - m_bdy[idx][0])
+					b = y_max_negl[p] - slope * m_bdy[idx][1]
+					#print p,y_min_negl[p],y_max_negl[p],slope * m + b
+					y_interp_negl.append(slope * m + b)
+				y1 = y_interp_negl
+		else:
+			#if masses are at both Z available
+			y1 = ytables.get(Z=Z_negl, M=m, quantity='Yields')	
 
-        # If no need to interpolate ...
+		#do interpolatation in metallicity
+		y2 = ytables.get(Z=Z_choice, M=m,quantity='Yields')
+		for p in range(len(y2)):
+			y1i = y1[p]
+			y2i = y2[p]
+			slope = (y2i - y1i) / (Z_choice - Z_negl)
+			b = y2i - slope * Z_choice
+			yi = slope * Z + b
+			yields[-1].append(yi)
+	
+        # If no need to interpolate because same metallicities
         else:
 
             # Copy one of the available stellar masses and yields
@@ -3346,13 +3358,21 @@ class chem_evol(object):
                     #print yi,(m-mfinal),y[p],X_ymgal_t[p]
                 else:
 		    #assume your yields are NOT net yields
-		    if iso_name[p] in ['C-12']:
-			print  'C12: Current gas fraction and X0: ',X_ymgal_t[p],X0[p]
-                    yi = y[p] + ( X_ymgal_t[p] - X0[p]) * (m-mfinal) #sum(y) #total yields yi, Eq. 7 in Wiersma09
+		    #if iso_name[p] in ['C-12']:
+			#print  'C12: Current gas fraction and X0: ',X_ymgal_t[p],X0[p]
+			#introduce relative correction check of term X_ymgal_t[p] - X0[p]
+			#since small difference (e.g. due to lack of precision in X0) can
+			#lead to big differences in yi
+			relat_corr=abs(X_ymgal_t[p] - X0[p])/X_ymgal_t[p]
+			if (relat_corr - 1.)>1e-3:
+                    		yi = y[p] + ( X_ymgal_t[p] - X0[p]) * (m-mfinal) #sum(y) #total yields yi, Eq. 7 in Wiersma09
+			else:
+				yi = y[p]
                 if yi < 0:
-		    if self.iolevel>0:
-		    	print 'set ',iso_name[p],' for star ',m,' with ',yi,' to 0, ', \
-			'netyields: ',y[p]
+		    #if self.iolevel>0:
+		    if abs(yi/y[p])>0.1:
+		    	print iso_name[p],'star ',m,' set ',yi,' to 0, ', \
+			'netyields: ',y[p],'Xsim: ',X_ymgal_t[p],X0[p]
                     yi = 0
 		yi_all.append(yi)
 	 

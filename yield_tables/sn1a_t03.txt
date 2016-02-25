@@ -10,3 +10,4 @@ H Tielemann et al. 2003, elements extracted from yates 2013, set as (only) domin
 &S-32      &8.34e-2
 &Ca-40     &1.21e-2
 &Fe-56     &0.74
+&G-1       &0.0
