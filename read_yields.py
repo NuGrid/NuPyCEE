@@ -227,6 +227,8 @@ class read_nugrid_yields():
 
 	'''
 		Allows to write out table in NuGrid yield table format.
+		Note that method has to be generalized for all tables
+		and lines about NuGrid removed.
 
 		fname: Table name
 
