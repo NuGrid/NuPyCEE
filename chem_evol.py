@@ -1063,16 +1063,19 @@ class chem_evol(object):
         # Get the mass fraction of stars that contribute to the stellar ejecta
         # relative to the total stellar mass within imf_bdys.
         mfac = self.__get_mfac()
-
+        #print 'test ',yields_all[mstars.index(9.0)][3]  #N14 3
         # Get the mass boundaries on which each star yields will be applied.
         # Ex: 12 Mo model yields might be used for all stars from 8 to 12.5 Mo.
 	# also modifies mstars since some stars could lie outside yield range
 	# therefore we also have to create the yields variable
         mass_bdys,mstars,yields = self.__get_mass_bdys(mstars,yields_all)
-      
+     
+        #print 'test ',yields[mstars.index(9.0)][3]  #N14 3
         # Apply the IMF on the mass boundaries
         mass_bdys, mstars, yields, massfac, mftot = \
             self.__apply_imf_mass_bdys( mass_bdys, mstars, yields)
+
+        #print 'test ',yields[mstars.index(9.0)][3]  #N14 3
 
         # Output information
         if self.iolevel >= 1:
@@ -1099,7 +1102,7 @@ class chem_evol(object):
         self.imf_mass_ranges = imf_mass_ranges
 
         # Calculate ejecta from stars recently formed and add it to the mdot arrays
-        self.__calculate_ejecta(mstars, yields_all, yields_extra, \
+        self.__calculate_ejecta(mstars, yields, yields_extra, \
             mass_bdys,massfac, i, func_total_ejecta)
 
         # Add the contribution of SNe Ia, if any ...
@@ -1516,6 +1519,7 @@ class chem_evol(object):
         # For every star having yields, from massive down to low-mass stars ...
         for w in range(len(mstars))[::-1]:
 
+	    #print 'take star ',mstars[w]
             # Copy the desired yields and mass boundary
             yields = yields_all[w]
             maxm = mass_bdys[w+1]
@@ -1771,6 +1775,9 @@ class chem_evol(object):
 
             # For massive stars ...
             if mstars[w] > self.transitionmass:
+
+		#if self.history.isotopes[k]=='N-14':
+			#print 'N14: ',mstars[w],yields[k],scalefactor,number_stars			
 
                 # In the case of an extra source in massive stars ...
                 if self.extra_source_on:
@@ -3342,7 +3349,7 @@ class chem_evol(object):
 			    if (m>8) and (iso_name[p] in ['C-12','Mg-24','Fe-56']):
 				yi = (X_ymgal_t[p]*(m-mfinal) + y[p]) #total yields, Eq. 4 in Wiersma09
 				if iso_name[p] in ['C-12','Fe-56']:
-					#print 'M=',m,' Reduce ',iso_name[p],' by 0.5'
+					print 'M=',m,' Reduce ',iso_name[p],' by 0.5 ',yi,yi*0.5
 					yi = yi*0.5
 				else:
 					#print 'M=',m,' Multiply ',iso_name[p],' by 2.'
@@ -3362,7 +3369,7 @@ class chem_evol(object):
 			#print  'C12: Current gas fraction and X0: ',X_ymgal_t[p],X0[p]
 			#introduce relative correction check of term X_ymgal_t[p] - X0[p]
 			#since small difference (e.g. due to lack of precision in X0) can
-			#lead to big differences in yi
+			#lead to big differences in yi; yield table X0 has only limited digits
 			relat_corr=abs(X_ymgal_t[p] - X0[p])/X_ymgal_t[p]
 			if (relat_corr - 1.)>1e-3:
                     		yi = y[p] + ( X_ymgal_t[p] - X0[p]) * (m-mfinal) #sum(y) #total yields yi, Eq. 7 in Wiersma09
@@ -3376,9 +3383,9 @@ class chem_evol(object):
                     yi = 0
 		yi_all.append(yi)
 	 
-	    # do the normalization
-	    norm = (m-mfinal)/sum(yi_all)
-	    yi_all= np.array(yi_all) * norm 	
+	    # we do not do the normalization
+	    #norm = (m-mfinal)/sum(yi_all)
+	    yi_all= np.array(yi_all) #* norm 	
             yields.append(yi_all)
 	    # save calculated net yields and corresponding masses
             self.history.netyields=yields           

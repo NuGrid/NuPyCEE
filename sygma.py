@@ -107,7 +107,7 @@ class sygma( chem_evol ):
     def __init__(self, sfr='input', \
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
-                 tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
+                 tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
                  ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
                  iniabu_table='', \
@@ -272,6 +272,59 @@ class sygma( chem_evol ):
 ###############################################################################################
 
 
+    def plot_metallicity(self,source='all',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+        Plots the metal fraction defined as the sum of all isotopes except
+        'H-1','H-2','H-3','He-3','He-4','Li-6','Li-7'.
+
+        source : string
+             Specifies if yields come from
+	     all sources ('all'), including
+	     AGB+SN1a, massive stars. Or from
+	     distinctive sources:
+	     only agb stars ('agb'), only
+	     SN1a ('SN1a'), or only massive stars
+             ('massive')
+
+
+        '''
+	iso_non_metal=['H-1','H-2','H-3','He-3','He-4','Li-6','Li-7']
+	idx_iso_non_metal=[]
+	for h in range(len(iso_non_metal)):
+		if iso_non_metal[h] in self.history.isotopes:
+			idx_iso_non_metal.append(self.history.isotopes.index(iso_non_metal[h]))
+
+
+        x=self.history.age
+
+	if source == 'all':
+	       yields_evol=self.history.ism_iso_yield
+	elif source =='agb':
+	      yields_evol=self.history.ism_iso_yield_agb
+	elif source == 'sn1a':
+	      yields_evol=self.history.ism_iso_yield_1a
+	elif source == 'massive':
+	     yields_evol=self.history.ism_iso_yield_massive
+	
+        Z_evol=[]
+	for k in range(len(yields_evol)):
+		isotopes=self.history.isotopes
+		nonmetals=0
+		for h in range(len(idx_iso_non_metal)):
+			nonmetals=nonmetals + yields_evol[k][idx_iso_non_metal[h]]
+		Z_step=(sum(yields_evol[k]) - nonmetals)/sum(yields_evol[k])
+		Z_evol.append(Z_step)
+
+	plt.plot(x,Z_evol,label=label)
+
+	plt.xscale('log')
+	plt.xlabel('Age [yrs]')
+	plt.ylabel('Metal fraction Z')
+        #self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+
+
+
     def plot_table_lifetimes(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
@@ -297,6 +350,8 @@ class sygma( chem_evol ):
         import read_yields as ry
         import re
         y_table=ry.read_nugrid_yields(global_path+table)
+
+	plt.figure(fig)
 
         # find all available masses
         if len(masses)==0:
@@ -2289,237 +2344,6 @@ class sygma( chem_evol ):
 	return mean_val,bin_bdys,y,color,label
 
 
-    def write_evol_table(self,elements=['H'],isotopes=['H-1'],table_name='gce_table.txt', path="",interact=False):
-
-        '''
-	Writes out evolution of time, metallicity
-	and each isotope in the following format
-	(each timestep in a line):
-
-	&Age       &H-1       &H-2  ....
-
-	&0.000E+00 &1.000E+00 &7.600E+08 & ...
-
-	....
-	
-	This method has a notebook and normal version. If you are
-	using a python notebook the function will
-	open a link to a page containing the table.
-	
-
-        Parameters
-        ----------
-        table_name : string,optional
-          Name of table. If you use a notebook version, setting a name
-	  is not necessary.
-	elements : array
-		Containing the elements with the name scheme 'H','C'
-	isotopes : array
-		If elements list empty, ignore elements input and use isotopes input; Containing the isotopes with the name scheme 'H-1', 'C-12'
-	interact: bool
-		If true, saves file in current directory (notebook dir) and creates HTML link useful in ipython notebook environment
-        Examples
-        ----------
-        >>> s.write_evol_table(elements=['H','C','O'],table_name='testoutput.txt')
-
-
-        '''
-        if path == "":
-            path = global_path+'evol_tables/'
-
-        yields_evol=self.history.ism_iso_yield
-        metal_evol=self.history.metallicity
-        time_evol=self.history.age
-	idx=[]
-	if len(elements)>0:
-		elements_tot=self.history.elements
-		for k in range(len(elements_tot)):
-			if elements_tot[k] in elements:
-				idx.append(elements_tot.index(elements_tot[k]))
-		yields_specie=self.history.ism_elem_yield
-		specie=elements
-	elif len(isotopes)>0:
-                iso_tot=self.history.isotopes
-                for k in range(len(iso_tot)):
-                        if iso_tot[k] in isotopes:
-                                idx.append(iso_tot.index(iso_tot[k]))
-		yields_specie=self.history.ism_iso_yield	
-		specie=isotopes
-		
-	else:
-		print 'Specify either isotopes or elements'
-		return
-	if len(idx)==0:
-		print 'Please choose the right isotope names'
-		return 0
-
-
-	frac_yields=[]
-	for h in range(len(yields_specie)):
-		frac_yields.append([])
-		for k in range(len(idx)):
-			frac_yields[-1].append( np.array(yields_specie[h][idx[k]])/self.history.mgal)
-	
-	mtot_gas=self.history.gas_mass
-
-
-        metal_evol=self.history.metallicity
-	#header
-        out='&Age [yr]  '
-        for i in range(len(specie)):
-            out+= ('&'+specie[i]+((10-len(specie[i]))*' '))
-        out+='M_tot \n'
-	#data
-        for t in range(len(frac_yields)):
-            out+=('&'+'{:.3E}'.format(time_evol[t]))
-            #out+=(' &'+'{:.3E}'.format(frac_yields[t]))
-            for i in range(len(specie)):
-                out+= ( ' &'+ '{:.3E}'.format(frac_yields[t][i]))
-	    out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
-            out+='\n'
-	
-	if interact==True:
-		import random
-		randnum=random.randrange(10000,99999)
-		name=table_name+str(randnum)+'.txt'
-		#f1=open(global_path+'evol_tables/'+name,'w')
-		f1=open(name,'w')
-		f1.write(out)
-		f1.close()
-		print 'Created table '+name+'.'
-		print 'Download the table using the following link:'
-		#from IPython.display import HTML
-		#from IPython import display
-		from IPython.core.display import HTML
-		import IPython.display as display
-		#print help(HTML)
-		#return HTML("""<a href="evol_tables/download.php?file="""+name+"""">Download</a>""")
-		#test=
-		#return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
-                #if interact==False:
-                #return HTML("""<a href="""+global_path+"""/evol_tables/"""+name+""">Download</a>""")
-		return HTML("""<a href="""+name+""">Download</a>""")
-                #else:
-                #        return name
-	else:
-		print 'file '+table_name+' saved in subdirectory evol_tables.'
-		f1=open(path+table_name,'w')
-        	f1.write(out)
-        	f1.close()
-
-    def save_data(self,header=[],data=[],filename='plot_data.txt'):
-	'''
-		Writes data into a text file. data entries
-		can have different lengths
-	'''
-	out=' '
-        #header
-        for i in range(len(header)):
-            out+= ('&'+header[i]+((10-len(header[i]))*' '))
-        #data
-	out+='\n'
-	max_data=[]
-        for t in range(len(data)):
-		max_data.append(len(data[t]))
-        for t in range(max(max_data)):
-            #out+=('&'+'{:.3E}'.format(data[t]))
-            #out+=(' &'+'{:.3E}'.format(frac_yields[t]))
-            for i in range(len(data)):
-		if t>(len(data[i])-1):
-			out+=(' '*len( ' &'+ '{:.3E}'.format(0)))
-		else:
-                	out+= ( ' &'+ '{:.3E}'.format(data[i][t]))
-            #out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
-            out+='\n'
-	#import os.path
-	#if os.path.isfile(filename) 
-	#overwrite existing file for now
-	f1=open(filename,'w')
-	f1.write(out)
-	f1.close()
-
-    def __time_to_z(self,time,Hubble_0,Omega_lambda,Omega_m):
-	'''
-	Time to redshift conversion
-
-	'''
-	import time_to_redshift as tz
-	#transform into Gyr
-	time_new=[]
-	firstidx=True
-	for k in range(len(time)):
-		if time[k]>=8e8:
-			time_new.append(time[k]/1e9)
-			if firstidx:
-				index=k
-				firstidx=False	
-	return tz.t_to_z(time_new,Hubble_0,Omega_lambda,Omega_m),index
-
-    def __msc(self,source,shape,marker,color):
-
-	'''
-	Function checks if either of shape,color,marker
-	is set. If not then assign in each case
-	a unique property related to the source ('agb','massive'..)
-	to the variable and return all three
-	'''
-
-	if source=='all':
-		shape1='-'
-		marker1='o'
-		color1='k'
-	elif source=='agb':
-		shape1='--'
-		marker1='s'
-		color1='r'
-	elif source=='massive':
-		shape1='-.'
-		marker1='D'
-		color1='b'
-	elif source =='sn1a':
-		shape1=':'
-		marker1='x'
-		color1='g'
-	
-	if len(shape)==0:
-		shape=shape1
-	if len(marker)==0:
-		marker=marker1
-	if len(color)==0:
-		color=color1
-
-	return shape,marker,color
-
-    def __fig_standard(self,ax,fontsize=8,labelsize=8,lwtickboth=[6,2],lwtickmajor=[10,3],markersize=8,rspace=0.6,bspace=0.15, legend_fontsize=14):
-
-        '''
-	Internal function in order to get standardized figure font sizes.
-	It is used in the plotting functions.
-        '''
-
-        plt.legend(loc=2,prop={'size':legend_fontsize})
-        plt.rcParams.update({'font.size': fontsize})
-        ax.yaxis.label.set_size(labelsize)
-        ax.xaxis.label.set_size(labelsize)
-	#ax.xaxis.set_tick_params(width=2)
-	#ax.yaxis.set_tick_params(width=2)		
-	ax.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
-	ax.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
-	#Add that line below at some point
-	#ax.xaxis.set_tick_params(width=2)
-	#ax.yaxis.set_tick_params(width=2)
-	if len(ax.lines)>0:
-		for h in range(len(ax.lines)):
-			ax.lines[h].set_markersize(markersize)
-	ax.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
-
-        plt.subplots_adjust(right=rspace)
-        plt.subplots_adjust(bottom=bspace)
-
-
-    ###################################################
-    #                  Plot Iso Ratio                 #
-    ###################################################
     def plot_iso_ratio(self,fig=18,source='all',marker='',shape='',\
         color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
         bspace=0.15,labelsize=15,legend_fontsize=14,return_x_y=False,
