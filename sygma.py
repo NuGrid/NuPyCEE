@@ -2575,3 +2575,100 @@ class sygma( chem_evol ):
         # Return the number fractions
         return x1_rsi, x2_rsi, y1_rsi, y2_rsi
 
+    def __msc(self,source,shape,marker,color):
+
+	'''
+	Function checks if either of shape,color,marker
+	is set. If not then assign in each case
+	a unique property related to the source ('agb','massive'..)
+	to the variable and returns all three
+	'''
+
+	if source=='all':
+		shape1='-'
+		marker1='o'
+		color1='k'
+	elif source=='agb':
+		shape1='--'
+		marker1='s'
+		color1='r'
+	elif source=='massive':
+		shape1='-.'
+		marker1='D'
+		color1='b'
+	elif source =='sn1a':
+		shape1=':'
+		marker1='x'
+		color1='g'
+	
+	if len(shape)==0:
+		shape=shape1
+	if len(marker)==0:
+		marker=marker1
+	if len(color)==0:
+		color=color1
+
+	return shape,marker,color
+
+
+    ##############################################
+    #                Fig Standard                #
+    ##############################################
+    def __fig_standard(self,ax,fontsize=8,labelsize=8,lwtickboth=[6,2],lwtickmajor=[10,3],markersize=8,rspace=0.6,bspace=0.15, legend_fontsize=14):
+
+        '''
+	Internal function in order to get standardized figure font sizes.
+	It is used in the plotting functions.
+        '''
+
+        plt.legend(loc=2,prop={'size':legend_fontsize})
+        plt.rcParams.update({'font.size': fontsize})
+        ax.yaxis.label.set_size(labelsize)
+        ax.xaxis.label.set_size(labelsize)
+	#ax.xaxis.set_tick_params(width=2)
+	#ax.yaxis.set_tick_params(width=2)		
+	ax.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
+	ax.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
+	#Add that line below at some point
+	#ax.xaxis.set_tick_params(width=2)
+	#ax.yaxis.set_tick_params(width=2)
+	if len(ax.lines)>0:
+		for h in range(len(ax.lines)):
+			ax.lines[h].set_markersize(markersize)
+	ax.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
+
+        plt.subplots_adjust(right=rspace)
+        plt.subplots_adjust(bottom=bspace)
+
+    def save_data(self,header=[],data=[],filename='plot_data.txt'):
+	'''
+		Writes data into a text file. data entries
+		can have different lengths
+	'''
+	out=' '
+        #header
+        for i in range(len(header)):
+            out+= ('&'+header[i]+((10-len(header[i]))*' '))
+        #data
+	out+='\n'
+	max_data=[]
+        for t in range(len(data)):
+		max_data.append(len(data[t]))
+        for t in range(max(max_data)):
+            #out+=('&'+'{:.3E}'.format(data[t]))
+            #out+=(' &'+'{:.3E}'.format(frac_yields[t]))
+            for i in range(len(data)):
+		if t>(len(data[i])-1):
+			out+=(' '*len( ' &'+ '{:.3E}'.format(0)))
+		else:
+                	out+= ( ' &'+ '{:.3E}'.format(data[i][t]))
+            #out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
+            out+='\n'
+	#import os.path
+	#if os.path.isfile(filename) 
+	#overwrite existing file for now
+	f1=open(filename,'w')
+	f1.write(out)
+	f1.close()
+
+
