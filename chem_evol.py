@@ -146,6 +146,10 @@ class chem_evol(object):
 		  'maoz' - specific power law from Maoz & Mannucci (2012)
         Default value : 'power_law'
 
+    ns_merger_on : boolean
+        True or False to include or exclude the contribution of neutron star mergers.
+        Default value: True
+
     beta_pow : float
         Slope of the power law for custom SN Ia rate, R = Constant * t^-beta_pow.
         Default value : -1.0
@@ -179,6 +183,10 @@ class chem_evol(object):
     sn1a_table : string
         Path pointing toward the stellar yield table for SNe Ia.
         Default value : 'yield_tables/sn1a_t86.txt' (Tielemann et al. 1986)
+
+    nsmerger_table : string
+        Path pointing toward the r-process yield tables for neutron star mergers
+        Default value : 'yield_tables/r_process.txt' (Rosswog et al. 2013)
 
     iniabu_table : string
         Path pointing toward the table of initial abuncances in mass fraction.
@@ -221,7 +229,8 @@ class chem_evol(object):
              tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
-             iniabu_table='', \
+             ns_merger_on=True, f_binary=1.0, f_merger=0.0028335,\
+             nsmerger_table = 'yield_tables/r_process.txt' iniabu_table='', \
              extra_source_on=False, \
              extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
              pop3_table='yield_tables/popIII_heger10.txt', \
@@ -236,6 +245,7 @@ class chem_evol(object):
              ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
              isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
              zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
+             ytables_nsmerger_in=np.array([]), \
              dt_in=np.array([]),dt_split_info=np.array([]),\
              ej_massive=np.array([]), ej_agb=np.array([]),\
              ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
@@ -273,6 +283,7 @@ class chem_evol(object):
 	self.table = table
         self.iniabu_table = iniabu_table
         self.sn1a_table = sn1a_table
+        self.nsmerger_table = nsmerger_table
         self.extra_source_table = extra_source_table
         self.pop3_table = pop3_table
 	self.hardsetZ = hardsetZ
@@ -280,6 +291,7 @@ class chem_evol(object):
 	self.imf_type = imf_type
 	self.alphaimf = alphaimf
 	self.sn1a_on = sn1a_on
+        self.ns_merger_on = ns_merger_on
         self.special_timesteps = special_timesteps
         self.iolevel = iolevel
         self.nb_1a_per_m = nb_1a_per_m
@@ -328,6 +340,7 @@ class chem_evol(object):
             self.ytables_pop3 = ytables_pop3_in
             self.zm_lifetime_grid_pop3 = zm_lifetime_grid_pop3_in
             self.ytables_1a = ytables_1a_in
+            self.ytables_nsmerger = ytables_nsmerger_in
             self.default_yields = True
             self.extra_source_on = False
             self.ytables_extra = 0
@@ -348,8 +361,8 @@ class chem_evol(object):
         self.nb_timesteps = len(timesteps)
 
         # Initialisation of the storing arrays
-        mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, mdot_massive, mdot_agb, \
-        mdot_1a, sn1a_numbers, sn2_numbers, imf_mass_ranges, \
+        mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_ns, mdot_massive, mdot_agb, \
+        mdot_1a, mdot_ns, sn1a_numbers, sn2_numbers, ns_numbers, imf_mass_ranges, \
         imf_mass_ranges_contribution, imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
@@ -367,8 +380,10 @@ class chem_evol(object):
         self.history.ism_iso_yield.append(ymgal[0])
         self.history.ism_iso_yield_agb.append(ymgal_agb[0])
         self.history.ism_iso_yield_1a.append(ymgal_1a[0])
+	self.history.ism_iso_yield_ns.append(ymgal_ns[0])
         self.history.ism_iso_yield_massive.append(ymgal_massive[0])
         self.history.sn1a_numbers.append(0)
+	self.history.ns_numbers.append(0)
         self.history.sn2_numbers.append(0)
         self.history.m_locked = []
         self.history.m_locked_agb = []
@@ -385,10 +400,13 @@ class chem_evol(object):
         self.ymgal_massive = ymgal_massive
         self.ymgal_agb = ymgal_agb
         self.ymgal_1a = ymgal_1a
+	self.ymgal_ns = ymgal_ns
         self.mdot_massive = mdot_massive
         self.mdot_agb = mdot_agb
         self.mdot_1a = mdot_1a
+	self.mdot_ns = mdot_ns
         self.sn1a_numbers = sn1a_numbers
+	self.ns_numbers = ns_numbers
         self.sn2_numbers = sn2_numbers
         self.imf_mass_ranges = imf_mass_ranges
         self.imf_mass_ranges_contribution = imf_mass_ranges_contribution
@@ -675,8 +693,8 @@ class chem_evol(object):
         '''
         This function declares and returns all the arrays containing information
         about the evolution of the stellar ejecta, the gas reservoir, the star
-        formation rate, and the number of core-collapse SNe, SNe Ia, and white
-        dwarfs.
+        formation rate, and the number of core-collapse SNe, SNe Ia, neutron star 
+        mergers, and white dwarfs.
 
         Argument
         ========
@@ -699,20 +717,24 @@ class chem_evol(object):
         for k in range(nb_dt_gsa):
             ymgal.append(nb_iso_gsa * [0])
 
-        # Massive stars, AGB stars, and SNe Ia ejecta
+        # Massive stars, AGB stars, SNe Ia ejecta, and neutron star merger ejecta
         ymgal_massive = []
         ymgal_agb = []
         ymgal_1a = []
+	ymgal_ns = []
         for k in range(nb_dt_gsa + 1):
             ymgal_massive.append(nb_iso_gsa * [0])
             ymgal_agb.append(nb_iso_gsa * [0])
             ymgal_1a.append(nb_iso_gsa * [0])
+	    ymgal_ns.append(nb_iso_gsa * [0])
         mdot_massive = copy.deepcopy(mdot)
         mdot_agb     = copy.deepcopy(mdot)
         mdot_1a      = copy.deepcopy(mdot)
+	mdot_ns      = copy.deepcopy(mdot)
 
-        # Number of SNe Ia and core-collapse SNe
+        # Number of SNe Ia, core-collapse SNe, and neutron star mergers
         sn1a_numbers = [0] * nb_dt_gsa
+	ns_numbers = [0] * nb_dt_gsa
         sn2_numbers  = [0] * nb_dt_gsa
         self.wd_sn1a_range  = [0] * nb_dt_gsa
         self.wd_sn1a_range1 = [0] * nb_dt_gsa
@@ -727,9 +749,9 @@ class chem_evol(object):
         imf_mass_ranges_mtot = [[]] * (nb_dt_gsa + 1)
 
         # Return all the arrays
-        return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, mdot_massive, \
-               mdot_agb, mdot_1a, sn1a_numbers, sn2_numbers, imf_mass_ranges, \
-               imf_mass_ranges_contribution, imf_mass_ranges_mtot
+        return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_ns, mdot_massive, \
+               mdot_agb, mdot_1a, mdot_ns, sn1a_numbers, sn2_numbers, ns_numbers, \
+               imf_mass_ranges, imf_mass_ranges_contribution, imf_mass_ranges_mtot
 
 
     ##############################################
@@ -862,6 +884,7 @@ class chem_evol(object):
                 self.ymgal[i][k] = f_lock * self.ymgal[i-1][k]
                 self.ymgal_agb[i][k] = f_lock * self.ymgal_agb[i-1][k]
                 self.ymgal_1a[i][k] = f_lock * self.ymgal_1a[i-1][k]
+		self.ymgal_ns[i][k] = f_lock * self.ymgal_ns[i-1][k]
                 self.ymgal_massive[i][k] = f_lock * self.ymgal_massive[i-1][k]
                 self.m_locked += self.sfrin * self.ymgal[i-1][k]
 
@@ -880,6 +903,7 @@ class chem_evol(object):
             self.ymgal[i] = self.ymgal[i-1]
             self.ymgal_agb[i] = self.ymgal_agb[i-1]
             self.ymgal_1a[i] = self.ymgal_1a[i-1]
+	    self.ymgal_ns[i] = self.ymgal_ns[i-1]
             self.ymgal_massive[i] = self.ymgal_massive[i-1]
 
             # Output information
@@ -892,6 +916,7 @@ class chem_evol(object):
         self.ymgal_1a[i] = np.array(self.ymgal_1a[i]) + np.array(self.mdot_1a[i-1])
         self.ymgal_massive[i] = np.array(self.ymgal_massive[i]) + \
                                 np.array(self.mdot_massive[i-1])
+        self.ymgal_ns[i] = np.array(self.ymgal_ns[i]) + np.array(self.mdot_ns[i-1])
 
         # Convert the mass ejected by massive stars into rate
         if self.history.timesteps[i-1] == 0.0:
@@ -929,8 +954,10 @@ class chem_evol(object):
         self.history.ism_iso_yield.append(self.ymgal[i])
         self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
         self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
+        self.history.ism_iso_yield_ns.append(self.ymgal_ns[i])
         self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
         self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
+        self.history.ns_numbers.append(self.ns_numbers[i-1])
         self.history.sn2_numbers.append(self.sn2_numbers[i-1])
         self.history.m_locked.append(self.m_locked)	
         self.history.m_locked_agb.append(self.m_locked_agb)
@@ -961,6 +988,8 @@ class chem_evol(object):
             self.history.ism_elem_yield_agb.append(conv[1])
             conv = self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h])
             self.history.ism_elem_yield_1a.append(conv[1])
+	    conv = self._iso_abu_to_elem(self.history.ism_iso_yield_ns[h])
+	    self.history.ism_elem_yield_ns.append(conv[1])
             conv = self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h])
             self.history.ism_elem_yield_massive.append(conv[1])
 
@@ -1019,6 +1048,10 @@ class chem_evol(object):
         sys.stdout.flush()
         self.ytables_1a = ry.read_yield_sn1a_tables( \
             global_path + self.sn1a_table, isotopes)
+
+        # Read NS merger yields
+        self.ytables_nsmerger = ry.read_yield_sn1a_tables( \
+            global_path + self.nsmerger_table, isotopes)
 
         # Should be modified to include extra source for the yields
         self.extra_source_on = False
@@ -1110,6 +1143,9 @@ class chem_evol(object):
             if not (self.imf_bdys[0] > 8 or self.imf_bdys[1] < 3):
                 self.__sn1a_contribution(i)
 
+        # Add the contribution of neutron star mergers, if any...
+        if (self.ns_merger_on == True):
+            self.__nsmerger_contribution(i)
 
     ##############################################
     #               Inter MM Plane               #
@@ -1941,6 +1977,228 @@ class chem_evol(object):
             self.mdot[j] = np.array(self.mdot[j]) +  np.array(n1a * yields1a)
             self.mdot_1a[j] = np.array(self.mdot_1a[j]) + np.array(n1a*yields1a)
 
+    #############################################
+    #            NS Merger Contribution         #
+    #############################################
+    def __nsmerger_contribution(self, i):
+        '''
+        This function calculates the contribution of neutron star mergers on the stellar ejecta
+        and adds it to the mdot array.
+
+        Arguments
+        =========
+
+            i : index of the current timestep
+
+        '''
+
+        tt = 0
+
+        # Normalize ...
+        self.__normalize_nsmerger(spline_min_time)
+
+        # For every upcoming timestep j, starting with the current one...
+        for j in range(i-1, self.nb_timesteps):
+
+            # Set the upper and lower time boundary of the timestep j
+            timemin = tt
+            tt += self.history.timesteps[j]
+            timemax = tt
+
+	    # Calculate the number of NS mergers per stellar mass
+            nns = self.__nsmerger_num(timemin, timemax)
+
+            # Calculate the number of NS mergers in the current SSP
+            nns = nns * self.m_locked
+
+            self.ns_numbers[j] += nns
+            ns_sum += nns
+
+            # Add the contribution of NS mergers to the timestep j
+            self.mdot[j] = np.array(self.mdot[j]) + np.array(nns * yieldsns)
+            self.mdot_ns[j] = np.array(self.mdot_ns[j]) + np.array(nns * yieldsns)
+
+    ##############################################
+    #               NS merger number             #
+    ##############################################
+    def __nsmerger_num(self, timemin, timemax):
+
+        '''
+        This function returns the number of neutron star mergers occurring within a given time
+        interval using the Dominik et al. (2012) delay-time distribution function.
+        
+        Arguments
+        =========
+        
+            timemin : Lower boundary of time interval.
+            timemax : Upper boundary of time interval.
+
+        '''
+
+        # Values of bounds on the piecewise DTDs, in Myr
+        lower = 10
+        a02bound = 22.2987197486
+        a002bound = 39.7183036496
+        #upper = 10000
+
+        # convert time bounds into Myr, since DTD is in units of Myr
+        timemin = timemin/1e6
+        timemax = timemax/1e6
+
+	# initialise the number of neutron star mergers in the current time interval
+        nns = 0.0
+
+        # Integrate over solar metallicity DTD
+        if self.zmetal == 0.02:
+
+            # Define a02 DTD fit parameters
+            a = -0.0138858377011
+            b = 1.10712569392
+            c = -32.1555682584
+            d = 468.236521089
+            e = -3300.97955814
+            f = 9019.62468302
+            a_pow = 1079.77358975
+
+	    # Manually compute definite integral values over DTD with bounds timemin and timemax
+            # DTD doesn't produce until 10 Myr
+            if timemax < lower:
+                nns = 0.0
+
+            # if timemin is below 10 Myr and timemax is in the first portion of DTD
+            elif timemin < lower and timemax <= a02bound:
+                up = ((a/6.)*(timemax**6))+((b/5.)*(timemax**5))+((c/4.)*(timemax**4))+((d/3.)*(timemax**3))+((e/2.)*(timemax**2))+(f*timemax)
+                down = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
+                nns = up - down
+
+            # if both timemin and timemax are in initial portion of DTD
+            elif timemin >= lower and timemax <= a02bound:
+                up = ((a/6.)*(timemax**6))+((b/5.)*(timemax**5))+((c/4.)*(timemax**4))+((d/3.)*(timemax**3))+((e/2.)*(timemax**2))+(f*timemax)
+                down = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
+                nns = up - down
+
+            # if timemin is in initial portion of DTD and timemax is in power law portion
+            elif timemin <= a02bound and timemax > a02bound:
+                up = a_pow * np.log(timemax)
+                down = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
+                nns = up - down
+
+	    # if both timemin and timemax are in power law portion of DTD
+            elif timemin > a02bound:
+                up = a_pow * np.log(timemax)
+                down = a_pow * np.log(timemax)
+                nns = up - down
+
+        # Integrate over 0.1 solar metallicity
+        elif self.zmetal == 0.002:
+
+            # Define a002 DTD fit parameters
+            a = -2.88192413434e-5
+            b = 0.00387383125623
+            c = -0.20721471544
+            d = 5.64382310405
+            e = -82.6061154979
+            f = 617.464778362
+            g = -1840.49386605
+            a_pow = 153.68106991
+
+	    # Manually compute definite integral values over DTD with bounds timemin and timemax, procedurally identical to a02 computation above
+            if timemax < lower:
+                nns = 0.0
+            elif timemin < lower and timemax <= a02bound:
+                up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
+                down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
+                nns = up - down
+            elif timemin >= lower and timemax <= a02bound:
+                up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
+                down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
+                nns = up - down
+            elif timemin <= a02bound and timemax > a02bound:
+                up = a_pow*np.log(timemax)
+                down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
+                nns = up - down
+            elif timemin > a02bound:
+                up = a_pow*np.log(timemax)
+                down = a_pow*np.log(timemin)
+                nns = up - down
+
+	# normalize
+        nns *= self.A_nsmerger
+
+        # return the number of neutron star mergers produced in this time interval
+        return nns
+
+    ##############################################
+    #               NS Merger Rate               #
+    ##############################################
+    def __nsmerger_rate(self, t):
+        '''
+        This function returns the rate of neutron star mergers occurring at a given
+        stellar lifetime. It uses the delay time distribution 
+        of Dominik et al. (2012).
+        
+        Arguments
+        =========
+
+            t : lifetime of stellar population in question
+            Z : metallicity of stellar population in question
+
+        '''
+	# if solar metallicity...
+        if self.zmetal == 0.02:
+
+            # piecewise defined DTD
+            if t < 25.7:
+                func = (-0.0138858377011*(t**5))+(1.10712569392*(t**4))-(32.1555682584*(t**3))+(468.236521089*(t**2))-(3300.97955814*t)+(9019.62468302)
+            elif t >= 25.7:
+                func = 1079.77358975/t
+
+        # if 0.1 solar metallicity...
+        elif self.zmetal == 0.002:
+
+            # piecewise defined DTD
+            if t < 45.76:
+                func = ((-2.88192413434e-5)*(t**6))+(0.00387383125623*(t**5))-(0.20721471544*(t**4))+(5.64382310405*(t**3))-(82.6061154979*(t**2))+(617.464778362*t)-(1840.49386605)
+            elif t >= 45.76:
+                func = 153.68106991 / t
+
+        # return the appropriate NS merger rate for time t
+        return func
+
+    ##############################################
+    #           NS merger normalization          #
+    ##############################################
+    def __normalize_nsmerger(self, spline_min_time):
+        '''
+        This function normalizes the Dominik et al. (2012) delay time distribution
+        to appropriately compute the total number of neutron star mergers in an SSP.
+
+        Arguments
+        =========
+        
+            spline_min_time : minimum stellar lifetime
+
+        '''
+	# Compute the number of massive stars (NS merger progenitors)
+        N = self._imf(self.transitionmass, self.imf_bdys[1], 1)   # IMF integration
+
+        # Compute total mass of system
+        M = self._imf(self.imf_bdys[0], self.imf_bdys[1], 2)
+
+        # multiply number by fraction in binary systems
+        N *= self.f_binary / 2.
+
+        # multiply number by fraction which will form neutron star mergers
+        N *= self.f_merger
+
+        # Calculate normalization constant per stellar mass (metallicity-dependent, constants computed manually)
+        if self.zmetal == 0.02:
+            self.A_nsmerger = N / ((196.4521905+6592.893564)*M)
+        elif self.zmetal == 0.002:
+            self.A_nsmerger = N / ((856.0742532+849.6301493)*M)
+
+        # Ensure normalization only occurs once
+        self.normalized = True
 
     ##############################################
     #              Vogelsberger 13               #
@@ -4045,12 +4303,15 @@ class chem_evol(object):
             self.ism_iso_yield_agb = []
             self.ism_iso_yield_massive = []
             self.ism_iso_yield_1a = []
+	    self.ism_iso_yield_ns = []
             self.isotopes = []
             self.elements = []
             self.ism_elem_yield = []
             self.ism_elem_yield_agb = []
             self.ism_elem_yield_massive = []
             self.ism_elem_yield_1a = []
+	    self.ism_elem_yield_ns = []
             self.sn1a_numbers = []
+	    self.ns_numbers = []
             self.sn2_numbers = []
 	    self.t_m_bdys = []
