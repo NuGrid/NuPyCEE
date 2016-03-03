@@ -230,7 +230,7 @@ class chem_evol(object):
              ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
              ns_merger_on=True, f_binary=1.0, f_merger=0.0028335,\
-             nsmerger_table = 'yield_tables/r_process.txt' iniabu_table='', \
+             nsmerger_table = 'yield_tables/r_process.txt', iniabu_table='', \
              extra_source_on=False, \
              extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
              pop3_table='yield_tables/popIII_heger10.txt', \
@@ -273,6 +273,8 @@ class chem_evol(object):
 	self.history.sn1a_rate = sn1a_rate
         self.history.imf_bdys = imf_bdys
         self.history.transitionmass = transitionmass
+	self.history.f_binary = f_binary
+	self.history.f_merger = f_merger
         self.mgal = mgal
         self.transitionmass = transitionmass
         self.iniZ = iniZ
@@ -292,6 +294,8 @@ class chem_evol(object):
 	self.alphaimf = alphaimf
 	self.sn1a_on = sn1a_on
         self.ns_merger_on = ns_merger_on
+	self.f_binary = f_binary
+	self.f_merger = f_merger
         self.special_timesteps = special_timesteps
         self.iolevel = iolevel
         self.nb_1a_per_m = nb_1a_per_m
@@ -361,8 +365,8 @@ class chem_evol(object):
         self.nb_timesteps = len(timesteps)
 
         # Initialisation of the storing arrays
-        mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_ns, mdot_massive, mdot_agb, \
-        mdot_1a, mdot_ns, sn1a_numbers, sn2_numbers, ns_numbers, imf_mass_ranges, \
+        mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, mdot_massive, mdot_agb, \
+        mdot_1a, mdot_nsm, sn1a_numbers, sn2_numbers, nsm_numbers, imf_mass_ranges, \
         imf_mass_ranges_contribution, imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
@@ -380,10 +384,10 @@ class chem_evol(object):
         self.history.ism_iso_yield.append(ymgal[0])
         self.history.ism_iso_yield_agb.append(ymgal_agb[0])
         self.history.ism_iso_yield_1a.append(ymgal_1a[0])
-	self.history.ism_iso_yield_ns.append(ymgal_ns[0])
+	self.history.ism_iso_yield_nsm.append(ymgal_nsm[0])
         self.history.ism_iso_yield_massive.append(ymgal_massive[0])
         self.history.sn1a_numbers.append(0)
-	self.history.ns_numbers.append(0)
+	self.history.nsm_numbers.append(0)
         self.history.sn2_numbers.append(0)
         self.history.m_locked = []
         self.history.m_locked_agb = []
@@ -400,13 +404,13 @@ class chem_evol(object):
         self.ymgal_massive = ymgal_massive
         self.ymgal_agb = ymgal_agb
         self.ymgal_1a = ymgal_1a
-	self.ymgal_ns = ymgal_ns
+	self.ymgal_nsm = ymgal_nsm
         self.mdot_massive = mdot_massive
         self.mdot_agb = mdot_agb
         self.mdot_1a = mdot_1a
-	self.mdot_ns = mdot_ns
+	self.mdot_nsm = mdot_nsm
         self.sn1a_numbers = sn1a_numbers
-	self.ns_numbers = ns_numbers
+	self.nsm_numbers = nsm_numbers
         self.sn2_numbers = sn2_numbers
         self.imf_mass_ranges = imf_mass_ranges
         self.imf_mass_ranges_contribution = imf_mass_ranges_contribution
@@ -721,20 +725,20 @@ class chem_evol(object):
         ymgal_massive = []
         ymgal_agb = []
         ymgal_1a = []
-	ymgal_ns = []
+	ymgal_nsm = []
         for k in range(nb_dt_gsa + 1):
             ymgal_massive.append(nb_iso_gsa * [0])
             ymgal_agb.append(nb_iso_gsa * [0])
             ymgal_1a.append(nb_iso_gsa * [0])
-	    ymgal_ns.append(nb_iso_gsa * [0])
+	    ymgal_nsm.append(nb_iso_gsa * [0])
         mdot_massive = copy.deepcopy(mdot)
         mdot_agb     = copy.deepcopy(mdot)
         mdot_1a      = copy.deepcopy(mdot)
-	mdot_ns      = copy.deepcopy(mdot)
+	mdot_nsm     = copy.deepcopy(mdot)
 
         # Number of SNe Ia, core-collapse SNe, and neutron star mergers
         sn1a_numbers = [0] * nb_dt_gsa
-	ns_numbers = [0] * nb_dt_gsa
+	nsm_numbers = [0] * nb_dt_gsa
         sn2_numbers  = [0] * nb_dt_gsa
         self.wd_sn1a_range  = [0] * nb_dt_gsa
         self.wd_sn1a_range1 = [0] * nb_dt_gsa
@@ -749,8 +753,8 @@ class chem_evol(object):
         imf_mass_ranges_mtot = [[]] * (nb_dt_gsa + 1)
 
         # Return all the arrays
-        return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_ns, mdot_massive, \
-               mdot_agb, mdot_1a, mdot_ns, sn1a_numbers, sn2_numbers, ns_numbers, \
+        return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, mdot_massive, \
+               mdot_agb, mdot_1a, mdot_nsm, sn1a_numbers, sn2_numbers, nsm_numbers, \
                imf_mass_ranges, imf_mass_ranges_contribution, imf_mass_ranges_mtot
 
 
@@ -884,7 +888,7 @@ class chem_evol(object):
                 self.ymgal[i][k] = f_lock * self.ymgal[i-1][k]
                 self.ymgal_agb[i][k] = f_lock * self.ymgal_agb[i-1][k]
                 self.ymgal_1a[i][k] = f_lock * self.ymgal_1a[i-1][k]
-		self.ymgal_ns[i][k] = f_lock * self.ymgal_ns[i-1][k]
+		self.ymgal_nsm[i][k] = f_lock * self.ymgal_nsm[i-1][k]
                 self.ymgal_massive[i][k] = f_lock * self.ymgal_massive[i-1][k]
                 self.m_locked += self.sfrin * self.ymgal[i-1][k]
 
@@ -903,7 +907,7 @@ class chem_evol(object):
             self.ymgal[i] = self.ymgal[i-1]
             self.ymgal_agb[i] = self.ymgal_agb[i-1]
             self.ymgal_1a[i] = self.ymgal_1a[i-1]
-	    self.ymgal_ns[i] = self.ymgal_ns[i-1]
+	    self.ymgal_nsm[i] = self.ymgal_nsm[i-1]
             self.ymgal_massive[i] = self.ymgal_massive[i-1]
 
             # Output information
@@ -916,7 +920,7 @@ class chem_evol(object):
         self.ymgal_1a[i] = np.array(self.ymgal_1a[i]) + np.array(self.mdot_1a[i-1])
         self.ymgal_massive[i] = np.array(self.ymgal_massive[i]) + \
                                 np.array(self.mdot_massive[i-1])
-        self.ymgal_ns[i] = np.array(self.ymgal_ns[i]) + np.array(self.mdot_ns[i-1])
+        self.ymgal_nsm[i] = np.array(self.ymgal_nsm[i]) + np.array(self.mdot_nsm[i-1])
 
         # Convert the mass ejected by massive stars into rate
         if self.history.timesteps[i-1] == 0.0:
@@ -954,10 +958,10 @@ class chem_evol(object):
         self.history.ism_iso_yield.append(self.ymgal[i])
         self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
         self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
-        self.history.ism_iso_yield_ns.append(self.ymgal_ns[i])
+        self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
         self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
         self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
-        self.history.ns_numbers.append(self.ns_numbers[i-1])
+        self.history.nsm_numbers.append(self.nsm_numbers[i-1])
         self.history.sn2_numbers.append(self.sn2_numbers[i-1])
         self.history.m_locked.append(self.m_locked)	
         self.history.m_locked_agb.append(self.m_locked_agb)
@@ -988,8 +992,8 @@ class chem_evol(object):
             self.history.ism_elem_yield_agb.append(conv[1])
             conv = self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h])
             self.history.ism_elem_yield_1a.append(conv[1])
-	    conv = self._iso_abu_to_elem(self.history.ism_iso_yield_ns[h])
-	    self.history.ism_elem_yield_ns.append(conv[1])
+	    conv = self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h])
+	    self.history.ism_elem_yield_nsm.append(conv[1])
             conv = self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h])
             self.history.ism_elem_yield_massive.append(conv[1])
 
@@ -1992,10 +1996,22 @@ class chem_evol(object):
 
         '''
 
+	# Get NS merger yields
+        tables_Z = self.ytables_nsmerger.metallicities
+        for tz in tables_Z:
+            if self.zmetal > tz:
+                yieldsnsm = self.ytables_nsmerger.get(Z=tz, quantity='Yields')
+                break
+            if self.zmetal <= tables_Z[-1]:
+                yieldsnsm = self.ytables_nsmerger.get(Z=tables_Z[-1], quantity='Yields')
+                break
+
+	# initialize variables which cumulate in loop
+	nsm_sum = 0.0
         tt = 0
 
         # Normalize ...
-        self.__normalize_nsmerger(spline_min_time)
+        self.__normalize_nsmerger(1) # NOTE: 1 is a dummy variable right now
 
         # For every upcoming timestep j, starting with the current one...
         for j in range(i-1, self.nb_timesteps):
@@ -2006,17 +2022,17 @@ class chem_evol(object):
             timemax = tt
 
 	    # Calculate the number of NS mergers per stellar mass
-            nns = self.__nsmerger_num(timemin, timemax)
+            nns_m = self.__nsmerger_num(timemin, timemax)
 
             # Calculate the number of NS mergers in the current SSP
-            nns = nns * self.m_locked
+            nns_m = nns_m * self.m_locked
 
-            self.ns_numbers[j] += nns
-            ns_sum += nns
+            self.nsm_numbers[j] += nns_m
+            nsm_sum += nns_m
 
             # Add the contribution of NS mergers to the timestep j
-            self.mdot[j] = np.array(self.mdot[j]) + np.array(nns * yieldsns)
-            self.mdot_ns[j] = np.array(self.mdot_ns[j]) + np.array(nns * yieldsns)
+            self.mdot[j] = np.array(self.mdot[j]) + np.array(nns_m * yieldsnsm)
+            self.mdot_nsm[j] = np.array(self.mdot_nsm[j]) + np.array(nns_m * yieldsnsm)
 
     ##############################################
     #               NS merger number             #
@@ -2046,7 +2062,7 @@ class chem_evol(object):
         timemax = timemax/1e6
 
 	# initialise the number of neutron star mergers in the current time interval
-        nns = 0.0
+        nns_m = 0.0
 
         # Integrate over solar metallicity DTD
         if self.zmetal == 0.02:
@@ -2063,31 +2079,31 @@ class chem_evol(object):
 	    # Manually compute definite integral values over DTD with bounds timemin and timemax
             # DTD doesn't produce until 10 Myr
             if timemax < lower:
-                nns = 0.0
+                nns_m = 0.0
 
             # if timemin is below 10 Myr and timemax is in the first portion of DTD
             elif timemin < lower and timemax <= a02bound:
                 up = ((a/6.)*(timemax**6))+((b/5.)*(timemax**5))+((c/4.)*(timemax**4))+((d/3.)*(timemax**3))+((e/2.)*(timemax**2))+(f*timemax)
                 down = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
-                nns = up - down
+                nns_m = up - down
 
             # if both timemin and timemax are in initial portion of DTD
             elif timemin >= lower and timemax <= a02bound:
                 up = ((a/6.)*(timemax**6))+((b/5.)*(timemax**5))+((c/4.)*(timemax**4))+((d/3.)*(timemax**3))+((e/2.)*(timemax**2))+(f*timemax)
                 down = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
-                nns = up - down
+                nns_m = up - down
 
             # if timemin is in initial portion of DTD and timemax is in power law portion
             elif timemin <= a02bound and timemax > a02bound:
                 up = a_pow * np.log(timemax)
                 down = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
-                nns = up - down
+                nns_m = up - down
 
 	    # if both timemin and timemax are in power law portion of DTD
             elif timemin > a02bound:
                 up = a_pow * np.log(timemax)
                 down = a_pow * np.log(timemax)
-                nns = up - down
+                nns_m = up - down
 
         # Integrate over 0.1 solar metallicity
         elif self.zmetal == 0.002:
@@ -2104,29 +2120,29 @@ class chem_evol(object):
 
 	    # Manually compute definite integral values over DTD with bounds timemin and timemax, procedurally identical to a02 computation above
             if timemax < lower:
-                nns = 0.0
+                nns_m = 0.0
             elif timemin < lower and timemax <= a02bound:
                 up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
                 down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
-                nns = up - down
+                nns_m = up - down
             elif timemin >= lower and timemax <= a02bound:
                 up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
                 down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
-                nns = up - down
+                nns_m = up - down
             elif timemin <= a02bound and timemax > a02bound:
                 up = a_pow*np.log(timemax)
                 down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
-                nns = up - down
+                nns_m = up - down
             elif timemin > a02bound:
                 up = a_pow*np.log(timemax)
                 down = a_pow*np.log(timemin)
-                nns = up - down
+                nns_m = up - down
 
 	# normalize
-        nns *= self.A_nsmerger
+        nns_m *= self.A_nsmerger
 
         # return the number of neutron star mergers produced in this time interval
-        return nns
+        return nns_m
 
     ##############################################
     #               NS Merger Rate               #
@@ -2192,10 +2208,13 @@ class chem_evol(object):
         N *= self.f_merger
 
         # Calculate normalization constant per stellar mass (metallicity-dependent, constants computed manually)
-        if self.zmetal == 0.02:
+        if .019 < self.zmetal < .021:
             self.A_nsmerger = N / ((196.4521905+6592.893564)*M)
-        elif self.zmetal == 0.002:
+        elif .0019 < self.zmetal < .0021:
             self.A_nsmerger = N / ((856.0742532+849.6301493)*M)
+	else:
+	    print self.zmetal
+	    self.A_nsmerger = N / ((196.4521905+6592.893564)*M)
 
         # Ensure normalization only occurs once
         self.normalized = True
@@ -4303,15 +4322,15 @@ class chem_evol(object):
             self.ism_iso_yield_agb = []
             self.ism_iso_yield_massive = []
             self.ism_iso_yield_1a = []
-	    self.ism_iso_yield_ns = []
+	    self.ism_iso_yield_nsm = []
             self.isotopes = []
             self.elements = []
             self.ism_elem_yield = []
             self.ism_elem_yield_agb = []
             self.ism_elem_yield_massive = []
             self.ism_elem_yield_1a = []
-	    self.ism_elem_yield_ns = []
+	    self.ism_elem_yield_nsm = []
             self.sn1a_numbers = []
-	    self.ns_numbers = []
+	    self.nsm_numbers = []
             self.sn2_numbers = []
 	    self.t_m_bdys = []

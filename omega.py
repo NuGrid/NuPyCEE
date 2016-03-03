@@ -263,7 +263,8 @@ class omega( chem_evol ):
                  table='yield_tables/isotope_yield_table_MESA_only.txt', \
                  hardsetZ=-1, sn1a_on=True,\
                  sn1a_table='yield_tables/sn1a_t86.txt',\
-                 iniabu_table='', \
+                 ns_merger_on=True, f_binary=1.0, f_merger=0.0028335,\
+                 nsmerger_table = 'yield_tables/r_process.txt', iniabu_table='', \
                  extra_source_on=False, \
                  extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -281,6 +282,7 @@ class omega( chem_evol ):
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
+		 ytables_nsmerger_in=np.array([]), \
                  dt_in=np.array([]), dt_split_info=np.array([]),\
                  ej_massive=np.array([]), ej_agb=np.array([]),\
                  ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
