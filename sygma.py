@@ -2677,3 +2677,140 @@ class sygma( chem_evol ):
 	f1.close()
 
 
+    def write_evol_table(self,elements=['H'],isotopes=['H-1'],table_name='gce_table.txt', path="",interact=False):
+
+        '''
+	Writes out evolution of time, metallicity
+	and each isotope in the following format
+	(each timestep in a line):
+
+	&Age       &H-1       &H-2  ....
+
+	&0.000E+00 &1.000E+00 &7.600E+08 & ...
+
+	....
+	
+	This method has a notebook and normal version. If you are
+	using a python notebook the function will
+	open a link to a page containing the table.
+	
+
+        Parameters
+        ----------
+        table_name : string,optional
+          Name of table. If you use a notebook version, setting a name
+	  is not necessary.
+	elements : array
+		Containing the elements with the name scheme 'H','C'
+	isotopes : array
+		If elements list empty, ignore elements input and use isotopes input; Containing the isotopes with the name scheme 'H-1', 'C-12'
+	interact: bool
+		If true, saves file in current directory (notebook dir) and creates HTML link useful in ipython notebook environment
+        Examples
+        ----------
+        >>> s.write_evol_table(elements=['H','C','O'],table_name='testoutput.txt')
+
+
+        '''
+        if path == "":
+            path = global_path+'evol_tables/'
+
+        yields_evol=self.history.ism_iso_yield
+        metal_evol=self.history.metallicity
+        time_evol=self.history.age
+	idx=[]
+	if len(elements)>0:
+		elements_tot=self.history.elements
+		for k in range(len(elements_tot)):
+			if elements_tot[k] in elements:
+				idx.append(elements_tot.index(elements_tot[k]))
+		yields_specie=self.history.ism_elem_yield
+		specie=elements
+	elif len(isotopes)>0:
+                iso_tot=self.history.isotopes
+                for k in range(len(iso_tot)):
+                        if iso_tot[k] in isotopes:
+                                idx.append(iso_tot.index(iso_tot[k]))
+		yields_specie=self.history.ism_iso_yield	
+		specie=isotopes
+		
+	else:
+		print 'Specify either isotopes or elements'
+		return
+	if len(idx)==0:
+		print 'Please choose the right isotope names'
+		return 0
+
+
+	frac_yields=[]
+	for h in range(len(yields_specie)):
+		frac_yields.append([])
+		for k in range(len(idx)):
+			frac_yields[-1].append( np.array(yields_specie[h][idx[k]])/self.history.mgal)
+	
+	mtot_gas=self.history.gas_mass
+
+
+        metal_evol=self.history.metallicity
+	#header
+        out='&Age [yr]  '
+        for i in range(len(specie)):
+            out+= ('&'+specie[i]+((10-len(specie[i]))*' '))
+        out+='M_tot \n'
+	#data
+        for t in range(len(frac_yields)):
+            out+=('&'+'{:.3E}'.format(time_evol[t]))
+            #out+=(' &'+'{:.3E}'.format(frac_yields[t]))
+            for i in range(len(specie)):
+                out+= ( ' &'+ '{:.3E}'.format(frac_yields[t][i]))
+	    out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
+            out+='\n'
+	
+	if interact==True:
+		import random
+		randnum=random.randrange(10000,99999)
+		name=table_name+str(randnum)+'.txt'
+		#f1=open(global_path+'evol_tables/'+name,'w')
+		f1=open(name,'w')
+		f1.write(out)
+		f1.close()
+		print 'Created table '+name+'.'
+		print 'Download the table using the following link:'
+		#from IPython.display import HTML
+		#from IPython import display
+		from IPython.core.display import HTML
+		import IPython.display as display
+		#print help(HTML)
+		#return HTML("""<a href="evol_tables/download.php?file="""+name+"""">Download</a>""")
+		#test=
+		#return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
+                #if interact==False:
+                #return HTML("""<a href="""+global_path+"""/evol_tables/"""+name+""">Download</a>""")
+		return HTML("""<a href="""+name+""">Download</a>""")
+                #else:
+                #        return name
+	else:
+		print 'file '+table_name+' saved in subdirectory evol_tables.'
+		f1=open(path+table_name,'w')
+        	f1.write(out)
+        	f1.close()
+
+
+    def __time_to_z(self,time,Hubble_0,Omega_lambda,Omega_m):
+	'''
+	Time to redshift conversion
+
+	'''
+	import time_to_redshift as tz
+	#transform into Gyr
+	time_new=[]
+	firstidx=True
+	for k in range(len(time)):
+		if time[k]>=8e8:
+			time_new.append(time[k]/1e9)
+			if firstidx:
+				index=k
+				firstidx=False	
+	return tz.t_to_z(time_new,Hubble_0,Omega_lambda,Omega_m),index
+
+
