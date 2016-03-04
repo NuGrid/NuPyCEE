@@ -308,6 +308,7 @@ class chem_evol(object):
         self.gauss_dtd = gauss_dtd
 	self.exp_dtd=exp_dtd
         self.normalized = False # To avoid normalizing SN Ia rate more than once
+	self.nsm_normalized = False # To avoid normalizing NS merger rate more than once
         self.f_arfo = f_arfo
         self.imf_yields_range = imf_yields_range
         self.exclude_masses=exclude_masses
@@ -2011,7 +2012,8 @@ class chem_evol(object):
         tt = 0
 
         # Normalize ...
-        self.__normalize_nsmerger(1) # NOTE: 1 is a dummy variable right now
+	if not self.nsm_normalized:
+            self.__normalize_nsmerger(1) # NOTE: 1 is a dummy variable right now
 
         # For every upcoming timestep j, starting with the current one...
         for j in range(i-1, self.nb_timesteps):
@@ -2223,11 +2225,11 @@ class chem_evol(object):
         elif .0019 < self.zmetal < .0021:
             self.A_nsmerger = N / ((856.0742532+849.6301493)*M)
 	else:
-	    print self.zmetal
+	    #print self.zmetal
 	    self.A_nsmerger = N / ((196.4521905+6592.893564)*M)
 
         # Ensure normalization only occurs once
-        self.normalized = True
+        self.nsm_normalized = True
 
     ##############################################
     #              Vogelsberger 13               #
