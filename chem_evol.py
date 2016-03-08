@@ -1913,7 +1913,6 @@ class chem_evol(object):
 
         # Initialisation of the cumulated time and number of SNe Ia
         sn1a_output = 0
-        sn1a_sum = 0
         tt = 0
 
         # For every upcoming timestep j, starting with the current one ...
@@ -1969,7 +1968,6 @@ class chem_evol(object):
 
             # Cumulate the number of SNe Ia
             self.sn1a_numbers[j] += n1a
-            sn1a_sum += n1a
 
             # Output information
             if sn1a_output == 0 :
@@ -2008,7 +2006,6 @@ class chem_evol(object):
                 break
 
 	# initialize variables which cumulate in loop
-	nsm_sum = 0.0
         tt = 0
 
         # Normalize ...
@@ -2028,9 +2025,7 @@ class chem_evol(object):
 
             # Calculate the number of NS mergers in the current SSP
             nns_m = nns_m * self.m_locked
-
             self.nsm_numbers[j] += nns_m
-            nsm_sum += nns_m
 
             # Add the contribution of NS mergers to the timestep j
             self.mdot[j] = np.array(self.mdot[j]) + np.array(nns_m * yieldsnsm)
@@ -2067,7 +2062,7 @@ class chem_evol(object):
         nns_m = 0.0
 
         # Integrate over solar metallicity DTD
-        if self.zmetal == 0.02:
+        if 0.019 < self.zmetal < 0.021:
 
             # Define a02 DTD fit parameters
             a = -0.0138858377011
@@ -2103,18 +2098,22 @@ class chem_evol(object):
 
             # if timemin is in initial portion of DTD and timemax is in power law portion
             elif timemin <= a02bound and timemax > a02bound:
-                up = a_pow * np.log(timemax)
-                down = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
-                nns_m = up - down
+                up1 = a_pow * np.log(timemax)
+		down1 = a_pow * np.log(a02bound)
+		up = up1 - down1
+		up2 = ((a/6.)*(a02bound**6))+((b/5.)*(a02bound**5))+((c/4.)*(a02bound**4))+((d/3.)*(a02bound**3))+((e/2.)*(a02bound**2))+(f*a02bound)
+                down2 = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
+		down = up2 - down2
+                nns_m = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
 
 	    # if both timemin and timemax are in power law portion of DTD
             elif timemin > a02bound:
                 up = a_pow * np.log(timemax)
-                down = a_pow * np.log(timemax)
+                down = a_pow * np.log(timemin)
                 nns_m = up - down
 
         # Integrate over 0.1 solar metallicity
-        elif self.zmetal == 0.002:
+        elif 0.0019 < self.zmetal < 0.0021:
 
             # Define a002 DTD fit parameters
             a = -2.88192413434e-5
@@ -2129,23 +2128,27 @@ class chem_evol(object):
 	    # Manually compute definite integral values over DTD with bounds timemin and timemax, procedurally identical to a02 computation above
             if timemax < lower:
                 nns_m = 0.0
-            elif timemin < lower and timemax <= a02bound:
+            elif timemin < lower and timemax <= a002bound:
                 up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
                 down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
                 nns_m = up - down
-	    elif timemin < lower and timemax > a02bound:
+	    elif timemin < lower and timemax > a002bound:
                 up = a_pow*np.log(timemax)
                 down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
 		nns_m = up - down
-            elif timemin >= lower and timemax <= a02bound:
+            elif timemin >= lower and timemax <= a002bound:
                 up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
                 down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
                 nns_m = up - down
-            elif timemin <= a02bound and timemax > a02bound:
-                up = a_pow*np.log(timemax)
-                down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
-                nns_m = up - down
-            elif timemin > a02bound:
+            elif timemin <= a002bound and timemax > a002bound:
+                up1 = a_pow * np.log(timemax)
+                down1 = a_pow * np.log(a002bound)
+                up = up1 - down1
+                up2 = ((a/7.)*(a002bound**7))+((b/6.)*(a002bound**6))+((c/5.)*(a002bound**5))+((d/4.)*(a002bound**4))+((e/3.)*(a002bound**3))+((f/2.)*(a002bound**2))+(g*a002bound)
+                down2 = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
+		down = up2 - down2
+                nns_m = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
+	    elif timemin > a002bound:
                 up = a_pow*np.log(timemax)
                 down = a_pow*np.log(timemin)
                 nns_m = up - down
@@ -2221,6 +2224,7 @@ class chem_evol(object):
 
         # Calculate normalization constant per stellar mass (metallicity-dependent, constants computed manually)
         if .019 < self.zmetal < .021:
+	    print self.zmetal
             self.A_nsmerger = N / ((196.4521905+6592.893564)*M)
         elif .0019 < self.zmetal < .0021:
             self.A_nsmerger = N / ((856.0742532+849.6301493)*M)
