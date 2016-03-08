@@ -549,8 +549,9 @@ class omega( chem_evol ):
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
-        self.ymgal_1a, self.mdot_massive, self.mdot_agb, self.mdot_1a, \
-        self.sn1a_numbers, self.sn2_numbers, self.imf_mass_ranges, \
+        self.mgal_1a, self.ymgal_nsm, self.mdot_massive, self.mdot_agb, self.mdot_1a, \
+        self.mdot_nsm, self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, \
+ 	self.imf_mass_ranges, \
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
@@ -613,9 +614,9 @@ class omega( chem_evol ):
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
-        self.ymgal_1a, self.mdot_massive, self.mdot_agb, self.mdot_1a, \
-        self.sn1a_numbers, self.sn2_numbers, self.imf_mass_ranges, \
-        self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
+        self.ymgal_1a, self.ymgal_nsm, self.mdot_massive, self.mdot_agb, self.mdot_1a, \
+        self.mdot_nsm, self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, \
+	self.imf_mass_ranges, self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
         # Initialisation of the composition of the gas reservoir
@@ -1604,6 +1605,7 @@ class omega( chem_evol ):
                     self.ymgal[i][k_op] = f_lost_2 * self.ymgal[i][k_op]
                     self.ymgal_agb[i][k_op] = f_lost_2 * self.ymgal_agb[i][k_op]
                     self.ymgal_1a[i][k_op] = f_lost_2 * self.ymgal_1a[i][k_op]
+		    self.ymgal_nsm[i][k_op] = f_lost_2 * self.ymgal_nsm[i][k_op]
                     self.ymgal_massive[i][k_op] = f_lost_2*self.ymgal_massive[i][k_op]
 
             # If the open box scenario is used ...
@@ -1649,6 +1651,8 @@ class omega( chem_evol ):
                         self.ymgal_agb[i][k_op]
                     self.ymgal_1a[i][k_op] = (1.0 - frac_rem) * \
                         self.ymgal_1a[i][k_op]
+		    self.ymgal_nsm[i][k_op] = (1.0 - frac_rem) * \
+			self.ymgal_nsm[i][k_op]
                     self.ymgal_massive[i][k_op] = (1.0 - frac_rem) * \
                         self.ymgal_massive[i][k_op]
 
