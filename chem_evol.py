@@ -246,33 +246,42 @@ class chem_evol(object):
 
     input yield information : series of lists that must be used together
       These are the yield tables, isotopes, and lifetimes that have been read
-      by a previous instance of SYGMA or OMEGA.  This avoid to read yields over
-      and over and should be used to reduce the computing time if many instances
-      are to be executed.  Here are the different inputs:
+      by a previous instance of SYGMA or OMEGA.  This can be used to avoid to
+      read yields over and over and can be used to reduce the computing time
+      if many instances are to be executed.  Here are the 6 different inputs 
+      that must be defined together if such an option is selected:
 
-      ytables_in : multi-D list
-        Yield tables.
-        Default value : np.array([]) --> Desactivated
+        1) ytables_in : multi-D list
+          This should be the ytables "self" variable of a previous instance.
+          Contains the yield tables.
+          Default value : np.array([]) --> Desactivated
 
-      ytables_pop3_in : list
-        PopII yield table.
-        Default value : np.array([]) --> Desactivated
+        2) ytables_pop3_in : list
+          This should be the ytables_pop3 "self" variable of a previous instance.
+          Contains the PopIII yield table.
+          Default value : np.array([]) --> Desactivated
 
-      ytables_1a_in : list
-        SN Ia yield table.
-        Default value : np.array([]) --> Desactivated
+        3) ytables_1a_in : list
+          This should be the ytables_1a "self" variable of a previous instance.
+          Contains the SN Ia yield table.
+          Default value : np.array([]) --> Desactivated
 
-      isotopes_in : list
-        List of all isotopes included in the yields
-        Default value : np.array([]) --> Desactivated
+        4) isotopes_in : list
+          This should be the isotopes "self" variable of a previous instance.
+          Contains a list of all isotopes included in the yields.
+          Default value : np.array([]) --> Desactivated
 
-      zm_lifetime_grid_nugrid_in : list
-        Grid of lifetimes as a function of stellar mass and metallicity
-        Default value : np.array([]) --> Desactivated
+        5) zm_lifetime_grid_nugrid_in : list
+          This should be the zm_lifetime_grid_nugrid "self" variable of a
+          previous instance.  Contains the grid of lifetimes as a function of
+          stellar mass and metallicity.
+          Default value : np.array([]) --> Desactivated
 
-      zm_lifetime_grid_pop3_in : list
-        Grid of lifetimes as a function of stellar mass and metallicity for PopIII
-        Default value : np.array([]) --> Desactivated
+        6) zm_lifetime_grid_pop3_in : list
+          This should be the zm_lifetime_grid_pop3 "self" variable of a previous
+          instance.  Contains the grid of lifetimes as a function of stellar mass
+          and metallicity for PopIII stars.
+          Default value : np.array([]) --> Desactivated
 
     Run example
     ===========
