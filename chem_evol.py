@@ -2062,7 +2062,7 @@ class chem_evol(object):
         nns_m = 0.0
 
         # Integrate over solar metallicity DTD
-        if 0.019 < self.zmetal < 0.021:
+        if self.zmetal >= 0.02:
 
             # Define a02 DTD fit parameters
             a = -0.0138858377011
@@ -2113,8 +2113,7 @@ class chem_evol(object):
                 nns_m = up - down
 
         # Integrate over 0.1 solar metallicity
-        elif 0.0019 < self.zmetal < 0.0021:
-
+        elif self.zmetal <= 0.002:
             # Define a002 DTD fit parameters
             a = -2.88192413434e-5
             b = 0.00387383125623
@@ -2152,6 +2151,89 @@ class chem_evol(object):
                 up = a_pow*np.log(timemax)
                 down = a_pow*np.log(timemin)
                 nns_m = up - down
+
+	# Interpolate between the two metallicities
+	else:
+
+	    # Define a002 DTD fit parameters
+            a = -2.88192413434e-5
+            b = 0.00387383125623
+            c = -0.20721471544
+            d = 5.64382310405
+            e = -82.6061154979
+            f = 617.464778362
+            g = -1840.49386605
+            a_pow = 153.68106991
+
+	    # 0.1 solar metallicity integration
+	    if timemax < lower:
+                nns_m002 = 0.0
+            elif timemin < lower and timemax <= a002bound:
+                up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
+                down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
+                nns_m002 = up - down
+            elif timemin < lower and timemax > a002bound:
+                up = a_pow*np.log(timemax)
+                down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
+                nns_m002 = up - down
+            elif timemin >= lower and timemax <= a002bound:
+                up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
+                down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
+                nns_m002 = up - down
+            elif timemin <= a002bound and timemax > a002bound:
+                up1 = a_pow * np.log(timemax)
+                down1 = a_pow * np.log(a002bound)
+                up = up1 - down1
+                up2 = ((a/7.)*(a002bound**7))+((b/6.)*(a002bound**6))+((c/5.)*(a002bound**5))+((d/4.)*(a002bound**4))+((e/3.)*(a002bound**3))+((f/2.)*(a002bound**2))+(g*a002bound)
+                down2 = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
+                down = up2 - down2
+                nns_m002 = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
+            elif timemin > a002bound:
+                up = a_pow*np.log(timemax)
+                down = a_pow*np.log(timemin)
+                nns_m002 = up - down
+
+	    # Define a02 DTD fit parameters
+            a = -0.0138858377011
+            b = 1.10712569392
+            c = -32.1555682584
+            d = 468.236521089
+            e = -3300.97955814
+            f = 9019.62468302
+            a_pow = 1079.77358975
+
+	    # solar metallicity integration
+	    if timemax < lower:
+		nns_m02 = 0.0
+	    elif timemin < lower and timemax <= a02bound:
+                up = ((a/6.)*(timemax**6))+((b/5.)*(timemax**5))+((c/4.)*(timemax**4))+((d/3.)*(timemax**3))+((e/2.)*(timemax**2))+(f*timemax)
+                down = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
+                nns_m02 = up - down
+            elif timemin < lower and timemax > a02bound:
+                up = a_pow * np.log(timemax)
+                down = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
+                nns_m02 = up - down
+            elif timemin >= lower and timemax <= a02bound:
+                up = ((a/6.)*(timemax**6))+((b/5.)*(timemax**5))+((c/4.)*(timemax**4))+((d/3.)*(timemax**3))+((e/2.)*(timemax**2))+(f*timemax)
+                down = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
+                nns_m02 = up - down
+            elif timemin <= a02bound and timemax > a02bound:
+                up1 = a_pow * np.log(timemax)
+                down1 = a_pow * np.log(a02bound)
+                up = up1 - down1
+                up2 = ((a/6.)*(a02bound**6))+((b/5.)*(a02bound**5))+((c/4.)*(a02bound**4))+((d/3.)*(a02bound**3))+((e/2.)*(a02bound**2))+(f*a02bound)
+                down2 = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
+                down = up2 - down2
+                nns_m02 = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
+            elif timemin > a02bound:
+                up = a_pow * np.log(timemax)
+                down = a_pow * np.log(timemin)
+                nns_m02 = up - down
+
+	    # interpolate between nns_m002 and nns_m02
+	    metallicities = np.asarray([0.002, 0.02])
+	    nsm_array = np.asarray([nns_m002, nns_m02])
+	    nns_m = np.interp(self.zmetal, metallicities, nsm_array)
 
 	# normalize
         nns_m *= self.A_nsmerger
@@ -2223,14 +2305,17 @@ class chem_evol(object):
         N *= self.f_merger
 
         # Calculate normalization constant per stellar mass (metallicity-dependent, constants computed manually)
-        if .019 < self.zmetal < .021:
-	    print self.zmetal
+        if self.zmetal >= .02:
             self.A_nsmerger = N / ((196.4521905+6592.893564)*M)
-        elif .0019 < self.zmetal < .0021:
+        elif self.zmetal <= .002:
             self.A_nsmerger = N / ((856.0742532+849.6301493)*M)
 	else:
-	    #print self.zmetal
-	    self.A_nsmerger = N / ((196.4521905+6592.893564)*M)
+	    # interpolate
+	    A_002 = N / ((856.0742532+849.6301493)*M)
+	    A_02 = N / ((196.4521905+6592.893564)*M)
+	    metallicities = np.asarray([0.002, 0.02])
+	    A_vals = np.asarray([A_002, A_02])
+	    self.A_nsmerger = np.interp(self.zmetal, metallicities, A_vals)
 
         # Ensure normalization only occurs once
         self.nsm_normalized = True
