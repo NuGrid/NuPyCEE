@@ -119,10 +119,12 @@ class sygma( chem_evol ):
                  nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0.0, \
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
-                 dt_in=np.array([]),\
-                 ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
+                 dt_in=np.array([]), ytables_in=np.array([]), \
+                 zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
-                 zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([])):
+                 zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
+                 mass_sampled=np.array([]), scale_cor=np.array([]),\
+                 poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
@@ -146,7 +148,9 @@ class sygma( chem_evol ):
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
-                 ytables_1a_in=ytables_1a_in,dt_in=dt_in)
+                 ytables_1a_in=ytables_1a_in,dt_in=dt_in,\
+                 poly_fit_dtd_5th=poly_fit_dtd_5th,\
+                 poly_fit_range=poly_fit_range)
 
         if self.need_to_quit:
             return
@@ -158,6 +162,8 @@ class sygma( chem_evol ):
 
         # Attribute the input parameter to the current object
         self.sfr = sfr
+        self.mass_sampled = mass_sampled
+        self.scale_cor = scale_cor
 
         # Get the SFR of every timestep
         self.sfrin_i = self.__sfr()
@@ -190,7 +196,7 @@ class sygma( chem_evol ):
             self.sfrin = self.sfrin_i[i-1]
 
             # Run the timestep i
-            self._evol_stars(i)
+            self._evol_stars(i, self.mass_sampled, self.scale_cor)
 
             # Get the new metallicity of the gas
             self.zmetal = self._getmetallicity(i)

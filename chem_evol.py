@@ -240,7 +240,11 @@ class chem_evol(object):
              ej_massive=np.array([]), ej_agb=np.array([]),\
              ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
              ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
-             dt_ssp=np.array([])):
+             dt_ssp=np.array([]), m_trans_in=np.array([]),\
+             mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
+             poly_fit_dtd_5th_ssp=np.array([]), poly_fit_dtd_5th=np.array([]),
+             poly_fit_range=np.array([]),poly_fit_range_ssp=np.array([]),\
+             nb_1a_ssp=np.array([])):
 
         # Initialize the history class which keeps the simulation in memory
 	self.history = self.__history()
@@ -302,6 +306,8 @@ class chem_evol(object):
         self.t_merge = t_merge
         self.ism_ini = ism_ini
         self.dt_in = dt_in
+        self.poly_fit_dtd_5th = poly_fit_dtd_5th
+        self.poly_fit_range = poly_fit_range
 
         # Normalization constants for the Kroupa IMF
         if imf_type == 'kroupa':
@@ -309,6 +315,17 @@ class chem_evol(object):
             self.p1 = 0.08**(-0.3 + 1.3)
             self.p2 = 0.5**(-1.3 + 2.3)
             self.p3 = 1**(-2.3 +2.3)
+
+        # Define the broken power-law of Ferrini IMF approximation
+        self.norm_fer  = [3.1,1.929,1.398,0.9113,0.538,0.3641,0.2972,\
+                          0.2814,0.2827,0.298,0.305,0.3269,0.3423,0.3634]
+        self.alpha_fer = [0.6,0.35,0.15,-0.15,-0.6,-1.05,-1.4,-1.6,-1.7,\
+                          -1.83,-1.85,-1.9,-1.92,-1.94]
+        self.m_up_fer  = [0.15,0.2,0.24,0.31,0.42,0.56,0.76,1.05,1.5,\
+                          3.16,4.0,10.0,20.0,120]
+        for i_fer in range(0,len(self.norm_fer)):
+            self.alpha_fer[i_fer] = self.alpha_fer[i_fer] + 1
+            self.norm_fer[i_fer] = self.norm_fer[i_fer]/(self.alpha_fer[i_fer])
 
         # Parameter that determines if not enough gas is available for star formation
         self.not_enough_gas_count = 0
@@ -491,6 +508,14 @@ class chem_evol(object):
             if self.netyields_on == True:
                 print 'Error - net yields setting not usable with PopIII at the moment.'
                 self.need_to_quit = True
+
+        # If input poly fit DTD, the applicable range must be specified
+        if len(self.poly_fit_dtd_5th) > 0:
+            if not len(self.poly_fit_range) == 2:
+                print 'Error - poly_fit_range must be specified when ',\
+                      'using the poly_fit_dtd_5th parameter the SNe Ia DTD.'
+                self.need_to_quit = True
+
 
     ##############################################
     #                  Get Iniabu                #
@@ -805,7 +830,7 @@ class chem_evol(object):
     ##############################################
     #                  Evol Stars                #
     ##############################################
-    def _evol_stars(self, i):
+    def _evol_stars(self, i, mass_sampled=np.array([]), scale_cor=np.array([])):
 
         '''
         This function executes a part of a single timestep with the simulation
@@ -817,6 +842,8 @@ class chem_evol(object):
         ========
 
           i : Index of the current timestep
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
 
         '''
 
@@ -871,7 +898,7 @@ class chem_evol(object):
                       ', new ISM mass:','{:.3E}'.format(sum(self.ymgal[i]))
 
             # Calculate stellar ejecta and the number of SNe
-            self.__sfrmdot(i)
+            self.__sfrmdot(i, mass_sampled, scale_cor)
 
         # If no star is forming during the current timestep ...
         else:
@@ -1036,7 +1063,7 @@ class chem_evol(object):
     ##############################################
     #                  SFR Mdot                  #
     ##############################################
-    def __sfrmdot(self, i):
+    def __sfrmdot(self, i, mass_sampled, scale_cor):
 
         '''
         This function calculates the stellar yields per isotope from the
@@ -1048,6 +1075,8 @@ class chem_evol(object):
         ========
 
           i : Index of the current timestep
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
 
         '''
 
@@ -1064,6 +1093,7 @@ class chem_evol(object):
         # relative to the total stellar mass within imf_bdys.
         mfac = self.__get_mfac()
         #print 'test ',yields_all[mstars.index(9.0)][3]  #N14 3
+
         # Get the mass boundaries on which each star yields will be applied.
         # Ex: 12 Mo model yields might be used for all stars from 8 to 12.5 Mo.
 	# also modifies mstars since some stars could lie outside yield range
@@ -1103,7 +1133,8 @@ class chem_evol(object):
 
         # Calculate ejecta from stars recently formed and add it to the mdot arrays
         self.__calculate_ejecta(mstars, yields, yields_extra, \
-            mass_bdys,massfac, i, func_total_ejecta)
+            mass_bdys,massfac, i, func_total_ejecta, mass_sampled, \
+            scale_cor)
 
         # Add the contribution of SNe Ia, if any ...
         if (self.sn1a_on == True) and (self.zmetal > 0 or self.hardsetZ > 0):
@@ -1493,7 +1524,8 @@ class chem_evol(object):
     #             Calculate Ejecta               #
     ##############################################
     def __calculate_ejecta(self, mstars, yields_all, yields_extra, mass_bdys, \
-                           massfac, i, func_total_ejecta):
+                           massfac, i, func_total_ejecta, mass_sampled, \
+                           scale_cor):
 
         '''
         This function calculates the ejecta coming from the stars that are forming
@@ -1509,6 +1541,8 @@ class chem_evol(object):
           mass_bdys : Stellar mass boundaries where yields are applied.
           massfac :  Number of stars in each mass bin (weighted by the IMF)
           i : Index of the current timestep
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
 
         '''
 
@@ -1563,7 +1597,7 @@ class chem_evol(object):
             # Distribute the yields in current and future timesteps
             self.__distribute_yields(i, count_numbers_c, count_numbers_f, yields, \
             yields_extra, maxm, minm, lifetimemin, lifetimemax, p_number, \
-            mstars, w, func_total_ejecta)
+            mstars, w, func_total_ejecta, mass_sampled, scale_cor)
 
 
     ##############################################
@@ -1571,7 +1605,7 @@ class chem_evol(object):
     ##############################################
     def __distribute_yields(self, i, count_numbers_c, count_numbers_f, yields, \
           yields_extra, maxm, minm, lifetimemin, lifetimemax, p_number, mstars, \
-          w, func_total_ejecta):
+          w, func_total_ejecta, mass_sampled, scale_cor):
 
         '''
         This function distributes the ejecta of a specific stellar mass bin over
@@ -1594,6 +1628,8 @@ class chem_evol(object):
           p_number : IMF (number) coefficient in the mass interval.
           mstars : Initial mass of stellar models available in the input yields.
           w : Index of the stellar model providing the yields
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
 
         '''
 
@@ -1649,7 +1685,7 @@ class chem_evol(object):
             # Add the yields to mdot arrays
             break_bol = self.__add_yields_mdot( minm1, maxm1, yields, \
                 yields_extra, i, j, w, number_stars, mstars, tt, lifetimemax, \
-                    p_number, func_total_ejecta)
+                    p_number, func_total_ejecta, mass_sampled, scale_cor)
 
             # Look if the last function demanded a break
             if break_bol:
@@ -1725,7 +1761,8 @@ class chem_evol(object):
     #              Add yields Mdot               #
     ##############################################
     def __add_yields_mdot(self, minm1, maxm1, yields, yields_extra, i, j, w,\
-            number_stars, mstars, tt, lifetimemax, p_number, func_total_ejecta):
+            number_stars, mstars, tt, lifetimemax, p_number, func_total_ejecta,\
+            mass_sampled, scale_cor):
 
         '''
         This function adds the yields of the stars formed during timestep i
@@ -1747,6 +1784,8 @@ class chem_evol(object):
           tt : Time between timestep j and timestep i.
           lifetimemax : Maximum lifetime .
           p_number : IMF (number) coefficient in the mass interval.
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
 
         '''
 
@@ -1762,16 +1801,33 @@ class chem_evol(object):
         if self.iolevel > 1:
             print 'Scalefactor:', scalefactor
 
+        # Calculate the scaling factor if mass_sampled is provided
+        if len(mass_sampled) > 0:
+            number_stars, yield_factor = self.__get_yield_factor(minm1, \
+                maxm1, mass_sampled, func_total_ejecta, mstars[w])
+
+        # If the IMF is full ...
+        else:
+
+            # If the is a correction to apply to the scale factor ...
+            if len(scale_cor) > 0:
+                scalefactor_factor = self.__get_scale_cor(minm1,\
+                    maxm1, scale_cor)
+                scalefactor = scalefactor * scalefactor_factor
+
+            # Calculate the factor that multiplies the yields
+            yield_factor = scalefactor * number_stars
+
         # For every isotope ...
         for k in range(len(self.ymgal[i])):
 
             # Add the total ejecta
             if k >= 76 and mstars[w] > self.transitionmass:
                 self.mdot[j][k] = self.mdot[j][k] + \
-                    self.f_arfo * yields[k] * scalefactor * number_stars
+                    self.f_arfo * yields[k] * yield_factor
             else:
                 self.mdot[j][k] = self.mdot[j][k] + \
-                    yields[k] * scalefactor * number_stars
+                    yields[k] * yield_factor
 
             # For massive stars ...
             if mstars[w] > self.transitionmass:
@@ -1782,22 +1838,22 @@ class chem_evol(object):
                 # In the case of an extra source in massive stars ...
                 if self.extra_source_on:
                     self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                        yields_extra[k] * scalefactor * number_stars
+                        yields_extra[k] * yield_factor
                     self.mdot[j][k] = self.mdot[j][k] + \
-                        yields_extra[k] * scalefactor * number_stars
+                        yields_extra[k] * yield_factor
                     
                 # Add the contribution of massive stars
                 if k >= 76:
                     self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                        self.f_arfo * yields[k] * scalefactor * number_stars
+                        self.f_arfo * yields[k] * yield_factor
                 else:
                     self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                        yields[k] * scalefactor * number_stars
+                        yields[k] * yield_factor
 
             # Add contribution of AGB stars
             else:
                 self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
-                    yields[k] * scalefactor * number_stars
+                    yields[k] * yield_factor
 
         # Count the number of core-collapse SNe
         if mstars[w] > self.transitionmass:
@@ -1820,6 +1876,124 @@ class chem_evol(object):
 
         # Return whether the parent function needs to break or not
         return break_bol
+
+
+    ##############################################
+    #               Get Yield Factor             #
+    ##############################################
+    def __get_yield_factor(self, minm1, maxm1, mass_sampled, \
+                           func_total_ejecta, m_table):
+
+        '''
+        This function calculates the factor that must be multiplied to
+        the input stellar yields, given the mass bin implied for the 
+        considered timestep and the stellar masses sampled by an external
+        program.
+   
+        Argument
+        ========
+
+          minm1 : Minimum stellar mass having ejecta in this timestep j
+          maxm1 : Minimum stellar mass having ejecta in this timestep j
+          mass_sampled : Stellar mass sampled by an external program
+          func_total_ejecta : Relation between M_tot_ej and stellar mass
+          m_table : Mass of the star in the table providing the yields
+
+        '''
+
+        # Initialisation of the number of stars sampled in this mass bin
+        nb_sampled_stars = 0.0
+
+        # Initialisation of the total mass ejected
+        m_ej_sampled = 0.0
+
+        # For all mass sampled ...
+        for i_gyf in range(0,len(mass_sampled)):
+
+            # If the mass is within the mass bin considered in this step ...
+            if mass_sampled[i_gyf] >= minm1 and mass_sampled[i_gyf] < maxm1:
+
+                # Add a star and cumulate the mass ejected
+                m_ej_sampled += func_total_ejecta(mass_sampled[i_gyf])
+                nb_sampled_stars += 1.0
+
+            # Stop the loop if the mass bin has been covered
+            if mass_sampled[i_gyf] >= maxm1:
+                break
+
+        # If no star is sampled in the current mass bin ...
+        if nb_sampled_stars == 0.0:
+
+            # No ejecta
+            return 0.0, 0.0
+
+        # If stars have been sampled ...
+        else:
+
+            # Calculate an adapted scalefactor parameter and return yield_factor
+            return nb_sampled_stars, m_ej_sampled / func_total_ejecta(m_table)
+
+
+    ##############################################
+    #                Get Scale Cor               #
+    ##############################################
+    def __get_scale_cor(self, minm1, maxm1, scale_cor):
+
+        '''
+        This function calculates the envelope correction that must be
+        applied to the IMF.  This correction can be used the increase
+        or reduce the number of stars in a particular mass bin, without
+        creating a new IMF.  It returns the scalefactor_factor, that will
+        be multiplied to scalefactor (e.g., 1.0 --> no correction)
+   
+        Argument
+        ========
+
+          minm1 : Minimum stellar mass having ejecta in this timestep j
+          maxm1 : Minimum stellar mass having ejecta in this timestep j
+          scale_cor : Envelope correction for the IMF
+
+        '''
+
+        # Initialization of the scalefactor correction factor
+        scalefactor_factor = 0.0
+
+        # Calculate the width of the stellar mass bin
+        m_bin_width_inv = 1 / (maxm1 - minm1)
+
+        # Cumulate the number of overlaped array bins
+        nb_overlaps = 0
+
+        # For each mass bin in the input scale_cor array ...
+        for i_gsc in range(0,len(scale_cor)):
+
+            # Copy the lower-mass limit of the current array bin
+            if i_gsc == 0:
+                m_low_temp = 0.0
+            else:
+                m_low_temp = scale_cor[i_gsc-1][0]
+
+            # If the array bin overlaps the considered stellar mass bin ...
+            if (scale_cor[i_gsc][0] > minm1 and scale_cor[i_gsc][0] <= maxm1)\
+              or (m_low_temp > minm1 and m_low_temp < maxm1)\
+              or (scale_cor[i_gsc][0] >= maxm1 and m_low_temp <= minm1):
+
+                # Calculate the stellar bin fraction covered by the array bin
+                frac_temp = (min(maxm1, scale_cor[i_gsc][0]) - \
+                            max(minm1, m_low_temp)) * m_bin_width_inv
+
+                # Cumulate the correction 
+                scalefactor_factor += frac_temp * scale_cor[i_gsc][1]
+
+                # Increment the number of overlaps
+                nb_overlaps += 1
+
+        # Warning is no overlap
+        if nb_overlaps == 0:
+            print '!!Warning - No overlap with scale_cor!!'
+
+        # Return the scalefactor correction factor
+        return scalefactor_factor
 
 
     ##############################################
@@ -2645,7 +2819,30 @@ class chem_evol(object):
             if inte == 1:
                 return quad(self.__g1_fpp, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_fpp, mmin, mmax)[0]
+                #return quad(self.__g2_fpp, mmin, mmax)[0]
+
+                # Find the lower mass bin
+                i_fer = 0
+                while mmin >= self.m_up_fer[i_fer]:
+                    i_fer += 1
+
+                # Integrate this mass bin ...
+                imf_int = 0.0
+                imf_int += self.norm_fer[i_fer] * \
+                       (min(mmax,self.m_up_fer[i_fer])**self.alpha_fer[i_fer]\
+                           - mmin**self.alpha_fer[i_fer])
+
+                # For the remaining mass bin ...
+                if not mmax <= self.m_up_fer[i_fer]:
+                  for i_fer2 in range((i_fer+1),len(self.m_up_fer)):
+                    if mmax >= self.m_up_fer[i_fer2-1]:
+                      imf_int += self.norm_fer[i_fer2] * \
+                          (min(mmax,self.m_up_fer[i_fer2])**self.alpha_fer[i_fer2]\
+                           - self.m_up_fer[i_fer2-1]**self.alpha_fer[i_fer2])
+
+                # Return the integration
+                return imf_int
+
             if inte == -1:
                 self.imfnorm = 1.0 / quad(self.__g2_fpp, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]

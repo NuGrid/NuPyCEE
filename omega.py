@@ -285,7 +285,12 @@ class omega( chem_evol ):
                  ej_massive=np.array([]), ej_agb=np.array([]),\
                  ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
                  ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
-                 dt_ssp=np.array([]),yield_interp='lin'):
+                 dt_ssp=np.array([]), yield_interp='lin',\
+                 m_trans_in=np.array([]), mass_sampled=np.array([]),\
+                 scale_cor=np.array([]), mass_sampled_ssp=np.array([]),\
+                 scale_cor_ssp=np.array([]), poly_fit_dtd_5th_ssp=np.array([]),\
+                 poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
+                 poly_fit_range_ssp=np.array([]), nb_1a_ssp=np.array([])):
 
         # Announce the beginning of the simulation 
         print 'OMEGA run in progress..'
@@ -319,7 +324,12 @@ class omega( chem_evol ):
                  ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
                  ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\
                  ej_sn1a_coef=ej_sn1a_coef,dt_ssp=dt_ssp,\
-		 yield_interp=yield_interp)
+		 yield_interp=yield_interp,\
+                 m_trans_in=m_trans_in,mass_sampled_ssp=mass_sampled_ssp,\
+                 scale_cor_ssp=scale_cor_ssp,\
+                 poly_fit_dtd_5th_ssp=poly_fit_dtd_5th_ssp,\
+                 poly_fit_dtd_5th=poly_fit_dtd_5th,poly_fit_range=poly_fit_range,\
+                 poly_fit_range_ssp=poly_fit_range_ssp,nb_1a_ssp=nb_1a_ssp)
 
         if self.need_to_quit:
             return
@@ -354,6 +364,8 @@ class omega( chem_evol ):
         self.m_gas_f = m_gas_f
         self.cl_SF_law = cl_SF_law
         self.external_control = external_control
+        self.mass_sampled = mass_sampled
+        self.scale_cor = scale_cor
 
         # Set cosmological parameters - Dunkley et al. (2009)
         self.omega_0   = 0.257   # Current mass density parameter
@@ -383,7 +395,7 @@ class omega( chem_evol ):
             self.__calculate_t_SF_t()
             need_t_raf = False
             for i_raf in range(self.nb_timesteps):
-                if self.history.timesteps[-1] > self.t_SF_t[i_raf] / self.sfe:
+                if self.history.timesteps[i_raf] > self.t_SF_t[i_raf] / self.sfe:
                     need_t_raf = True
                     break
             if need_t_raf:
@@ -459,7 +471,7 @@ class omega( chem_evol ):
         if not self.external_control:
 
             # Run the simulation
-            self.__run_simulation()
+            self.__run_simulation(mass_sampled, scale_cor)
 
 
     ##############################################
@@ -1531,11 +1543,18 @@ class omega( chem_evol ):
     ##############################################
     #                Run Simulation              #
     ##############################################
-    def __run_simulation(self):
+    def __run_simulation(self, mass_sampled=np.array([]), \
+                         scale_cor=np.array([])):
 
         '''
         This function calculates the evolution of the chemical abundances of a
         galaxy as a function of time.
+
+        Argument
+        ========
+
+          mass_sampled : Stars sampled in the IMF by an external program.
+          scale_cor : Envelope correction for the IMF.
          
         '''
 
@@ -1543,7 +1562,8 @@ class omega( chem_evol ):
         for i in range(1, self.nb_timesteps+1):
 
             # Run a timestep using the input SFR
-            self.run_step(i, self.sfr_input[i-1])
+            self.run_step(i, self.sfr_input[i-1], \
+                mass_sampled=mass_sampled, scale_cor=scale_cor)
             
         # Calculate the last SFR at the end point of the simulation
         if self.cl_SF_law and not self.open_box:
@@ -1553,7 +1573,8 @@ class omega( chem_evol ):
     ##############################################
     #                   Run Step                 #
     ##############################################
-    def run_step(self, i, sfr_rs, m_added = np.array([]), m_lost = 0.0):
+    def run_step(self, i, sfr_rs, m_added = np.array([]), m_lost = 0.0, \
+                 mass_sampled=np.array([]), scale_cor=np.array([])):
 
         '''
         This function calculates the evolution of one single step in the
@@ -1566,6 +1587,8 @@ class omega( chem_evol ):
           sfr_rs : Input star formation rate [Mo/yr] for the step i.
           m_added : Mass (and composition) added for the step i.
           m_lost : Mass lost for the step i.
+          mass_sampled : Stars sampled in the IMF by an external program.
+          scale_cor : Envelope correction for the IMF.
          
         '''
 
@@ -1580,7 +1603,7 @@ class omega( chem_evol ):
             self.__cal_m_frac_stars(i, sfr_rs)
 
             # Run the timestep i (!need to be right after __cal_m_frac_stars!)
-            self._evol_stars(i)
+            self._evol_stars(i, mass_sampled, scale_cor)
 
             # Add the incoming gas (if any)
             len_m_added = len(m_added)
