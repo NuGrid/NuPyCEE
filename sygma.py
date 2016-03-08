@@ -124,7 +124,7 @@ class sygma( chem_evol ):
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
                  mass_sampled=np.array([]), scale_cor=np.array([]),\
-                 poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([])):
+                 poly_fit_dtd=np.array([]), poly_fit_range=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
@@ -149,7 +149,7 @@ class sygma( chem_evol ):
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
                  ytables_1a_in=ytables_1a_in,dt_in=dt_in,\
-                 poly_fit_dtd_5th=poly_fit_dtd_5th,\
+                 poly_fit_dtd=poly_fit_dtd,\
                  poly_fit_range=poly_fit_range)
 
         if self.need_to_quit:

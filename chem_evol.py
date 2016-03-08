@@ -92,6 +92,19 @@ class chem_evol(object):
         Total duration of the simulation [yr].
         Default value : 13.0e9
 
+    dt_in : list
+        Customized array of input timesteps [yr].  When used, the total duration
+        of the simulation is equal to the sum of all timesteps.
+        Default value : np.array([]) --> Desactivated
+
+    dt_split_info: 2D list
+        Information to build customized timesteps.
+        Example : [ [1e6,1e9], [1e8,13e9] ] means that the timesteps will be
+        of 1e6 yrs until the simulation reaches a time of 1e9 yrs.  Then, the
+        timesteps will be of 1e8 yrs until the simulation reaches a time of
+        13e9 yrs.  There is no limit for the number of [dt,t] arrays used.
+        Default value : np.array([]) --> Desactivated
+
     imf_bdys : list
         Upper and lower mass limits of the initial mass function (IMF) [Mo].
         Default value : [0.1,100]
@@ -204,6 +217,62 @@ class chem_evol(object):
         Specifies the amount of output for testing purposes (up to 3).
         Default value : 0
 
+    poly_fit_dtd : list
+        Array of polynomial coefficients of a customized delay-time distribution
+        function for SNe Ia.  The polynome can be of any order.
+        Example : [0.2, 0.3, 0.1] for rate_snIa(t) = 0.2*t**2 + 0.3*t + 0.1
+        Note : Must be used with the poly_fit_range parameter (see below)
+        Default value : np.array([]) --> Desactivated
+
+    poly_fit_range : list --> [t_min,t_max]
+        Time range where the customized delay-time distribution function for
+        SNe Ia will be applied for a simple stellar population.
+        Default value : np.array([]) --> Desactivated
+
+    mass_sampled : list
+        Stellar masses that are sampled to eject yields in a stellar population.
+        Warning : The use of this parameter bypasses the IMF calculation and 
+        do not ensure a correlation with the star formation rate.  Each sampled
+        mass will eject the exact amount of mass give in the stellar yields. 
+        Default value : np.array([]) --> Desactivated
+
+    scale_cor : 2D list
+        Determine the fraction of yields ejected for any given stellar mass bin.
+        Example : [ [1.0,8], [0.5,100] ] means that stars with initial mass between
+        0 and 8 Msu will eject 100% of their yields, and stars with initial mass
+        between 8 and 100 will eject 50% of their yields.  There is no limit for
+        the number of [%,M_upper_limit] arrays used.
+        Default value : np.array([])  --> Desactivated
+
+    input yield information : series of lists that must be used together
+      These are the yield tables, isotopes, and lifetimes that have been read
+      by a previous instance of SYGMA or OMEGA.  This avoid to read yields over
+      and over and should be used to reduce the computing time if many instances
+      are to be executed.  Here are the different inputs:
+
+      ytables_in : multi-D list
+        Yield tables.
+        Default value : np.array([]) --> Desactivated
+
+      ytables_pop3_in : list
+        PopII yield table.
+        Default value : np.array([]) --> Desactivated
+
+      ytables_1a_in : list
+        SN Ia yield table.
+        Default value : np.array([]) --> Desactivated
+
+      isotopes_in : list
+        List of all isotopes included in the yields
+        Default value : np.array([]) --> Desactivated
+
+      zm_lifetime_grid_nugrid_in : list
+        Grid of lifetimes as a function of stellar mass and metallicity
+        Default value : np.array([]) --> Desactivated
+
+      zm_lifetime_grid_pop3_in : list
+        Grid of lifetimes as a function of stellar mass and metallicity for PopIII
+        Default value : np.array([]) --> Desactivated
 
     Run example
     ===========
@@ -242,7 +311,7 @@ class chem_evol(object):
              ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
              dt_ssp=np.array([]), m_trans_in=np.array([]),\
              mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
-             poly_fit_dtd_5th_ssp=np.array([]), poly_fit_dtd_5th=np.array([]),
+             poly_fit_dtd_ssp=np.array([]), poly_fit_dtd=np.array([]),
              poly_fit_range=np.array([]),poly_fit_range_ssp=np.array([]),\
              nb_1a_ssp=np.array([])):
 
@@ -306,7 +375,7 @@ class chem_evol(object):
         self.t_merge = t_merge
         self.ism_ini = ism_ini
         self.dt_in = dt_in
-        self.poly_fit_dtd_5th = poly_fit_dtd_5th
+        self.poly_fit_dtd = poly_fit_dtd
         self.poly_fit_range = poly_fit_range
 
         # Normalization constants for the Kroupa IMF
@@ -510,10 +579,10 @@ class chem_evol(object):
                 self.need_to_quit = True
 
         # If input poly fit DTD, the applicable range must be specified
-        if len(self.poly_fit_dtd_5th) > 0:
+        if len(self.poly_fit_dtd) > 0:
             if not len(self.poly_fit_range) == 2:
                 print 'Error - poly_fit_range must be specified when ',\
-                      'using the poly_fit_dtd_5th parameter the SNe Ia DTD.'
+                      'using the poly_fit_dtd parameter the SNe Ia DTD.'
                 self.need_to_quit = True
 
 
@@ -1810,10 +1879,11 @@ class chem_evol(object):
         else:
 
             # If the is a correction to apply to the scale factor ...
+            # The imf_scalefactor tells the pourcentage of yields ejected by stars
             if len(scale_cor) > 0:
-                scalefactor_factor = self.__get_scale_cor(minm1,\
+                imf_scalefactor = self.__get_scale_cor(minm1,\
                     maxm1, scale_cor)
-                scalefactor = scalefactor * scalefactor_factor
+                scalefactor = scalefactor * imf_scalefactor
 
             # Calculate the factor that multiplies the yields
             yield_factor = scalefactor * number_stars
@@ -1943,7 +2013,7 @@ class chem_evol(object):
         This function calculates the envelope correction that must be
         applied to the IMF.  This correction can be used the increase
         or reduce the number of stars in a particular mass bin, without
-        creating a new IMF.  It returns the scalefactor_factor, that will
+        creating a new IMF.  It returns the imf_scalefactor, that will
         be multiplied to scalefactor (e.g., 1.0 --> no correction)
    
         Argument
@@ -1956,7 +2026,7 @@ class chem_evol(object):
         '''
 
         # Initialization of the scalefactor correction factor
-        scalefactor_factor = 0.0
+        imf_scalefactor = 0.0
 
         # Calculate the width of the stellar mass bin
         m_bin_width_inv = 1 / (maxm1 - minm1)
@@ -1983,7 +2053,7 @@ class chem_evol(object):
                             max(minm1, m_low_temp)) * m_bin_width_inv
 
                 # Cumulate the correction 
-                scalefactor_factor += frac_temp * scale_cor[i_gsc][1]
+                imf_scalefactor += frac_temp * scale_cor[i_gsc][1]
 
                 # Increment the number of overlaps
                 nb_overlaps += 1
@@ -1992,8 +2062,8 @@ class chem_evol(object):
         if nb_overlaps == 0:
             print '!!Warning - No overlap with scale_cor!!'
 
-        # Return the scalefactor correction factor
-        return scalefactor_factor
+        # Return the IMF scalefactor correction 
+        return imf_scalefactor
 
 
     ##############################################

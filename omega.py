@@ -288,8 +288,8 @@ class omega( chem_evol ):
                  dt_ssp=np.array([]), yield_interp='lin',\
                  m_trans_in=np.array([]), mass_sampled=np.array([]),\
                  scale_cor=np.array([]), mass_sampled_ssp=np.array([]),\
-                 scale_cor_ssp=np.array([]), poly_fit_dtd_5th_ssp=np.array([]),\
-                 poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
+                 scale_cor_ssp=np.array([]), poly_fit_dtd_ssp=np.array([]),\
+                 poly_fit_dtd=np.array([]), poly_fit_range=np.array([]),\
                  poly_fit_range_ssp=np.array([]), nb_1a_ssp=np.array([])):
 
         # Announce the beginning of the simulation 
@@ -327,8 +327,8 @@ class omega( chem_evol ):
 		 yield_interp=yield_interp,\
                  m_trans_in=m_trans_in,mass_sampled_ssp=mass_sampled_ssp,\
                  scale_cor_ssp=scale_cor_ssp,\
-                 poly_fit_dtd_5th_ssp=poly_fit_dtd_5th_ssp,\
-                 poly_fit_dtd_5th=poly_fit_dtd_5th,poly_fit_range=poly_fit_range,\
+                 poly_fit_dtd_ssp=poly_fit_dtd_ssp,\
+                 poly_fit_dtd=poly_fit_dtd,poly_fit_range=poly_fit_range,\
                  poly_fit_range_ssp=poly_fit_range_ssp,nb_1a_ssp=nb_1a_ssp)
 
         if self.need_to_quit:
