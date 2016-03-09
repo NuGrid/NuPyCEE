@@ -301,6 +301,8 @@ class omega( chem_evol ):
                  transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
+		 ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
+                 nsmerger_table=nsmerger_table, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
                  extra_source_table=extra_source_table, pop3_table=pop3_table, \
                  imf_bdys_pop3=imf_bdys_pop3, \
@@ -316,7 +318,8 @@ class omega( chem_evol ):
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
-                 ytables_1a_in=ytables_1a_in,dt_in=dt_in,\
+                 ytables_1a_in=ytables_1a_in, \
+		 ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
                  dt_split_info=dt_split_info,ej_massive=ej_massive,\
                  ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
                  ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\

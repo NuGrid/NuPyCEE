@@ -2114,6 +2114,7 @@ class chem_evol(object):
 
         # Integrate over 0.1 solar metallicity
         elif self.zmetal <= 0.002:
+
             # Define a002 DTD fit parameters
             a = -2.88192413434e-5
             b = 0.00387383125623
