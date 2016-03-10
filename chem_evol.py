@@ -887,10 +887,10 @@ class chem_evol(object):
             f_lock = 1.0e0 - self.sfrin
             for k in range(self.len_ymgal):
                 self.ymgal[i][k] = f_lock * self.ymgal[i-1][k]
+		self.ymgal_massive[i][k] = f_lock * self.ymgal_massive[i-1][k]
                 self.ymgal_agb[i][k] = f_lock * self.ymgal_agb[i-1][k]
                 self.ymgal_1a[i][k] = f_lock * self.ymgal_1a[i-1][k]
 		self.ymgal_nsm[i][k] = f_lock * self.ymgal_nsm[i-1][k]
-                self.ymgal_massive[i][k] = f_lock * self.ymgal_massive[i-1][k]
                 self.m_locked += self.sfrin * self.ymgal[i-1][k]
 
             # Output information
@@ -2085,10 +2085,14 @@ class chem_evol(object):
                 nns_m = up - down
 
 	    # if timemin is below 10 Myr and timemax is in the power law portion of DTD
-	    elif timemin < lower and timemax > a02bound:
-                up = a_pow * np.log(timemax)
-                down = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
-                nns_m = up - down
+	    elif timemin < lower and timemax >= a02bound:
+		up1 = a_pow * np.log(timemax)
+                down1 = a_pow * np.log(a02bound)
+                up = up1 - down1
+                up2 = ((a/6.)*(a02bound**6))+((b/5.)*(a02bound**5))+((c/4.)*(a02bound**4))+((d/3.)*(a02bound**3))+((e/2.)*(a02bound**2))+(f*a02bound)
+                down2 = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
+                down = up2 - down2
+                nns_m = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
 
             # if both timemin and timemax are in initial portion of DTD
             elif timemin >= lower and timemax <= a02bound:
@@ -2132,10 +2136,14 @@ class chem_evol(object):
                 up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
                 down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
                 nns_m = up - down
-	    elif timemin < lower and timemax > a002bound:
-                up = a_pow*np.log(timemax)
-                down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
-		nns_m = up - down
+	    elif timemin < lower and timemax >= a002bound:
+		up1 = a_pow * np.log(timemax)
+                down1 = a_pow * np.log(a002bound)
+                up = up1 - down1
+                up2 = ((a/7.)*(a002bound**7))+((b/6.)*(a002bound**6))+((c/5.)*(a002bound**5))+((d/4.)*(a002bound**4))+((e/3.)*(a002bound**3))+((f/2.)*(a002bound**2))+(g*a002bound)
+                down2 = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
+                down = up2 - down2
+                nns_m = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
             elif timemin >= lower and timemax <= a002bound:
                 up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
                 down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
@@ -2173,10 +2181,14 @@ class chem_evol(object):
                 up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
                 down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
                 nns_m002 = up - down
-            elif timemin < lower and timemax > a002bound:
-                up = a_pow*np.log(timemax)
-                down = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
-                nns_m002 = up - down
+            elif timemin < lower and timemax >= a002bound:
+		up1 = a_pow * np.log(timemax)
+                down1 = a_pow * np.log(a002bound)
+                up = up1 - down1
+                up2 = ((a/7.)*(a002bound**7))+((b/6.)*(a002bound**6))+((c/5.)*(a002bound**5))+((d/4.)*(a002bound**4))+((e/3.)*(a002bound**3))+((f/2.)*(a002bound**2))+(g*a002bound)
+                down2 = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
+                down = up2 - down2
+                nns_m = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
             elif timemin >= lower and timemax <= a002bound:
                 up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
                 down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
@@ -2210,10 +2222,14 @@ class chem_evol(object):
                 up = ((a/6.)*(timemax**6))+((b/5.)*(timemax**5))+((c/4.)*(timemax**4))+((d/3.)*(timemax**3))+((e/2.)*(timemax**2))+(f*timemax)
                 down = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
                 nns_m02 = up - down
-            elif timemin < lower and timemax > a02bound:
-                up = a_pow * np.log(timemax)
-                down = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
-                nns_m02 = up - down
+            elif timemin < lower and timemax >= a02bound:
+		up1 = a_pow * np.log(timemax)
+                down1 = a_pow * np.log(a02bound)
+                up = up1 - down1
+                up2 = ((a/6.)*(a02bound**6))+((b/5.)*(a02bound**5))+((c/4.)*(a02bound**4))+((d/3.)*(a02bound**3))+((e/2.)*(a02bound**2))+(f*a02bound)
+                down2 = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
+                down = up2 - down2
+                nns_m = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
             elif timemin >= lower and timemax <= a02bound:
                 up = ((a/6.)*(timemax**6))+((b/5.)*(timemax**5))+((c/4.)*(timemax**4))+((d/3.)*(timemax**3))+((e/2.)*(timemax**2))+(f*timemax)
                 down = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
@@ -2307,13 +2323,13 @@ class chem_evol(object):
 
         # Calculate normalization constant per stellar mass (metallicity-dependent, constants computed manually)
         if self.zmetal >= .02:
-            self.A_nsmerger = N / ((196.4521905+6592.893564)*M)
+            self.A_nsmerger = N / ((39029.0273426+6592.893564)*M)
         elif self.zmetal <= .002:
             self.A_nsmerger = N / ((856.0742532+849.6301493)*M)
 	else:
 	    # interpolate
 	    A_002 = N / ((856.0742532+849.6301493)*M)
-	    A_02 = N / ((196.4521905+6592.893564)*M)
+	    A_02 = N / ((39029.0273426+6592.893564)*M)
 	    metallicities = np.asarray([0.002, 0.02])
 	    A_vals = np.asarray([A_002, A_02])
 	    self.A_nsmerger = np.interp(self.zmetal, metallicities, A_vals)
