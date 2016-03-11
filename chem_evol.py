@@ -2062,11 +2062,11 @@ class chem_evol(object):
         nns_m = 0.0
 
         # Integrate over solar metallicity DTD
-        if self.zmetal >= 0.02:
+        if self.zmetal >= 0.019:
 
             # Define a02 DTD fit parameters
             a = -0.0138858377011
-            b = 1.10712569392
+            b = 1.0712569392
             c = -32.1555682584
             d = 468.236521089
             e = -3300.97955814
@@ -2116,6 +2116,9 @@ class chem_evol(object):
                 down = a_pow * np.log(timemin)
                 nns_m = up - down
 
+	    # normalize
+	    nns_m *= self.A_nsmerger_02
+
         # Integrate over 0.1 solar metallicity
         elif self.zmetal <= 0.002:
 
@@ -2161,6 +2164,9 @@ class chem_evol(object):
                 down = a_pow*np.log(timemin)
                 nns_m = up - down
 
+	    # normalize
+	    nns_m *= self.A_nsmerger_002
+
 	# Interpolate between the two metallicities
 	else:
 
@@ -2188,7 +2194,7 @@ class chem_evol(object):
                 up2 = ((a/7.)*(a002bound**7))+((b/6.)*(a002bound**6))+((c/5.)*(a002bound**5))+((d/4.)*(a002bound**4))+((e/3.)*(a002bound**3))+((f/2.)*(a002bound**2))+(g*a002bound)
                 down2 = ((a/7.)*(lower**7))+((b/6.)*(lower**6))+((c/5.)*(lower**5))+((d/4.)*(lower**4))+((e/3.)*(lower**3))+((f/2.)*(lower**2))+(g*lower)
                 down = up2 - down2
-                nns_m = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
+                nns_m002 = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
             elif timemin >= lower and timemax <= a002bound:
                 up = ((a/7.)*(timemax**7))+((b/6.)*(timemax**6))+((c/5.)*(timemax**5))+((d/4.)*(timemax**4))+((e/3.)*(timemax**3))+((f/2.)*(timemax**2))+(g*timemax)
                 down = ((a/7.)*(timemin**7))+((b/6.)*(timemin**6))+((c/5.)*(timemin**5))+((d/4.)*(timemin**4))+((e/3.)*(timemin**3))+((f/2.)*(timemin**2))+(g*timemin)
@@ -2208,7 +2214,7 @@ class chem_evol(object):
 
 	    # Define a02 DTD fit parameters
             a = -0.0138858377011
-            b = 1.10712569392
+            b = 1.0712569392
             c = -32.1555682584
             d = 468.236521089
             e = -3300.97955814
@@ -2229,7 +2235,7 @@ class chem_evol(object):
                 up2 = ((a/6.)*(a02bound**6))+((b/5.)*(a02bound**5))+((c/4.)*(a02bound**4))+((d/3.)*(a02bound**3))+((e/2.)*(a02bound**2))+(f*a02bound)
                 down2 = ((a/6.)*(lower**6))+((b/5.)*(lower**5))+((c/4.)*(lower**4))+((d/3.)*(lower**3))+((e/2.)*(lower**2))+(f*lower)
                 down = up2 - down2
-                nns_m = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
+                nns_m02 = up + down # + because we are adding the contribution of the two integrals on either side of the piecewise discontinuity
             elif timemin >= lower and timemax <= a02bound:
                 up = ((a/6.)*(timemax**6))+((b/5.)*(timemax**5))+((c/4.)*(timemax**4))+((d/3.)*(timemax**3))+((e/2.)*(timemax**2))+(f*timemax)
                 down = ((a/6.)*(timemin**6))+((b/5.)*(timemin**5))+((c/4.)*(timemin**4))+((d/3.)*(timemin**3))+((e/2.)*(timemin**2))+(f*timemin)
@@ -2247,13 +2253,14 @@ class chem_evol(object):
                 down = a_pow * np.log(timemin)
                 nns_m02 = up - down
 
+	    # normalize
+	    nns_m02 *= self.A_nsmerger_02
+	    nns_m002 *= self.A_nsmerger_002
+
 	    # interpolate between nns_m002 and nns_m02
 	    metallicities = np.asarray([0.002, 0.02])
 	    nsm_array = np.asarray([nns_m002, nns_m02])
 	    nns_m = np.interp(self.zmetal, metallicities, nsm_array)
-
-	# normalize
-        nns_m *= self.A_nsmerger
 
         # return the number of neutron star mergers produced in this time interval
         return nns_m
@@ -2311,28 +2318,20 @@ class chem_evol(object):
         '''
 	# Compute the number of massive stars (NS merger progenitors)
         N = self._imf(self.transitionmass, self.imf_bdys[1], 1)   # IMF integration
-
+	print N
         # Compute total mass of system
         M = self._imf(self.imf_bdys[0], self.imf_bdys[1], 2)
 
         # multiply number by fraction in binary systems
         N *= self.f_binary / 2.
-
+	print N
         # multiply number by fraction which will form neutron star mergers
         N *= self.f_merger
+	print N
 
-        # Calculate normalization constant per stellar mass (metallicity-dependent, constants computed manually)
-        if self.zmetal >= .02:
-            self.A_nsmerger = N / ((39029.0273426+6592.893564)*M)
-        elif self.zmetal <= .002:
-            self.A_nsmerger = N / ((856.0742532+849.6301493)*M)
-	else:
-	    # interpolate
-	    A_002 = N / ((856.0742532+849.6301493)*M)
-	    A_02 = N / ((39029.0273426+6592.893564)*M)
-	    metallicities = np.asarray([0.002, 0.02])
-	    A_vals = np.asarray([A_002, A_02])
-	    self.A_nsmerger = np.interp(self.zmetal, metallicities, A_vals)
+	# Calculate the normalization constants for Z_o and 0.1Z_o
+	self.A_nsmerger_02 = N / ((196.4521885+6592.893564)*M)
+	self.A_nsmerger_002 = N / ((856.0742532+849.6301493)*M)
 
         # Ensure normalization only occurs once
         self.nsm_normalized = True
