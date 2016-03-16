@@ -108,7 +108,8 @@ class sygma( chem_evol ):
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
-                 ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
+                 ini_alpha=True, \
+		 table='yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt', \
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
 		 ns_merger_on=True, f_binary=1.0, f_merger=0.0028335, \
                  nsmerger_table = 'yield_tables/r_process.txt', iniabu_table='', \
