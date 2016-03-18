@@ -1,5 +1,5 @@
-H Yields (Msun) of stable (?) isotopes
-H See Chris email, Table 1
+H Yields (in mass fraction)
+H Taken from Rosswog et al. 2014 (http://adsabs.harvard.edu/abs/2014MNRAS.439..744R)
 &Isotopes  &Z=0.02
 &H-1       &8.13310921E-09
 &H-2       &1.3406843905747E-09
