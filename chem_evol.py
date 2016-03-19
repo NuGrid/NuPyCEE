@@ -186,7 +186,7 @@ class chem_evol(object):
 
     nsmerger_table : string
         Path pointing toward the r-process yield tables for neutron star mergers
-        Default value : 'yield_tables/r_process.txt' (Rosswog et al. 2013)
+        Default value : 'yield_tables/r_process_rosswog_2014.txt' (Rosswog et al. 2013)
 
     iniabu_table : string
         Path pointing toward the table of initial abuncances in mass fraction.
@@ -230,7 +230,7 @@ class chem_evol(object):
              ini_alpha=True, table='yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt', \
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
              ns_merger_on=True, f_binary=1.0, f_merger=0.0028335,\
-             nsmerger_table = 'yield_tables/r_process.txt', iniabu_table='', \
+             nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
              extra_source_on=False, \
              extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
              pop3_table='yield_tables/popIII_heger10.txt', \
