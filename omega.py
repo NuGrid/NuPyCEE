@@ -301,6 +301,8 @@ class omega( chem_evol ):
                  transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
+		 ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
+                 nsmerger_table=nsmerger_table, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
                  extra_source_table=extra_source_table, pop3_table=pop3_table, \
                  imf_bdys_pop3=imf_bdys_pop3, \
@@ -316,7 +318,8 @@ class omega( chem_evol ):
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
-                 ytables_1a_in=ytables_1a_in,dt_in=dt_in,\
+                 ytables_1a_in=ytables_1a_in, \
+		 ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
                  dt_split_info=dt_split_info,ej_massive=ej_massive,\
                  ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
                  ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\
@@ -549,8 +552,9 @@ class omega( chem_evol ):
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
-        self.ymgal_1a, self.mdot_massive, self.mdot_agb, self.mdot_1a, \
-        self.sn1a_numbers, self.sn2_numbers, self.imf_mass_ranges, \
+        self.ymgal_1a, self.ymgal_nsm, self.mdot_massive, self.mdot_agb, self.mdot_1a, \
+        self.mdot_nsm, self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, \
+ 	self.imf_mass_ranges, \
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
@@ -613,9 +617,9 @@ class omega( chem_evol ):
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
-        self.ymgal_1a, self.mdot_massive, self.mdot_agb, self.mdot_1a, \
-        self.sn1a_numbers, self.sn2_numbers, self.imf_mass_ranges, \
-        self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
+        self.ymgal_1a, self.ymgal_nsm, self.mdot_massive, self.mdot_agb, self.mdot_1a, \
+        self.mdot_nsm, self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, \
+	self.imf_mass_ranges, self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
         # Initialisation of the composition of the gas reservoir
@@ -1604,6 +1608,7 @@ class omega( chem_evol ):
                     self.ymgal[i][k_op] = f_lost_2 * self.ymgal[i][k_op]
                     self.ymgal_agb[i][k_op] = f_lost_2 * self.ymgal_agb[i][k_op]
                     self.ymgal_1a[i][k_op] = f_lost_2 * self.ymgal_1a[i][k_op]
+		    self.ymgal_nsm[i][k_op] = f_lost_2 * self.ymgal_nsm[i][k_op]
                     self.ymgal_massive[i][k_op] = f_lost_2*self.ymgal_massive[i][k_op]
 
             # If the open box scenario is used ...
@@ -1643,14 +1648,11 @@ class omega( chem_evol ):
 
                 # Remove mass from the ISM because of the outflow
                 for k_op in range(0, self.nb_isotopes):
-                    self.ymgal[i][k_op] = (1.0 - frac_rem) * \
-                        self.ymgal[i][k_op]
-                    self.ymgal_agb[i][k_op] = (1.0 - frac_rem) * \
-                        self.ymgal_agb[i][k_op]
-                    self.ymgal_1a[i][k_op] = (1.0 - frac_rem) * \
-                        self.ymgal_1a[i][k_op]
-                    self.ymgal_massive[i][k_op] = (1.0 - frac_rem) * \
-                        self.ymgal_massive[i][k_op]
+                    self.ymgal[i][k_op] *= (1.0 - frac_rem)
+                    self.ymgal_agb[i][k_op] *= (1.0 - frac_rem)
+                    self.ymgal_1a[i][k_op] *= (1.0 - frac_rem)
+		    self.ymgal_nsm[i][k_op] *= (1.0 - frac_rem)
+                    self.ymgal_massive[i][k_op] *= (1.0 - frac_rem)
 
             # Get the new metallicity of the gas
             self.zmetal = self._getmetallicity(i)
