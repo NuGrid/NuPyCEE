@@ -186,7 +186,7 @@ class chem_evol(object):
 
     nsmerger_table : string
         Path pointing toward the r-process yield tables for neutron star mergers
-        Default value : 'yield_tables/r_process.txt' (Rosswog et al. 2013)
+        Default value : 'yield_tables/r_process_rosswog_2014.txt' (Rosswog et al. 2013)
 
     iniabu_table : string
         Path pointing toward the table of initial abuncances in mass fraction.
@@ -229,8 +229,8 @@ class chem_evol(object):
              tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
-             ns_merger_on=True, f_binary=1.0, f_merger=0.0028335,\
-             nsmerger_table = 'yield_tables/r_process.txt', iniabu_table='', \
+             ns_merger_on=False, f_binary=1.0, f_merger=0.0028335,\
+             nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
              extra_source_on=False, \
              extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
              pop3_table='yield_tables/popIII_heger10.txt', \
@@ -2318,16 +2318,15 @@ class chem_evol(object):
         '''
 	# Compute the number of massive stars (NS merger progenitors)
         N = self._imf(self.transitionmass, self.imf_bdys[1], 1)   # IMF integration
-	print N
+
         # Compute total mass of system
         M = self._imf(self.imf_bdys[0], self.imf_bdys[1], 2)
 
         # multiply number by fraction in binary systems
         N *= self.f_binary / 2.
-	print N
+
         # multiply number by fraction which will form neutron star mergers
         N *= self.f_merger
-	print N
 
 	# Calculate the normalization constants for Z_o and 0.1Z_o
 	self.A_nsmerger_02 = N / ((196.4521885+6592.893564)*M)
