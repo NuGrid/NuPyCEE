@@ -108,9 +108,11 @@ class sygma( chem_evol ):
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
-                 ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
+                 ini_alpha=True, \
+		 table='yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt', \
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
-                 iniabu_table='', \
+		 ns_merger_on=True, f_binary=1.0, f_merger=0.0028335, \
+                 nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
                  extra_source_on=False, \
                  extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -122,7 +124,8 @@ class sygma( chem_evol ):
                  dt_in=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
-                 zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([])):
+                 zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]), \
+		 ytables_nsmerger_in=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
@@ -131,6 +134,8 @@ class sygma( chem_evol ):
                  transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
+		 ns_merger_on=ns_merger_on, nsmerger_table=nsmerger_table, \
+		 f_binary=f_binary, f_merger=f_merger, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
                  extra_source_table=extra_source_table, pop3_table=pop3_table, \
                  imf_bdys_pop3=imf_bdys_pop3, \
@@ -146,7 +151,8 @@ class sygma( chem_evol ):
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
-                 ytables_1a_in=ytables_1a_in,dt_in=dt_in)
+		 ytables_1a_in=ytables_1a_in, ytables_nsmerger_in=ytables_nsmerger_in, \
+		 dt_in=dt_in)
 
         if self.need_to_quit:
             return
