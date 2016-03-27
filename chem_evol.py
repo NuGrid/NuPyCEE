@@ -1894,14 +1894,25 @@ class chem_evol(object):
         self._imf(0, 0, -1, 0)
 
         # Get SN Ia yields
-        tables_Z = self.ytables_1a.metallicities
-        for tz in tables_Z:
-            if self.zmetal > tz:
-                yields1a = self.ytables_1a.get(Z=tz, quantity='Yields')
-                break
-            if self.zmetal <= tables_Z[-1]:
-                yields1a = self.ytables_1a.get(Z=tables_Z[-1], quantity='Yields')
-                break
+	#check available metallicities
+	tables_Z = self.ytables_1a.metallicities
+	#sort lowest to highest
+	tables_Z.sort(reverse=True)
+	for tz in tables_Z:
+	    # if current Z above available
+	    if self.zmetal > tz:
+		yields1a = \
+		self.ytables_1a.get(Z=tz, quantity='Yields')
+		break
+	    #if current Z below available
+	    if self.zmetal < tables_Z[-1]:
+		yields1a = \
+		self.ytables_1a.get(Z=tables_Z[-1],quantity='Yields')
+		break
+	    else:
+		if self.zmetal>=tz:
+			yields_extra = \
+			self.ytables_extra.get(Z=tz,quantity='Yields')
 
         # If the selected SN Ia rate depends on the number of white dwarfs ...
         if self.history.sn1a_rate == 'exp' or \
