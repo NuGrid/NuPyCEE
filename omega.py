@@ -255,7 +255,7 @@ class omega( chem_evol ):
                  outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, \
                  m_DM_0=1.0e11, mass_loading=1.0, t_star=-1.0, sfh_file='none', \
                  in_out_ratio=1.0, stellar_mass_0=-1.0, \
-                 z_dependent=True, exp_ml=2.0, \
+                 z_dependent=True, exp_ml=2.0, nsmerger_bdys=[8, 100], \
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  tend=13e9, mgal=-1, transitionmass=8, iolevel=0, \
@@ -264,7 +264,7 @@ class omega( chem_evol ):
                  hardsetZ=-1, sn1a_on=True,\
                  sn1a_table='yield_tables/sn1a_t86.txt',\
                  ns_merger_on=True, f_binary=1.0, f_merger=0.0028335,\
-                 nsmerger_table = 'yield_tables/r_process.txt', iniabu_table='', \
+                 nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
                  extra_source_on=False, \
                  extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -298,7 +298,7 @@ class omega( chem_evol ):
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
                  imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \
                  special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
-                 transitionmass=transitionmass, iolevel=iolevel, \
+                 nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
 		 ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
@@ -418,7 +418,7 @@ class omega( chem_evol ):
                 s_inst = sygma.sygma(imf_type=imf_type, alphaimf=alphaimf,\
                  imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=Z[i_Z_SSP], dt=dt, \
                  special_timesteps=special_timesteps, tend=tend, mgal=1.0, \
-                 transitionmass=transitionmass, iolevel=iolevel, \
+                 nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \

@@ -107,11 +107,11 @@ class sygma( chem_evol ):
     def __init__(self, sfr='input', \
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
-                 tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
+                 nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
                  ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
 		 ns_merger_on=True, f_binary=1.0, f_merger=0.0028335, \
-                 nsmerger_table = 'yield_tables/r_process.txt', iniabu_table='', \
+                 nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
                  extra_source_on=False, \
                  extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -130,7 +130,7 @@ class sygma( chem_evol ):
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
                  imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \
                  special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
-                 transitionmass=transitionmass, iolevel=iolevel, \
+                 nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
 		 ns_merger_on=ns_merger_on, nsmerger_table=nsmerger_table, \

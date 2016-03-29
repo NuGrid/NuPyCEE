@@ -226,7 +226,7 @@ class chem_evol(object):
     ##############################################
     def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
              sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
-             tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
+             nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
              ns_merger_on=False, f_binary=1.0, f_merger=0.0028335,\
@@ -273,12 +273,14 @@ class chem_evol(object):
 	self.history.sn1a_rate = sn1a_rate
         self.history.imf_bdys = imf_bdys
         self.history.transitionmass = transitionmass
+	self.history.nsmerger_bdys = nsmerger_bdys
 	self.history.f_binary = f_binary
 	self.history.f_merger = f_merger
         self.mgal = mgal
         self.transitionmass = transitionmass
         self.iniZ = iniZ
 	self.imf_bdys=imf_bdys
+	self.nsmerger_bdys=nsmerger_bdys
 	self.imf_bdys_pop3=imf_bdys_pop3
 	self.imf_yields_range_pop3=imf_yields_range_pop3
 	self.extra_source_on = extra_source_on
@@ -485,7 +487,10 @@ class chem_evol(object):
              or (self.transitionmass>self.imf_yields_range[1]):
             print 'Error - Transitionmass outside imf yield range'
             self.need_to_quit = True
-
+	if ((self.nsmerger_bdys[0] >  self.imf_bdys[1]) or \
+            (self.nsmerger_bdys[1] < self.imf_bdys[0])):
+            print 'Error - part of nsmerger_bdys must be within imf_bdys.'
+            self.need_to_quit = True
 
         # SN Ia delay-time distribution function
         if not self.history.sn1a_rate in \
@@ -2317,7 +2322,7 @@ class chem_evol(object):
 
         '''
 	# Compute the number of massive stars (NS merger progenitors)
-        N = self._imf(self.transitionmass, self.imf_bdys[1], 1)   # IMF integration
+        N = self._imf(self.nsmerger_bdys[0], self.nsmerger_bdys[1], 1)   # IMF integration
 
         # Compute total mass of system
         M = self._imf(self.imf_bdys[0], self.imf_bdys[1], 2)
