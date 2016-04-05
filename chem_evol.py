@@ -3303,7 +3303,7 @@ class chem_evol(object):
 
             # Get the closest available metallicity (favouring lower boundary)
             Z_gridpoint = self.__get_Z_wiersma(Z, Z_grid)
-	    print 'Take yields from Z closest to: ',Z,' found: ',Z_gridpoint
+	    #print 'Take yields from Z closest to: ',Z,' found: ',Z_gridpoint
             # Get all initial masses at the selected closest metallicity
             m_stars = ytables.get(Z=Z_gridpoint, quantity='masses')
             # Get the yields corrected for the different initial abundances
@@ -3648,7 +3648,7 @@ class chem_evol(object):
 			    if (m>8) and (iso_name[p] in ['C-12','Mg-24','Fe-56']):
 				yi = (X_ymgal_t[p]*(m-mfinal) + y[p]) #total yields, Eq. 4 in Wiersma09
 				if iso_name[p] in ['C-12','Fe-56']:
-					print 'M=',m,' Reduce ',iso_name[p],' by 0.5 ',yi,yi*0.5
+					#print 'M=',m,' Reduce ',iso_name[p],' by 0.5 ',yi,yi*0.5
 					yi = yi*0.5
 				else:
 					#print 'M=',m,' Multiply ',iso_name[p],' by 2.'
