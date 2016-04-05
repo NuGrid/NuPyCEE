@@ -3675,10 +3675,10 @@ class chem_evol(object):
 			else:
 				yi = y[p]
                 if yi < 0:
-		    #if self.iolevel>0:
-		    if abs(yi/y[p])>0.1:
-		    	print iso_name[p],'star ',m,' set ',yi,' to 0, ', \
-			'netyields: ',y[p],'Xsim: ',X_ymgal_t[p],X0[p]
+		    if self.iolevel>0:
+		    	if abs(yi/y[p])>0.1:
+		    		print iso_name[p],'star ',m,' set ',yi,' to 0, ', \
+				'netyields: ',y[p],'Xsim: ',X_ymgal_t[p],X0[p]
                     yi = 0
 		yi_all.append(yi)
 	 
