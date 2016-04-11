@@ -83,6 +83,7 @@ class stellab():
         self.leg       = []  # Legend
 
         # List of all the data sets (path)
+        self.paths.append('milky_way_data/APOGEE_stellab')
         self.paths.append('milky_way_data/Frebel_2010_Milky_Way_stellab')
         self.paths.append('milky_way_data/Venn_et_al_2004_stellab')
         self.paths.append('milky_way_data/Hinkel_et_al_2014_stellab')
@@ -91,14 +92,14 @@ class stellab():
         self.paths.append('milky_way_data/Andrievsky_et_al_2008_stellab')
         self.paths.append('milky_way_data/Andrievsky_et_al_2010_stellab')
         self.paths.append('milky_way_data/Bensby_et_al_2005_stellab')
-        self.paths.append('milky_way_data/Bensby_Feltzing_2006_stellab')
-        self.paths.append('milky_way_data/Bergemann_Gehren_2008_stellab')
+        #        self.paths.append('milky_way_data/Bensby_Feltzing_2006_stellab')
+        #        self.paths.append('milky_way_data/Bergemann_Gehren_2008_stellab')
         self.paths.append('milky_way_data/Bihain_et_al_2004_stellab')
         self.paths.append('milky_way_data/Bonifacio_et_al_2009_stellab')
         self.paths.append('milky_way_data/Caffau_et_al_2005_stellab')
         self.paths.append('milky_way_data/Cayrel_et_al_2004_stellab')
         self.paths.append('milky_way_data/Fabbian_et_al_2009_stellab')
-        self.paths.append('milky_way_data/Gehren_et_al_2006_stellab')
+        #        self.paths.append('milky_way_data/Gehren_et_al_2006_stellab')
         self.paths.append('milky_way_data/Gratton_et_al_2003_stellab')
         self.paths.append('milky_way_data/Israelian_et_al_2004_stellab')
         self.paths.append('milky_way_data/Lai_et_al_2008_stellab')
@@ -124,6 +125,7 @@ class stellab():
             self.paths_s.append(self.paths[i_path]+'_s')
 
         # List of colors and symbols associated to data sets
+        self.cs.append('.b') # APOGEE - Milky Way
         self.cs.append('xg') # Frebel (2010) - Milky Way
         self.cs.append('xr') # Venn et al. (2004)
         self.cs.append('xb') # Hinkel et al. (2014)
@@ -132,14 +134,14 @@ class stellab():
         self.cs.append('og') # Andrievsky et al. (2008)
         self.cs.append('og') # Andrievsky et al. (2010)
         self.cs.append('om') # Bensby et al. (2005)
-        self.cs.append('^g') # Bensby & Feltzing (2006)
-        self.cs.append('og') # Bergemann & Gehren (2008)
+        #        self.cs.append('^g') # Bensby & Feltzing (2006)
+        #        self.cs.append('og') # Bergemann & Gehren (2008)
         self.cs.append('og') # Bihain et al. (2004)
         self.cs.append('^m') # Bonifacio et al. (2009)
-        self.cs.append('or') # Caffau et al. (2005)
+        self.cs.append('xm') # Caffau et al. (2005)
         self.cs.append('^b') # Cayrel et al. (2004)
         self.cs.append('^c') # Fabbian et al. (2009)
-        self.cs.append('^g') # Gehren et al. (2006)
+        #        self.cs.append('^g') # Gehren et al. (2006)
         self.cs.append('sc') # Gratton et al. (2003)
         self.cs.append('oc') # Israelian et al. (2004)
         self.cs.append('or') # Lai et al. (2008)
@@ -161,6 +163,7 @@ class stellab():
         self.cs.append('or') # Pompeia et al. (2008)
 
         # List of legends associated to data sets
+        self.leg.append('APOGEE (R12)')
         self.leg.append('Frebel (2010)')
         self.leg.append('Venn et al. (2004)')
         self.leg.append('Hinkel et al. (2014)')
@@ -169,14 +172,14 @@ class stellab():
         self.leg.append('Andrievsky et al. (2008)')
         self.leg.append('Andrievsky et al. (2010)')
         self.leg.append('Bensby et al. (2005)')
-        self.leg.append('Bensby & Feltzing (2006)')
-        self.leg.append('Bergemann & Gehren (2008)')
+        #        self.leg.append('Bensby & Feltzing (2006)')
+        #        self.leg.append('Bergemann & Gehren (2008)')
         self.leg.append('Bihain et al. (2004)')
         self.leg.append('Bonifacio et al. (2009)')
         self.leg.append('Caffau et al. (2005)')
         self.leg.append('Cayrel et al. (2004)')
         self.leg.append('Fabbian et al. (2009)')
-        self.leg.append('Gehren et al. (2006)')
+        #        self.leg.append('Gehren et al. (2006)')
         self.leg.append('Gratton et al. (2003)')
         self.leg.append('Israelian et al. (2004)')
         self.leg.append('Lai et al. (2008)')
@@ -405,113 +408,13 @@ class stellab():
     ##############################################
     #                Plot Spectro                #
     ##############################################
-    def plot_spectro(self,fig=0, galaxy='', xaxis='[Fe/H]', yaxis='[Mg/Fe]', \
-                     fsize=[10,4.5], fontsize=14, rspace=0.6, bspace=0.15, \
-                     labelsize=15, legend_fontsize=14, norm='', obs='',\
+    def plot_spectro(self, galaxy='', xaxis='[Fe/H]', yaxis='[Mg/Fe]', \
+                     fsize=[10,4.5], fontsize=14, rspace=0.6, bspace=0.15,\
+                     labelsize=15, legend_fontsize=14, ms=6.0, norm='', obs='',\
                      overplot=False, return_xy=False, show_err=False, \
-                     show_mean_err=False):
+                     show_mean_err=False, stat=False, flat=False, show_legend=True, \
+                     sub=1, sub_plot=False, alpha=1.0, lw=1.0):
  
-        '''
-        This function plots observational data with the spectroscopic notation:
-        [X/Y] = log10(n_X/n_Y) - log10(n_X/n_Y)_solar where 'n_X' and 'n_Y' are
-        the number densities of elements X and Y.
-        
-        Parameters
-        ---------
-
-        galaxy : string
-
-            Name of the target galaxy.  The code then automatically selects
-            the corresponding data sets (when available).
-
-            Choices : 'milky_way', 'sculptor', 'carina', 'fornax'
-
-            Default value : 'milky_way' 
-
-        xaxis : string
-
-            Elements on the x axis in the form of '[X/Y]'.
-
-            Default value : '[Fe/H]'
-
-        yaxis : string
-
-            Elements on the y axis in the form of '[X/Y]'.
-
-            Default value : '[Mg/Fe]'
-
-        norm : string
-
-            Common solar normalization used to scale all the data.  Use the
-            list_solar_norm() function for a list of available normalizations.
-            When not specified, each data uses the solar normalization of the
-            reference paper.  
-
-            Example : norm='Anders_Grevesse_1989'
-
-        obs : string array
-
-            Personal selection of observational data.  Use the list_ref_papers()
-            function for a list of availble data sets.  When not specified, all
-            the available data for the selected galaxy will be plotted.
-
-            Example : obs=['milky_way_data/Venn_et_al_2004_stellab',
-            'milky_way_data/Hinkel_et_al_2014_stellab']
-
-        show_err : boolean
-
-            If True, show error bars when available in the code.
-
-            Default value : False
-
-        show_mean_err : boolean
-
-            If True, print the mean X and Y errors when error bars are available
-            in the code.
-
-            Default value : False
-
-        return_xy : boolean
-
-            If True, return the X and Y axis arrays instead of plotting the data.
-
-            Default value = False
-
-            Example : x, y = stellab.plot_spectro(return_xy=True)
-
-	fig : figure ID
-
-        fsize : 2D float array
-
-	     Figure dimension/size.
-
-	fontsize : integer
-
-	     Font size of the numbers on the X and Y axis.
-
-	rspace : float
-
-	     Extra space on the right for the legend.
-
-	bspace : float
-
-	     Extra space at the bottom for the Y axis label.
-
-	labelsize : integer
-
-	     Font size of the X and Y axis labels.
-
-	legend_fontsize : integer
-
- 	     Font size of the legend.
-
-        Examples
-	----------
-
-	>>> stellab.plot_spectro(yaxis='[Ti/H]',xaxis='[Mg/H]',galaxy='sculptor',norm='Anders_Grevesse_1989',show_err=True)
-
-        '''
-
         # Extract the X and Y of the input [X/Y]
         xx, yx = self.__get_x_y(xaxis)
         xy, yy = self.__get_x_y(yaxis)
@@ -522,9 +425,15 @@ class stellab():
         sum_y = 0.0
         sum_count = 0
 
+        # Initialization of the variables used for statistical plot
+        if stat:
+            xy_plot_all = []
+            xy_plot_all.append([])
+            xy_plot_all.append([])
+
         # Show the frame of the plot
-        if not overplot and not return_xy:
-            plt.figure(fig,figsize=(fsize[0],fsize[1]))
+        if not overplot and not return_xy and not sub_plot:
+            plt.figure(figsize=(fsize[0],fsize[1]))
 
         # If data need to be re-normalized ...
         re_norm = False
@@ -692,38 +601,65 @@ class stellab():
             # If ratio is available
             if ok_for_plot:
 
-                # Filtrate unwanted data (e.g., available X but not available Y)
-                xy_temp = []
-                xy_temp.append([])
-                xy_temp.append([])
-                err_temp = []
-                err_temp.append([])
-                err_temp.append([])
-                for i_temp in range(0,len(xy_plot[0])):
-                    if xy_plot[0][i_temp] < 5 and xy_plot[0][i_temp] > -5 and \
-                       xy_plot[1][i_temp] < 5 and xy_plot[1][i_temp] > -5:
-                        xy_temp[0].append(xy_plot[0][i_temp])
-                        xy_temp[1].append(xy_plot[1][i_temp])
-                        err_temp[0].append(err_plot[0][i_temp])
-                        err_temp[1].append(err_plot[1][i_temp])
-                xy_plot = xy_temp
-                err_plot = err_temp
-
                 # If a plot is generated
-                if not return_xy and len(xy_plot[0])>0 and len(xy_plot[1])>0:
-
+                if not return_xy:
                     if re_norm and not sol_ab_found:
                         leg_temp = self.leg[i_ds]+' **'
                     else:
                         leg_temp = self.leg[i_ds]
-                    if show_err:
-                        plt.errorbar(xy_plot[0], xy_plot[1], \
-                          xerr=err_plot[0], yerr=err_plot[1], \
-                          fmt=self.cs[i_ds][0], ecolor=self.cs[i_ds][1], \
-                          color=self.cs[i_ds][1], label=leg_temp)
+                    if stat:
+                        xy_plot_all[0].append(xy_plot[0])
+                        xy_plot_all[1].append(xy_plot[1])
                     else:
-                        plt.plot(xy_plot[0],xy_plot[1],self.cs[i_ds],label=leg_temp)
-                    plt.legend()
+                      if show_err:
+                        if show_legend:
+                          if sub_plot:
+                            sub.errorbar(xy_plot[0], xy_plot[1], \
+                            xerr=err_plot[0], yerr=err_plot[1], 
+                            fmt=self.cs[i_ds][0], ecolor=self.cs[i_ds][1], \
+                            color=self.cs[i_ds][1], label=leg_temp, markersize=ms, \
+                            alpha=alpha, linewidth=lw)
+                          else:
+                            plt.errorbar(xy_plot[0], xy_plot[1], \
+                            xerr=err_plot[0], yerr=err_plot[1], 
+                            fmt=self.cs[i_ds][0], ecolor=self.cs[i_ds][1], \
+                            color=self.cs[i_ds][1], label=leg_temp, markersize=ms, \
+                            alpha=alpha, linewidth=lw)
+                        else:
+                          if sub_plot:
+                            sub.errorbar(xy_plot[0], xy_plot[1], \
+                            xerr=err_plot[0], yerr=err_plot[1], 
+                            fmt=self.cs[i_ds][0], ecolor=self.cs[i_ds][1], \
+                            color=self.cs[i_ds][1], markersize=ms, alpha=alpha, \
+                            linewidth=lw)
+                          else:
+                            plt.errorbar(xy_plot[0], xy_plot[1], \
+                            xerr=err_plot[0], yerr=err_plot[1],\
+                            fmt=self.cs[i_ds][0], ecolor=self.cs[i_ds][1], \
+                            color=self.cs[i_ds][1], markersize=ms, alpha=alpha, \
+                            linewidth=lw)
+                      else:
+                        if show_legend:
+                          if sub_plot:
+                            sub.plot(xy_plot[0],xy_plot[1],self.cs[i_ds],\
+                            label=leg_temp, markersize=ms, alpha=alpha, \
+                            linewidth=lw)
+                          else:
+                            plt.plot(xy_plot[0],xy_plot[1],self.cs[i_ds],\
+                            label=leg_temp, markersize=ms, alpha=alpha, \
+                            linewidth=lw)
+                        else:
+                          if sub_plot:
+                            sub.plot(xy_plot[0],xy_plot[1],self.cs[i_ds], \
+                                  markersize=ms, alpha=alpha, linewidth=lw)
+                          else:
+                            plt.plot(xy_plot[0],xy_plot[1],self.cs[i_ds], \
+                                  markersize=ms, alpha=alpha, linewidth=lw)
+                      if show_legend:
+                        if sub_plot:
+                          sub.legend()
+                        else:
+                          plt.legend()
 
                 # If the data need to be returned ...
                 else:
@@ -741,7 +677,7 @@ class stellab():
             if show_mean_err:
 
                 # For every data point ...
-                for i_dp in range(0,len(xy_plot[0])):
+                for i_dp in range(0,len(self.ab[i_ds])):
 
                     # Add the error to the sum
                     if not xy_plot[0][i_dp] == -30.0 and \
@@ -760,12 +696,84 @@ class stellab():
 
         # Provide a standard plot
         if not return_xy:
-            ax = plt.gca()
-            plt.xlabel(xaxis)
-            plt.ylabel(yaxis)
-            matplotlib.rcParams.update({'font.size': 14})
-            self.__fig_standard(ax=ax, fontsize=fontsize, labelsize=labelsize, \
-            rspace=rspace, bspace=bspace, legend_fontsize=legend_fontsize)
+
+            # If plot median, 68%, 95%, 
+            if stat:
+ 
+                # Build the x_bin
+                x_bin = []
+                y_bin = []
+                dx_bin = 0.3
+                x_max = 1.0
+                xx = -5.0
+                while xx <= x_max:
+                    x_bin.append(xx)
+                    y_bin.append([])
+                    xx += dx_bin
+
+                # Put the y data in the right bin
+                for xi in range(0,len(xy_plot_all[0])):
+                    for xxi in range(0,len(xy_plot_all[0][xi])):
+                        for xb in range(len(x_bin)-1):
+                            if x_bin[xb] <= xy_plot_all[0][xi][xxi] < x_bin[xb+1]:
+                              if xy_plot_all[1][xi][xxi] > -10.0:
+                                y_bin[xb].append(xy_plot_all[1][xi][xxi])
+ 
+                
+                y_stat = []
+                for i in range(0,7):
+                    y_stat.append([])
+                for xb in range(len(x_bin)-1):
+                    x_bin[xb] += 0.5 * dx_bin
+                    y_temp = sorted(y_bin[xb])
+                    if len(y_temp) > 0:
+                        i_med = int(len(y_temp)/2)
+                        y_stat[0].append(y_temp[0])
+                        y_stat[1].append(y_temp[i_med - int(len(y_temp)*0.475)])
+                        y_stat[2].append(y_temp[i_med - int(len(y_temp)*0.340)])
+                        y_stat[3].append(y_temp[i_med])
+                        y_stat[4].append(y_temp[i_med + int(len(y_temp)*0.340)])
+                        y_stat[5].append(y_temp[i_med + int(len(y_temp)*0.475)])
+                        y_stat[6].append(y_temp[-1])
+                    else:
+                        y_stat[0].append(-30.0)
+                        y_stat[1].append(-30.0)
+                        y_stat[2].append(-30.0)
+                        y_stat[3].append(-30.0)
+                        y_stat[4].append(-30.0)
+                        y_stat[5].append(-30.0)
+                        y_stat[6].append(-30.0)
+
+                if flat:
+                    for i in range(0,len(y_stat[0])):
+                        y_stat[0][i] -= y_stat[3][i]
+                        y_stat[1][i] -= y_stat[3][i]
+                        y_stat[2][i] -= y_stat[3][i]
+                        y_stat[4][i] -= y_stat[3][i]
+                        y_stat[5][i] -= y_stat[3][i]
+                        y_stat[6][i] -= y_stat[3][i]
+                        y_stat[3][i] = 0.0 
+
+                del x_bin[-1]
+                plt.fill_between(x_bin,y_stat[0],y_stat[-1],color='0.95')
+                plt.plot(x_bin,y_stat[1],linestyle='-', color='w',linewidth=3)
+                plt.plot(x_bin,y_stat[1],linestyle=':', color='k',linewidth=1.5)
+                plt.plot(x_bin,y_stat[2],linestyle='-', color='w',linewidth=3)
+                plt.plot(x_bin,y_stat[2],linestyle='--',color='k',linewidth=1)
+                plt.plot(x_bin,y_stat[3],               color='w',linewidth=3)
+                plt.plot(x_bin,y_stat[3],               color='k',linewidth=1.5)
+                plt.plot(x_bin,y_stat[4],linestyle='-' ,color='w',linewidth=3)
+                plt.plot(x_bin,y_stat[4],linestyle='--',color='k',linewidth=1)
+                plt.plot(x_bin,y_stat[5],linestyle='-', color='w',linewidth=3)
+                plt.plot(x_bin,y_stat[5],linestyle=':', color='k',linewidth=1.5)
+
+            if not sub_plot:
+                ax = plt.gca()
+                plt.xlabel(xaxis)
+                plt.ylabel(yaxis)
+                matplotlib.rcParams.update({'font.size': 14})
+                self.__fig_standard(ax=ax, fontsize=fontsize, labelsize=labelsize, \
+                rspace=rspace, bspace=bspace, legend_fontsize=legend_fontsize)
 
         # Return the data if the option is choosen
         else:

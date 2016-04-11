@@ -114,7 +114,8 @@ class sygma( chem_evol ):
 		 ns_merger_on=True, f_binary=1.0, f_merger=0.0028335, \
                  nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
                  extra_source_on=False, \
-                 extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
+                 extra_source_table='yield_tables/extra_source.txt', \
+		 f_extra_source=1.0, \
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
@@ -137,7 +138,8 @@ class sygma( chem_evol ):
 		 ns_merger_on=ns_merger_on, nsmerger_table=nsmerger_table, \
 		 f_binary=f_binary, f_merger=f_merger, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
-                 extra_source_table=extra_source_table, pop3_table=pop3_table, \
+                 extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
+		 pop3_table=pop3_table, \
                  imf_bdys_pop3=imf_bdys_pop3, \
                  imf_yields_range_pop3=imf_yields_range_pop3, \
                  starbursts=starbursts, beta_pow=beta_pow, \
@@ -366,7 +368,7 @@ class sygma( chem_evol ):
                         if str(iniZ) in allheader[k]:
                                 mfound=float(allheader[k].split(',')[0].split('=')[1])
                                 masses.append(mfound)
-                print 'Found masses: ',masses
+                #print 'Found masses: ',masses
 
         ltimes=[]
         for k in range(len(masses)):
@@ -899,7 +901,7 @@ class sygma( chem_evol ):
 	     only agb stars ('agb'), only
 	     SN1a ('SN1a'), or only massive stars
              ('massive')
-        norm : boolean
+        norm : string
 	    if 'no', no normalization
             If 'current', normalize to current total amount of specie
 
@@ -980,7 +982,7 @@ class sygma( chem_evol ):
            plt.figure(fig, figsize=(fsize[0],fsize[1]))
            plt.xscale('log')
            plt.xlabel('log-scaled age [yrs]')
-           if norm == False:
+           if norm == 'no':
                plt.ylabel('yields [Msun]')
                plt.yscale('log')
            else:

@@ -232,7 +232,8 @@ class chem_evol(object):
              ns_merger_on=False, f_binary=1.0, f_merger=0.0028335,\
              nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
              extra_source_on=False, \
-             extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
+             extra_source_table='yield_tables/extra_source.txt', \
+	     f_extra_source=1.0, \
              pop3_table='yield_tables/popIII_heger10.txt', \
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
@@ -282,6 +283,7 @@ class chem_evol(object):
 	self.imf_bdys_pop3=imf_bdys_pop3
 	self.imf_yields_range_pop3=imf_yields_range_pop3
 	self.extra_source_on = extra_source_on
+	self.f_extra_source= f_extra_source
 	self.table = table
         self.iniabu_table = iniabu_table
         self.sn1a_table = sn1a_table
@@ -1059,11 +1061,11 @@ class chem_evol(object):
             global_path + self.nsmerger_table, isotopes)
 
         # Should be modified to include extra source for the yields
-        self.extra_source_on = False
-        self.ytables_extra = 0
+        #self.extra_source_on = False
+        #self.ytables_extra = 0
         if self.extra_source_on == True:
             self.ytables_extra = ry.read_yield_sn1a_tables( \
-                global_path + extra_source_table, isotopes)
+                global_path + self.extra_source_table, isotopes)
 
         # Output information
         if self.iolevel >= 1:
@@ -1204,22 +1206,30 @@ class chem_evol(object):
             # Copy PopIII stars lifetimes
             self.zm_lifetime_grid_current = self.zm_lifetime_grid_pop3
 
-        # In case of extra source ...
-        # In case an extra yield source (e.g. r process) is considered
-        # Use new interpolation method here as well?
+        # In case an extra yield source for massive stars is considered
         yields_extra = []
-        if self.default_yields == False:
+        if True: #self.default_yields == False:
             if self.extra_source_on:
+		#check available metallicities
                 tables_Z = self.ytables_extra.metallicities
+		#sort lowest to highest
+		tables_Z.sort(reverse=True) 
                 for tz in tables_Z:
+		    # if current Z above available
                     if self.zmetal > tz:
                         yields_extra = \
                         self.ytables_extra.get(Z=tz, quantity='Yields')
                         break
-                    if self.zmetal <= tables_Z[-1]:
+		    #if current Z below available
+                    if self.zmetal < tables_Z[-1]:
                         yields_extra = \
                         self.ytables_extra.get(Z=tables_Z[-1],quantity='Yields')
                         break
+		    else:
+			if self.zmetal>=tz:
+				yields_extra = \
+				self.ytables_extra.get(Z=tz,quantity='Yields')
+					    
 
         # Output information
         if self.iolevel > 2:
@@ -1823,9 +1833,9 @@ class chem_evol(object):
                 # In the case of an extra source in massive stars ...
                 if self.extra_source_on:
                     self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                        yields_extra[k] * scalefactor * number_stars
+                        yields_extra[k] * self.f_extra_source * scalefactor * number_stars
                     self.mdot[j][k] = self.mdot[j][k] + \
-                        yields_extra[k] * scalefactor * number_stars
+                        yields_extra[k] * self.f_extra_source * scalefactor * number_stars
                     
                 # Add the contribution of massive stars
                 if k >= 76:
@@ -3293,7 +3303,7 @@ class chem_evol(object):
 
             # Get the closest available metallicity (favouring lower boundary)
             Z_gridpoint = self.__get_Z_wiersma(Z, Z_grid)
-	    print 'Take yields from Z closest to: ',Z,' found: ',Z_gridpoint
+	    #print 'Take yields from Z closest to: ',Z,' found: ',Z_gridpoint
             # Get all initial masses at the selected closest metallicity
             m_stars = ytables.get(Z=Z_gridpoint, quantity='masses')
             # Get the yields corrected for the different initial abundances
@@ -3638,7 +3648,7 @@ class chem_evol(object):
 			    if (m>8) and (iso_name[p] in ['C-12','Mg-24','Fe-56']):
 				yi = (X_ymgal_t[p]*(m-mfinal) + y[p]) #total yields, Eq. 4 in Wiersma09
 				if iso_name[p] in ['C-12','Fe-56']:
-					print 'M=',m,' Reduce ',iso_name[p],' by 0.5 ',yi,yi*0.5
+					#print 'M=',m,' Reduce ',iso_name[p],' by 0.5 ',yi,yi*0.5
 					yi = yi*0.5
 				else:
 					#print 'M=',m,' Multiply ',iso_name[p],' by 2.'
@@ -3665,10 +3675,10 @@ class chem_evol(object):
 			else:
 				yi = y[p]
                 if yi < 0:
-		    #if self.iolevel>0:
-		    if abs(yi/y[p])>0.1:
-		    	print iso_name[p],'star ',m,' set ',yi,' to 0, ', \
-			'netyields: ',y[p],'Xsim: ',X_ymgal_t[p],X0[p]
+		    if self.iolevel>0:
+		    	if abs(yi/y[p])>0.1:
+		    		print iso_name[p],'star ',m,' set ',yi,' to 0, ', \
+				'netyields: ',y[p],'Xsim: ',X_ymgal_t[p],X0[p]
                     yi = 0
 		yi_all.append(yi)
 	 
