@@ -786,6 +786,11 @@ class plotting():
 	
 
 	'''
+        import read_yields as ry
+        import re
+        y_table=ry.read_nugrid_yields(global_path+table)	
+	y_delay = y_table
+	Z = iniZ
 
         # find all available masses
         if len(masses)==0:
