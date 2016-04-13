@@ -3279,7 +3279,6 @@ class chem_evol(object):
                        'wiersma' - Interpolation method from Wiersma+ (2009)
 
         '''
-	print 'enter interpolate yields'
         # Output information
         if self.iolevel >= 2:
              print 'Start interpolating yields'
