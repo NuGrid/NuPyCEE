@@ -552,7 +552,7 @@ class read_nugrid_yields():
 
 class read_yield_sn1a_tables():
 
-    def __init__(self,sn1a_table,isotopes):
+    def __init__(self,sn1a_table,isotopes=[]):
 
 
         '''
@@ -580,6 +580,7 @@ class read_yield_sn1a_tables():
         self.col_attrs=[]
         yields=[]
         metallicities=[]
+	isotopes_avail=[]
         for line in lines:
             #for header
             if 'H' in line[0]:
@@ -602,6 +603,9 @@ class read_yield_sn1a_tables():
             for k in range(1,len(linesp)):
                 yields[k-1].append(float(linesp[k]))
 
+	#if isotope list emtpy take all isotopes
+        if len(isotopes)==0:
+		isotopes=iso
         yields1=[]
         #fill up the missing isotope yields with zero
         for z in range(len(yields)):
@@ -619,6 +623,7 @@ class read_yield_sn1a_tables():
             self.metallicities.append(float(m.split('=')[1]))
         #self.metallicities=metallicities
         #print yields1
+	self.isotopes=iso
 
     def get(self,Z=0,quantity='Yields',specie=''):
 
@@ -630,16 +635,17 @@ class read_yield_sn1a_tables():
                 were used, data is taken for the closest metallicity available
                 to reach given Z
 
-                quantity: yields only possible atm
-
-
+                quantity: if 'Yields' return yields
+			  if 'Isotopes' return all isotopes available
 
         '''
-        idx = (np.abs(np.array(self.metallicities)-Z)).argmin()
-        yields=self.yields[idx]
 
-        return np.array(yields)
-
+	if quantity=='Yields':
+        	idx = (np.abs(np.array(self.metallicities)-Z)).argmin()
+        	yields=self.yields[idx]
+        	return np.array(yields)
+	elif quantity=='Isotopes':
+		return self.isotopes
 
 
 class read_yield_rawd_tables():
