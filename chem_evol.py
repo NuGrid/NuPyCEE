@@ -335,6 +335,12 @@ class chem_evol(object):
 
         # Check for incompatible inputs - Error messages
         self.__check_inputs()
+
+        # Initialisation of the timesteps 
+        timesteps = self.__get_timesteps()
+        self.history.timesteps = timesteps
+        self.nb_timesteps = len(timesteps)
+
 	
         # If the yield tables has already been read previously ...
         if input_yields:
@@ -1028,6 +1034,17 @@ class chem_evol(object):
         ytables = ry.read_nugrid_yields(global_path + self.table,excludemass=self.exclude_masses)
         self.ytables = ytables
 
+	# Read other stellar input
+	self.stellar_param=[]
+	self.stellar_param_attrs=[]
+	for k in range(len(self.ytables.col_attrs)):
+		if ((not 'Table' in self.ytables.col_attrs[k]) and ((not 'Lifetime' in self.ytables.col_attrs[k])
+			and (not 'Mfinal' in ytables.col_attrs[k]))):
+			#ytables.col_attrs_data
+			#for each parameter, create list
+			self.stellar_param.append([0.]*self.nb_timesteps)
+			self.stellar_param_attrs.append(self.ytables.col_attrs[k])
+
         # Interpolate stellar lifetimes
         self.zm_lifetime_grid_nugrid = self.__interpolate_lifetimes_grid(ytables)
 
@@ -1205,6 +1222,10 @@ class chem_evol(object):
 
             # Copy PopIII stars lifetimes
             self.zm_lifetime_grid_current = self.zm_lifetime_grid_pop3
+
+	    #here we save the metallicity selected from yield grid
+            self.Z_gridpoint=0.
+
 
         # In case an extra yield source for massive stars is considered
         yields_extra = []
@@ -1657,6 +1678,8 @@ class chem_evol(object):
         minm1 = 0.0
         maxm1 = 0.0
 
+	# Choose Z param
+
         # For every timestep, beginning with the current timestep ...
         for j in range(i-1, self.nb_timesteps):
 
@@ -1800,7 +1823,6 @@ class chem_evol(object):
           p_number : IMF (number) coefficient in the mass interval.
 
         '''
-
         # Scale the total yields (see func_total_eject)
 	if (self.total_ejecta_interp == True):
 		#print 'minm1,maxm1',minm1,maxm1
@@ -1862,7 +1884,13 @@ class chem_evol(object):
 
         # Sum the total number of stars born in the current timestep i (not j)
         self.number_stars_born[i] += number_stars
-		
+	#Add other stellar input, only for Z>0 because of different input grid.
+	if self.Z_gridpoint>0.:
+		# Add other stellar input
+		for p in range(len(self.stellar_param_attrs)):
+			attr=self.stellar_param_attrs[p]
+			attr_data=self.ytables.get(M=mstars[w],Z=self.Z_gridpoint,quantity=attr)
+			self.stellar_param[p][j]= self.stellar_param[p][j] + attr_data
         # Exit loop if no more ejecta to be distributed 
         if tt >= lifetimemax:
             break_bol = True
@@ -3251,7 +3279,7 @@ class chem_evol(object):
                        'wiersma' - Interpolation method from Wiersma+ (2009)
 
         '''
-
+	print 'enter interpolate yields'
         # Output information
         if self.iolevel >= 2:
              print 'Start interpolating yields'
@@ -3298,6 +3326,12 @@ class chem_evol(object):
             m_stars, yields = self.__lin_int_yields(z1, z2, m1, m2, ytables, Z)
 	    #print m_stars
 
+	    #this step is to get a Z_gridpoint value for self.Z_gridpoint 
+            if abs(Z-z1) > abs(Z-z2):
+                Z_gridpoint=z2
+            else:
+                Z_gridpoint=z1
+
         # If the "interpolation" is taken from Wiersma et al. (2009) ....   
         elif (self.yield_interp == 'wiersma'):
 
@@ -3310,6 +3344,9 @@ class chem_evol(object):
             yields = self.__correct_iniabu(ymgal_t, ytables, Z_gridpoint, m_stars)
 	else:
             sys.exit('Choice of parameter value of yield_interp not valid!') 
+
+	#here we save the metallicity selected from yield grid
+	self.Z_gridpoint=Z_gridpoint
 
         # Output information
         if self.iolevel >= 3:
