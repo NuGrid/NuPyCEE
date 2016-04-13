@@ -9,67 +9,12 @@ class plotting():
     ##############################################
     ##               Constructor                ##
     ##############################################
-    def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
-             sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
-             nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
-             ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
-             hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
-             ns_merger_on=False, f_binary=1.0, f_merger=0.0028335,\
-             nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
-             extra_source_on=False, \
-             extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', \
-             pop3_table='yield_tables/popIII_heger10.txt', \
-             imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
-             starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
-             exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=-1, \
-             f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
-             netyields_on=False,wiersmamod=False,yield_interp='lin',\
-             total_ejecta_interp=True,\
-             input_yields=False,t_merge=-1.0,\
-             popIII_on=True,ism_ini=np.array([]),\
-             ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
-             isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
-             zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
-             ytables_nsmerger_in=np.array([]), \
-             dt_in=np.array([]),dt_split_info=np.array([]),\
-             ej_massive=np.array([]), ej_agb=np.array([]),\
-             ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
-             ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
-             dt_ssp=np.array([])):
+    def __init__(self):
+	pass
 
-        # Call the init function of the class inherited by SYGMA/OMEGA
-        chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
-                 imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \
-                 special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
-                 nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
-                 ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
-                 sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
-                 ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
-                 nsmerger_table=nsmerger_table, \
-                 iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
-                 extra_source_table=extra_source_table, pop3_table=pop3_table, \
-                 imf_bdys_pop3=imf_bdys_pop3, \
-                 imf_yields_range_pop3=imf_yields_range_pop3, \
-                 starbursts=starbursts, beta_pow=beta_pow, \
-                 gauss_dtd = gauss_dtd, exp_dtd = exp_dtd, \
-                 nb_1a_per_m=nb_1a_per_m, Z_trans=Z_trans, f_arfo=f_arfo, \
-                 imf_yields_range=imf_yields_range,exclude_masses=exclude_masses, \
-                 netyields_on=netyields_on,wiersmamod=wiersmamod, \
-                 input_yields=input_yields,\
-                 t_merge=t_merge,popIII_on=popIII_on,\
-                 ism_ini=ism_ini,ytables_in=ytables_in,\
-                 zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
-                 isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
-                 zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
-                 ytables_1a_in=ytables_1a_in, \
-                 ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
-                 dt_split_info=dt_split_info,ej_massive=ej_massive,\
-                 ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
-                 ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\
-                 ej_sn1a_coef=ej_sn1a_coef,dt_ssp=dt_ssp,\
-                 yield_interp=yield_interp)
-
-# Formatting for plots first
+    ##############################################
+    ##           Class Attributes               ##
+    ##############################################
 
     def __plot_mass_multi(self,fig=1,specie=['C'],ylims=[],source='all',norm=False,label=[],shape=['-'],marker=['o'],color=['r'],markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
@@ -605,7 +550,9 @@ class plotting():
 
         return shape,marker,color
 
-
+    ####################################
+    ##       Plotting Functions       ##
+    ####################################
     def plot_metallicity(self,source='all',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
