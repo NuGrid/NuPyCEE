@@ -81,10 +81,15 @@ import matplotlib.pyplot as plt
 
 # Import the class inherited by SYGMA
 from chem_evol import *
-from plotting import *
+from plotting import sygmaPlots
+'''from plotting import __plot_mass_multi, __plot_abu_distr, __plot_mass_range_contributions_single, __get_XY, __read_solar_iso, \
+                     __fig_standard, __msc, plot_iso_ratio, plot_mass, plot_mass_range_contributions, plot_mass_ratio, \
+                     plot_massfrac, plot_metallicity, plot_net_yields, plot_sn_distr, plot_spectro, plot_star_formation_rate, \
+                     plot_table_lifetimes, plot_table_remnant, plot_table_yield, plot_table_yield_mass, plot_totmasses, \
+                     plot_yield_mtot'''
 
 
-class sygma( chem_evol, plotting ):
+class sygma( chem_evol, sygmaPlots ):
 
     '''
     Input parameters (SYGMA)

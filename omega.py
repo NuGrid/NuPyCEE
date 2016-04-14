@@ -70,10 +70,10 @@ import random
 # Import the class inherited by SYGMA
 import sygma
 from chem_evol import *
-from plotting import *
+from plotting import sygmaPlots, omegaPlots
 
 
-class omega( chem_evol, plotting ):
+class omega( chem_evol, sygmaPlots, omegaPlots ):
 
     '''
     Input parameters (OMEGA)
