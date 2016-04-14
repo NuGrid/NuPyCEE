@@ -273,12 +273,40 @@ class sygma( chem_evol ):
         # Return the SFR (mass fraction) of every timestep
         return sfr_i
 
-
- 
 ###############################################################################################
 ######################## Here start the analysis methods ######################################
 ###############################################################################################
 
+    def plot_stellar_param(self,fig=8,quantity='Wind kinetic energy',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+
+        '''
+	
+	Plots the evolution of stellar parameter (provided in yield table, e.g. kin. E.) over time.
+
+        Parameters
+        ----------
+
+	quantity: Parameter of interest.
+
+	'''
+
+	if not quantity in self.stellar_param_attrs:
+		print 'Quantity not provided in yield table'
+		return
+	idx=self.stellar_param_attrs.index(quantity)
+	quantity_evol=self.stellar_param[idx]
+	age=self.history.age[1:]
+
+	plt.figure(fig)
+
+        plt.plot(age,quantity_evol,label=label,marker=marker,color=color,linestyle=shape)
+ 
+        ax=plt.gca()
+        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+        plt.ylabel(quantity)
+	plt.xlabel('Lifetime/yrs')
+	plt.yscale('log')
+	plt.xscale('log')
 
     def plot_metallicity(self,source='all',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
@@ -333,17 +361,18 @@ class sygma( chem_evol ):
 
 
 
-    def plot_table_lifetimes(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_table_stellar_param(self,fig=8,xaxis='mini',quantity='Lifetime',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
 	
-	Plots the lifetimes versus initial mass.
+	Plots the lifetimes versus initial mass as given in yield input tables.
 
         Parameters
         ----------
 
         xaxis : string
              if 'mini': use initial mass
+	     if 'time': use lifetime
         iniZ  : float 
 	      Metallicity of interest
 	masses: list
@@ -370,15 +399,26 @@ class sygma( chem_evol ):
                                 masses.append(mfound)
                 #print 'Found masses: ',masses
 
-        ltimes=[]
-        for k in range(len(masses)):
-                ltimes.append(y_table.get(Z=iniZ, M=masses[k], quantity='Lifetime'))
+	if xaxis=='mini':
+		x=masses
+	elif xaxis=='time':
+		x=[]
+		for k in range(len(masses)):
+			x.append(y_table.get(Z=iniZ, M=masses[k], quantity='Lifetime'))	
 
-        plt.plot(masses,ltimes,label=label,marker=marker,color=color,linestyle=shape)
+        param=[]
+        for k in range(len(masses)):
+                param.append(y_table.get(Z=iniZ, M=masses[k], quantity=quantity))
+
+
+        plt.plot(x,param,label=label,marker=marker,color=color,linestyle=shape)
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-        plt.ylabel('Lifetimes/yrs')
-        plt.xlabel('Initial mass/Msun')
+        plt.ylabel(quantity)
+	if xaxis=='mini':
+        	plt.xlabel('Initial mass/Msun')
+	elif xaxis=='time':
+		plt.xlabel('Lifetime/yrs')
 	plt.yscale('log')
 
 
