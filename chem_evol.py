@@ -1037,8 +1037,6 @@ class chem_evol(object):
 	# Read other stellar input
 	self.stellar_param=[]
 	self.stellar_param_attrs=[]
-	#self.stellar_param_inst=[]
-	#self.stellar_param_inst_attrs=[]
 
 	for k in range(len(self.ytables.col_attrs)):
 		if ((not 'Table' in self.ytables.col_attrs[k]) and ((not 'Lifetime' in self.ytables.col_attrs[k])
@@ -1048,10 +1046,6 @@ class chem_evol(object):
 				#parameter applied over whole lifetime, average
 			self.stellar_param_attrs.append(self.ytables.col_attrs[k])
 			self.stellar_param.append([0.]*self.nb_timesteps)							
-			#else: 
-			#	#parameter applied at end  of MS lifetime as ejected mass
-			#	self.stellar_param_inst_attrs.append(self.ytables.col_attrs[k])
-			#	self.stellar_param_inst.append([0.]*self.nb_timesteps)
 
         # Interpolate stellar lifetimes
         self.zm_lifetime_grid_nugrid = self.__interpolate_lifetimes_grid(ytables)
@@ -1701,22 +1695,6 @@ class chem_evol(object):
                 self.__set_t_m_bdys(tt, lifetimemin, lifetimemin1, firstmin, \
                   lifetimemax, lifetimemax1, maxm, maxm1, minm, minm1, j, min_old)
 
-	    '''
-	    # follow mean stellar parameter over whole stellar lifetime
-	    if continue_bol and (not break_bol):
-		#print mstars[w],'i: ',i,' j: ',j
-		#Add other stellar input, only for Z>0 because of different input grid.
-		if self.Z_gridpoint>0.:
-			print 'age: ',lifetimemin1,lifetimemax1
-			print 'test: ',minm1, maxm1
-			number_stars = p_number * (self._imf(minm1, maxm1, 1))
-			# Add other stellar (inst) input
-			for p in range(len(self.stellar_param_attrs)):
-				attr=self.stellar_param_attrs[p]
-				attr_data=self.ytables.get(M=mstars[w],Z=self.Z_gridpoint,quantity=attr)
-				#maybe  we need to multiply with self.f_arfo, meaning not documented!!
-				self.stellar_param[p][j]= self.stellar_param[p][j] + number_stars*attr_data
-	    '''
             # Verify if last function demanded a continue or a break
             if continue_bol:
                 continue
@@ -1913,21 +1891,20 @@ class chem_evol(object):
 
 	#Add other stellar input, only for Z>0 because of different input grid.
 	if self.Z_gridpoint>0.:
-		# Add stellar (inst) input
-		#for p in range(len(self.stellar_param_inst_attrs)):
-		#	attr=self.stellar_param_inst_attrs[p]
-		#	attr_data=self.ytables.get(M=mstars[w],Z=self.Z_gridpoint,quantity=attr)
-		#	self.stellar_param_inst[p][j]= self.stellar_param_inst[p][j] + number_stars*attr_data
 		for p in range(len(self.stellar_param_attrs)):
 			attr=self.stellar_param_attrs[p]
 			attr_data=self.ytables.get(M=mstars[w],Z=self.Z_gridpoint,quantity=attr)
-			if 'band' in attr:
+			if 'Average' in attr:
 				self.stellar_param[p][:j+1]= np.array(self.stellar_param[p][:j+1]) + number_stars*attr_data
-				#if 'High' in attr:
+				#if 'Wind ejection rate' in attr:
 				#	print 'burst at ',i,' star ',mstars[w],' timestep ',j,' time: ',tt,' numberstars: ',number_stars,attr_data
 			else:
 				self.stellar_param[p][j]= self.stellar_param[p][j] + number_stars*attr_data
 				#print 'burst at ',i,' star ',mstars[w],' add to timestep ',j
+                       	#if 'Wind ejection rate' in attr:
+                        #	print 'burst at ',i,' star ',mstars[w],' timestep ',j,' time: ',tt,' numberstars: ',number_stars,attr_data
+
+
         # Exit loop if no more ejecta to be distributed 
         if tt >= lifetimemax:
             break_bol = True
