@@ -122,7 +122,7 @@ class sygma( chem_evol ):
                  nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0.0, \
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
-                 dt_in=np.array([]),\
+                 stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',dt_in=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]), \
@@ -154,7 +154,7 @@ class sygma( chem_evol ):
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
 		 ytables_1a_in=ytables_1a_in, ytables_nsmerger_in=ytables_nsmerger_in, \
-		 dt_in=dt_in)
+		 dt_in=dt_in,stellar_param_table=stellar_param_table)
 
         if self.need_to_quit:
             return
