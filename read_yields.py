@@ -32,6 +32,193 @@ notebookmode=False
 #               self.sn1a_table=sn1a_table
 #               self.nugridtable=nugridtable    ,...
 
+class read_nugrid_parameter():
+
+    def __init__(self,nugridtable):
+
+        '''
+                dir : specifing the filename of the table file
+
+        '''
+        table=nugridtable
+
+        import os
+        if '/' in table:
+            self.label=table.split('/')[-1]
+        else:
+            self.label=table
+        self.path=table
+    	file1=open(nugridtable)
+    	lines=file1.readlines()
+    	file1.close()
+        header1=[]
+        table_header=[]
+        yield_data=[]
+        header_done=False
+	ignore=False
+	col_attrs_data=[]
+	######read through all lines
+        for line in lines:
+            if 'H' in line[0]:
+                if not 'Table' in line:
+                    if header_done==False:
+                        header1.append(line.strip())
+                    else:
+                        table_header[-1].append(line.strip())
+                else:
+		    ignore=False
+		    #print line,'ignore',ignore
+		    if ignore==True:
+		        header_done=True
+		        continue
+		    
+                    table_header.append([])
+                    table_header[-1].append(line.strip())
+                    yield_data.append([])
+                    #lum_bands.append([])
+                    #m_final.append([])
+		    col_attrs_data.append([])
+		    col_attrs_data[-1].append(line.strip())
+                    header_done=True
+		    continue
+		if ignore==True:
+		    continue
+		if header_done==True:
+			#col_attrs_data.append([])
+			col_attrs_data[-1].append(float(line.split(':')[1]))
+                continue
+	    if ignore==True:
+		continue
+            if '&Age' in line:
+                title_line=line.split('&')[1:]
+                column_titles=[]
+                for t in title_line:
+                    yield_data[-1].append([])
+                    column_titles.append(t.strip())
+                #print column_titles
+                continue
+            #iso ,name and yields
+	    iso_name=line.split('&')[1].strip()
+	    #print line
+	    #print line.split('&')
+            yield_data[-1][0].append(float(line.split('&')[1].strip()))
+            #if len(isotopes)>0:
+            #        if not iso_name in isotopes:
+	    #else:    	    
+	    yield_data[-1][1].append(float(line.split('&')[2].strip()))
+            # for additional data
+            for t in range(2,len(yield_data[-1])):
+	    	yield_data[-1][t].append(float(line.split('&')[t+1].strip()))
+	#choose only isotoopes and right order
+        ######reading finished
+	#In [43]: tablesN.col_attrs
+	#Out[43]: ['Isotopes', 'Yields', 'X0', 'Z', 'A']
+        self.yield_data=yield_data
+        #table header points to element in yield_data
+        self.table_idx={}
+        i=0
+        self.col_attrs=[]
+        self.table_mz=[]
+        self.metallicities=[]
+	#self.col_attrs=table_header
+	#go through all MZ pairs
+        for table1 in table_header:
+	    #go through col_attrs
+            for k in range(len(table1)):
+                table1[k]=table1[k][2:]
+                if 'Table' in table1[k]:
+                    self.table_idx[table1[k].split(':')[1].strip()]=i
+                    tablename=table1[k].split(':')[1].strip()
+                    self.table_mz.append(tablename)
+                    metal=tablename.split(',')[1].split('=')[1][:-1]
+                    if float(metal) not in self.metallicities:
+                        self.metallicities.append(float(metal))
+                if table1 ==table_header[0]:
+                    if 'Table' in table1[k]:
+                        table1[k] = 'Table (M,Z):'
+                    self.col_attrs.append(table1[k].split(':')[0].strip())
+		    
+            i+=1
+        #define  header
+        self.header_attrs={}
+        #print 'header1: ',header1
+        for h in header1:
+            self.header_attrs[h.split(':')[0][1:].strip()]=h.split(':')[1].strip()
+        self.data_cols=column_titles #previous data_attrs
+        #self.kin_e=kin_e
+        #self.lum_bands=lum_bands
+        #self.m_final=m_final
+	self.col_attrs_data=col_attrs_data
+
+
+    def get(self,M=0,Z=-1,quantity=''):
+
+        '''
+                Allows to extract table data in 2 Modes:
+
+                1) For extracting of table data for
+                   star of mass M and metallicity Z.
+                   Returns either table attributes,
+                   given by yield.col_attrs
+                   or table columns,
+                   given by yield.data_cols.
+
+                2) For extraction of a table attribute
+                   from all available tables. Can be
+                   directly used in the following way:
+
+                   get(tableattribute)
+
+
+                M: Stellar mass in Msun
+                Z: Stellar metallicity (e.g. solar: 0.02)
+                quantity: table attribute or data column/data_cols
+
+        '''
+
+        all_tattrs=False
+        if Z ==-1:
+            if M ==0 and len(quantity)>0:
+                quantity1=quantity
+                all_tattrs=True
+            elif (M in self.col_attrs) and quantity == '':
+                quantity1=M
+                all_tattrs=True
+            else:
+                print 'Error: Wrong input'
+                return 0
+            quantity=quantity1
+
+
+        if (all_tattrs==False) and (not M ==0):
+            inp='(M='+str(float(M))+',Z='+str(float(Z))+')'
+            idx=self.table_idx[inp]
+
+	if quantity in self.col_attrs:
+		if all_tattrs==False:
+			data=self.col_attrs_data[idx][self.col_attrs.index(quantity)]
+			return data
+		else:
+			data=[]
+			for k in range(len(self.table_idx)):
+				data.append(self.col_attrs_data[k][self.col_attrs.index(quantity)])	
+			return data
+
+        if quantity=='masses':
+            data_tables=self.table_mz
+            masses=[]
+            for table in data_tables:
+                if str(float(Z)) in table:
+                    masses.append(float(table.split(',')[0].split('=')[1]))
+
+
+            return masses
+        else:
+            data=self.yield_data[idx]
+	    idx_col=self.data_cols.index(quantity)
+	    set1=data[idx_col]
+	    return set1
+
 class read_nugrid_yields():
 
     def __init__(self,nugridtable,isotopes=[],excludemass=[]):
