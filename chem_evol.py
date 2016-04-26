@@ -1891,23 +1891,13 @@ class chem_evol(object):
 		for p in range(len(self.stellar_param_attrs)):
 			attr=self.stellar_param_attrs[p]
 			if not attr in self.table_param.data_cols:
-				#print 'mass test',(maxm1+minm1)/2.
 				if self.stellar_param_mrange[0]>minm1:
 					attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[0])
 				elif self.stellar_param_mrange[1]<maxm1:
 					attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[1])
 				else:
 					attr_data=self.stellar_param_functions[p]((maxm1+minm1)/2.)
-			##self.ytables.get(M=mstars[w],Z=self.Z_gridpoint,quantity=attr)
-			#if 'Average' in attr:
-			#	self.stellar_param[p][:j+1]= np.array(self.stellar_param[p][:j+1]) + number_stars*attr_data
-				#if 'Wind ejection rate' in attr:
-				#	print 'burst at ',i,' star ',mstars[w],' timestep ',j,' time: ',tt,' numberstars: ',number_stars,attr_data
-			#else:
-				self.stellar_param[p][j]= self.stellar_param[p][j] + number_stars*attr_data
-				#print 'burst at ',i,' star ',mstars[w],' add to timestep ',j
-                       	#if 'Wind ejection rate' in attr:
-                        #	print 'burst at ',i,' star ',mstars[w],' timestep ',j,' time: ',tt,' numberstars: ',number_stars,attr_data
+				self.stellar_param[p][j]= self.stellar_param[p][j] + number_stars*attr_data/(self.history.timesteps[j]) #*3.154e7)
 			else:
 				idx=list(self.stellar_param_evol_masses).index(mstars[w])
 				self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars*np.array(self.stellar_param_evol[idx][q])
