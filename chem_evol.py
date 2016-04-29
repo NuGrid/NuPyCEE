@@ -3428,8 +3428,6 @@ class chem_evol(object):
 				attr_data.append(self.ytables.get(M=m_stars_grid[h],Z=self.Z_gridpoint,quantity=self.ytables.col_attrs[k]))			
 			f = interp1d(m_stars_grid, attr_data)
 			self.stellar_param_functions.append(f)	
-	
-	print 'start dealing with stellar param evol'
 	#tabulated parameter	
 	table_p=self.table_param #to be better readable
 	stellar_param_evol_num=len(table_p.data_cols)-1 #-age
@@ -3454,16 +3452,12 @@ class chem_evol(object):
 		age_sim_last=0.
 		age_sim=0.
 		ages=[0.]+list(ages)
-		#print 'mass ',m_stars_grid[h],'ages: ',ages
 		for k in range(len(dts)):
 			age_sim = age_sim + dts[k]
-			#simulatin: age_sim_last - age_sim
-			#print 'age_sim: ',age_sim,' k: ',k
                         for t in range(1,len(ages)):
 				#to prevent same time entries to add up; stop then
 				if ages[t] == ages[t-1]:
 					break
-				#print 'age: ',ages[t]
 				#table grid step: ages[t-1] - ages[t]
                                 if ages[t]<age_sim_last:
 					continue
@@ -3483,20 +3477,13 @@ class chem_evol(object):
                                                 stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac
 				if frac<0:
 					print 'error frac!!!, t: ',t
-				#print 'frac',frac
 			age_sim_last=age_sim
-
-			#print 'stellar_param_evol1',stellar_param_evol1
 
 		stellar_param_evol.append(stellar_param_evol1)
 	
 
 	self.stellar_param_evol_masses=m_stars_grid
 	self.stellar_param_evol=stellar_param_evol		
-	print 'Finished  dealing  with stellar parame table evol'			
-		#sort 
-        #table1.get(M=1.0,Z=0.0001,quantity='[11.18, 13.6]')
-        #bands=table1.data_cols
 
         # Return the stellar masses, yields and ejecta function at Z
         return m_stars, yields, func_total_ejecta
