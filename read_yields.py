@@ -1,36 +1,3 @@
-'''
-
-        Superclass to extract yield data from tables
-        and from mppnp simulations
-
-        Christian Ritter 11/2013
-
-        Two classes: One for reading and extracting of
-        NuGrid table data, the other one for SN1a data.
-
-
-
-'''
-
-
-import matplotlib.pyplot as plt
-import numpy as np
-import os
-
-color=['r','k','b','g']
-marker_type=['o','p','s','D']
-line_style=['--','-','-.',':']
-
-
-#global notebookmode
-notebookmode=False
-
-#class read_yields():
-#
-#       def __init__(self,nugridtable='element_yield_table.txt',sn1a_table='sn1a_ivo12_stable_z.txt'):
-#
-#               self.sn1a_table=sn1a_table
-#               self.nugridtable=nugridtable    ,...
 
 class read_nugrid_parameter():
 
@@ -218,6 +185,55 @@ class read_nugrid_parameter():
 	    idx_col=self.data_cols.index(quantity)
 	    set1=data[idx_col]
 	    return set1
+
+    def add_parameter_write_table(self,table_header='',dcols=[],data=[[]],filename='isotope_yield_table_MESA_only_param_new.txt'):
+
+	'''
+		Allows to add more parameter to the parameter table.
+		dcols=['Test1'], data=[[....]]
+	'''
+
+	import ascii_table as ascii1
+	tables=self.table_mz
+	yield_data=self.yield_data
+	data_cols=self.data_cols
+	col_attrs=self.col_attrs
+	col_attrs_data1=self.col_attrs_data
+	for k in range(len(tables)):
+		if not tables[k]==table_header:
+			continue
+		mass=float(tables[k].split(',')[0].split('=')[1])
+		metallicity=float(tables[k].split(',')[1].split('=')[1][:-1])
+
+		#read out existing data
+		col_attrs=col_attrs  #MZ pairs
+		col_attrs_data=col_attrs_data1[k]
+
+		#over col attrs, first is MZ pair which will be skipped, see special_header
+		attr_lines=[]
+		for h in range(1,len(col_attrs)):
+			attr=col_attrs[h]
+			idx=col_attrs.index(attr)
+			# over MZ pairs
+			attr_data=col_attrs_data[k][idx]
+			line=attr+': '+'{:.3E}'.format(attr_data)
+			attr_lines.append(line)
+
+		#read in available columns
+		data_new=yield_data[k]
+		dcols_new=data_cols[:]
+		#add more data...
+		for h in range(len(dcols)):
+			print 'h :',h
+			data_new.append(data[h])
+			dcols_new.append(dcols[h])
+		dcols_new=[dcols_new[0]]+dcols_new[2:]+[dcols_new[1]]
+		print 'dcols: ',dcols_new
+		special_header='Table: (M='+str(mass)+',Z='+str(metallicity)+')'
+		headers=[special_header]+attr_lines
+		ascii1.writeGCE_table_parameter(filename=filename,headers=headers,data=data_new,dcols=dcols_new)
+
+
 
 class read_nugrid_yields():
 
@@ -499,34 +515,6 @@ class read_nugrid_yields():
 
 		headers=[special_header]+attr_lines
 		ascii1.writeGCE_table(filename=filename,headers=headers,data=data,dcols=dcols)
-
-		'''
-		#add ages
-		#time=self.age[k]
-		time=[]
-		idx=self.col_attrs.index('Lifetime')
-		for k in range(len(self.table_mz)):
-			time.append(col_attrs_data[k][idx])
-
-		f1=open(filename,'r')
-		lines=f1.readlines()
-		f1.close()
-		i=-1
-		line1=''
-		while (True):
-			i+=1
-			if i>len(lines)-1:
-				break
-			line=lines[i]
-			line1+=lines[i]
-			if tables[k] in lines[i]:
-				line1+=('H Lifetime: '+'{:.3E}'.format(time)+'\n')
-		f1=open(filename,'w')
-		f1.write(line1)
-		f1.close()
-		'''
-
-
 
 
     def get(self,M=0,Z=-1,quantity='',specie=''):
