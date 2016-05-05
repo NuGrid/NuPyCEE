@@ -242,7 +242,7 @@ class chem_evol(object):
              f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
              netyields_on=False,wiersmamod=False,yield_interp='lin',\
 	     total_ejecta_interp=True,\
-             input_yields=False,t_merge=-1.0,stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',\
+             input_yields=False,t_merge=-1.0,stellar_param_on=True,stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',\
              popIII_on=True,ism_ini=np.array([]),\
              ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
              isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
@@ -325,7 +325,7 @@ class chem_evol(object):
         self.ism_ini = ism_ini
         self.dt_in = dt_in
 	self.stellar_param_table=stellar_param_table
-
+	self.stellar_param_on=stellar_param_on
         # Normalization constants for the Kroupa IMF
         if imf_type == 'kroupa':
             self.p0 = 1.0
@@ -1081,11 +1081,9 @@ class chem_evol(object):
                 global_path + self.extra_source_table, isotopes)
 
 	#Read stellar parameter. stellar_param
-	table_param=ry.read_nugrid_parameter(global_path + self.stellar_param_table)
-	self.table_param=table_param
-	#table1.get(M=1.0,Z=0.0001,quantity='[11.18, 13.6]')
-	#bands=table1.data_cols
-
+	if self.stellar_param_on:
+		table_param=ry.read_nugrid_parameter(global_path + self.stellar_param_table)
+		self.table_param=table_param
 
         # Output information
         if self.iolevel >= 1:
@@ -1891,7 +1889,7 @@ class chem_evol(object):
         self.number_stars_born[i] += number_stars
 
 	#Add other stellar input, only for Z>0 because of different input grid.
-	if self.Z_gridpoint>0.:
+	if self.Z_gridpoint>0. and self.stellar_param_on:
 		q=0
 		for p in range(len(self.stellar_param_attrs)):
 			attr=self.stellar_param_attrs[p]
@@ -3517,82 +3515,83 @@ class chem_evol(object):
                 plt.xlabel('Minis');plt.ylabel('Meject')
         '''
 
-	# Derive stellar parameter 1-parameter-1-mass with linear fits vs mass
-	self.stellar_param=[]
-	self.stellar_param_attrs=[]
-	self.stellar_param_functions=[]
-	m_stars_grid = self.ytables.get(Z=self.Z_gridpoint, quantity='masses')
-	self.stellar_param_mrange=[m_stars_grid[0],m_stars_grid[-1]]	
-	for k in range(len(self.ytables.col_attrs)):
-		if ((not 'Table' in self.ytables.col_attrs[k]) and ((not 'Lifetime' in self.ytables.col_attrs[k])
-			and (not 'Mfinal' in self.ytables.col_attrs[k]))):
-			#luminosities are relevant over the MS lifetime and are given as averages
-			#if 'band' in self.ytables.col_attrs[k]: #needs to changed  from band  to 'Average'
-				#parameter applied over whole lifetime, average
-			self.stellar_param_attrs.append(self.ytables.col_attrs[k])
+	if self.stellar_param_on:
+		# Derive stellar parameter 1-parameter-1-mass with linear fits vs mass
+		self.stellar_param=[]
+		self.stellar_param_attrs=[]
+		self.stellar_param_functions=[]
+		m_stars_grid = self.ytables.get(Z=self.Z_gridpoint, quantity='masses')
+		self.stellar_param_mrange=[m_stars_grid[0],m_stars_grid[-1]]	
+		for k in range(len(self.ytables.col_attrs)):
+			if ((not 'Table' in self.ytables.col_attrs[k]) and ((not 'Lifetime' in self.ytables.col_attrs[k])
+				and (not 'Mfinal' in self.ytables.col_attrs[k]))):
+				#luminosities are relevant over the MS lifetime and are given as averages
+				#if 'band' in self.ytables.col_attrs[k]: #needs to changed  from band  to 'Average'
+					#parameter applied over whole lifetime, average
+				self.stellar_param_attrs.append(self.ytables.col_attrs[k])
+				self.stellar_param.append([0.]*self.nb_timesteps)
+				#linear spline fit between grid points
+				attr_data=[]
+				for h in range(len(m_stars_grid)):
+					attr_data.append(self.ytables.get(M=m_stars_grid[h],Z=self.Z_gridpoint,quantity=self.ytables.col_attrs[k]))			
+				f = interp1d(m_stars_grid, attr_data)
+				self.stellar_param_functions.append(f)	
+		#tabulated parameter	
+		table_p=self.table_param #to be better readable
+		stellar_param_evol_num=len(table_p.data_cols)-1 #-age
+		for h in range(1,len(table_p.data_cols)):
+			self.stellar_param_attrs.append(table_p.data_cols[h])
 			self.stellar_param.append([0.]*self.nb_timesteps)
-			#linear spline fit between grid points
-			attr_data=[]
-			for h in range(len(m_stars_grid)):
-				attr_data.append(self.ytables.get(M=m_stars_grid[h],Z=self.Z_gridpoint,quantity=self.ytables.col_attrs[k]))			
-			f = interp1d(m_stars_grid, attr_data)
-			self.stellar_param_functions.append(f)	
-	#tabulated parameter	
-	table_p=self.table_param #to be better readable
-	stellar_param_evol_num=len(table_p.data_cols)-1 #-age
-	for h in range(1,len(table_p.data_cols)):
-		self.stellar_param_attrs.append(table_p.data_cols[h])
-		self.stellar_param.append([0.]*self.nb_timesteps)
+	
+		stellar_param_evol_num=len(table_p.data_cols)-1 #-age
+		dts= self.history.timesteps		
+		stellar_param_evol=[]
+		for h in range(len(m_stars_grid)):
+			#for 1 star
+			#print 'mass ',m_stars_grid[h]
+        		ages=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity='Age')
+			#print 'ages: ',ages
+			stellar_param_table_evol=[]
+			stellar_param_evol1=[]
+			for k in range(1,len(table_p.data_cols)):
+				stellar_param_table_evol.append(table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity=table_p.data_cols[k]))
+				stellar_param_evol1.append([0.]*len(dts))
 
-	stellar_param_evol_num=len(table_p.data_cols)-1 #-age
-	dts= self.history.timesteps		
-	stellar_param_evol=[]
-	for h in range(len(m_stars_grid)):
-		#for 1 star
-		#print 'mass ',m_stars_grid[h]
-        	ages=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity='Age')
-		#print 'ages: ',ages
-		stellar_param_table_evol=[]
-		stellar_param_evol1=[]
-		for k in range(1,len(table_p.data_cols)):
-			stellar_param_table_evol.append(table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity=table_p.data_cols[k]))
-			stellar_param_evol1.append([0.]*len(dts))
-
-		age_sim_last=0.
-		age_sim=0.
-		ages=[0.]+list(ages)
-		for k in range(len(dts)):
-			age_sim = age_sim + dts[k]
-                        for t in range(1,len(ages)):
-				#to prevent same time entries to add up; stop then
-				if ages[t] == ages[t-1]:
-					break
-				#table grid step: ages[t-1] - ages[t]
-                                if ages[t]<age_sim_last:
-					continue
-				elif ages[t-1]>age_sim:
-					continue
-				elif ages[t-1]<=age_sim_last and ages[t]<=age_sim:
-					frac = (ages[t] - age_sim_last)/dts[k]
-					for p in range(stellar_param_evol_num):
-						stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac		
-				elif ages[t-1]>=age_sim_last and ages[t]>age_sim:
-					frac = (age_sim - ages[t-1])/dts[k]	
-	                        	for p in range(stellar_param_evol_num):
-                                                stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac
-				else:
-					frac = (ages[t] - ages[t-1])/dts[k]
-                                        for p in range(stellar_param_evol_num):
-                                                stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac
-				if frac<0:
-					print 'error frac!!!, t: ',t
-			age_sim_last=age_sim
-
-		stellar_param_evol.append(stellar_param_evol1)
+			age_sim_last=0.
+			age_sim=0.
+			ages=[0.]+list(ages)
+			for k in range(len(dts)):
+				age_sim = age_sim + dts[k]
+                	        for t in range(1,len(ages)):
+					#to prevent same time entries to add up; stop then
+					if ages[t] == ages[t-1]:
+						break
+					#table grid step: ages[t-1] - ages[t]
+                        	        if ages[t]<age_sim_last:
+						continue
+					elif ages[t-1]>age_sim:
+						continue
+					elif ages[t-1]<=age_sim_last and ages[t]<=age_sim:
+						frac = (ages[t] - age_sim_last)/dts[k]
+						for p in range(stellar_param_evol_num):
+							stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac		
+					elif ages[t-1]>=age_sim_last and ages[t]>age_sim:
+						frac = (age_sim - ages[t-1])/dts[k]	
+	                	        	for p in range(stellar_param_evol_num):
+                        	                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac
+					else:
+						frac = (ages[t] - ages[t-1])/dts[k]
+                        	                for p in range(stellar_param_evol_num):
+                        	                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac
+					if frac<0:
+						print 'error frac!!!, t: ',t
+				age_sim_last=age_sim
+	
+			stellar_param_evol.append(stellar_param_evol1)
 	
 
-	self.stellar_param_evol_masses=m_stars_grid
-	self.stellar_param_evol=stellar_param_evol		
+		self.stellar_param_evol_masses=m_stars_grid
+		self.stellar_param_evol=stellar_param_evol		
 
         # Return the stellar masses, yields and ejecta function at Z
         return m_stars, yields, func_total_ejecta
