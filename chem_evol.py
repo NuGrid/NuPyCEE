@@ -209,6 +209,17 @@ class chem_evol(object):
     total_ejecta_interp : if true then interpolates total ejecta given in yield tables 
 			  over initial mass range.  
 
+
+    stellar_param_on : boolean
+	if true reads in additional stellar parameter given in table stellar_param_table.
+	default true in sygma and false in omega 
+	
+    stellar_param_table: stirng
+	Path pointoing toward the table hosting the evolution of stellar parameter 
+	derived from stellar evolution calculations.
+
+
+
     iolevel : int
         Specifies the amount of output for testing purposes (up to 3).
         Default value : 0
@@ -3546,21 +3557,24 @@ class chem_evol(object):
 		stellar_param_evol_num=len(table_p.data_cols)-1 #-age
 		dts= self.history.timesteps		
 		stellar_param_evol=[]
+		#loop over all stars
 		for h in range(len(m_stars_grid)):
-			#for 1 star
-			#print 'mass ',m_stars_grid[h]
         		ages=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity='Age')
-			#print 'ages: ',ages
+			#get the parameter from tables
 			stellar_param_table_evol=[]
 			stellar_param_evol1=[]
 			for k in range(1,len(table_p.data_cols)):
 				stellar_param_table_evol.append(table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity=table_p.data_cols[k]))
 				stellar_param_evol1.append([0.]*len(dts))
 
+			#fill the time step bins with values
 			age_sim_last=0.
 			age_sim=0.
 			ages=[0.]+list(ages)
 			for k in range(len(dts)):
+				# for timestep loop over table time entries, are they relevant for time step bin? 
+				# during which fraction frac of the time step bin are they relevant?
+				# create mean value for each time step bin by taking account the fractions
 				age_sim = age_sim + dts[k]
                 	        for t in range(1,len(ages)):
 					#to prevent same time entries to add up; stop then
@@ -3586,7 +3600,6 @@ class chem_evol(object):
 					if frac<0:
 						print 'error frac!!!, t: ',t
 				age_sim_last=age_sim
-	
 			stellar_param_evol.append(stellar_param_evol1)
 	
 
