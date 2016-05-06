@@ -278,7 +278,71 @@ class sygma( chem_evol ):
 ######################## Here start the analysis methods ######################################
 ###############################################################################################
 
-    def plot_stellar_param(self,fig=8,quantity='Wind kinetic energy',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+
+    def write_stellar_param_table(self,table_name='gce_stellar_param_table.txt', path="",interact=False):
+
+	'''
+	Writes out evolution of stellar parameter such as luminosity and kinetic energy in the following
+	format.
+
+	&Age &Quantity1 &Quantity2 ...
+	&0.000E+00 &0.000E+00 &0.000E+00
+	&0.000E+00 &0.000E+00 &0.000E+00
+
+	'''
+
+        time_evol=self.history.age
+
+	#get available quantities
+
+        parameter=self.stellar_param_attrs
+        parameter_values=self.stellar_param
+
+        metal_evol=self.history.metallicity
+        #header
+        out='&Age [yr]  '
+        for i in range(len(parameter)):
+            out+= ('&'+parameter[i]+((20-len(parameter[i]))*' '))
+	out = out + '\n'
+        #data
+        for t in range(len(parameter[0])):
+            out+=('&'+'{:.3E}'.format(time_evol[t]))
+            for i in range(len(parameter_values)):
+                out+= ( ' &'+ '{:.3E}'.format(parameter_values[i][t]))
+            out+='\n'
+
+        if interact==True:
+                import random
+                randnum=random.randrange(10000,99999)
+                name=table_name+str(randnum)+'.txt'
+                #f1=open(global_path+'evol_tables/'+name,'w')
+                f1=open(name,'w')
+                f1.write(out)
+                f1.close()
+                print 'Created table '+name+'.'
+                print 'Download the table using the following link:'
+                #from IPython.display import HTML
+                #from IPython import display
+                from IPython.core.display import HTML
+                import IPython.display as display
+                #print help(HTML)
+                #return HTML("""<a href="evol_tables/download.php?file="""+name+"""">Download</a>""")
+                #test=
+                #return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
+                #if interact==False:
+                #return HTML("""<a href="""+global_path+"""/evol_tables/"""+name+""">Download</a>""")
+                return HTML("""<a href="""+name+""">Download</a>""")
+                #else:
+                #        return name
+        else:
+                print 'file '+table_name+' saved in subdirectory evol_tables.'
+                f1=open(path+table_name,'w')
+                f1.write(out)
+                f1.close()
+
+
+
+    def plot_stellar_param(self,fig=8,quantity='Ekin_wind',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
 	
