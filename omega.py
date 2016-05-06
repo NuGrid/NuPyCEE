@@ -255,7 +255,7 @@ class omega( chem_evol ):
                  outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, \
                  m_DM_0=1.0e11, mass_loading=1.0, t_star=-1.0, sfh_file='none', \
                  in_out_ratio=1.0, stellar_mass_0=-1.0, \
-                 z_dependent=True, exp_ml=2.0, nsmerger_bdys=[8, 100], \
+                 z_dependent=True, exp_ml=2.0,nsmerger_bdys=[8, 100], \
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  tend=13e9, mgal=-1, transitionmass=8, iolevel=0, \
@@ -278,6 +278,7 @@ class omega( chem_evol ):
                  f_s_enhance=1.0,m_gas_f=1.0e10,cl_SF_law=False,\
                  external_control=False, calc_SSP_ej=False,\
                  input_yields=False, popIII_on=True,\
+		 stellar_param_on=False,\
                  sfh_array=np.array([]),ism_ini=np.array([]),\
                  mdot_ini=np.array([]), mdot_ini_t=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
@@ -299,7 +300,7 @@ class omega( chem_evol ):
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
                  imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \
                  special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
-                 nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
+                 transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
 		 ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
@@ -316,6 +317,7 @@ class omega( chem_evol ):
                  netyields_on=netyields_on,wiersmamod=wiersmamod, \
                  input_yields=input_yields,\
                  t_merge=t_merge,popIII_on=popIII_on,\
+		 stellar_param_on=stellar_param_on,\
                  ism_ini=ism_ini,ytables_in=ytables_in,\
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
@@ -420,7 +422,7 @@ class omega( chem_evol ):
                 s_inst = sygma.sygma(imf_type=imf_type, alphaimf=alphaimf,\
                  imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=Z[i_Z_SSP], dt=dt, \
                  special_timesteps=special_timesteps, tend=tend, mgal=1.0, \
-                 nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
+                 transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \

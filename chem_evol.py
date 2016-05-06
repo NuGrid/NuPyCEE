@@ -49,6 +49,7 @@ from scipy.integrate import quad
 from scipy.integrate import dblquad
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
+from scipy.interpolate import interp1d
 from mpl_toolkits.mplot3d import Axes3D
 from imp import *
 import matplotlib.pyplot as plt
@@ -208,6 +209,17 @@ class chem_evol(object):
     total_ejecta_interp : if true then interpolates total ejecta given in yield tables 
 			  over initial mass range.  
 
+
+    stellar_param_on : boolean
+	if true reads in additional stellar parameter given in table stellar_param_table.
+	default true in sygma and false in omega 
+	
+    stellar_param_table: string
+	Path pointoing toward the table hosting the evolution of stellar parameter 
+	derived from stellar evolution calculations.
+
+
+
     iolevel : int
         Specifies the amount of output for testing purposes (up to 3).
         Default value : 0
@@ -241,7 +253,7 @@ class chem_evol(object):
              f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
              netyields_on=False,wiersmamod=False,yield_interp='lin',\
 	     total_ejecta_interp=True,\
-             input_yields=False,t_merge=-1.0,\
+             input_yields=False,t_merge=-1.0,stellar_param_on=True,stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',\
              popIII_on=True,ism_ini=np.array([]),\
              ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
              isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
@@ -323,7 +335,8 @@ class chem_evol(object):
         self.t_merge = t_merge
         self.ism_ini = ism_ini
         self.dt_in = dt_in
-
+	self.stellar_param_table=stellar_param_table
+	self.stellar_param_on=stellar_param_on
         # Normalization constants for the Kroupa IMF
         if imf_type == 'kroupa':
             self.p0 = 1.0
@@ -337,6 +350,12 @@ class chem_evol(object):
 
         # Check for incompatible inputs - Error messages
         self.__check_inputs()
+
+        # Initialisation of the timesteps 
+        timesteps = self.__get_timesteps()
+        self.history.timesteps = timesteps
+        self.nb_timesteps = len(timesteps)
+
 	
         # If the yield tables has already been read previously ...
         if input_yields:
@@ -1072,6 +1091,11 @@ class chem_evol(object):
             self.ytables_extra = ry.read_yield_sn1a_tables( \
                 global_path + self.extra_source_table, isotopes)
 
+	#Read stellar parameter. stellar_param
+	if self.stellar_param_on:
+		table_param=ry.read_nugrid_parameter(global_path + self.stellar_param_table)
+		self.table_param=table_param
+
         # Output information
         if self.iolevel >= 1:
             print 'Warning - Use isotopes with care.'
@@ -1210,6 +1234,10 @@ class chem_evol(object):
 
             # Copy PopIII stars lifetimes
             self.zm_lifetime_grid_current = self.zm_lifetime_grid_pop3
+
+	    #here we save the metallicity selected from yield grid
+            self.Z_gridpoint=0.
+
 
         # In case an extra yield source for massive stars is considered
         yields_extra = []
@@ -1662,6 +1690,8 @@ class chem_evol(object):
         minm1 = 0.0
         maxm1 = 0.0
 
+	# Choose Z param
+
         # For every timestep, beginning with the current timestep ...
         for j in range(i-1, self.nb_timesteps):
 
@@ -1680,6 +1710,8 @@ class chem_evol(object):
                 continue
             elif break_bol:
                 break
+
+	    #print mstars[w],'i: ',i,' j: ',j
 
 	    self.history.t_m_bdys.append([minm1, maxm1])
 
@@ -1805,7 +1837,6 @@ class chem_evol(object):
           p_number : IMF (number) coefficient in the mass interval.
 
         '''
-
         # Scale the total yields (see func_total_eject)
 	if (self.total_ejecta_interp == True):
 		#print 'minm1,maxm1',minm1,maxm1
@@ -1867,7 +1898,25 @@ class chem_evol(object):
 
         # Sum the total number of stars born in the current timestep i (not j)
         self.number_stars_born[i] += number_stars
-		
+
+	#Add other stellar input, only for Z>0 because of different input grid.
+	if self.Z_gridpoint>0. and self.stellar_param_on:
+		q=0
+		for p in range(len(self.stellar_param_attrs)):
+			attr=self.stellar_param_attrs[p]
+			if not attr in self.table_param.data_cols:
+				if self.stellar_param_mrange[0]>minm1:
+					attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[0])
+				elif self.stellar_param_mrange[1]<maxm1:
+					attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[1])
+				else:
+					attr_data=self.stellar_param_functions[p]((maxm1+minm1)/2.)
+				self.stellar_param[p][j]= self.stellar_param[p][j] + number_stars*attr_data/(self.history.timesteps[j]) #*3.154e7)
+			else:
+				idx=list(self.stellar_param_evol_masses).index(mstars[w])
+				self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars*np.array(self.stellar_param_evol[idx][q])
+				q=q+1
+
         # Exit loop if no more ejecta to be distributed 
         if tt >= lifetimemax:
             break_bol = True
@@ -3360,7 +3409,6 @@ class chem_evol(object):
                        'wiersma' - Interpolation method from Wiersma+ (2009)
 
         '''
-
         # Output information
         if self.iolevel >= 2:
              print 'Start interpolating yields'
@@ -3407,6 +3455,12 @@ class chem_evol(object):
             m_stars, yields = self.__lin_int_yields(z1, z2, m1, m2, ytables, Z)
 	    #print m_stars
 
+	    #this step is to get a Z_gridpoint value for self.Z_gridpoint 
+            if abs(Z-z1) > abs(Z-z2):
+                Z_gridpoint=z2
+            else:
+                Z_gridpoint=z1
+
         # If the "interpolation" is taken from Wiersma et al. (2009) ....   
         elif (self.yield_interp == 'wiersma'):
 
@@ -3419,6 +3473,9 @@ class chem_evol(object):
             yields = self.__correct_iniabu(ymgal_t, ytables, Z_gridpoint, m_stars)
 	else:
             sys.exit('Choice of parameter value of yield_interp not valid!') 
+
+	#here we save the metallicity selected from yield grid
+	self.Z_gridpoint=Z_gridpoint
 
         # Output information
         if self.iolevel >= 3:
@@ -3468,6 +3525,86 @@ class chem_evol(object):
                 plt.title('Total mass fit')
                 plt.xlabel('Minis');plt.ylabel('Meject')
         '''
+
+	if self.stellar_param_on:
+		# Derive stellar parameter 1-parameter-1-mass with linear fits vs mass
+		self.stellar_param=[]
+		self.stellar_param_attrs=[]
+		self.stellar_param_functions=[]
+		m_stars_grid = self.ytables.get(Z=self.Z_gridpoint, quantity='masses')
+		self.stellar_param_mrange=[m_stars_grid[0],m_stars_grid[-1]]	
+		for k in range(len(self.ytables.col_attrs)):
+			if ((not 'Table' in self.ytables.col_attrs[k]) and ((not 'Lifetime' in self.ytables.col_attrs[k])
+				and (not 'Mfinal' in self.ytables.col_attrs[k]))):
+				#luminosities are relevant over the MS lifetime and are given as averages
+				#if 'band' in self.ytables.col_attrs[k]: #needs to changed  from band  to 'Average'
+					#parameter applied over whole lifetime, average
+				self.stellar_param_attrs.append(self.ytables.col_attrs[k])
+				self.stellar_param.append([0.]*self.nb_timesteps)
+				#linear spline fit between grid points
+				attr_data=[]
+				for h in range(len(m_stars_grid)):
+					attr_data.append(self.ytables.get(M=m_stars_grid[h],Z=self.Z_gridpoint,quantity=self.ytables.col_attrs[k]))			
+				f = interp1d(m_stars_grid, attr_data)
+				self.stellar_param_functions.append(f)	
+		#tabulated parameter	
+		table_p=self.table_param #to be better readable
+		stellar_param_evol_num=len(table_p.data_cols)-1 #-age
+		for h in range(1,len(table_p.data_cols)):
+			self.stellar_param_attrs.append(table_p.data_cols[h])
+			self.stellar_param.append([0.]*self.nb_timesteps)
+	
+		stellar_param_evol_num=len(table_p.data_cols)-1 #-age
+		dts= self.history.timesteps		
+		stellar_param_evol=[]
+		#loop over all stars
+		for h in range(len(m_stars_grid)):
+        		ages=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity='Age')
+			#get the parameter from tables
+			stellar_param_table_evol=[]
+			stellar_param_evol1=[]
+			for k in range(1,len(table_p.data_cols)):
+				stellar_param_table_evol.append(table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity=table_p.data_cols[k]))
+				stellar_param_evol1.append([0.]*len(dts))
+
+			#fill the time step bins with values
+			age_sim_last=0.
+			age_sim=0.
+			ages=[0.]+list(ages)
+			for k in range(len(dts)):
+				# for timestep loop over table time entries, are they relevant for time step bin? 
+				# during which fraction frac of the time step bin are they relevant?
+				# create mean value for each time step bin by taking account the fractions
+				age_sim = age_sim + dts[k]
+                	        for t in range(1,len(ages)):
+					#to prevent same time entries to add up; stop then
+					if ages[t] == ages[t-1]:
+						break
+					#table grid step: ages[t-1] - ages[t]
+                        	        if ages[t]<age_sim_last:
+						continue
+					elif ages[t-1]>age_sim:
+						continue
+					elif ages[t-1]<=age_sim_last and ages[t]<=age_sim:
+						frac = (ages[t] - age_sim_last)/dts[k]
+						for p in range(stellar_param_evol_num):
+							stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac		
+					elif ages[t-1]>=age_sim_last and ages[t]>age_sim:
+						frac = (age_sim - ages[t-1])/dts[k]	
+	                	        	for p in range(stellar_param_evol_num):
+                        	                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac
+					else:
+						frac = (ages[t] - ages[t-1])/dts[k]
+                        	                for p in range(stellar_param_evol_num):
+                        	                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac
+					if frac<0:
+						print 'error frac!!!, t: ',t
+				age_sim_last=age_sim
+			stellar_param_evol.append(stellar_param_evol1)
+	
+
+		self.stellar_param_evol_masses=m_stars_grid
+		self.stellar_param_evol=stellar_param_evol		
 
         # Return the stellar masses, yields and ejecta function at Z
         return m_stars, yields, func_total_ejecta
@@ -4326,6 +4463,15 @@ class chem_evol(object):
 
             return 10**found_lifetime
 
+
+    def get_lifetimes(self, metallicity, mass, lifetime=0):
+	
+	'''
+		To get lifetime for given metallicity and mass.
+		Taken from the interpolated grid.
+	'''
+
+	return self.__find_lifetimes(metallicity=metallicity, mass=mass, lifetime=lifetime)
 
     ##############################################
     #               Get Metallicity              #
