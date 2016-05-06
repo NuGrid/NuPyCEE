@@ -214,7 +214,7 @@ class chem_evol(object):
 	if true reads in additional stellar parameter given in table stellar_param_table.
 	default true in sygma and false in omega 
 	
-    stellar_param_table: stirng
+    stellar_param_table: string
 	Path pointoing toward the table hosting the evolution of stellar parameter 
 	derived from stellar evolution calculations.
 

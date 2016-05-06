@@ -255,7 +255,7 @@ class omega( chem_evol ):
                  outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, \
                  m_DM_0=1.0e11, mass_loading=1.0, t_star=-1.0, sfh_file='none', \
                  in_out_ratio=1.0, stellar_mass_0=-1.0, \
-                 z_dependent=True, exp_ml=2.0, \
+                 z_dependent=True, exp_ml=2.0,nsmerger_bdys=[8, 100], \
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  tend=13e9, mgal=-1, transitionmass=8, iolevel=0, \
