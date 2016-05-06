@@ -1,3 +1,30 @@
+'''
+
+        Superclass to extract yield data from tables
+        and from mppnp simulations
+
+        Christian Ritter 11/2013
+
+        Two classes: One for reading and extracting of
+        NuGrid table data, the other one for SN1a data.
+
+
+
+'''
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+color=['r','k','b','g']
+marker_type=['o','p','s','D']
+line_style=['--','-','-.',':']
+
+
+#global notebookmode
+notebookmode=False
+
 
 class read_nugrid_parameter():
 
