@@ -1,0 +1,63 @@
+Contains the test suite for SYGMA of NuGrid's NUPYCEE GCE package.
+
+###To run the test suite:
+
+1) execute start_notebook.sh (./start_notebook.sh)
+
+2) Choose and execute notebooks and test output
+
+   Currently recommended:
+   
+   Open SYGMA_SSP_h_yield_input.ipynb
+    	Execute parts and check variables
+   Open SYGMA_SSP_CNO_yield_input.ipynb 
+	Execute parts and check variables
+   Open SYGMA_SSP_all_yields.ipynb
+
+
+###Overview over content in notebooks:
+
+SYGMA_BUGS: Report your bugs in this notebook.
+
+SYGMA_SSP_h_yield_input: Tests with artificial yields containing only H.
+
+    Evolution of ISM
+
+    distinguish sources of massive and AGB stars
+
+    Test of final mass of ISM for different IMF boundaries
+
+    Test of Salpeter, Chabrier, Kroupa IMF by checking  the evolution of ISM mass (incl. alphaimf)
+
+    Test if SNIa on/off works
+
+    Test of the three SNIa implementations, the evolution of SN1a contributions
+
+    Test of parameter tend, dt and special_timesteps
+
+    Test of parmeter mgal
+
+    Test of parameter transitionmass
+
+
+SYGMA_SSP_CNO_yield_input: Tests with artifical yields containing C,N,O, Ni.
+
+
+    Distinguished final ISM from different sources (low mass, massive AGB, massive stars, SN1a)
+
+    Evolution of different sources
+
+    Check of transition mass
+
+    Check of the exclude_masses parameter
+    
+    
+SYGMA_SSP_all_yields: Test with standard (solar) yields input.
+
+    Check that the total amounts of H-1, Fe-56 are reproduced.
+    
+    Check the mass intervals and time intervals
+    
+    SNIa check: default and hardsetZ mode.
+
+
