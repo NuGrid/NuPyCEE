@@ -1913,6 +1913,7 @@ class chem_evol(object):
 					attr_data=self.stellar_param_functions[p]((maxm1+minm1)/2.)
 				self.stellar_param[p][j]= self.stellar_param[p][j] + number_stars*attr_data/(self.history.timesteps[j]) #*3.154e7)
 			else:
+				#Apply quantities for stars in time interval i/j, apply their contribution over their whole lifetime (table)
 				idx=list(self.stellar_param_evol_masses).index(mstars[w])
 				self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars*np.array(self.stellar_param_evol[idx][q])
 				q=q+1

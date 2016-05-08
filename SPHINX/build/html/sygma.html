@@ -61,7 +61,7 @@
 <div class="section" id="functionality">
 <h2>Functionality<a class="headerlink" href="#functionality" title="Permalink to this headline">¶</a></h2>
 <p>This tool allows the modeling of simple stellar populations.  Creating a SYGMA 
-instance runs the simulation while extensive analyzsis can be done with the plot_*
+instance runs the simulation while extensive analysis can be done with the plot_*
 functions found in the chem_evol_plot module.  See the DOC directory for a detailed
 documentation.</p>
 </div>
@@ -79,58 +79,58 @@ NuGrid collaboration</dd>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <p>Simple run example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sygma</span> <span class="kn">as</span> <span class="nn">s</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sygma</span> <span class="kn">as</span> <span class="nn">s</span>
 </pre></div>
 </div>
 <p>Get help with</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">help</span> <span class="n">s</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">help</span> <span class="n">s</span>
 </pre></div>
 </div>
 <p>Now start a calculation by providing the initial metal fraction
-iniZ, the final evolution time tend and the total mass of the SSP:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">sygma</span><span class="p">(</span><span class="n">iniZ</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">tend</span><span class="o">=</span><span class="mf">5e9</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+iniZ, the final evolution time tend, and the total mass of the SSP:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">sygma</span><span class="p">(</span><span class="n">iniZ</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">tend</span><span class="o">=</span><span class="mf">5e9</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For more information regarding the input parameter see below or
 try</p>
-<div class="highlight-python"><div class="highlight"><pre>&gt;&gt;&gt; s.sygma?
+<div class="highlight-python"><div class="highlight"><pre><span></span>&gt;&gt;&gt; s.sygma?
 </pre></div>
 </div>
 <p>For plotting utilize the plotting functions (plot_*) as described further
 below, for example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="o">.</span><span class="n">plot_totmasses</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="o">.</span><span class="n">plot_totmasses</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>You can write out the information about the composition of the total
 ejecta of a SSP via</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">write_evol_table</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;H&#39;</span><span class="p">,</span><span class="s">&#39;C&#39;</span><span class="p">,</span><span class="s">&#39;O&#39;</span><span class="p">])</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">write_evol_table</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Yield tables are available in the NUPYCEE subdirectory 
-yield   extunderscore tables. Add your yield tables to
-this directory and SYGMA will be able read the table
+yield/textunderscore tables. Add your yield tables to
+this directory and SYGMA will be able to read the table
 if you have specified the $table$ variable. Only
-for table of Z=0 the variable $pop3     extunderscore table$ is used.
+for tables with Z=0 is the variable $pop3/textunderscore table$ used.
 Both tables need yields specified in the SYGMA (and OMEGA)
-yield input format. See for the structure the default table.
+yield input format. See the default table for the structure.
 It is important to provide an initial abundance
-file which has to match the number of species provided in the yield tables.
-Provide the file in the iniAbu directory inside the directory yield     extunderscore tables.
-The input variable with which the table file can be specified is $iniabu        extunderscore table$.
+file which must match the number of species provided in the yield tables.
+Provide the file in the iniAbu directory inside the directory yield/extunderscore tables.
+The input variable with which the table file can be specified is $iniabu/textunderscore table$.
 For the necessary structure see again the default choice of that variable.</p>
-<p>For example with artifical yields of only H-1, you can try</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">sygma</span><span class="p">(</span><span class="n">iniZ</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span><span class="n">dt</span><span class="o">=</span><span class="mf">1e8</span><span class="p">,</span><span class="n">tend</span><span class="o">=</span><span class="mf">1.5e10</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e11</span><span class="p">,</span><span class="n">table</span><span class="o">=</span><span class="s">&#39;yield_tables/isotope_yield_table_h1.txt&#39;</span><span class="p">,</span>
+<p>For example with artificial yields of only H-1, you can try</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">sygma</span><span class="p">(</span><span class="n">iniZ</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span><span class="n">dt</span><span class="o">=</span><span class="mf">1e8</span><span class="p">,</span><span class="n">tend</span><span class="o">=</span><span class="mf">1.5e10</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e11</span><span class="p">,</span><span class="n">table</span><span class="o">=</span><span class="s1">&#39;yield_tables/isotope_yield_table_h1.txt&#39;</span><span class="p">,</span>
 <span class="go">    sn1a_table=&#39;yield_tables/sn1a_h1.txt&#39;,iniabu_table=&#39;yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt&#39;)</span>
 </pre></div>
 </div>
 <dl class="class">
 <dt id="sygma.sygma">
-<em class="property">class </em><code class="descclassname">sygma.</code><code class="descname">sygma</code><span class="sig-paren">(</span><em>sfr='input', imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1, 100], sn1a_rate='power_law', iniZ=0.0, dt=1000000.0, special_timesteps=30, tend=13000000000.0, mgal=160000000000.0, transitionmass=8, iolevel=0, ini_alpha=True, table='yield_tables/isotope_yield_table.txt', hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt', iniabu_table='', extra_source_on=False, extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', pop3_table='yield_tables/popIII_heger10.txt', imf_bdys_pop3=[0.1, 100], imf_yields_range_pop3=[10, 30], starbursts=[], beta_pow=-1.0, gauss_dtd=[1000000000.0, 660000000.0], exp_dtd=2000000000.0, nb_1a_per_m=0.001, direct_norm_1a=-1, Z_trans=0, f_arfo=1.0, imf_yields_range=[1, 30], exclude_masses=[32, 60], netyields_on=False, wiersmamod=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sygma.</code><code class="descname">sygma</code><span class="sig-paren">(</span><em>sfr='input', imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1, 100], sn1a_rate='power_law', iniZ=0.0, dt=1000000.0, special_timesteps=30, nsmerger_bdys=[8, 100], tend=13000000000.0, mgal=10000.0, transitionmass=8, iolevel=0, ini_alpha=True, table='yield_tables/isotope_yield_table.txt', hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt', ns_merger_on=True, f_binary=1.0, f_merger=0.0028335, nsmerger_table='yield_tables/r_process_rosswog_2014.txt', iniabu_table='', extra_source_on=False, extra_source_table='yield_tables/extra_source.txt', f_extra_source=1.0, pop3_table='yield_tables/popIII_heger10.txt', imf_bdys_pop3=[0.1, 100], imf_yields_range_pop3=[10, 30], starbursts=[], beta_pow=-1.0, gauss_dtd=[1000000000.0, 660000000.0], exp_dtd=2000000000.0, nb_1a_per_m=0.001, direct_norm_1a=-1, Z_trans=0.0, f_arfo=1.0, imf_yields_range=[1, 30], exclude_masses=[], netyields_on=False, wiersmamod=False, yield_interp='lin', stellar_param_on=True, stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt', dt_in=array([], dtype=float64), ytables_in=array([], dtype=float64), zm_lifetime_grid_nugrid_in=array([], dtype=float64), isotopes_in=array([], dtype=float64), ytables_pop3_in=array([], dtype=float64), zm_lifetime_grid_pop3_in=array([], dtype=float64), ytables_1a_in=array([], dtype=float64), ytables_nsmerger_in=array([], dtype=float64)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">chem_evol.chem_evol</span></code></p>
 <dl class="docutils">
 <dt>sfr <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first">Description of the star formation, usualy a instantaneous burst.
-Choices : &#8216;input&#8217; - read and use the sfr_input file to set the pourcentage</p>
+<dd><p class="first">Description of the star formation, usually an instantaneous burst.
+Choices : &#8216;input&#8217; - read and use the sfr_input file to set the percentage</p>
 <blockquote>
 <div><blockquote>
 <div>of gas that is converted into stars at each timestep.</div></blockquote>
@@ -199,6 +199,9 @@ Choices : &#8216;power_law&#8217; - custom power law, set parameter with beta_po
 &#8216;maoz&#8217; - specific power law from Maoz &amp; Mannucci (2012)</div></blockquote>
 <p class="last">Default value : &#8216;power_law&#8217;</p>
 </dd>
+<dt>ns_merger_on <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>True or False to include or exclude the contribution of neutron star mergers.
+Default value: True</dd>
 <dt>beta_pow <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Slope of the power law for custom SN Ia rate, R = Constant * t^-beta_pow.
 Default value : -1.0</dd>
@@ -210,21 +213,46 @@ and then the width of the distribution [yrs].</dd>
 <dt>nb_1a_per_m <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Number of SNe Ia per stellar mass formed in a simple stellar population.
 Default value : 1.0e-03</dd>
+<dt>direct_norm_1a <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Normalization coefficient for SNIa rate integral. 
+By default deactived but replaces the usage of teh nb_1a_per_m when its value is larger than zero.</dd>
 <dt>transitionmass <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Initial mass which marks the transition from AGB to massive stars [Mo].
 Default value : 8.0</dd>
 <dt>exclude_masses <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>Contains initial masses to be excluded from the simulation; default exclude 32Msun and 60Msun of solar Z because
-they are usable only in Z=0.02 SSP simulations</dd>
+<dd>Contains initial masses in yield tables to be excluded from the simulation;</dd>
 <dt>table <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd>Path pointing toward the stellar yield tables for massive and AGB stars.
-Default value : &#8216;yield_tables/isotope_yield_table.txt&#8217; (NuGrid)</dd>
+Default value : &#8216;yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt&#8217; (NuGrid)</dd>
 <dt>sn1a_table <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd>Path pointing toward the stellar yield table for SNe Ia.
 Default value : &#8216;yield_tables/sn1a_t86.txt&#8217; (Tielemann et al. 1986)</dd>
+<dt>nsmerger_table <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>Path pointing toward the r-process yield tables for neutron star mergers
+Default value : &#8216;yield_tables/r_process_rosswog_2014.txt&#8217; (Rosswog et al. 2013)</dd>
 <dt>iniabu_table <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd>Path pointing toward the table of initial abuncances in mass fraction.
 Default value : &#8216;yield_tables/iniabu/iniab2.0E-02GN93.ppn&#8217;</dd>
+<dt>yield_interp <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">if &#8216;None&#8217; : no yield interpolation, no interpolation of total ejecta
+if &#8216;lin&#8217; - Simple linear yield interpolation.
+if &#8216;wiersma&#8217; - Interpolation method which makes use of net yields</p>
+<blockquote class="last">
+<div>as used e.g. in Wiersma+ (2009); Does not require net yields.
+if netyields_on is true than makes use of given net yields
+else calculates net yields from given X0 in yield table.</div></blockquote>
+</dd>
+<dt>netyields_on <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>if true assumes that yields (input from table parameter) 
+are net yields. Default false.</dd>
+<dt>total_ejecta_interp <span class="classifier-delimiter">:</span> <span class="classifier">if true then interpolates total ejecta given in yield tables </span></dt>
+<dd>over initial mass range.</dd>
+<dt>stellar_param_on <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>if true reads in additional stellar parameter given in table stellar_param_table.
+default true in sygma and false in omega</dd>
+<dt>stellar_param_table: string</dt>
+<dd>Path pointoing toward the table hosting the evolution of stellar parameter 
+derived from stellar evolution calculations.</dd>
 <dt>iolevel <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>Specifies the amount of output for testing purposes (up to 3).
 Default value : 0</dd>
@@ -237,9 +265,8 @@ Default value : 0</dd>
 
 <dl class="method">
 <dt id="sygma.sygma.plot_mass">
-<code class="descname">plot_mass</code><span class="sig-paren">(</span><em>fig=0, specie='C', source='all', norm=False, label='', shape='', marker='', color='', markevery=20, multiplot=False, return_x_y=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_mass" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>mass evolution (in Msun) of an element or isotope vs time.</div></blockquote>
+<code class="descname">plot_mass</code><span class="sig-paren">(</span><em>fig=0, specie='C', source='all', norm='no', label='', shape='', marker='', color='', markevery=20, multiplot=False, return_x_y=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, linewidth=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>mass evolution (in Msun) of an element or isotope vs time.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -261,9 +288,10 @@ only agb stars (&#8216;agb&#8217;), only
 SN1a (&#8216;SN1a&#8217;), or only massive stars
 (&#8216;massive&#8217;)</p>
 </div></blockquote>
-<p><strong>norm</strong> : boolean</p>
+<p><strong>norm</strong> : string</p>
 <blockquote>
-<div><p>If True, normalize to current total ISM mass</p>
+<div><p>if &#8216;no&#8217;, no normalization
+If &#8216;current&#8217;, normalize to current total amount of specie</p>
 </div></blockquote>
 <p><strong>label</strong> : string</p>
 <blockquote>
@@ -290,7 +318,7 @@ SN1a (&#8216;SN1a&#8217;), or only massive stars
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass</span><span class="p">(</span><span class="n">specie</span><span class="o">=</span><span class="s">&#39;C&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass</span><span class="p">(</span><span class="n">specie</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -350,7 +378,7 @@ total mass (ISM+stars) in that region.</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass_range_contribution</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="s">&#39;C&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass_range_contribution</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -413,7 +441,7 @@ SN1a (&#8216;SN1a&#8217;), or only massive stars
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass_ratio</span><span class="p">(</span><span class="s">&#39;C-12&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_mass_ratio</span><span class="p">(</span><span class="s1">&#39;C-12&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -476,9 +504,32 @@ if &#8216;ini&#8217;, normalization ot initial abundance</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_massfrac</span><span class="p">(</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;C-12&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_massfrac</span><span class="p">(</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="s1">&#39;C-12&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="sygma.sygma.plot_metallicity">
+<code class="descname">plot_metallicity</code><span class="sig-paren">(</span><em>source='all', label='', marker='o', color='r', shape='-', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_metallicity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_metallicity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the metal fraction defined as the sum of all isotopes except
+&#8216;H-1&#8217;,&#8217;H-2&#8217;,&#8217;H-3&#8217;,&#8217;He-3&#8217;,&#8217;He-4&#8217;,&#8217;Li-6&#8217;,&#8217;Li-7&#8217;.</p>
+<dl class="docutils">
+<dt>source <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>Specifies if yields come from
+all sources (&#8216;all&#8217;), including
+AGB+SN1a, massive stars. Or from
+distinctive sources:
+only agb stars (&#8216;agb&#8217;), only
+SN1a (&#8216;SN1a&#8217;), or only massive stars
+(&#8216;massive&#8217;)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sygma.sygma.plot_net_yields">
+<code class="descname">plot_net_yields</code><span class="sig-paren">(</span><em>fig=91</em>, <em>species='[C-12/Fe-56]'</em>, <em>netyields_iniabu='yield_tables/iniabu/iniab_solar_Wiersma.ppn'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_net_yields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_net_yields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots net yields as calculated in the code when using netyields_on=True.</p>
 </dd></dl>
 
 <dl class="method">
@@ -536,7 +587,7 @@ if &#8216;redshift&#8217;: experimental! use with caution; redshift evolution</p
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_sn_distr</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_sn_distr</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -551,7 +602,7 @@ if &#8216;redshift&#8217;: experimental! use with caution; redshift evolution</p
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>xaxis</strong> : string</p>
 <blockquote>
-<div><p>Elements spectroscopic notation e.g. [Fe/H]
+<div><p>Spectroscopic notation of elements e.g. [Fe/H]
 if &#8216;age&#8217;: time evolution in years</p>
 </div></blockquote>
 <p><strong>yaxis</strong> : string</p>
@@ -593,7 +644,7 @@ SN1a (&#8216;SN1a&#8217;), or only massive stars
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot_spectro</span><span class="p">(</span><span class="s">&#39;[Fe/H]&#39;</span><span class="p">,</span><span class="s">&#39;[C/Fe]&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot_spectro</span><span class="p">(</span><span class="s1">&#39;[Fe/H]&#39;</span><span class="p">,</span><span class="s1">&#39;[C/Fe]&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -630,15 +681,124 @@ else: mass of ISM which goes into stars</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">star_formation_rate</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">star_formation_rate</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="method">
+<dt id="sygma.sygma.plot_stellar_param">
+<code class="descname">plot_stellar_param</code><span class="sig-paren">(</span><em>fig=8, quantity='Ekin_wind', label='', marker='o', color='r', shape='-', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_stellar_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_stellar_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the evolution of stellar parameter (provided in yield table, e.g. kin. E.) over time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>quantity: Parameter of interest.</strong></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sygma.sygma.plot_table_remnant">
+<code class="descname">plot_table_remnant</code><span class="sig-paren">(</span><em>fig=8, xaxis='mini', iniZ=0.02, masses=[], label='', marker='o', color='r', shape='-', table='yield_tables/isotope_yield_table.txt', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_table_remnant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_table_remnant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the remnant masses versus initial mass.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>xaxis</strong> : string</p>
+<blockquote>
+<div><p>if &#8216;mini&#8217;: use initial mass; if of the form [specie1/specie2] use spec. notation of</p>
+</div></blockquote>
+<p class="last"><strong>yaxis</strong> : string</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sygma.sygma.plot_table_stellar_param">
+<code class="descname">plot_table_stellar_param</code><span class="sig-paren">(</span><em>fig=8, xaxis='mini', quantity='Lifetime', iniZ=0.02, masses=[], label='', marker='o', color='r', shape='-', table='yield_tables/isotope_yield_table.txt', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_table_stellar_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_table_stellar_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the lifetimes versus initial mass as given in yield input tables.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>xaxis</strong> : string</p>
+<blockquote>
+<div><p>if &#8216;mini&#8217;: use initial mass
+if &#8216;time&#8217;: use lifetime</p>
+</div></blockquote>
+<p><strong>iniZ</strong> : float</p>
+<blockquote>
+<div><p>Metallicity of interest</p>
+</div></blockquote>
+<p><strong>masses: list</strong></p>
+<blockquote>
+<div><p>List of initial masses to be plotted</p>
+</div></blockquote>
+<p><strong>table: string</strong></p>
+<blockquote class="last">
+<div><p>Yield table</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sygma.sygma.plot_table_yield">
+<code class="descname">plot_table_yield</code><span class="sig-paren">(</span><em>fig=8, xaxis='mini', yaxis='C-12', iniZ=0.0001, netyields=False, masses=[], label='', marker='o', color='r', shape='-', table='yield_tables/isotope_yield_table.txt', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, solar_ab='', netyields_iniabu=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_table_yield"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_table_yield" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the yields of the yield input grid versus initial mass or
+Z or [Fe/H]. Yield can be plotted in solar masses or in spectroscopic notation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>xaxis</strong> : string</p>
+<blockquote>
+<div><p>if &#8216;mini&#8217;: use initial mass; if of the form [specie1/specie2] use spec. notation</p>
+</div></blockquote>
+<p><strong>yaxis</strong> : string</p>
+<blockquote>
+<div><p>specifies isotopes or elements with &#8216;C-12&#8217; or &#8216;C&#8217;: plot yield of isotope;
+if chosen spectros: use form [specie3/specie4]</p>
+</div></blockquote>
+<p><strong>iniZ</strong> : float</p>
+<blockquote>
+<div><p>specifies the metallicity to be plotted</p>
+</div></blockquote>
+<p><strong>masses</strong> : list</p>
+<blockquote>
+<div><p>if empty plot all available masses for metallicity iniZ; else choose only masses in list masses</p>
+</div></blockquote>
+<p><strong>netyields</strong> : bool</p>
+<blockquote>
+<div><p>if true assume net yields in table and add corresponding initial contribution to get total yields</p>
+</div></blockquote>
+<p><strong>table</strong> : string</p>
+<blockquote class="last">
+<div><p>table to plot data from; default sygma input table</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sygma.sygma.plot_table_yield_mass">
+<code class="descname">plot_table_yield_mass</code><span class="sig-paren">(</span><em>fig=8, xaxis='mini', yaxis='C-12', iniZ=0.0001, netyields=False, masses=[], label='', marker='o', color='r', shape='-', table='yield_tables/isotope_yield_table.txt', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_table_yield_mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_table_yield_mass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sygma.sygma.plot_totmasses">
 <code class="descname">plot_totmasses</code><span class="sig-paren">(</span><em>fig=4, mass='gas', source='all', norm='no', label='', shape='', marker='', color='', markevery=20, log=True, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_totmasses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_totmasses" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots either gas or star mass in fraction of total mass
+<dd><p>Plots either gas or star mass as fraction of total mass
 vs time.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -647,11 +807,11 @@ vs time.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mass</strong> : string</p>
 <blockquote>
 <div><p>either &#8216;gas&#8217; for ISM gas mass
-or &#8216;stars&#8217; for gas locked away in stars (totalgas - ISM gas)</p>
+or &#8216;stars&#8217; for gas locked away in stars (total gas - ISM gas)</p>
 </div></blockquote>
 <p><strong>norm</strong> : string</p>
 <blockquote>
-<div><p>normalization, either &#8216;no&#8217; for no normalization (total gass mass in solar masses),</p>
+<div><p>normalization, either &#8216;no&#8217; for no normalization (total gas mass in solar masses),</p>
 <p>for normalization to the initial gas mass (mgal) with &#8216;ini&#8217;,</p>
 <p>for normalization to the current total gas mass &#8216;current&#8217;.
 The latter case makes sense when comparing different
@@ -659,7 +819,7 @@ sources (see below)</p>
 </div></blockquote>
 <p><strong>source</strong> : string</p>
 <blockquote>
-<div><p>specificies if yields come from
+<div><p>specifies if yields come from
 all sources (&#8216;all&#8217;), including
 AGB+SN1a, massive stars. Or from
 distinctive sources:
@@ -696,50 +856,15 @@ SN1a (&#8216;sn1a&#8217;), or only massive stars
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_totmasses</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_totmasses</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="method">
-<dt id="sygma.sygma.plot_yield_input">
-<code class="descname">plot_yield_input</code><span class="sig-paren">(</span><em>fig=8, xaxis='mini', yaxis='C-12', iniZ=0.0001, netyields=False, masses=[], label='', marker='o', color='r', shape='-', table='yield_tables/isotope_yield_table.txt', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, solar_ab='', netyields_iniabu=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_yield_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_yield_input" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>Plots the yields of the yield input grid vesus initial mass or
-Z or [Fe/H]. Yield can be plotted in solar masses or in spectroscopic notation.</div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>xaxis</strong> : string</p>
-<blockquote>
-<div><p>if &#8216;mini&#8217;: use initial mass; if of the form [specie1/specie2] use spec. notation of</p>
-</div></blockquote>
-<p><strong>yaxis</strong> : string</p>
-<blockquote>
-<div><p>specifies isotopes or elements with &#8216;C-12&#8217; or &#8216;C&#8217;: plot yield of isotope;
-if chosen spectros: use form [specie3/specie4]</p>
-</div></blockquote>
-<p><strong>iniZ</strong> : float</p>
-<blockquote>
-<div><p>specifies the metallicity to be plotted</p>
-</div></blockquote>
-<p><strong>masses</strong> : list</p>
-<blockquote>
-<div><p>if empty plot all available masses for metallicity iniZ; else choose only masses in list masses</p>
-</div></blockquote>
-<p><strong>netyields</strong> : bool</p>
-<blockquote>
-<div><p>if true assume net yields in table and add corresponding initial contribution to get total yields</p>
-</div></blockquote>
-<p><strong>table</strong> : string</p>
-<blockquote class="last">
-<div><p>table to plot data from; default sygma input table</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
+<dt id="sygma.sygma.plot_yield_mtot">
+<code class="descname">plot_yield_mtot</code><span class="sig-paren">(</span><em>fig=8</em>, <em>plot_imf_mass_ranges=True</em>, <em>fontsize=14</em>, <em>rspace=0.6</em>, <em>bspace=0.15</em>, <em>labelsize=15</em>, <em>legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.plot_yield_mtot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.plot_yield_mtot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots total mass ejected by stars (!). To distinguish between the total mass of yields from the table and fitted total mass</p>
 </dd></dl>
 
 <dl class="method">
@@ -764,19 +889,19 @@ and each isotope in the following format
 <p>&amp;0.000E+00 &amp;1.000E+00 &amp;7.600E+08 &amp; ...</p>
 <p>This method has a notebook and normal version. If you are
 using a python notebook the function will
-opem a link to a page containing the table.</p>
+open a link to a page containing the table.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>table_name</strong> : string,optional</p>
 <blockquote>
-<div><p>Name of table. In case you use a notebook version, setting a name
+<div><p>Name of table. If you use a notebook version, setting a name
 is not necessary.</p>
 </div></blockquote>
 <p><strong>elements</strong> : array</p>
 <blockquote>
-<div><p>Containing the elmements with the name scheme &#8216;H&#8217;,&#8217;C&#8217;</p>
+<div><p>Containing the elements with the name scheme &#8216;H&#8217;,&#8217;C&#8217;</p>
 </div></blockquote>
 <p><strong>isotopes</strong> : array</p>
 <blockquote>
@@ -793,6 +918,16 @@ is not necessary.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sygma.sygma.write_stellar_param_table">
+<code class="descname">write_stellar_param_table</code><span class="sig-paren">(</span><em>table_name='gce_stellar_param_table.txt'</em>, <em>path=''</em>, <em>interact=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sygma.html#sygma.write_stellar_param_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sygma.sygma.write_stellar_param_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes out evolution of stellar parameter such as luminosity and kinetic energy in the following
+format.</p>
+<p>&amp;Age &amp;Quantity1 &amp;Quantity2 ...
+&amp;0.000E+00 &amp;0.000E+00 &amp;0.000E+00
+&amp;0.000E+00 &amp;0.000E+00 &amp;0.000E+00</p>
 </dd></dl>
 
 </dd></dl>
@@ -867,7 +1002,7 @@ is not necessary.</p>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Christian Ritter.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>

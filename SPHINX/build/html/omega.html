@@ -56,7 +56,7 @@
 <span class="target" id="module-omega"></span><p>GCE OMEGA (One-zone Model for the Evolution of Galaxies) module</p>
 <div class="section" id="functionality">
 <h2>Functionality<a class="headerlink" href="#functionality" title="Permalink to this headline">¶</a></h2>
-<p>This tool allows to simulate the chemical evolution of single-zone galaxies.
+<p>This tool allows one to simulate the chemical evolution of single-zone galaxies.
 Having the star formation history as one of the input parameters, OMEGA can
 target local galaxies by using observational data found in the literature.</p>
 </div>
@@ -65,7 +65,7 @@ target local galaxies by using observational data found in the literature.</p>
 <p>FEB2015: C. Ritter, B. Cote</p>
 <p>MAY2015: B. Cote</p>
 <p>The code inherits the chem_evol class, which contains common functions shared by
-SYGMA and OMEGA.  The code in chem_evol have been developped by :</p>
+SYGMA and OMEGA.  The code in chem_evol has been developed by :</p>
 <p>v0.1 NOV2013: C. Fryer, C. Ritter</p>
 <p>v0.2 JAN2014: C. Ritter</p>
 <dl class="docutils">
@@ -79,29 +79,29 @@ the NuGrid collaboration</dd>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <p>Import the module:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">omega</span> <span class="kn">as</span> <span class="nn">o</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">omega</span> <span class="kn">as</span> <span class="nn">o</span>
 </pre></div>
 </div>
 <p>Get help:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">help</span> <span class="n">o</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">help</span> <span class="n">o</span>
 </pre></div>
 </div>
 <p>Get more information:</p>
-<div class="highlight-python"><div class="highlight"><pre>&gt;&gt;&gt; o.omega?
+<div class="highlight-python"><div class="highlight"><pre><span></span>&gt;&gt;&gt; o.omega?
 </pre></div>
 </div>
-<p>Create an costum galaxy (closed box):</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">omega</span><span class="p">(</span><span class="n">cte_sfr</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1.5e10</span><span class="p">)</span>
+<p>Create a custom galaxy (closed box):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">omega</span><span class="p">(</span><span class="n">cte_sfr</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1.5e10</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Simulate a known galaxy (open box):</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o2</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">omega</span><span class="p">(</span><span class="n">galaxy</span><span class="o">=</span><span class="s">&#39;sculptor&#39;</span><span class="p">,</span> <span class="n">in_out_control</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">mass_loading</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">in_out_ratio</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o2</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">omega</span><span class="p">(</span><span class="n">galaxy</span><span class="o">=</span><span class="s1">&#39;sculptor&#39;</span><span class="p">,</span> <span class="n">in_out_control</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">mgal</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">mass_loading</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">in_out_ratio</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Analysis functions: See the Sphinx documentation</p>
 <dl class="class">
 <dt id="omega.omega">
-<em class="property">class </em><code class="descclassname">omega.</code><code class="descname">omega</code><span class="sig-paren">(</span><em>galaxy='none', in_out_control=False, SF_law=False, DM_evolution=False, Z_trans=1e-20, f_dyn=0.1, sfe=0.1, outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, m_DM_0=100000000000.0, mass_loading=1.0, t_star=-1.0, sfh_file='none', in_out_ratio=1.0, stellar_mass_0=-1.0, z_dependent=True, exp_ml=2.0, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1, 100], sn1a_rate='power_law', iniZ=0.0, dt=1000000.0, special_timesteps=30, tend=13000000000.0, mgal=-1, transitionmass=8, iolevel=0, ini_alpha=True, table='yield_tables/isotope_yield_table_MESA_only.txt', hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt', iniabu_table='', extra_source_on=False, extra_source_table='yield_tables/mhdjet_NTT_delayed.txt', pop3_table='yield_tables/popIII_heger10.txt', imf_bdys_pop3=[0.1, 100], imf_yields_range_pop3=[10, 30], starbursts=[], beta_pow=-1.0, gauss_dtd=[1000000000.0, 660000000.0], exp_dtd=2000000000.0, nb_1a_per_m=0.001, f_arfo=1, imf_yields_range=[1, 30], exclude_masses=[32, 60], netyields_on=False, wiersmamod=False, skip_zero=False, redshift_f=0.0, print_off=False, long_range_ref=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">omega.</code><code class="descname">omega</code><span class="sig-paren">(</span><em>galaxy='none', in_out_control=False, SF_law=False, DM_evolution=False, Z_trans=1e-20, f_dyn=0.1, sfe=0.1, outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, m_DM_0=100000000000.0, mass_loading=1.0, t_star=-1.0, sfh_file='none', in_out_ratio=1.0, stellar_mass_0=-1.0, z_dependent=True, exp_ml=2.0, nsmerger_bdys=[8, 100], imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1, 100], sn1a_rate='power_law', iniZ=0.0, dt=1000000.0, special_timesteps=30, tend=13000000000.0, mgal=-1, transitionmass=8, iolevel=0, ini_alpha=True, table='yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt', hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt', ns_merger_on=True, f_binary=1.0, f_merger=0.0028335, nsmerger_table='yield_tables/r_process_rosswog_2014.txt', iniabu_table='', extra_source_on=False, extra_source_table='yield_tables/extra_source.txt', f_extra_source=1.0, pop3_table='yield_tables/popIII_heger10.txt', imf_bdys_pop3=[0.1, 100], imf_yields_range_pop3=[10, 30], starbursts=[], beta_pow=-1.0, gauss_dtd=[1000000000.0, 660000000.0], exp_dtd=2000000000.0, nb_1a_per_m=0.001, f_arfo=1, t_merge=-1.0, imf_yields_range=[1, 30], exclude_masses=[], netyields_on=False, wiersmamod=False, skip_zero=False, redshift_f=0.0, print_off=False, long_range_ref=False, f_s_enhance=1.0, m_gas_f=10000000000.0, cl_SF_law=False, external_control=False, calc_SSP_ej=False, input_yields=False, popIII_on=True, stellar_param_on=False, sfh_array=array([], dtype=float64), ism_ini=array([], dtype=float64), mdot_ini=array([], dtype=float64), mdot_ini_t=array([], dtype=float64), ytables_in=array([], dtype=float64), zm_lifetime_grid_nugrid_in=array([], dtype=float64), isotopes_in=array([], dtype=float64), ytables_pop3_in=array([], dtype=float64), zm_lifetime_grid_pop3_in=array([], dtype=float64), ytables_1a_in=array([], dtype=float64), ytables_nsmerger_in=array([], dtype=float64), dt_in=array([], dtype=float64), dt_split_info=array([], dtype=float64), ej_massive=array([], dtype=float64), ej_agb=array([], dtype=float64), ej_sn1a=array([], dtype=float64), ej_massive_coef=array([], dtype=float64), ej_agb_coef=array([], dtype=float64), ej_sn1a_coef=array([], dtype=float64), dt_ssp=array([], dtype=float64), yield_interp='lin'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">chem_evol.chem_evol</span></code></p>
 <p>Important : By default, a closed box model is always assumed.</p>
 <p>galaxy : string</p>
@@ -109,7 +109,7 @@ the NuGrid collaboration</dd>
 <div><p>Name of the target galaxy.  By using a known galaxy, the code
 automatically selects the corresponding star formation history, stellar
 mass, and total mass (when available).  By using &#8216;none&#8217;, the user has
-the perfect control on these three last parameters.</p>
+perfect control of these three last parameters.</p>
 <p>Choices : &#8216;milky_way&#8217;, &#8216;milky_way_cte&#8217;, &#8216;sculptor&#8217;, &#8216;carina&#8217;, &#8216;fornax&#8217;,
 &#8216;none&#8217;</p>
 <p>Default value : &#8216;none&#8217;</p>
@@ -123,7 +123,7 @@ characteristics, but with a constant star formation history.</p>
 </div></blockquote>
 <p>rand_sfh : float</p>
 <blockquote>
-<div><p>Maximum possible ratio between the maximum and the minium values of a star
+<div><p>Maximum possible ratio between the maximum and the minimum values of a star
 formation history that is randomly generated.</p>
 <p>Default value : 0.0 (deactivated)</p>
 <p>Special note : A value greater than zero automatically generates a random
@@ -141,11 +141,11 @@ and_sfh parameters.</p>
 <p>stellar_mass_0 : float</p>
 <blockquote>
 <div><p>Current stellar mass of the galaxy, in [Mo], at the end of the simulation.</p>
-<p>Default value : -1.0 (you need to specify a value with unkown galaxies)</p>
+<p>Default value : -1.0 (you need to specify a value with unknown galaxies)</p>
 </div></blockquote>
 <p>in_out_control : boolean</p>
 <blockquote>
-<div><p>The in_out_control implementation enables to control the outflow and
+<div><p>The in_out_control implementation enables control of the outflow and
 the inflow rates independently by using constant values (see outflow_rate
 and inflow_rate) or by using a mass-loading factor that connects the
 rates to the star formation history (see mass_loading and in_out_ratio).</p>
@@ -217,8 +217,8 @@ which bypasses the f_dyn parameter.</p>
 </div></blockquote>
 <p>DM_evolution : boolean</p>
 <blockquote>
-<div><p>The DM_evolution implementation is an extention of the SF_law option.
-In addition of using a Kennicutt-Schmidt star formation law, it assumes
+<div><p>The DM_evolution implementation is an extension of the SF_law option.
+In addition to using a Kennicutt-Schmidt star formation law, it assumes
 an evolution in the total mass of the galaxy as function of time.  With
 this prescription, the mass-loading factor has a mass dependency.  The
 mass_loading parameter then only represents the final value at the end
@@ -293,6 +293,9 @@ Choices : &#8216;power_law&#8217; - custom power law, set parameter with beta_po
 &#8216;maoz&#8217; - specific power law from Maoz &amp; Mannucci (2012)</div></blockquote>
 <p class="last">Default value : &#8216;power_law&#8217;</p>
 </dd>
+<dt>ns_merger_on <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>True or False to include or exclude the contribution of neutron star mergers.
+Default value: True</dd>
 <dt>beta_pow <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Slope of the power law for custom SN Ia rate, R = Constant * t^-beta_pow.
 Default value : -1.0</dd>
@@ -304,21 +307,46 @@ and then the width of the distribution [yrs].</dd>
 <dt>nb_1a_per_m <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Number of SNe Ia per stellar mass formed in a simple stellar population.
 Default value : 1.0e-03</dd>
+<dt>direct_norm_1a <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Normalization coefficient for SNIa rate integral. 
+By default deactived but replaces the usage of teh nb_1a_per_m when its value is larger than zero.</dd>
 <dt>transitionmass <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Initial mass which marks the transition from AGB to massive stars [Mo].
 Default value : 8.0</dd>
 <dt>exclude_masses <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>Contains initial masses to be excluded from the simulation; default exclude 32Msun and 60Msun of solar Z because
-they are usable only in Z=0.02 SSP simulations</dd>
+<dd>Contains initial masses in yield tables to be excluded from the simulation;</dd>
 <dt>table <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd>Path pointing toward the stellar yield tables for massive and AGB stars.
-Default value : &#8216;yield_tables/isotope_yield_table.txt&#8217; (NuGrid)</dd>
+Default value : &#8216;yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt&#8217; (NuGrid)</dd>
 <dt>sn1a_table <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd>Path pointing toward the stellar yield table for SNe Ia.
 Default value : &#8216;yield_tables/sn1a_t86.txt&#8217; (Tielemann et al. 1986)</dd>
+<dt>nsmerger_table <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>Path pointing toward the r-process yield tables for neutron star mergers
+Default value : &#8216;yield_tables/r_process_rosswog_2014.txt&#8217; (Rosswog et al. 2013)</dd>
 <dt>iniabu_table <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd>Path pointing toward the table of initial abuncances in mass fraction.
 Default value : &#8216;yield_tables/iniabu/iniab2.0E-02GN93.ppn&#8217;</dd>
+<dt>yield_interp <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">if &#8216;None&#8217; : no yield interpolation, no interpolation of total ejecta
+if &#8216;lin&#8217; - Simple linear yield interpolation.
+if &#8216;wiersma&#8217; - Interpolation method which makes use of net yields</p>
+<blockquote class="last">
+<div>as used e.g. in Wiersma+ (2009); Does not require net yields.
+if netyields_on is true than makes use of given net yields
+else calculates net yields from given X0 in yield table.</div></blockquote>
+</dd>
+<dt>netyields_on <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>if true assumes that yields (input from table parameter) 
+are net yields. Default false.</dd>
+<dt>total_ejecta_interp <span class="classifier-delimiter">:</span> <span class="classifier">if true then interpolates total ejecta given in yield tables </span></dt>
+<dd>over initial mass range.</dd>
+<dt>stellar_param_on <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>if true reads in additional stellar parameter given in table stellar_param_table.
+default true in sygma and false in omega</dd>
+<dt>stellar_param_table: string</dt>
+<dd>Path pointoing toward the table hosting the evolution of stellar parameter 
+derived from stellar evolution calculations.</dd>
 <dt>iolevel <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>Specifies the amount of output for testing purposes (up to 3).
 Default value : 0</dd>
@@ -382,7 +410,7 @@ function of time.</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_dark_matter</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Dark Matter&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_dark_matter</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Dark Matter&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -445,7 +473,7 @@ in units of [Mo/yr].</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_inflow_rate</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Inflow Rate&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_inflow_rate</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Inflow Rate&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -541,7 +569,7 @@ SN Ia (&#8216;sn1a&#8217;), or only massive stars
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_iso_ratio</span><span class="p">(</span><span class="n">xaxis</span><span class="o">=</span><span class="s">&#39;[Fe/H]&#39;</span><span class="p">,</span> <span class="n">yaxis</span><span class="o">=</span><span class="s">&#39;C-12/C-13&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_iso_ratio</span><span class="p">(</span><span class="n">xaxis</span><span class="o">=</span><span class="s1">&#39;[Fe/H]&#39;</span><span class="p">,</span> <span class="n">yaxis</span><span class="o">=</span><span class="s1">&#39;C-12/C-13&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -598,7 +626,7 @@ SN1a (&#8216;SN1a&#8217;), or only massive stars
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s">&#39;C-12&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;C-12&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -662,7 +690,7 @@ function of time.</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_mass_loading</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Mass-Loading Factor&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_mass_loading</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Mass-Loading Factor&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -725,7 +753,7 @@ if &#8216;ini&#8217;, normalization ot initial abundance</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_massfrac</span><span class="p">(</span><span class="s">&#39;age&#39;</span><span class="p">,</span><span class="s">&#39;C-12&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_massfrac</span><span class="p">(</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="s1">&#39;C-12&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -818,7 +846,7 @@ sigma by which the X axis range is expanded.</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_mdf</span><span class="p">(</span><span class="n">axis_mdf</span><span class="o">=</span><span class="s">&#39;[Fe/H]&#39;</span><span class="p">,</span> <span class="n">sigma_gauss</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_mdf</span><span class="p">(</span><span class="n">axis_mdf</span><span class="o">=</span><span class="s1">&#39;[Fe/H]&#39;</span><span class="p">,</span> <span class="n">sigma_gauss</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -881,7 +909,7 @@ in units of [Mo/yr].</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_outflow_rate</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Outflow Rate&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_outflow_rate</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Outflow Rate&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -943,7 +971,7 @@ in units of [Mo/yr].</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_redshift</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Redshift&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_redshift</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Redshift&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1006,7 +1034,7 @@ in units of [yr].</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_sf_timescale</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Star Formation Timescale&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">.</span><span class="n">plot_sf_timescale</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Star Formation Timescale&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1066,14 +1094,14 @@ if &#8216;redshift&#8217;: experimental! use with caution; redshift evolution</p
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_sn_distr</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_sn_distr</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="omega.omega.plot_spectro">
-<code class="descname">plot_spectro</code><span class="sig-paren">(</span><em>fig=3, xaxis='age', yaxis='[Fe/H]', source='all', label='', shape='-', marker='o', color='k', markevery=100, show_data=False, show_sculptor=False, show_legend=True, return_x_y=False, sub_plot=False, linewidth=3, sub=1, plot_data=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, solar_ab=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_spectro"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_spectro" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_spectro</code><span class="sig-paren">(</span><em>fig=3, xaxis='age', yaxis='[Fe/H]', source='all', label='', shape='-', marker='o', color='k', markevery=100, show_data=False, show_sculptor=False, show_legend=True, return_x_y=False, sub_plot=False, linewidth=3, sub=1, plot_data=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, only_one_iso=False, solar_ab=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_spectro"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_spectro" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots elements in spectroscopic notation:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1123,7 +1151,7 @@ SN1a (&#8216;SN1a&#8217;), or only massive stars
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot_spectro</span><span class="p">(</span><span class="s">&#39;[Fe/H]&#39;</span><span class="p">,</span><span class="s">&#39;[C/Fe]&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot_spectro</span><span class="p">(</span><span class="s1">&#39;[Fe/H]&#39;</span><span class="p">,</span><span class="s1">&#39;[C/Fe]&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1160,7 +1188,7 @@ else: mass of ISM which goes into stars</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">star_formation_rate</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">star_formation_rate</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1226,9 +1254,16 @@ SN1a (&#8216;sn1a&#8217;), or only massive stars
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_totmasses</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_totmasses</span><span class="p">()</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="omega.omega.run_step">
+<code class="descname">run_step</code><span class="sig-paren">(</span><em>i</em>, <em>sfr_rs</em>, <em>m_added=array([]</em>, <em>dtype=float64)</em>, <em>m_lost=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.run_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.run_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function calculates the evolution of one single step in the
+chemical evolution.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1304,7 +1339,7 @@ can have different lengths</p>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Christian Ritter.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>
