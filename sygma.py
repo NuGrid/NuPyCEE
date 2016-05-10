@@ -279,7 +279,7 @@ class sygma( chem_evol ):
 ###############################################################################################
 
 
-    def write_stellar_param_table(self,table_name='gce_stellar_param_table.txt', path="",interact=False):
+    def write_stellar_param_table(self,table_name='gce_stellar_param_table.txt', path="evol_tables",interact=False):
 
 	'''
 	Writes out evolution of stellar parameter such as luminosity and kinetic energy in the following
@@ -304,9 +304,13 @@ class sygma( chem_evol ):
         for i in range(len(parameter)):
             out+= ('&'+parameter[i]+((20-len(parameter[i]))*' '))
 	out = out + '\n'
+	out+=('&'+'{:.3E}'.format(time_evol[0]))
+	for i in range(len(parameter_values)):
+		out+= ( ' &'+ '{:.3E}'.format(0.))
+	out = out + '\n'	
         #data
-        for t in range(len(parameter[0])):
-            out+=('&'+'{:.3E}'.format(time_evol[t]))
+        for t in range(len(parameter_values[0])):
+            out+=('&'+'{:.3E}'.format(time_evol[t+1]))
             for i in range(len(parameter_values)):
                 out+= ( ' &'+ '{:.3E}'.format(parameter_values[i][t]))
             out+='\n'
@@ -336,7 +340,7 @@ class sygma( chem_evol ):
                 #        return name
         else:
                 print 'file '+table_name+' saved in subdirectory evol_tables.'
-                f1=open(path+table_name,'w')
+                f1=open(path+'/'+table_name,'w')
                 f1.write(out)
                 f1.close()
 
