@@ -1904,19 +1904,19 @@ class chem_evol(object):
 		q=0
 		for p in range(len(self.stellar_param_attrs)):
 			attr=self.stellar_param_attrs[p]
-			if not attr in self.table_param.data_cols:
-				if self.stellar_param_mrange[0]>minm1:
-					attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[0])
-				elif self.stellar_param_mrange[1]<maxm1:
-					attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[1])
-				else:
-					attr_data=self.stellar_param_functions[p]((maxm1+minm1)/2.)
-				self.stellar_param[p][j]= self.stellar_param[p][j] + number_stars*attr_data/(self.history.timesteps[j]) #*3.154e7)
-			else:
-				#Apply quantities for stars in time interval i/j, apply their contribution over their whole lifetime (table)
-				idx=list(self.stellar_param_evol_masses).index(mstars[w])
-				self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars*np.array(self.stellar_param_evol[idx][q])
-				q=q+1
+			#if not attr in self.table_param.data_cols:
+			#	if self.stellar_param_mrange[0]>minm1:
+			#		attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[0])
+			#	elif self.stellar_param_mrange[1]<maxm1:
+			#		attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[1])
+			#	else:
+			#		attr_data=self.stellar_param_functions[p]((maxm1+minm1)/2.)
+			#	self.stellar_param[p][j]= self.stellar_param[p][j] + number_stars*attr_data/(self.history.timesteps[j]) #*3.154e7)
+			#else:
+			#Apply quantities for stars in time interval i/j, apply their contribution over their whole lifetime (table)
+			idx=list(self.stellar_param_evol_masses).index(mstars[w])
+			self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars*np.array(self.stellar_param_evol[idx][q])
+			q=q+1
 
         # Exit loop if no more ejecta to be distributed 
         if tt >= lifetimemax:
@@ -3534,20 +3534,18 @@ class chem_evol(object):
 		self.stellar_param_functions=[]
 		m_stars_grid = self.ytables.get(Z=self.Z_gridpoint, quantity='masses')
 		self.stellar_param_mrange=[m_stars_grid[0],m_stars_grid[-1]]	
-		for k in range(len(self.ytables.col_attrs)):
-			if ((not 'Table' in self.ytables.col_attrs[k]) and ((not 'Lifetime' in self.ytables.col_attrs[k])
-				and (not 'Mfinal' in self.ytables.col_attrs[k]))):
-				#luminosities are relevant over the MS lifetime and are given as averages
-				#if 'band' in self.ytables.col_attrs[k]: #needs to changed  from band  to 'Average'
-					#parameter applied over whole lifetime, average
-				self.stellar_param_attrs.append(self.ytables.col_attrs[k])
-				self.stellar_param.append([0.]*self.nb_timesteps)
-				#linear spline fit between grid points
-				attr_data=[]
-				for h in range(len(m_stars_grid)):
-					attr_data.append(self.ytables.get(M=m_stars_grid[h],Z=self.Z_gridpoint,quantity=self.ytables.col_attrs[k]))			
-				f = interp1d(m_stars_grid, attr_data)
-				self.stellar_param_functions.append(f)	
+		#for k in range(len(self.ytables.col_attrs)):
+		#	if ((not 'Table' in self.ytables.col_attrs[k]) and ((not 'Lifetime' in self.ytables.col_attrs[k])
+		#		and (not 'Mfinal' in self.ytables.col_attrs[k]))):
+		#		#luminosities are relevant over the MS lifetime and are given as averages
+		#		self.stellar_param_attrs.append(self.ytables.col_attrs[k])
+		#		self.stellar_param.append([0.]*self.nb_timesteps)
+		#		#linear spline fit between grid points
+		#		attr_data=[]
+		#		for h in range(len(m_stars_grid)):
+		#			attr_data.append(self.ytables.get(M=m_stars_grid[h],Z=self.Z_gridpoint,quantity=self.ytables.col_attrs[k]))			
+		#		f = interp1d(m_stars_grid, attr_data)
+		#		self.stellar_param_functions.append(f)	
 		#tabulated parameter	
 		table_p=self.table_param #to be better readable
 		stellar_param_evol_num=len(table_p.data_cols)-1 #-age
