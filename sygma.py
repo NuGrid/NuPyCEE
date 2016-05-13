@@ -23,7 +23,7 @@ v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg,
               NuGrid collaboration
 
 v0.4 FEB2015: C. Ritter, B. Cote
-
+v0.5 MAY2016: C. Ritter; Note: See from now the official releases via github.
 
 Usage
 =====
@@ -91,9 +91,14 @@ class sygma( chem_evol ):
 
     sfr : string
 	Description of the star formation, usually an instantaneous burst.
-        Choices : 'input' - read and use the sfr_input file to set the percentage
+        
+	Choices : 
+
+		'input' - read and use the sfr_input file to set the percentage
                             of gas that is converted into stars at each timestep.
-                  'schmidt' - use an adapted Schmidt law (see Timmes95)
+
+                'schmidt' - use an adapted Schmidt law (see Timmes95)
+
         Default value : 'input'
     
     ================
@@ -282,12 +287,37 @@ class sygma( chem_evol ):
     def write_stellar_param_table(self,table_name='gce_stellar_param_table.txt', path="evol_tables",interact=False):
 
 	'''
-	Writes out evolution of stellar parameter such as luminosity and kinetic energy in the following
-	format.
+	Writes out evolution of stellar parameter such as luminosity and kinetic energy. 
+	Stellar parameter quantities are available via <sygma instance>.stellar_param_attrs.
+
+
+	Table structure:
 
 	&Age &Quantity1 &Quantity2 ...
+
 	&0.000E+00 &0.000E+00 &0.000E+00
+
 	&0.000E+00 &0.000E+00 &0.000E+00
+
+
+        Parameters
+        ----------
+
+        table_name : string,optional
+          Name of table. If you use a notebook version, setting a name
+          is not necessary.
+
+	path : string
+		directory where to save table.	
+
+        interact: bool
+                If true, saves file in current directory (notebook dir) and creates HTML link useful in ipython notebook environment
+
+        Examples
+        ----------
+
+        >>> s.write_evol_table(table_name='testoutput.txt')
+
 
 	'''
 
@@ -350,12 +380,20 @@ class sygma( chem_evol ):
 
         '''
 	
-	Plots the evolution of stellar parameter (provided in yield table, e.g. kin. E.) over time.
+	Plots the evolution of stellar parameter as provided as input in stellar parameter table (stellar_param_table variable).
 
         Parameters
         ----------
 
-	quantity: Parameter of interest.
+	quantity: string
+ 
+		Name of stellar parameter of interest. Check for available parameter via <sygma instance>.stellar_param_attrs
+
+        Examples
+        ----------
+
+        >>> s.plot_stellar_param(quantity='Ekin_wind')
+
 
 	'''
 
@@ -381,16 +419,30 @@ class sygma( chem_evol ):
 
         '''
         Plots the metal fraction defined as the sum of all isotopes except
-        'H-1','H-2','H-3','He-3','He-4','Li-6','Li-7'.
+        H1, H2, H3, He3, He4, Li6, Li7.
+
+        Parameters
+        ----------
 
         source : string
              Specifies if yields come from
+
 	     all sources ('all'), including
 	     AGB+SN1a, massive stars. Or from
+
 	     distinctive sources:
-	     only agb stars ('agb'), only
-	     SN1a ('SN1a'), or only massive stars
-             ('massive')
+
+	     only agb stars ('agb'), 
+	
+	     only SN1a ('SN1a')
+
+	     only massive stars ('massive')
+
+        Examples
+        ----------
+
+        >>> s.plot_metallicity(source='all')
+
 
 
         '''
@@ -430,11 +482,10 @@ class sygma( chem_evol ):
 
 
 
-    def plot_table_stellar_param(self,fig=8,xaxis='mini',quantity='Lifetime',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_table_param(self,fig=8,xaxis='mini',quantity='Lifetime',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	
-	Plots the lifetimes versus initial mass as given in yield input tables.
+	Plots the yield table quantities such as lifetimes versus initial mass as given in yield input tables.
 
         Parameters
         ----------
@@ -449,6 +500,12 @@ class sygma( chem_evol ):
 
 	table: string
 	      Yield table	
+
+        Examples
+        ----------
+
+        >>> s.plot_table_param(quantity='Lifetiem')
+
 
 
 	'''
@@ -495,7 +552,7 @@ class sygma( chem_evol ):
 
         '''
 
-	Plots the remnant masses versus initial mass.
+	Plots the remnant masses versus initial mass given in yield tables.
 
         Parameters
         ----------
@@ -503,6 +560,14 @@ class sygma( chem_evol ):
         xaxis : string
              if 'mini': use initial mass; if of the form [specie1/specie2] use spec. notation of 
         yaxis : string
+
+	iniZ : float
+	     Metallicity to choose.
+
+        Examples
+        ----------
+
+        >>> s.plot_table_remnant(iniZ=0.02)
 
 
 	'''
@@ -535,6 +600,18 @@ class sygma( chem_evol ):
 	'''
 
 	Plots total mass ejected by stars (!). To distinguish between the total mass of yields from the table and fitted total mass
+
+        Parameters
+        ----------
+
+	plot_imf_mass_ranges : boolean
+		If true plots the initial mass ranges for which yields are consider.	
+
+        Examples
+        ----------
+
+        >>> s.plot_yield_mtot()
+
 	
 	'''
 
@@ -567,7 +644,22 @@ class sygma( chem_evol ):
     def plot_table_yield_mass(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
 	'''
+	Plots yields for isotopes given in yield tables.
+
+        Parameters
+        ----------
+
+	xaxis : string
+		if 'mini' use initial mass on x axis
 	
+	yaxis : string
+		isotope to plot.
+	
+
+        Examples
+        ----------
+
+        >>> s.plot_iso_ratio(yaxis='C-12')
 
 	'''
 
@@ -605,13 +697,29 @@ class sygma( chem_evol ):
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         #return x,y
-        self.save_data(header=[headerx,headery],data=[x,y])
+        self.__save_data(header=[headerx,headery],data=[x,y])
 
 
     def plot_net_yields(self,fig=91,species='[C-12/Fe-56]',netyields_iniabu='yield_tables/iniabu/iniab_solar_Wiersma.ppn'):
 
 	'''
 		Plots net yields as calculated in the code when using netyields_on=True.
+
+		To be used only with net yield input.
+
+        Parameters
+        ----------
+
+	species : string
+		Isotope ratio in spectroscopic notation.
+
+
+        Examples
+        ----------
+
+        >>> s.plot_net_yields(species='[C-12/Fe-56]')
+
+
 	'''
 
 	iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
@@ -668,6 +776,11 @@ class sygma( chem_evol ):
 	     if true assume net yields in table and add corresponding initial contribution to get total yields
 	table : string
 	     table to plot data from; default sygma input table
+
+        Examples
+        ----------
+
+        >>> s.plot_iso_ratio(yaxis='C-12')
 
         
 	'''
@@ -892,7 +1005,7 @@ class sygma( chem_evol ):
 	ax=plt.gca()
 	self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         #return x,y
-        self.save_data(header=[headerx,headery],data=[x,y])
+        self.__save_data(header=[headerx,headery],data=[x,y])
 
 
     def plot_mass_ratio(self,fig=0,species_ratio='C/N',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,logy=True):
@@ -984,7 +1097,7 @@ class sygma( chem_evol ):
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 	    plt.xlim(self.history.dt,self.history.tend)	
-	    #self.save_data(header=['Age[yrs]',specie],data=[x,y])
+	    #self.__save_data(header=['Age[yrs]',specie],data=[x,y])
 
        
 
@@ -1109,7 +1222,7 @@ class sygma( chem_evol ):
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 	    plt.xlim(self.history.dt,self.history.tend)	
 	    #return x,y
-	    self.save_data(header=['Age[yrs]',specie],data=[x,y])
+	    self.__save_data(header=['Age[yrs]',specie],data=[x,y])
 
     def __plot_mass_multi(self,fig=1,specie=['C'],ylims=[],source='all',norm=False,label=[],shape=['-'],marker=['o'],color=['r'],markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
@@ -1383,11 +1496,11 @@ class sygma( chem_evol ):
         plt.legend()
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	self.save_data(header=[xaxis,yaxis],data=[x,y])
+	self.__save_data(header=[xaxis,yaxis],data=[x,y])
 
     def plot_spectro(self,fig=3,xaxis='age',yaxis='[Fe/H]',source='all',label='',shape='-',marker='o',color='k',markevery=100,show_data=False,show_sculptor=False,show_legend=True,return_x_y=False,sub_plot=False,linewidth=3,sub=1,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab=''):
         '''
-        Plots elements in spectroscopic notation:
+        Plots elements in spectroscopic notation.
 
         Parameters
         ----------
@@ -1598,7 +1711,7 @@ class sygma( chem_evol ):
 	            plt.legend()
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    self.save_data(header=[xaxis,yaxis],data=[x,y])
+	    self.__save_data(header=[xaxis,yaxis],data=[x,y])
 
 
     def __plot_abu_distr(self,fig=0,t=-1,x_axis='A',solar_norm=True,marker1=2,linest=0,y_range=[],label='CHEM  module',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
@@ -1889,14 +2002,15 @@ class sygma( chem_evol ):
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 	plt.xlim(self.history.dt,self.history.tend)
-	self.save_data(header=['age','mass'],data=[x,y])
+	self.__save_data(header=['age','mass'],data=[x,y])
 
     def plot_sn_distr(self,fig=5,rate=True,rate_only='',xaxis='time',fraction=False,label1='SNIa',label2='SN2',shape1=':',shape2='--',marker1='o',marker2='s',color1='k',color2='b',markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
 	Plots the SN1a distribution:
+
 	The evolution of the number of SN1a and SN2
-	#Add numbers/dt numbers/year...
+
 
         Parameters
         ----------
@@ -2032,7 +2146,7 @@ class sygma( chem_evol ):
 		label='SNIafractionperWD';label='sn1a '+label
 		x=age1
 		y=ratio
-		self.save_data(header=['age',label],data=[x,y])		
+		self.__save_data(header=['age',label],data=[x,y])		
 		return 
 	    else:
 		    if len(rate_only)==0:
@@ -2065,13 +2179,13 @@ class sygma( chem_evol ):
 			label='rate'
 		else:
 			label='number'
-		self.save_data(header=['age','SNIa '+label,'age','CCSN '+label],data=[x[0],y[0],x[1],y[1]])
+		self.__save_data(header=['age','SNIa '+label,'age','CCSN '+label],data=[x[0],y[0],x[1],y[1]])
 	else:
 		if rate_only=='sn1a':
 			label='sn1a '+label
 		else:
 			label='ccsn '+label
-                self.save_data(header=['age',label],data=[x,y])
+                self.__save_data(header=['age',label],data=[x,y])
 			
 
     ##############################################
@@ -2145,7 +2259,7 @@ class sygma( chem_evol ):
 		plt.xlabel('Age [yrs]')
 		plt.plot(age,sfr,label=label,marker=marker,linestyle=shape)
 		plt.ylabel('Fraction of current gas mass into stars')	
-        	self.save_data(header=['age','SFR'],data=[age,sfr])
+        	self.__save_data(header=['age','SFR'],data=[age,sfr])
 
         #Plot the mass converted into stars
 	else:
@@ -2284,7 +2398,7 @@ class sygma( chem_evol ):
         #ax.xaxis.set_tick_params(width=2)
         #ax.yaxis.set_tick_params(width=2)
         ax1.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
-	self.save_data(header=['Mean mass','mass bdys (bins)','Yields'],data=[mean_val,bin_bdys,y])
+	self.__save_data(header=['Mean mass','mass bdys (bins)','Yields'],data=[mean_val,bin_bdys,y])
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
 
@@ -2468,6 +2582,26 @@ class sygma( chem_evol ):
         solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
         solar_iso='solar_normalization/Asplund_et_al_2009_iso.txt'):
 
+	'''
+
+	Plots ratios of isotopes.
+
+
+        Parameters
+        ----------
+
+	yaxis: string
+		Ratio of isotopes, e.g. C-12/C-13
+
+
+        Examples
+        ----------
+
+	>>> s.plot_iso_ratio(yaxis='C-12/C-13') 	
+
+	'''
+
+
         # Declaration of the array to plot
         x = []
         y = []
@@ -2593,10 +2727,10 @@ class sygma( chem_evol ):
         # Get the solar values
         if xaxis_ratio:
             x1_sol, x2_sol, y1_sol, y2_sol = \
-              self.read_solar_iso(solar_iso, x_1, x_2, y_1, y_2)
+              self.__read_solar_iso(solar_iso, x_1, x_2, y_1, y_2)
         else:
             x1_sol, x2_sol, y1_sol, y2_sol = \
-                self.read_solar_iso(solar_iso, '', '', y_1, y_2)
+                self.__read_solar_iso(solar_iso, '', '', y_1, y_2)
 
         # Calculate the isotope ratios (mass ratio)
         #for k in range(0,len(yields_evol)):
@@ -2652,14 +2786,14 @@ class sygma( chem_evol ):
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
                   rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 	    #plt.xlim(self.history.dt,self.history.tend)	
-	    self.save_data(header=['Iso mass ratio',yaxis],data=[x,y])
+	    self.__save_data(header=['Iso mass ratio',yaxis],data=[x,y])
 
 
 
     ##############################################
     #               Read Solar Iso               #
     ##############################################
-    def read_solar_iso(self, file_path, xx1, xx2, yy1, yy2):
+    def __read_solar_iso(self, file_path, xx1, xx2, yy1, yy2):
 
         # Initialisation of the variable to be returned
         x1_rsi = -1
@@ -2757,7 +2891,7 @@ class sygma( chem_evol ):
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
 
-    def save_data(self,header=[],data=[],filename='plot_data.txt'):
+    def __save_data(self,header=[],data=[],filename='plot_data.txt'):
 	'''
 		Writes data into a text file. data entries
 		can have different lengths
@@ -2792,13 +2926,14 @@ class sygma( chem_evol ):
     def write_evol_table(self,elements=['H'],isotopes=['H-1'],table_name='gce_table.txt', path="",interact=False):
 
         '''
-	Writes out evolution of time, metallicity
-	and each isotope in the following format
+	Writes out evolution of the SSP accummulated ejecta in fraction of total mass of the SSP in the following format
 	(each timestep in a line):
 
 	&Age       &H-1       &H-2  ....
 
 	&0.000E+00 &1.000E+00 &7.600E+08 & ...
+
+	&1.000E+07 &1.000E+00 &7.600E+08 & ...
 
 	....
 	
@@ -2818,10 +2953,11 @@ class sygma( chem_evol ):
 		If elements list empty, ignore elements input and use isotopes input; Containing the isotopes with the name scheme 'H-1', 'C-12'
 	interact: bool
 		If true, saves file in current directory (notebook dir) and creates HTML link useful in ipython notebook environment
+
         Examples
         ----------
-        >>> s.write_evol_table(elements=['H','C','O'],table_name='testoutput.txt')
 
+        >>> s.write_evol_table(elements=['H','C','O'],table_name='testoutput.txt')
 
         '''
         if path == "":

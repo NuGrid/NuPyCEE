@@ -82,146 +82,189 @@ class chem_evol(object):
         Number of special timesteps.  This option (already activated by default)
         is activated when special_timesteps > 0.  It uses a logarithm timestep
         scheme which increases the duration of timesteps throughout the simulation.
+
         Default value : 30
 
     dt : float
         Duration of the first timestep [yr] if special_timesteps is activated.
         Duration of each timestep if special_timesteps is desactivated.
+
         Default value : 1.0e6
 
     tend : float
         Total duration of the simulation [yr].
+
         Default value : 13.0e9
 
     imf_bdys : list
         Upper and lower mass limits of the initial mass function (IMF) [Mo].
+
         Default value : [0.1,100]
 
     imf_yields_range : list
         Initial mass of stars that contribute to stellar ejecta [Mo].
+
         Default value : [1,30]
 
     imf_type : string
 	Choices : 'salpeter', 'chabrier', 'kroupa', 'alphaimf'
         'alphaimf' creates a custom IMF with a single power-law covering imf_bdys.
+
         Default value : 'kroupa'
 
     alphaimf : float
         Aplha index of the custom IMF, dN/dM = Constant * M^-alphaimf
+
         Default value : 2.35
 
     imf_bdys_pop3 : list
         Upper and lower mass limits of the IMF of PopIII stars [Mo]. 
+
         Default value : [0.1,100]
 
     imf_yields_range_pop3 : list
         Initial mass of stars that contribute to PopIII stellar ejecta [Mo].
         PopIII stars ejecta taken from Heger et al. (2010)
+
         Default value : [10,30]
 
     iniZ : float
         Initial metallicity of the gas in mass fraction (e.g. Solar Z = 0.02).
+
         Choices : 0.0, 0.0001, 0.001, 0.006, 0.01, 0.02
                  (-1.0 to use non-default yield tables)
+
         Default value : 0.0
 
     Z_trans : float
         Variable used when interpolating stellar yields as a function of Z.
         Transition Z below which PopIII yields are used, and above which default
         yields are used.
+
         Default value : -1 (not active)
 
     mgal : float
         Initial mass of gas in the simulation [Mo].
+
         Default value : 1.6e11
 
     sn1a_on : boolean
 	True or False to include or exclude the contribution of SNe Ia.
+
         Default value : True
 
     sn1a_rate : string
         SN Ia delay-time distribution function used to calculate the SN Ia rate.
-	Choices : 'power_law' - custom power law, set parameter with beta_pow (similar to Maoz & Mannucci 2012)
-                  'gauss' - gaussian DTD, set parameter with gauss_dtd
-                  'exp' - exponential DTD, set parameter with exp_dtd
-		  'maoz' - specific power law from Maoz & Mannucci (2012)
+
+	Choices : 
+		'power_law' - custom power law, set parameter with beta_pow (similar to Maoz & Mannucci 2012)
+
+                'gauss' - gaussian DTD, set parameter with gauss_dtd
+
+                'exp' - exponential DTD, set parameter with exp_dtd
+
+		'maoz' - specific power law from Maoz & Mannucci (2012)
+
         Default value : 'power_law'
 
     ns_merger_on : boolean
         True or False to include or exclude the contribution of neutron star mergers.
+
         Default value: True
 
     beta_pow : float
         Slope of the power law for custom SN Ia rate, R = Constant * t^-beta_pow.
+
         Default value : -1.0
 
     gauss_dtd : list
         Contains parameter for the gaussian DTD: first the characteristic time [yrs] (gaussian center) 
         and then the width of the distribution [yrs]. 
 
+	Default value : [3.3e9,6.6e8] 
+
     exp_dtd : float
         Characteristic delay time [yrs] for the e-folding DTD.
 
     nb_1a_per_m : float
         Number of SNe Ia per stellar mass formed in a simple stellar population.
+
         Default value : 1.0e-03
 
     direct_norm_1a : float
 	Normalization coefficient for SNIa rate integral. 
-	By default deactived but replaces the usage of teh nb_1a_per_m when its value is larger than zero.
+
+	Default: deactived but replaces the usage of teh nb_1a_per_m when its value is larger than zero.
 	
     transitionmass : float
         Initial mass which marks the transition from AGB to massive stars [Mo].
+
         Default value : 8.0
 
     exclude_masses : list
         Contains initial masses in yield tables to be excluded from the simulation;
 
+	Default value : [] 
+
     table : string
         Path pointing toward the stellar yield tables for massive and AGB stars.
+
         Default value : 'yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt' (NuGrid)
 
     sn1a_table : string
         Path pointing toward the stellar yield table for SNe Ia.
+
         Default value : 'yield_tables/sn1a_t86.txt' (Tielemann et al. 1986)
 
     nsmerger_table : string
         Path pointing toward the r-process yield tables for neutron star mergers
+
         Default value : 'yield_tables/r_process_rosswog_2014.txt' (Rosswog et al. 2013)
 
     iniabu_table : string
         Path pointing toward the table of initial abuncances in mass fraction.
+
         Default value : 'yield_tables/iniabu/iniab2.0E-02GN93.ppn'
 
     yield_interp : string
 	if 'None' : no yield interpolation, no interpolation of total ejecta
+	
 	if 'lin' - Simple linear yield interpolation.
+
         if 'wiersma' - Interpolation method which makes use of net yields
-			as used e.g. in Wiersma+ (2009); Does not require net yields.
-			if netyields_on is true than makes use of given net yields
+	as used e.g. in Wiersma+ (2009); Does not require net yields.
+	
+	if netyields_on is true than makes use of given net yields
 			else calculates net yields from given X0 in yield table.
 
+	Default : 'lin' 
+	
     netyields_on : boolean
 	if true assumes that yields (input from table parameter) 
-	are net yields. Default false.
+	are net yields. 
+
+	Default : false.
 
 
     total_ejecta_interp : if true then interpolates total ejecta given in yield tables 
 			  over initial mass range.  
 
+	Default : True
 
     stellar_param_on : boolean
 	if true reads in additional stellar parameter given in table stellar_param_table.
-	default true in sygma and false in omega 
+
+	Default : true in sygma and false in omega 
 	
     stellar_param_table: string
 	Path pointoing toward the table hosting the evolution of stellar parameter 
 	derived from stellar evolution calculations.
 
-
+	Default table : 'yield_tables/isotope_yield_table_MESA_only_param.txt' 
 
     iolevel : int
         Specifies the amount of output for testing purposes (up to 3).
+
         Default value : 0
 
 
