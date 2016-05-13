@@ -59,12 +59,26 @@ ipython notebooks.
 
 \subsection{Fastest possible instruction}
 
-Download the code at
+To download the code
+you need to have git installed on your local machine.
+Then download the code from github at
 
-\url{http://nupycee.bitbucket.org/}
+\url{https://github.com/NuGrid/NuPyCEE}
 
-Install ipython with numpy and matplotlib.
-Start ipython in NUPYCEE with
+into your local directory via
+
+\begin{verbatim}
+git clone https://nupycee@bitbucket.org/nupycee/nupycee.bitbucket.org.git .
+\end{verbatim}
+
+Install ipython with numpy and matplotlib and
+nugridpy via
+
+\begin{verbatim}
+pip install nugridpy
+\end{verbatim}
+
+Start ipython in the NUPYCEE directory with
 
 \begin{verbatim}
 ipython -pylab -p numpy
@@ -145,7 +159,8 @@ In order to follow the chemical enrichment via gas particles
 in N-body simulations one has to describe the ejecta of material
 from such star particles, essentially simple stellar populations. 
 With SYGMA one can follow the ejecta of such populations via
-diagrams and by extracting the ejecta in tables.
+diagrams and you can extract the composition of the ejecta via tables.
+
 
 \subsubsection{Getting started}
 
@@ -175,7 +190,7 @@ default parameter include for example the choice of the initial-mass function.
 
 
 One can check the definition of these input parameter online via
-\url{http://nupycee.bitbucket.org/SPHINX/build/html/sygma.html}.
+\url{http://nugrid.github.io/NuPyCEE/SPHINX/build/html/sygma.html}.
 
 
 No yield tables are defined and hence the NuGrid tables as the
@@ -228,7 +243,7 @@ certain initial mass.
 %at \\http://208.75.74.161:8888/tree/Publicnotebooks/intro\textunderscore SYGMA.
 
 To analyze the run afterwards we provide a variety of plotting  functions
-which are described in detail at \url{http://nupycee.bitbucket.org/SPHINX/build/html/sygma.html}.
+which are described in detail at \url{http://nugrid.github.io/NuPyCEE/SPHINX/build/html/sygma.html}.
 In following we give some examples. The function plot\textunderscore mass() shows the evolution
 of the yield in solar masses.
 
@@ -307,8 +322,9 @@ This document history complements the svn log.
 \begin{tabular*}{\textwidth}{lll}
 \hline
 Authors & yymmdd & Comment \\
+CR & 130926 & Update of links and details \\
 \hline
-CR & 130926 & creation \\
+CR & 160513 & creation \\
 \end{tabular*}
 
 
