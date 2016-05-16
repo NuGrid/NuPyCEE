@@ -1,10 +1,10 @@
 % *********** Document name and reference:
 % Title of document
-\renewcommand{\ndoctitle}{NUPYCEE} 
+\renewcommand{\ndoctitle}{NuPyCEE} 
 % Document category acronym 
-\renewcommand{\ndocname}{NUPYCEE}                      
+\renewcommand{\ndocname}{NuPyCEE}                      
 % svn dir
-\renewcommand{\svndir}{svn://forum.astro.keele.ac.uk/utils/GCE/NUPYCEE}  
+\renewcommand{\svndir}{svn://forum.astro.keele.ac.uk/utils/GCE/NuPyCEE}  
 % Contributors to this document
 \renewcommand{\ndoccontribs}{Christian Ritter, Benoit C\^ot\'e}
 
@@ -18,17 +18,17 @@ Please send any feedback to critter@uvic.ca or bcote@uvic.ca. Thank you.
 
 {  \textbf{Abstract:} %\slshape{}
 %\begin{abstract}
-\noindent The Nugrid-Python-Chemical-evolution environment, short NuPyCEE, provides
+\noindent The Nugrid-Python-Chemical-Evolution Environment, short NuPyCEE, provides
 a framework to simulate the ejecta of simple stellar populations with the 1-zone code
 Stellar Yields for Galactic Modeling Applications as well as galaxies
 with the One-zone Model for the Evolution of Galaxies.
-Various chemical evolution input parameter can be specified through a python-based interface.
+Various chemical evolution input parameters can be specified through a python-based interface.
 Both tools provide extraction and plotting methods.
 We also provide a web interface with limited capabilities which allows to download
-yield tables containing the ejecta of SSP's. 
-To compare the results to observational data the user can utilize the STELLAB module
-which provides various spectroscopic abundance ratios of stars such as
-Milky Way and dwarf galaxies.
+yield tables containing the ejecta of SSPs. 
+To compare the results to observational data, the user can utilize the STELLAB module
+which provides various spectroscopic abundance ratios of stars observed in the 
+Milky Way and local dwarf spheroidal galaxies.
 %\end{abstract}
 }
 
@@ -78,7 +78,7 @@ nugridpy via
 pip install nugridpy
 \end{verbatim}
 
-Start ipython in the NUPYCEE directory with
+Start ipython in the NuPyCEE directory with
 
 \begin{verbatim}
 ipython -pylab -p numpy
@@ -156,7 +156,7 @@ pip install nugridpy
 \subsubsection{General concepts}
 
 In order to follow the chemical enrichment via gas particles
-in N-body simulations one has to describe the ejecta of material
+in hydrodynamical simulations one has to describe the ejecta of material
 from such star particles, essentially simple stellar populations. 
 With SYGMA one can follow the ejecta of such populations via
 diagrams and you can extract the composition of the ejecta via tables.
@@ -206,12 +206,12 @@ AGB and massive star yields for five different metallicities.
 In this mode the user specifies $iniZ$
 which can be either $Z=2e-2, 1e-2, 6e-3, 1e-3, 1e-4$ and $0.0$.
 Scaled abundances for Z=1e-t65, 1e-6 will be available soon.
-Currently for $Z=0$ the PopIII stars from \cite{heger:10} are set
+Currently for $Z=0$ the PopIII stars from Heger et al. (2010) are set
 as default.
 
 \subsubsection{Providing your own yield tables}
 
-Yield tables are available in the NUPYCEE subdirectory 
+Yield tables are available in the NuPyCEE subdirectory 
 yield\textunderscore tables. Add your yield tables to
 this directory and SYGMA will be able read the table
 if you have specified the $table$ variable. Only
@@ -285,33 +285,47 @@ It writes out the mass of isotopes ejected by stars as a function of time
 
 \subsection{OMEGA}
 
-OMEGA is a classical one-zone galaxy model with
-an input star formation history
-where stars form and inject new elements within
+\subsubsection{General concepts}
+OMEGA is a classical one-zone, open-box galaxy model with
+an input star formation history where stars form and inject new elements within
 the same gas reservoir, using SYGMA to create a SSP at every timestep.
+At any time, each existing SSP ejects material that reflects its age, mass, and initial metallicity.
+OMEGA can mimic known local galaxies, such as Sculptor, Carina, and Fornax,
+by using the observed star formation history and current mass, which is taken
+from the literature.  It also offers the possibility to mimic the Milky Way, but we
+warn the user that a one-zone model is probably too simplistic to simulate the
+evolution of massive and complex galaxies, although they are useful for testing
+stellar yields.
+
+The code offers three different prescriptions for treating gas inflows and outflows
+(see the OMEGA Userguide ipython notebook on WENDI, \url{http://www.nugridstars.org/projects/wendi}).  
+Inflows and outflows can be independently switched off to consider a semi-open box or a closed box model.
+The different prescriptions can also be found in C\^ot\'e et al. (2016, \url{http://adsabs.harvard.edu/abs/2016arXiv160407824C}).
+
 A complete description of OMEGA's input parameters and functions can
-be found in the Sphinx documentation.  
+be found in the Sphinx documentation (\url{http://nugrid.github.io/NuPyCEE/SPHINX/build/html/omega.html}). 
+All the SSP parameters associated with SYGMA are available with OMEGA as well.
 
-OMEGA can mimic known local galaxies, such as Sculptor and Fornax, by
-using their specific star formation history and current mass, which is taken
-from the literature.  The code offers three different prescriptions for treating
-gas inflows and outflows (see the OMEGA Userguide ipython notebook).
+\subsubsection{Getting Started with OMEGA}
 
-All the parameters associated with simple stellar populations are treated as
-in the SYGMA module.
-
-
-\subsection{Getting Started with OMEGA}
-
-Steps what to do with omega.
+We refer to the OMEGA Userguide ipython notebook on WENDI (\url{http://www.nugridstars.org/projects/wendi})
+for more information about how to use OMEGA with command lines, and how to use plotting functions
+to analyze the predicted chemical evolution of the target galaxy.
 
 
-inflows and outflow implementation;
-star formation input ...
+\subsection{STELLAB}
 
-\subsection{Stellab}
+STELLAB (short for Stellar Abundances) is a module that allows to plot the stellar abundances 
+observed in different galaxies.  So far, data are available for the Milky Way, Sculptor, Fornax, Carina,
+and the LMC.  This code uses an input collection of data and plots any abundance ratio [X/Y] as 
+a function of another one.  It also offers the possibility to re-normalize all data to the same solar
+normalization.  It is a useful and complementary tool that enables to confront numerical predictions
+with observations.
 
-Cool stuff about stellab here.
+We refer to the STELLAB Userguide ipython notebook on WENDI (\url{http://www.nugridstars.org/projects/wendi})
+for more information on its usage, options, and collection of data.  It should be noted that observational
+data have not been curated, but have rather been blindly taken from the literature.  We are currently
+working on a curation process in collaboration with JINA-CEE members (\url{http://www.jinaweb.org}).
 
 \section{Disclaimer}
 
@@ -329,7 +343,7 @@ CR & 160513 & creation \\
 
 
 \subsection{Contact}
-If any bugs do appear or if there are any questions, please email critter@uvic.ca
+If any bugs do appear or if there are any questions, please email critter@uvic.ca or bcote@uvic.ca
 % --------------- latex template below ---------------------------
 \begin{verbatim}
 
