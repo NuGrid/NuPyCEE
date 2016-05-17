@@ -5,4 +5,5 @@ python:
 install:
   - pip install runipy
 script:
+  - ./regression_test_suite/start_notebook.sh
   - runipy regression_test_suite/RTS_MSP_h_yield_input.ipynb
