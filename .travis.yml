@@ -11,3 +11,5 @@ script:
   - export SYGMADIR=../
   - export PYTHONPATH=$PYTHONPATH:$SYGMADIR
   - runipy regression_test_suite/RTS_MSP_h_yield_input.ipynb
+notifications:
+  - email: false
