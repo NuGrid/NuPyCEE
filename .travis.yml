@@ -4,6 +4,8 @@ python:
   - "2.7"
 install:
   - pip install runipy
+  - pip install matplotlib
+  - pip install numpy
 script:
   - export SYGMADIR=../
   - export PYTHONPATH=$PYTHONPATH:$SYGMADIR
