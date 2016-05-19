@@ -5,5 +5,6 @@ python:
 install:
   - pip install runipy
 script:
-  - ./regression_test_suite/start_notebook.sh
+  - export SYGMADIR=../
+  - export PYTHONPATH=$PYTHONPATH:$SYGMADIR
   - runipy regression_test_suite/RTS_MSP_h_yield_input.ipynb
