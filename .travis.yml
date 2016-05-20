@@ -19,11 +19,12 @@ install:
 script:
   - export SYGMADIR=../
   - export PYTHONPATH=$PYTHONPATH:$SYGMADIR
-  - runipy regression_test_suite/RTS_custom_imf.ipynb
-  - runipy regression_test_suite/RTS_extra_source.ipynb
-  - runipy regression_test_suite/RTS_plot_functions.ipynb
-  - runipy regression_test_suite/RTS_ScaledownZ.ipynb
-  - runipy regression_test_suite/RTS_MSP_h_yield_input.ipynb
+  - runipy regression_test_suite/SYGMA_SSP_h_yield_input.ipynb
+  #- runipy regression_test_suite/RTS_custom_imf.ipynb
+  #- runipy regression_test_suite/RTS_extra_source.ipynb
+  #- runipy regression_test_suite/RTS_plot_functions.ipynb
+  #- runipy regression_test_suite/RTS_ScaledownZ.ipynb
+  #- runipy regression_test_suite/RTS_MSP_h_yield_input.ipynb
 notifications:
   slack: nugrid:wTgGR31cFsNUqfytUDZ5ZLug
   email: false
