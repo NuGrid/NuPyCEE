@@ -82,146 +82,189 @@ class chem_evol(object):
         Number of special timesteps.  This option (already activated by default)
         is activated when special_timesteps > 0.  It uses a logarithm timestep
         scheme which increases the duration of timesteps throughout the simulation.
+
         Default value : 30
 
     dt : float
         Duration of the first timestep [yr] if special_timesteps is activated.
         Duration of each timestep if special_timesteps is desactivated.
+
         Default value : 1.0e6
 
     tend : float
         Total duration of the simulation [yr].
+
         Default value : 13.0e9
 
     imf_bdys : list
         Upper and lower mass limits of the initial mass function (IMF) [Mo].
+
         Default value : [0.1,100]
 
     imf_yields_range : list
         Initial mass of stars that contribute to stellar ejecta [Mo].
+
         Default value : [1,30]
 
     imf_type : string
 	Choices : 'salpeter', 'chabrier', 'kroupa', 'alphaimf'
         'alphaimf' creates a custom IMF with a single power-law covering imf_bdys.
+
         Default value : 'kroupa'
 
     alphaimf : float
         Aplha index of the custom IMF, dN/dM = Constant * M^-alphaimf
+
         Default value : 2.35
 
     imf_bdys_pop3 : list
         Upper and lower mass limits of the IMF of PopIII stars [Mo]. 
+
         Default value : [0.1,100]
 
     imf_yields_range_pop3 : list
         Initial mass of stars that contribute to PopIII stellar ejecta [Mo].
         PopIII stars ejecta taken from Heger et al. (2010)
+
         Default value : [10,30]
 
     iniZ : float
         Initial metallicity of the gas in mass fraction (e.g. Solar Z = 0.02).
+
         Choices : 0.0, 0.0001, 0.001, 0.006, 0.01, 0.02
                  (-1.0 to use non-default yield tables)
+
         Default value : 0.0
 
     Z_trans : float
         Variable used when interpolating stellar yields as a function of Z.
         Transition Z below which PopIII yields are used, and above which default
         yields are used.
+
         Default value : -1 (not active)
 
     mgal : float
         Initial mass of gas in the simulation [Mo].
+
         Default value : 1.6e11
 
     sn1a_on : boolean
 	True or False to include or exclude the contribution of SNe Ia.
+
         Default value : True
 
     sn1a_rate : string
         SN Ia delay-time distribution function used to calculate the SN Ia rate.
-	Choices : 'power_law' - custom power law, set parameter with beta_pow (similar to Maoz & Mannucci 2012)
-                  'gauss' - gaussian DTD, set parameter with gauss_dtd
-                  'exp' - exponential DTD, set parameter with exp_dtd
-		  'maoz' - specific power law from Maoz & Mannucci (2012)
+
+	Choices : 
+		'power_law' - custom power law, set parameter with beta_pow (similar to Maoz & Mannucci 2012)
+
+                'gauss' - gaussian DTD, set parameter with gauss_dtd
+
+                'exp' - exponential DTD, set parameter with exp_dtd
+
+		'maoz' - specific power law from Maoz & Mannucci (2012)
+
         Default value : 'power_law'
 
     ns_merger_on : boolean
         True or False to include or exclude the contribution of neutron star mergers.
+
         Default value: True
 
     beta_pow : float
         Slope of the power law for custom SN Ia rate, R = Constant * t^-beta_pow.
+
         Default value : -1.0
 
     gauss_dtd : list
         Contains parameter for the gaussian DTD: first the characteristic time [yrs] (gaussian center) 
         and then the width of the distribution [yrs]. 
 
+	Default value : [3.3e9,6.6e8] 
+
     exp_dtd : float
         Characteristic delay time [yrs] for the e-folding DTD.
 
     nb_1a_per_m : float
         Number of SNe Ia per stellar mass formed in a simple stellar population.
+
         Default value : 1.0e-03
 
     direct_norm_1a : float
 	Normalization coefficient for SNIa rate integral. 
-	By default deactived but replaces the usage of teh nb_1a_per_m when its value is larger than zero.
+
+	Default: deactived but replaces the usage of teh nb_1a_per_m when its value is larger than zero.
 	
     transitionmass : float
         Initial mass which marks the transition from AGB to massive stars [Mo].
+
         Default value : 8.0
 
     exclude_masses : list
         Contains initial masses in yield tables to be excluded from the simulation;
 
+	Default value : [] 
+
     table : string
         Path pointing toward the stellar yield tables for massive and AGB stars.
+
         Default value : 'yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt' (NuGrid)
 
     sn1a_table : string
         Path pointing toward the stellar yield table for SNe Ia.
+
         Default value : 'yield_tables/sn1a_t86.txt' (Tielemann et al. 1986)
 
     nsmerger_table : string
         Path pointing toward the r-process yield tables for neutron star mergers
+
         Default value : 'yield_tables/r_process_rosswog_2014.txt' (Rosswog et al. 2013)
 
     iniabu_table : string
         Path pointing toward the table of initial abuncances in mass fraction.
+
         Default value : 'yield_tables/iniabu/iniab2.0E-02GN93.ppn'
 
     yield_interp : string
 	if 'None' : no yield interpolation, no interpolation of total ejecta
+	
 	if 'lin' - Simple linear yield interpolation.
+
         if 'wiersma' - Interpolation method which makes use of net yields
-			as used e.g. in Wiersma+ (2009); Does not require net yields.
-			if netyields_on is true than makes use of given net yields
+	as used e.g. in Wiersma+ (2009); Does not require net yields.
+	
+	if netyields_on is true than makes use of given net yields
 			else calculates net yields from given X0 in yield table.
 
+	Default : 'lin' 
+	
     netyields_on : boolean
 	if true assumes that yields (input from table parameter) 
-	are net yields. Default false.
+	are net yields. 
+
+	Default : false.
 
 
     total_ejecta_interp : if true then interpolates total ejecta given in yield tables 
 			  over initial mass range.  
 
+	Default : True
 
     stellar_param_on : boolean
 	if true reads in additional stellar parameter given in table stellar_param_table.
-	default true in sygma and false in omega 
+
+	Default : true in sygma and false in omega 
 	
     stellar_param_table: string
 	Path pointoing toward the table hosting the evolution of stellar parameter 
 	derived from stellar evolution calculations.
 
-
+	Default table : 'yield_tables/isotope_yield_table_MESA_only_param.txt' 
 
     iolevel : int
         Specifies the amount of output for testing purposes (up to 3).
+
         Default value : 0
 
 
@@ -1095,7 +1138,6 @@ class chem_evol(object):
 	if self.stellar_param_on:
 		table_param=ry.read_nugrid_parameter(global_path + self.stellar_param_table)
 		self.table_param=table_param
-
         # Output information
         if self.iolevel >= 1:
             print 'Warning - Use isotopes with care.'
@@ -1840,8 +1882,9 @@ class chem_evol(object):
         # Scale the total yields (see func_total_eject)
 	if (self.total_ejecta_interp == True):
 		#print 'minm1,maxm1',minm1,maxm1
-        	scalefactor = (func_total_ejecta(minm1) + \
-                              func_total_ejecta(maxm1)) / 2.0 / sum(yields)
+		m_tot_ejecta=(func_total_ejecta(minm1)+func_total_ejecta(maxm1)) / 2.0
+        	scalefactor = m_tot_ejecta / sum(yields)
+		
 	else:
 		scalefactor = 1
 
@@ -1902,21 +1945,25 @@ class chem_evol(object):
 	#Add other stellar input, only for Z>0 because of different input grid.
 	if self.Z_gridpoint>0. and self.stellar_param_on:
 		q=0
+		mass_scale_f=0.
 		for p in range(len(self.stellar_param_attrs)):
 			attr=self.stellar_param_attrs[p]
-			if not attr in self.table_param.data_cols:
-				if self.stellar_param_mrange[0]>minm1:
-					attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[0])
-				elif self.stellar_param_mrange[1]<maxm1:
-					attr_data=self.stellar_param_functions[p](self.stellar_param_mrange[1])
-				else:
-					attr_data=self.stellar_param_functions[p]((maxm1+minm1)/2.)
-				self.stellar_param[p][j]= self.stellar_param[p][j] + number_stars*attr_data/(self.history.timesteps[j]) #*3.154e7)
+			#Apply quantities for stars in time interval i/j, apply their contribution over their whole lifetime (table)
+			#I need m_tot_ejecta , current time tt at index j, lifetime of star stellar_param_evol_lifetimes[idx]
+			idx=list(self.stellar_param_evol_masses).index(mstars[w])
+			'''
+			if 'Ekindot_wind' in self.stellar_param_attrs and 'Mdot_wind' in self.stellar_param_attrs:
+				if 'Mdot_wind' == attr:	 
+					#scale to total ejecta: total ejecta summed from each time bin / total ejecta from fit
+					mass_scale_f=sum(np.array(self.stellar_param_evol[idx][j-1][q]) * np.array(self.history.timesteps)) / m_tot_ejecta
+					self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
+				if 'Ekindot_wind' == attr:
+					self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
+					
 			else:
-				#Apply quantities for stars in time interval i/j, apply their contribution over their whole lifetime (table)
-				idx=list(self.stellar_param_evol_masses).index(mstars[w])
-				self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars*np.array(self.stellar_param_evol[idx][q])
-				q=q+1
+			'''
+			self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars * np.array(self.stellar_param_evol[idx][j-1][q])
+			q=q+1
 
         # Exit loop if no more ejecta to be distributed 
         if tt >= lifetimemax:
@@ -3534,49 +3581,69 @@ class chem_evol(object):
 		self.stellar_param_functions=[]
 		m_stars_grid = self.ytables.get(Z=self.Z_gridpoint, quantity='masses')
 		self.stellar_param_mrange=[m_stars_grid[0],m_stars_grid[-1]]	
-		for k in range(len(self.ytables.col_attrs)):
-			if ((not 'Table' in self.ytables.col_attrs[k]) and ((not 'Lifetime' in self.ytables.col_attrs[k])
-				and (not 'Mfinal' in self.ytables.col_attrs[k]))):
-				#luminosities are relevant over the MS lifetime and are given as averages
-				#if 'band' in self.ytables.col_attrs[k]: #needs to changed  from band  to 'Average'
-					#parameter applied over whole lifetime, average
-				self.stellar_param_attrs.append(self.ytables.col_attrs[k])
-				self.stellar_param.append([0.]*self.nb_timesteps)
-				#linear spline fit between grid points
-				attr_data=[]
-				for h in range(len(m_stars_grid)):
-					attr_data.append(self.ytables.get(M=m_stars_grid[h],Z=self.Z_gridpoint,quantity=self.ytables.col_attrs[k]))			
-				f = interp1d(m_stars_grid, attr_data)
-				self.stellar_param_functions.append(f)	
-		#tabulated parameter	
+
+		#parameter hold the evolution and filled in the step where yields are applied
 		table_p=self.table_param #to be better readable
-		stellar_param_evol_num=len(table_p.data_cols)-1 #-age
-		for h in range(1,len(table_p.data_cols)):
-			self.stellar_param_attrs.append(table_p.data_cols[h])
+
+		data_cols1=table_p.data_cols
+		#to make sure that Mdot comes before Ekindot, if available (for factors)
+		if 'Mdot_wind' in data_cols1 and 'Ekindot_wind' in data_cols1:
+			#first Mdot and then Ekindot_wind
+			idx1= data_cols1.index('Mdot_wind')
+			idx2= data_cols1.index('Ekindot_wind')
+			if idx1 > idx2:
+				data_cols1[idx1]='Ekindot_wind'
+				data_cols1[idx2]='Mdot_wind'
+
+		data_cols=data_cols1[1:]
+		#print 'data_cols',data_cols
+		for h in range(len(data_cols)):
+			self.stellar_param_attrs.append(data_cols[h])
 			self.stellar_param.append([0.]*self.nb_timesteps)
 	
-		stellar_param_evol_num=len(table_p.data_cols)-1 #-age
+		stellar_param_evol_num=len(data_cols)
 		dts= self.history.timesteps		
 		stellar_param_evol=[]
+		stellar_param_evol_lifetimes=[]
 		#loop over all stars
-		for h in range(len(m_stars_grid)):
-        		ages=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity='Age')
+		for hh in range(len(m_stars_grid)):
+			if hh==len(m_stars_grid)-1:
+				age_before=0.
+			else:
+				age_before=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh+1],quantity='Age')[-1]
+			if hh==0:
+				age_after=1e99
+			else:
+				age_after=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh-1],quantity='Age')[-1]
+        		ages=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh],quantity='Age')
+			#print 'zgridpoint',Z_gridpoint
 			#get the parameter from tables
 			stellar_param_table_evol=[]
 			stellar_param_evol1=[]
-			for k in range(1,len(table_p.data_cols)):
-				stellar_param_table_evol.append(table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[h],quantity=table_p.data_cols[k]))
+			for k in range(len(data_cols)):
+				#print 'quantity ',k,self.Z_gridpoint,m_stars_grid[hh],data_cols[k]
+				tdum=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh],quantity=data_cols[k])
+				#print tdum
+				stellar_param_table_evol.append(tdum)
 				stellar_param_evol1.append([0.]*len(dts))
-
+			if 'Mdot_wind' in data_cols and 'Ekindot_wind' in data_cols:
+				#for some reason entry 3 and 4 are switched despite me taking correct quantity, so I switch back
+				stellar_param_table_evol1=stellar_param_table_evol[:]
+				stellar_param_table_evol[3]=stellar_param_table_evol1[4]
+				stellar_param_table_evol[4]=stellar_param_table_evol1[3]			
+			#print 'm star: ',m_stars_grid[hh],stellar_param_table_evol[3]
 			#fill the time step bins with values
 			age_sim_last=0.
 			age_sim=0.
 			ages=[0.]+list(ages)
+			scaled_dts=[]
+			age_sim_save=[]
 			for k in range(len(dts)):
 				# for timestep loop over table time entries, are they relevant for time step bin? 
 				# during which fraction frac of the time step bin are they relevant?
 				# create mean value for each time step bin by taking account the fractions
 				age_sim = age_sim + dts[k]
+				age_sim_save.append(age_sim)
                 	        for t in range(1,len(ages)):
 					#to prevent same time entries to add up; stop then
 					if ages[t] == ages[t-1]:
@@ -3589,23 +3656,97 @@ class chem_evol(object):
 					elif ages[t-1]<=age_sim_last and ages[t]<=age_sim:
 						frac = (ages[t] - age_sim_last)/dts[k]
 						for p in range(stellar_param_evol_num):
-							stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac		
-					elif ages[t-1]>=age_sim_last and ages[t]>age_sim:
+							stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac #* age_scale_f		
+					elif ages[t-1]>=age_sim_last and ages[t]>=age_sim:
 						frac = (age_sim - ages[t-1])/dts[k]	
 	                	        	for p in range(stellar_param_evol_num):
-                        	                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac
+                        	                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac #* age_scale_f
+					elif ages[t-1]<=age_sim_last and ages[t]>=age_sim:
+						frac = 1.
+                                                for p in range(stellar_param_evol_num):
+                                                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac #* age_scale_f						
 					else:
 						frac = (ages[t] - ages[t-1])/dts[k]
                         	                for p in range(stellar_param_evol_num):
-                        	                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac
+                        	                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac #* age_scale_f
 					if frac<0:
 						print 'error frac!!!, t: ',t
 				age_sim_last=age_sim
-			stellar_param_evol.append(stellar_param_evol1)
-	
 
+			stellar_param_evol11=[]
+			#age_star=ages[-1]
+			for k in range(len(dts)):
+				stellar_param_evol11.append([])
+				for h in range(len(data_cols)):
+					stellar_param_evol11[-1].append([0.]*self.nb_timesteps)
+			
+			#for each timestep get scaling relation
+			# in principle one need only these scaling for certain time range which we don't know yet..
+			#hence we compute for all timesteps... 
+			#plt.figure(str(m_stars_grid[hh]))
+			#plt.plot(age_sim_save[:],stellar_param_evol1[4],marker='x',markevery=1)
+			for u in range(len(dts)):
+			
+				#we need values only for certain lifetime range
+				if age_sim_save[u]<age_before or age_sim_save[u]>age_after:
+					continue	
+				
+				#scale facgtor for time steps
+				age_scale_f=age_sim_save[u]/ages[-1]
+				scaled_dts= np.array(dts)*age_scale_f
+				#print 'age scalf ',u,age_scale_f
+				#age for scaled timesteps
+				age_sim1=[0.]
+				adum=0.
+				for t in range(len(scaled_dts)):
+					adum = adum + scaled_dts[t]
+					age_sim1.append(adum)
+		
+                                age_sim=0.
+                                age_sim_last=0.
+				#go over available time steps to fill 	
+				for k in range(len(dts)):
+				
+					age_sim = age_sim + dts[k]
+					#for each age find which suites the best in intervall given by time step
+					for t in range(1,len(age_sim1)):
+	                	 	        if age_sim1[t]<age_sim_last:
+							continue
+						elif age_sim1[t-1]>age_sim:
+							continue
+						elif age_sim1[t-1]<=age_sim_last and age_sim1[t]<=age_sim:
+							frac = (age_sim1[t] - age_sim_last)/dts[k]
+							for p in range(stellar_param_evol_num):
+								stellar_param_evol11[u][p][k] += stellar_param_evol1[p][t-1] * frac
+						elif age_sim1[t-1]>=age_sim_last and age_sim1[t]>=age_sim:
+							frac = (age_sim - age_sim1[t-1])/dts[k]	
+	                		        	for p in range(stellar_param_evol_num):
+                        		                        stellar_param_evol11[u][p][k] += stellar_param_evol1[p][t-1] * frac
+                                        	elif age_sim1[t-1]<=age_sim_last and age_sim1[t]>=age_sim:
+                                                	frac = 1.
+                                                	for p in range(stellar_param_evol_num):
+                                                        	stellar_param_evol11[u][p][k] += stellar_param_evol1[p][t-1] * frac #* age_scale_f                    
+						else:
+							frac = (age_sim1[t] - age_sim1[t-1])/dts[k]
+                        		                for p in range(stellar_param_evol_num):
+                        		                        stellar_param_evol11[u][p][k] += stellar_param_evol1[p][t-1] * frac
+						#print 'frac ',frac
+						#if frac>1e4:
+						#	print 'frac 1e4',frac
+						if frac<0:
+							print ' negative frac!!!',frac,' t: ',t
+					age_sim_last=age_sim	
+						
+				#plt.plot(age_sim_save[:],stellar_param_evol11[u][4],linestyle=':')
+			stellar_param_evol.append(stellar_param_evol11) #to 11
+			#plt.yscale('log')
+			#plt.xscale('log')
+			#plt.xlim(5e6,1e10);plt.ylim(1e36,1e44) #plt.ylim(1e-14,1e-5)
+			#stellar_param_evol_lifetimes.append(ages[-1])
+	
 		self.stellar_param_evol_masses=m_stars_grid
 		self.stellar_param_evol=stellar_param_evol		
+		self.sellar_param_evol_lifetimes=stellar_param_evol_lifetimes
 
         # Return the stellar masses, yields and ejecta function at Z
         return m_stars, yields, func_total_ejecta
