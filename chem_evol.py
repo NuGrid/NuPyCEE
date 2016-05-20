@@ -3684,7 +3684,7 @@ class chem_evol(object):
 			# in principle one need only these scaling for certain time range which we don't know yet..
 			#hence we compute for all timesteps... 
 			#plt.figure(str(m_stars_grid[hh]))
-			#plt.plot(age_sim_save[:],stellar_param_evol1[3],marker='x',markevery=1)
+			#plt.plot(age_sim_save[:],stellar_param_evol1[4],marker='x',markevery=1)
 			for u in range(len(dts)):
 			
 				#we need values only for certain lifetime range
@@ -3693,7 +3693,7 @@ class chem_evol(object):
 				
 				#scale facgtor for time steps
 				age_scale_f=age_sim_save[u]/ages[-1]
-				scaled_dts= dts*age_scale_f
+				scaled_dts= np.array(dts)*age_scale_f
 				#print 'age scalf ',u,age_scale_f
 				#age for scaled timesteps
 				age_sim1=[0.]
@@ -3737,11 +3737,11 @@ class chem_evol(object):
 							print ' negative frac!!!',frac,' t: ',t
 					age_sim_last=age_sim	
 						
-				#plt.plot(age_sim_save[:],stellar_param_evol11[u][3],linestyle=':')
+				#plt.plot(age_sim_save[:],stellar_param_evol11[u][4],linestyle=':')
 			stellar_param_evol.append(stellar_param_evol11) #to 11
 			#plt.yscale('log')
 			#plt.xscale('log')
-			#plt.xlim(5e6,1e10);plt.ylim(1e36,1e46)
+			#plt.xlim(5e6,1e10);plt.ylim(1e36,1e44) #plt.ylim(1e-14,1e-5)
 			#stellar_param_evol_lifetimes.append(ages[-1])
 	
 		self.stellar_param_evol_masses=m_stars_grid
