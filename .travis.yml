@@ -3,13 +3,28 @@ language: python
 python:
   - "2.7"
 install:
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION matplotlib numpy scipy
   - pip install runipy
-  - pip install matplotlib
-  - pip install numpy
-  - pip install scipy
 script:
   - export SYGMADIR=../
   - export PYTHONPATH=$PYTHONPATH:$SYGMADIR
-  - runipy regression_test_suite/RTS_MSP_h_yield_input.ipynb
+  - runipy regression_test_suite/SYGMA_SSP_h_yield_input.ipynb
+  #- runipy regression_test_suite/RTS_custom_imf.ipynb
+  #- runipy regression_test_suite/RTS_extra_source.ipynb
+  #- runipy regression_test_suite/RTS_plot_functions.ipynb
+  #- runipy regression_test_suite/RTS_ScaledownZ.ipynb
+  #- runipy regression_test_suite/RTS_MSP_h_yield_input.ipynb
 notifications:
-  - email: false
+  slack: nugrid:wTgGR31cFsNUqfytUDZ5ZLug
+  email: false
