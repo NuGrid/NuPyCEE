@@ -26,5 +26,5 @@ script:
   - runipy regression_test_suite/RTS_MSP_h_yield_input.ipynb
 notifications:
   - email: false
-  - slack: nugrid:wTgGR31cFsNUqfytUDZ5ZLug
+  - slack: nugrid:lqB5FJmlTGSlLfHLa0JlCGaA
 
