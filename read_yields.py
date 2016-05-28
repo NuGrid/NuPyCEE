@@ -443,6 +443,35 @@ class read_nugrid_yields():
         #self.m_final=m_final
 	self.col_attrs_data=col_attrs_data
 
+
+    def set_col_attrs(self,M=0,Z=-1,quantity='',value=0):
+	'''
+		adds quantity with value to header of yield table with mass M and metallicity Z
+		Note: creates for all tables the same quantity with value 0.
+
+		if quantity is already available replace current value with new value
+
+		quantites given by col_attrs
+	'''
+
+        inp='(M='+str(float(M))+',Z='+str(float(Z))+')'
+        idx=self.table_idx[inp]
+	if quantity in self.col_attrs:
+		#quantity exists and will be overwritten
+		idxq=self.col_attrs.index(quantity)
+		self.col_attrs_data[idx][idxq]=value
+	else:
+		#create new entry
+		self.col_attrs.append(quantity)
+		#add for each table zero value
+		for k in range(len(self.col_attrs_data)):
+			if k==idx:
+				newval=value
+			else:
+				newval=0.
+			self.col_attrs_data[k].append(newval)	
+
+
     def set(self,M=0,Z=-1,specie='',value=0):
 
 	'''
