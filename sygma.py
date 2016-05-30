@@ -114,7 +114,7 @@ class sygma( chem_evol ):
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
                  ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
-                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
+                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',sn1a_energy=1e51,\
 		 ns_merger_on=True, f_binary=1.0, f_merger=0.0028335, \
                  nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
                  extra_source_on=False, \
@@ -126,7 +126,7 @@ class sygma( chem_evol ):
                  nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0.0, \
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
-                 stellar_param_on=True, \
+                 stellar_param_on=False, \
 		 stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',
 		 dt_in=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
@@ -140,7 +140,7 @@ class sygma( chem_evol ):
                  special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
                  nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
-                 sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
+                 sn1a_on=sn1a_on, sn1a_table=sn1a_table,sn1a_energy=sn1a_energy,\
 		 ns_merger_on=ns_merger_on, nsmerger_table=nsmerger_table, \
 		 f_binary=f_binary, f_merger=f_merger, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
@@ -376,7 +376,7 @@ class sygma( chem_evol ):
 
 
 
-    def plot_stellar_param(self,fig=8,quantity='Ekin_wind',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_stellar_param(self,fig=8,quantity='Ekin_wind',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,markevery=1):
 
         '''
 	
@@ -406,7 +406,7 @@ class sygma( chem_evol ):
 
 	plt.figure(fig)
 
-        plt.plot(age,quantity_evol,label=label,marker=marker,color=color,linestyle=shape)
+        plt.plot(age,quantity_evol,label=label,marker=marker,color=color,linestyle=shape,markevery=markevery)
  
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
@@ -942,8 +942,8 @@ class sygma( chem_evol ):
                                         ini_species=ini_isos
 					ini_species_frac=ini_isos_frac
 					ini_species_frac_sol=ini_isos_frac_sol
-                                        yy2=y_delay.get(M=mini,Z=Z,specie=x2)
-                                        yy1=y_delay.get(M=mini,Z=Z,specie=x1)
+                                        yy2=y_delay.get(M=mini,Z=Z,specie=y2)
+                                        yy1=y_delay.get(M=mini,Z=Z,specie=y1)
                                 else:
                                         ini_species=ini_elems
 					ini_species_frac=ini_elems_frac

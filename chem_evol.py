@@ -71,6 +71,8 @@ global_path=global_path+'/'
 import read_yields as ry
 
 
+
+
 class chem_evol(object):
 
 
@@ -166,6 +168,11 @@ class chem_evol(object):
 		'maoz' - specific power law from Maoz & Mannucci (2012)
 
         Default value : 'power_law'
+
+    sn1a_energy : float
+	Energy ejected by each SNIa event. Units in erg/s.
+
+	Default value : 1e51
 
     ns_merger_on : boolean
         True or False to include or exclude the contribution of neutron star mergers.
@@ -283,7 +290,7 @@ class chem_evol(object):
              sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
-             hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
+             hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',sn1a_energy=1e51,\
              ns_merger_on=False, f_binary=1.0, f_merger=0.0028335,\
              nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
              extra_source_on=False, \
@@ -310,6 +317,7 @@ class chem_evol(object):
 
         # Initialize the history class which keeps the simulation in memory
 	self.history = self.__history()
+	self.const = self.__const()
 
         # If we need to assume the current baryonic ratio ...
         if mgal < 0.0:
@@ -352,6 +360,7 @@ class chem_evol(object):
 	self.imf_type = imf_type
 	self.alphaimf = alphaimf
 	self.sn1a_on = sn1a_on
+	self.sn1a_energy=sn1a_energy
         self.ns_merger_on = ns_merger_on
 	self.f_binary = f_binary
 	self.f_merger = f_merger
@@ -1945,25 +1954,36 @@ class chem_evol(object):
 	#Add other stellar input, only for Z>0 because of different input grid.
 	if self.Z_gridpoint>0. and self.stellar_param_on:
 		q=0
+		qq=0
 		mass_scale_f=0.
 		for p in range(len(self.stellar_param_attrs)):
 			attr=self.stellar_param_attrs[p]
-			#Apply quantities for stars in time interval i/j, apply their contribution over their whole lifetime (table)
-			#I need m_tot_ejecta , current time tt at index j, lifetime of star stellar_param_evol_lifetimes[idx]
+			#Handle SNIa energy in __sn1a_contribution
+			if attr == 'SNIa energy':
+				continue
 			idx=list(self.stellar_param_evol_masses).index(mstars[w])
-			'''
-			if 'Ekindot_wind' in self.stellar_param_attrs and 'Mdot_wind' in self.stellar_param_attrs:
-				if 'Mdot_wind' == attr:	 
-					#scale to total ejecta: total ejecta summed from each time bin / total ejecta from fit
-					mass_scale_f=sum(np.array(self.stellar_param_evol[idx][j-1][q]) * np.array(self.history.timesteps)) / m_tot_ejecta
-					self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
-				if 'Ekindot_wind' == attr:
-					self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
-					
+
+			#to process yield table parameter (1 val for 1 star)
+			if attr in self.stellar_param_attrs_y:
+				# rate of quantity
+				self.stellar_param[p][j] = self.stellar_param[p][j] + self.stellar_param_y[idx][qq]*number_stars/(self.history.timesteps[j]*self.const.syr) 
+				qq=qq+1
 			else:
-			'''
-			self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars * np.array(self.stellar_param_evol[idx][j-1][q])
-			q=q+1
+				#Apply quantities for stars in time interval i/j, apply their contribution over their whole lifetime (table)
+				#I need m_tot_ejecta , current time tt at index j, lifetime of star stellar_param_evol_lifetimes[idx]
+				'''
+				if 'Ekindot_wind' in self.stellar_param_attrs and 'Mdot_wind' in self.stellar_param_attrs:
+					if 'Mdot_wind' == attr:	 
+						#scale to total ejecta: total ejecta summed from each time bin / total ejecta from fit
+						mass_scale_f=sum(np.array(self.stellar_param_evol[idx][j-1][q]) * np.array(self.history.timesteps)) / m_tot_ejecta
+						self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
+					if 'Ekindot_wind' == attr:
+						self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
+						
+				else:
+				'''
+				self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars * np.array(self.stellar_param_evol[idx][j-1][q])
+				q=q+1
 
         # Exit loop if no more ejecta to be distributed 
         if tt >= lifetimemax:
@@ -2080,6 +2100,11 @@ class chem_evol(object):
 
             # Cumulate the number of SNe Ia
             self.sn1a_numbers[j] += n1a
+
+	    # add SNIa energy
+	    if self.sn1a_on:	
+		idx=self.stellar_param_attrs.index('SNIa energy')
+                self.stellar_param[idx][j] = self.stellar_param[idx][j] + n1a  * self.sn1a_energy/(self.history.timesteps[j]*self.const.syr)
 
             # Output information
             if sn1a_output == 0 :
@@ -3584,7 +3609,26 @@ class chem_evol(object):
 
 		#parameter hold the evolution and filled in the step where yields are applied
 		table_p=self.table_param #to be better readable
+		table_y=self.ytables
 
+		stellar_param_y=[]
+		#ytables.col_attrs
+		self.stellar_param_attrs_y=[]
+		for hh in range(len(m_stars_grid)):
+			stellar_param_y.append([])
+			for k in range(len(table_y.col_attrs)):
+				if not table_y.col_attrs[k] in ['Table (M,Z)', 'Lifetime', 'Mfinal']:
+					stellar_param_y[-1].append(table_y.get(Z=self.Z_gridpoint,M=m_stars_grid[hh],quantity=table_y.col_attrs[k]))
+					
+		for k in range(len(table_y.col_attrs)):
+			if not table_y.col_attrs[k] in ['Table (M,Z)', 'Lifetime', 'Mfinal']:		
+				self.stellar_param_attrs_y.append(table_y.col_attrs[k])	
+
+		self.stellar_param_y=stellar_param_y
+		print 'stellar_param_attrs_y',self.stellar_param_attrs_y
+		print 'stellar_param_y',self.stellar_param_y 
+
+		
 		data_cols1=table_p.data_cols
 		#to make sure that Mdot comes before Ekindot, if available (for factors)
 		if 'Mdot_wind' in data_cols1 and 'Ekindot_wind' in data_cols1:
@@ -3599,8 +3643,17 @@ class chem_evol(object):
 		#print 'data_cols',data_cols
 		for h in range(len(data_cols)):
 			self.stellar_param_attrs.append(data_cols[h])
+
+                for h in range(len(data_cols)+len(self.stellar_param_attrs_y)):
 			self.stellar_param.append([0.]*self.nb_timesteps)
+
+		#add parameter from table file
+		self.stellar_param_attrs += self.stellar_param_attrs_y
 	
+		if self.sn1a_on:
+			self.stellar_param_attrs += ['SNIa energy']
+			self.stellar_param.append([0.]*self.nb_timesteps)
+
 		stellar_param_evol_num=len(data_cols)
 		dts= self.history.timesteps		
 		stellar_param_evol=[]
@@ -4753,3 +4806,27 @@ class chem_evol(object):
 	    self.nsm_numbers = []
             self.sn2_numbers = []
 	    self.t_m_bdys = []
+
+
+    class __const():
+
+	'''
+	Holds the physical constants. 
+	Please add further constants if required.
+	
+	'''
+
+        #############################
+        #        Constructor        #
+        #############################
+        def __init__(self):
+
+            '''
+            Initiate variables tracking.history
+
+            '''
+
+
+	    self.c = 2.998e+10  #speed of light, cm/s
+	    self.syr = 31536000 #seconds in a year		
+
