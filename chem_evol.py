@@ -170,7 +170,7 @@ class chem_evol(object):
         Default value : 'power_law'
 
     sn1a_energy : float
-	Energy ejected by each SNIa event. Units in erg/s.
+	Energy ejected by single SNIa event. Units in erg.
 
 	Default value : 1e51
 
@@ -2102,7 +2102,7 @@ class chem_evol(object):
             self.sn1a_numbers[j] += n1a
 
 	    # add SNIa energy
-	    if self.sn1a_on:	
+	    if self.sn1a_on and self.stellar_param_on:	
 		idx=self.stellar_param_attrs.index('SNIa energy')
                 self.stellar_param[idx][j] = self.stellar_param[idx][j] + n1a  * self.sn1a_energy/(self.history.timesteps[j]*self.const.syr)
 
