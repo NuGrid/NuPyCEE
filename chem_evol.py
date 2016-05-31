@@ -3625,8 +3625,8 @@ class chem_evol(object):
 				self.stellar_param_attrs_y.append(table_y.col_attrs[k])	
 
 		self.stellar_param_y=stellar_param_y
-		print 'stellar_param_attrs_y',self.stellar_param_attrs_y
-		print 'stellar_param_y',self.stellar_param_y 
+		#print 'stellar_param_attrs_y',self.stellar_param_attrs_y
+		#print 'stellar_param_y',self.stellar_param_y 
 
 		
 		data_cols1=table_p.data_cols
@@ -4827,6 +4827,14 @@ class chem_evol(object):
             '''
 
 
-	    self.c = 2.998e+10  #speed of light, cm/s
 	    self.syr = 31536000 #seconds in a year		
+            self.c= 2.99792458e10 #speed of light in vacuum (cm s^-1)
+            self.pi = 3.1415926535897932384626433832795029e0 
+            self.planck_h  = 6.62606896e-27 # Planck's constant (erg s)
+            self.ev2erg = 1.602176487e-12 # electron volt (erg)
+            self.rsol = 6.9598e10 # solar radius (cm)
+            self.lsol = 3.8418e33 #erg/s
+            self.msol =  1.9892e33  # solar mass (g)
+            self.ggrav = 6.67428e-8 #(g^-1 cm^3 s^-2)
+
 

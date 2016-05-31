@@ -553,7 +553,6 @@ class read_nugrid_yields():
 		mass_frac_ini=data[idx_x0]
 		idx_specie=self.data_cols.index(self.data_cols[0])
 		species=data[idx_specie]
-
 		#over col attrs, first is MZ pair which will be skipped, see special_header
 		attr_lines=[]
 		for h in range(1,len(self.col_attrs)):
