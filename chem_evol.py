@@ -1962,7 +1962,6 @@ class chem_evol(object):
 			if attr == 'SNIa energy':
 				continue
 			idx=list(self.stellar_param_evol_masses).index(mstars[w])
-
 			#to process yield table parameter (1 val for 1 star)
 			if attr in self.stellar_param_attrs_y:
 				# rate of quantity
@@ -1972,13 +1971,14 @@ class chem_evol(object):
 				#Apply quantities for stars in time interval i/j, apply their contribution over their whole lifetime (table)
 				#I need m_tot_ejecta , current time tt at index j, lifetime of star stellar_param_evol_lifetimes[idx]
 				'''
-				if 'Ekindot_wind' in self.stellar_param_attrs and 'Mdot_wind' in self.stellar_param_attrs:
+				#if 'Ekindot_wind' in self.stellar_param_attrs and 'Mdot_wind' in self.stellar_param_attrs:
+				if True:
 					if 'Mdot_wind' == attr:	 
 						#scale to total ejecta: total ejecta summed from each time bin / total ejecta from fit
 						mass_scale_f=sum(np.array(self.stellar_param_evol[idx][j-1][q]) * np.array(self.history.timesteps)) / m_tot_ejecta
 						self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
-					if 'Ekindot_wind' == attr:
-						self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
+					#if 'Ekindot_wind' == attr:
+					#	self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
 						
 				else:
 				'''

@@ -398,7 +398,7 @@ class sygma( chem_evol ):
 	'''
 
 	if not quantity in self.stellar_param_attrs:
-		print 'Quantity not provided in yield table'
+		print 'Quantity ',quantity,' not provided in yield table'
 		return
 	idx=self.stellar_param_attrs.index(quantity)
 	quantity_evol=self.stellar_param[idx]
@@ -482,7 +482,7 @@ class sygma( chem_evol ):
 
 
 
-    def plot_table_param(self,fig=8,xaxis='mini',quantity='Lifetime',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_table_param(self,fig=8,ax='',xaxis='mini',quantity='Lifetime',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
 	Plots the yield table quantities such as lifetimes versus initial mass as given in yield input tables.
@@ -536,8 +536,9 @@ class sygma( chem_evol ):
         for k in range(len(masses)):
                 param.append(y_table.get(Z=iniZ, M=masses[k], quantity=quantity))
 
-
-        plt.plot(x,param,label=label,marker=marker,color=color,linestyle=shape)
+	if type(ax)==str:
+		ax=plt.gca()
+        ax.plot(x,param,label=label,marker=marker,color=color,linestyle=shape)
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         plt.ylabel(quantity)
