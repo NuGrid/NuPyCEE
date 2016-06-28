@@ -408,7 +408,7 @@ class stellab():
     ##############################################
     #                Plot Spectro                #
     ##############################################
-    def plot_spectro(self, galaxy='', xaxis='[Fe/H]', yaxis='[Mg/Fe]', \
+    def plot_spectro(self,fig=-1, galaxy='', xaxis='[Fe/H]', yaxis='[Mg/Fe]', \
                      fsize=[10,4.5], fontsize=14, rspace=0.6, bspace=0.15,\
                      labelsize=15, legend_fontsize=14, ms=6.0, norm='', obs='',\
                      overplot=False, return_xy=False, show_err=False, \
@@ -433,7 +433,10 @@ class stellab():
 
         # Show the frame of the plot
         if not overplot and not return_xy and not sub_plot:
-            plt.figure(figsize=(fsize[0],fsize[1]))
+	    if fig>=0:
+            	plt.figure(fig,figsize=(fsize[0],fsize[1]))
+	    else:
+		plt.figure(fig,figsize=(fsize[0],fsize[1]))		
 
         # If data need to be re-normalized ...
         re_norm = False
