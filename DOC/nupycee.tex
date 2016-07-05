@@ -71,12 +71,11 @@ into your local directory via
 git clone  https://github.com/NuGrid/NuPyCEE.git .
 \end{verbatim}
 
-Install ipython with numpy and matplotlib and
-nugridpy via
+All python dependencies can be installed via 
 
-\begin{verbatim}
-pip install nugridpy
-\end{verbatim}
+install\textunderscore dependencies.sh 
+
+available in the root directory of NUPYCEE.
 
 Start ipython in the NUPYCEE directory with
 
@@ -128,24 +127,19 @@ st1.plot_spectro(xaxis='[Fe/H]', yaxis='[O/Fe]')
 
 \subsection{Preparing the environment}%Tutorial and Walkthough}
 
+
+All python dependencies can be installed via 
+
+install\textunderscore dependencies.sh 
+
+available in the root directory of NUPYCEE
+
 To take advantage of the interactive ipython environment 
 SYGMA and OMEGA are both launched after starting
 ipython with
 
-
 \begin{verbatim}
 ipython -pylab -p numpy
-\end{verbatim}
-
-where the modules numpy and matploblib have to be installed.
-Also you might need to install other python modules (e.g., h5py).
-
-A necessary dependence is NuGrid's pylib toolbox nugridpy which
-contains a number of python scripts.  It can simply be installed via
-pip:
-
-\begin{verbatim}
-pip install nugridpy
 \end{verbatim}
 
 
