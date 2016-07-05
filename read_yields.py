@@ -719,12 +719,7 @@ class read_nugrid_yields():
 
 	##Scale down
 
-	import utils as u
 	import re
-	#table=ry.read_nugrid_yields('yield_tables/prodfac_iso_table.txt')
-	#table_yields=ry.read_nugrid_yields('yield_tables/isotope_yield_table.txt')
-	#iniabu=u.iniabu('yield_tables/iniabu/iniab1.0E-05GN93_alpha.ppn')
-	#iniabu_scale=u.iniabu('yield_tables/iniabu/iniab1.0E-04GN93_alpha.ppn')
 	
 	iniiso=[]
 	iniabu_massfrac=[]
@@ -732,7 +727,6 @@ class read_nugrid_yields():
 		iso=iniabu.habu.keys()[k]
 		iniiso.append(re.split('(\d+)',iso)[0].strip().capitalize()+'-'+re.split('(\d+)',iso)[1])
 		iniabu_massfrac.append(iniabu.habu.values()[k])
-	#iniabu_scale=u.iniabu('yield_tables/iniabu/iniab1.0E-04GN93_alpha.ppn')
 	iniiso_scale=[]
 	iniabu_scale_massfrac=[]
 	for k in range(len(iniabu_scale.habu)):
