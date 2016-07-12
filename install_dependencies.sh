@@ -40,3 +40,7 @@ pip install h5py
 #If 'import mpl_toolkits.mplot3d' does not work 
 #you need to install it on your own.
 
+#To start the interactive ipython session:
+
+ipython --pylab --profile=numpy
+
