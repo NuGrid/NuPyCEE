@@ -376,7 +376,7 @@ class sygma( chem_evol ):
 
 
 
-    def plot_stellar_param(self,fig=8,quantity='Ekin_wind',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,markevery=1):
+    def plot_stellar_param(self,fig=8,quantity='Ekindot_wind',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,markevery=1):
 
         '''
 	
@@ -397,6 +397,11 @@ class sygma( chem_evol ):
 
 	'''
 
+	#in case stellar parameter are not used.
+	if self.stellar_param_on==False:
+		print 'Set stellar_param_on to true to use this function.'
+		return
+	
 	if not quantity in self.stellar_param_attrs:
 		print 'Quantity ',quantity,' not provided in yield table'
 		return
@@ -410,8 +415,8 @@ class sygma( chem_evol ):
  
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-        plt.ylabel(quantity)
-	plt.xlabel('Lifetime/yrs')
+        plt.ylabel('log-scaled '+quantity)
+	plt.xlabel('log-scaled age [yr]')
 	plt.yscale('log')
 	plt.xscale('log')
 
@@ -476,8 +481,8 @@ class sygma( chem_evol ):
 	plt.plot(x,Z_evol,label=label)
 
 	plt.xscale('log')
-	plt.xlabel('Age [yrs]')
-	plt.ylabel('Metal fraction Z')
+	plt.xlabel('age [yr]')
+	plt.ylabel('metal fraction Z')
         #self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
 
@@ -543,9 +548,9 @@ class sygma( chem_evol ):
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         plt.ylabel(quantity)
 	if xaxis=='mini':
-        	plt.xlabel('Initial mass/Msun')
+        	plt.xlabel('initial mass [Msun]')
 	elif xaxis=='time':
-		plt.xlabel('Lifetime/yrs')
+		plt.xlabel('lifetime [yr]')
 	plt.yscale('log')
 
 
@@ -592,8 +597,8 @@ class sygma( chem_evol ):
 	plt.plot(masses,mfinals,label=label,marker=marker,color=color,linestyle=shape)
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	plt.ylabel('Remnant mass/Msun')
-	plt.xlabel('Initial mass/Msun')
+	plt.ylabel('remnant mass [Msun]')
+	plt.xlabel('initial mass [Msun]')
 	plt.minorticks_on()
 
     def plot_yield_mtot(self,fig=8,plot_imf_mass_ranges=True,fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
@@ -628,8 +633,8 @@ class sygma( chem_evol ):
 	    ms.append(m)
 	plt.plot(ms,x,linestyle=':',label='fit')
 	plt.plot(mall,yall,marker='x',color='k',linestyle='',label='input yield grid')
-	plt.xlabel('Initial mass/Msun')
-	plt.ylabel('Total yields/Msun')
+	plt.xlabel('initial mass [Msun]')
+	plt.ylabel('total yields [Msun]')
 	plt.legend()
 
 	if plot_imf_mass_ranges==True:
@@ -677,7 +682,7 @@ class sygma( chem_evol ):
                 y=[]
                 for mini in masses:
                                 x.append(mini)
-                                plt.xlabel('Initial mass/Msun')
+                                plt.xlabel('initial mass [Msun]')
                                 headerx='Mini/Msun'
 
                                 if netyields==True:
@@ -686,8 +691,8 @@ class sygma( chem_evol ):
                                         y.append(y_delay.get(M=mini,Z=Z,specie=yaxis) + miniadd)
                                 else:
                                         y.append(y_delay.get(M=mini,Z=Z,specie=yaxis))
-                                plt.ylabel('Yield/Msun')
-                                headery='Yields/Msun'
+                                plt.ylabel('yield [Msun]')
+                                headery='Yield [Msun]'
 
                 if len(label)==0:
                         plt.plot(x,y,label='Z='+str(Z),marker=marker,color=color,linestyle=shape)
@@ -751,7 +756,7 @@ class sygma( chem_evol ):
 	plt.figure(fig)
 	plt.plot(x,y,marker='o')
 	plt.ylabel(species)
-	plt.xlabel('Initial mass [Msun]')
+	plt.xlabel('initial mass [Msun]')
 	#plt.xscale('log')
 
     def plot_table_yield(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab='',netyields_iniabu=''):
@@ -930,7 +935,7 @@ class sygma( chem_evol ):
 				headerx=xaxis
 			elif 'mini' == xaxis:
 				x.append(mini)
-				plt.xlabel('Initial mass/Msun')
+				plt.xlabel('initial mass [Msun]')
 				headerx='Mini/Msun'
 			else:
 				return 'wrong input'	
@@ -987,7 +992,7 @@ class sygma( chem_evol ):
 					y.append(y_delay.get(M=mini,Z=Z,specie=yaxis) + miniadd)
 				else:
 					y.append(y_delay.get(M=mini,Z=Z,specie=yaxis))
-				plt.ylabel('Yield/Msun')
+				plt.ylabel('yield [Msun]')
 				headery='Yields/Msun'
 			#if idx==4:
 			#	ax1.plot([],[],marker=marker[idx1],color='k',linestyle='None',label='M='+str(mini))
@@ -1080,9 +1085,9 @@ class sygma( chem_evol ):
         if not return_x_y:
            plt.figure(fig, figsize=(fsize[0],fsize[1]))
            plt.xscale('log')
-           plt.xlabel('log-scaled age [yrs]')
+           plt.xlabel('age [yr]')
            if norm == False:
-               plt.ylabel('Yield ratio')
+               plt.ylabel('yield ratio')
 	       if logy==True:
                    plt.yscale('log')
            else:
@@ -1098,7 +1103,7 @@ class sygma( chem_evol ):
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 	    plt.xlim(self.history.dt,self.history.tend)	
-	    #self.__save_data(header=['Age[yrs]',specie],data=[x,y])
+	    #self.__save_data(header=['Age[yr]',specie],data=[x,y])
 
        
 
@@ -1107,7 +1112,7 @@ class sygma( chem_evol ):
     
         '''
 	mass evolution (in Msun) of an element or isotope vs time.
-	
+	Note: Used in WENDI.
 
         Parameters
         ----------
@@ -1204,12 +1209,12 @@ class sygma( chem_evol ):
         if not return_x_y:
            plt.figure(fig, figsize=(fsize[0],fsize[1]))
            plt.xscale('log')
-           plt.xlabel('log-scaled age [yrs]')
+           plt.xlabel('log-scaled age [yr]')
            if norm == 'no':
-               plt.ylabel('yields [Msun]')
+               plt.ylabel('log-scaled integrated ejecta [Msun]')
                plt.yscale('log')
            else:
-               plt.ylabel('(IMF-weighted) fraction of ejecta')
+               plt.ylabel('log-scaled integrated fraction of ejecta')
         self.y=y
 
         #If x and y need to be returned ...
@@ -1223,7 +1228,7 @@ class sygma( chem_evol ):
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 	    plt.xlim(self.history.dt,self.history.tend)	
 	    #return x,y
-	    self.__save_data(header=['Age[yrs]',specie],data=[x,y])
+	    self.__save_data(header=['Age[yr]',specie],data=[x,y])
 
     def __plot_mass_multi(self,fig=1,specie=['C'],ylims=[],source='all',norm=False,label=[],shape=['-'],marker=['o'],color=['r'],markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
@@ -1288,10 +1293,10 @@ class sygma( chem_evol ):
 		#ax_plots[k].
 		plt.xscale('log')
 		#ax_plots[k].set_yscale('log')
-		plt.xlabel('Log-scaled age [yrs]')
+		plt.xlabel('log-scaled age [yr]')
 		#ax_plots[k].locator_params(axis = 'y', nbins = 2)
 		#if norm == False:
-		    #ax_plots[k].set_ylabel('Log-scaled yields [Msun]')
+		    #ax_plots[k].set_ylabel('yield [Msun]')
 		    #ax_plots[k].set_yscale('log')
 		#else:
 		#    ax_plots[k].set_ylabel('(IMF-weighted) fraction of ejecta')
@@ -1305,7 +1310,7 @@ class sygma( chem_evol ):
 		plt.xlim(self.history.dt,self.history.tend)
 	if norm == False:
 		fig=plt.gcf()
-		fig.text(0.002, 0.5, 'Log (Yields [Msun])', ha='center', va='center', rotation='vertical')
+		fig.text(0.002, 0.5, 'Log (Yield [Msun])', ha='center', va='center', rotation='vertical')
 	else:
 		fig=plt.gcf()
 		fig.text(0.01, 0.5, '(IMF-weighted) fraction of ejecta', ha='center', va='center', rotation='vertical')
@@ -1395,12 +1400,12 @@ class sygma( chem_evol ):
 	           x.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
 	       if norm=='ini':
 	           x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
-            plt.xlabel('log-scaled X('+xaxis+')')
+            plt.xlabel('X('+xaxis+')')
             plt.xscale('log')
         elif 'age' == xaxis:
             x=self.history.age#[1:]
             plt.xscale('log')
-            plt.xlabel('log-scaled Age [yrs]')
+            plt.xlabel('age [yr]')
         elif 'Z' == xaxis:
             x=self.history.metallicity#[1:]
             plt.xlabel('ISM metallicity')
@@ -1423,7 +1428,7 @@ class sygma( chem_evol ):
                     x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
                     print yields_evol[0][iso_idx]
 
-            plt.xlabel('log-scaled X('+xaxis+')')
+            plt.xlabel('X('+xaxis+')')
             plt.xscale('log')
 
 
@@ -1502,6 +1507,7 @@ class sygma( chem_evol ):
     def plot_spectro(self,fig=3,xaxis='age',yaxis='[Fe/H]',source='all',label='',shape='-',marker='o',color='k',markevery=100,show_data=False,show_sculptor=False,show_legend=True,return_x_y=False,sub_plot=False,linewidth=3,sub=1,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab=''):
         '''
         Plots elements in spectroscopic notation.
+	Note: Used in WENDI.
 
         Parameters
         ----------
@@ -1591,7 +1597,7 @@ class sygma( chem_evol ):
             #Operations associated with plot visual aspects
             if not return_x_y and not sub_plot:
                 plt.xscale('log')
-                plt.xlabel('Log-scaled age [yrs]')
+                plt.xlabel('log-scaled age [yr]')
 
             self.x=x
         else:
@@ -1832,7 +1838,7 @@ class sygma( chem_evol ):
             #if x_axis=='Z':
             #       x.append(line_1[0])
 
-        plt.xlabel("Mass number A")
+        plt.xlabel("mass number A")
             #plt.plot(x,y,marker=marker_type[0],markersize=10,linestyle='None',label=self.label)
         ax.set_yscale('log')
         if len(y_range)>0:
@@ -1849,7 +1855,8 @@ class sygma( chem_evol ):
         '''
 	Plots either gas or star mass as fraction of total mass
 	vs time.
-        
+    	Note: Used in WENDI.
+    
         Parameters
         ----------
 
@@ -1923,7 +1930,7 @@ class sygma( chem_evol ):
 	if 'age' == xaxis:
 	    x_all=self.history.age#[1:]
 	    plt.xscale('log')
-	    plt.xlabel('log-scaled '+xaxis+' [yrs]')
+	    plt.xlabel(xaxis+' [yr]')
 	    #self.x=x
 
 	gas_mass=self.history.gas_mass
@@ -1987,14 +1994,14 @@ class sygma( chem_evol ):
                 plt.title('Star mass as a fraction of total star mass')
         else:
             if mass=='gas':
-                plt.ylabel('ISM gas mass [Msun]')
+                plt.ylabel('log-scaled integrated ejected mass [Msun]')
             else:
-                plt.ylabel('mass locked in stars [Msun]')
+                plt.ylabel('log-scaled integrated mass locked in stars [Msun]')
 
             if mass=='gas':
-                plt.ylabel('ISM gas mass [Msun]')
+                plt.ylabel('log-scaled integrated ejected mass [Msun]')
             else:
-                plt.ylabel('Mass locked in stars [Msun]')
+                plt.ylabel('log-scaled integrated mass locked in stars [Msun]')
 
         if log==True:
             plt.yscale('log')
@@ -2058,12 +2065,12 @@ class sygma( chem_evol ):
 		return 0
 		age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
 		age=[0]+age
-		plt.xlabel('Redshift z')
+		plt.xlabel('redshift z')
 		timesteps=self.history.timesteps[idx-1:]
 		sn2numbers=sn2numbers[idx:]
 		sn1anumbers=sn1anumbers[idx:]
 	else:
-		plt.xlabel('Log-scaled age [yrs]')
+		plt.xlabel('age [yr]')
 		plt.xscale('log')
         if rate and not fraction:
 	    if xaxis=='redshift':
@@ -2143,7 +2150,7 @@ class sygma( chem_evol ):
 		plt.plot(age1,ratio)
 		plt.yscale('log')
 		plt.xscale('log')
-		plt.ylabel('Number of SNIa going off per WD born')
+		plt.ylabel('number of SNIa going off per WD born')
 		label='SNIafractionperWD';label='sn1a '+label
 		x=age1
 		y=ratio
@@ -2227,7 +2234,7 @@ class sygma( chem_evol ):
 		age=self.history.age
 		#age=[0.1]+self.history.age[1:-1]
 		sfr=self.history.sfr
-		plt.xlabel('Log-scaled age [yrs]')
+		plt.xlabel('age [yr]')
 		#plt.xscale('log')
 		mean_age=[]
 		color='r'
@@ -2257,9 +2264,9 @@ class sygma( chem_evol ):
                         label='Massive'
 		age=self.history.age[:-1]
 		print len(age),len(sfr)
-		plt.xlabel('Age [yrs]')
+		plt.xlabel('age [yr]')
 		plt.plot(age,sfr,label=label,marker=marker,linestyle=shape)
-		plt.ylabel('Fraction of current gas mass into stars')	
+		plt.ylabel('fraction of current gas mass into stars')	
         	self.__save_data(header=['age','SFR'],data=[age,sfr])
 
         #Plot the mass converted into stars
@@ -2275,8 +2282,8 @@ class sygma( chem_evol ):
 			label='Massive'
 		age=self.history.age[1:]
 		plt.plot(age,masslocked,marker=marker,linestyle=shape,label=label)
-		plt.xlabel('Age [yrs]')
-		plt.ylabel('ISM Mass transformed into stars')
+		plt.xlabel('age [yr]')
+		plt.ylabel('ISM mass transformed into stars')
 		plt.xscale('log');plt.yscale('log')
 		plt.legend()
 
@@ -2295,6 +2302,7 @@ class sygma( chem_evol ):
 	is represented by the same yields, yields from certain stellar simulation.
 	Be aware that a larger mass range means also a larger amount
 	of yield for that range.
+	Note: Used in WENDI.
 
         Parameters
         ----------
@@ -2370,10 +2378,10 @@ class sygma( chem_evol ):
         #ax1.errorbar(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label,xerr=0.05)
 	ax1=plt.gca()
         #self.__fig_standard(ax=ax1,fontsize=18,labelsize=18)
-	if log==True:		
-        	ax1.set_xlabel('log-scaled initial mass [Msun]')
-	else:
-		ax1.set_xlabel('initial mass [Msun]')
+	#if log==True:		
+        #	ax1.set_xlabel('log-scaled initial mass [Msun]')
+	#else:
+	ax1.set_xlabel('initial mass [Msun]')
 	if prodfac==False:
 		ax1.set_ylabel('IMF-weighted yields [Msun]')
 	else:
@@ -2399,7 +2407,7 @@ class sygma( chem_evol ):
         #ax.xaxis.set_tick_params(width=2)
         #ax.yaxis.set_tick_params(width=2)
         ax1.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
-	self.__save_data(header=['Mean mass','mass bdys (bins)','Yields'],data=[mean_val,bin_bdys,y])
+	self.__save_data(header=['Mean mass','mass bdys (bins)','Yield'],data=[mean_val,bin_bdys,y])
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
 
@@ -2768,7 +2776,7 @@ class sygma( chem_evol ):
            plt.ylabel("$\delta$($^{"+str(int(y1_at_nb))+"}$"+y1_elem+"/$^{"+\
                            str(int(y2_at_nb))+"}$"+y2_elem+")")
            if xaxis == 'age':
-               plt.xlabel('Age [yr]')
+               plt.xlabel('age [yr]')
            elif xaxis_ratio:
                plt.xlabel("$\delta$($^{"+str(int(x1_at_nb))+"}$"+x1_elem+"/$^{"+\
                            str(int(x2_at_nb))+"}$"+x2_elem+")")
