@@ -1,0 +1,486 @@
+H Yields: Heger & Woosley (2010)
+H Data prepared by: christian
+H Data prepared date: 07 Feb 2015
+H Isotopes: , H1, H2, He3, He4, Li6, Li7, Be9, B10, B11, C12, C13, N14, N15, O16, O17, O18, F19, Ne20, Ne21, Ne22, Na23, Mg24, Mg25, Mg26, Al27, Si28, Si29, Si30, P31, S32, S33, S34, S36, Cl35, Cl37, Ar36, Ar38, Ar40, K39, K40, K41, Ca40, Ca42, Ca43, Ca44, Ca46, Ca48, Sc45, Ti46, Ti47, Ti48, Ti49, Ti50, V50, V51, Cr50, Cr52, Cr53, Cr54, Mn55, Fe54, Fe56, Fe57, Fe58, Co59, Ni58, Ni60, Ni61, Ni62, Ni64, Cu63, Cu65, Zn64, Zn66, Zn67, Zn68, Zn70, Ga69, Ga71, Ge70, Ge72, Ge73, Ge74, As75, Se74, Se76, Se77, Se78, Se80, Br79, Br81, Kr78, Kr80, Kr82, Kr83, Kr84, Rb85, Sr84, Sr86, Sr87, Sr88, Y89, Zr90, Zr91, Zr92, Nb93, Mo92, Mo94, Mo95, Mo96, Mo97, Ru96, Ru98, Ru99, Ru100, Ru101, Pd102, Ge76, Se82, Kr86, Rb87, Zr94, Zr96, Mo98, Mo100, Ru102, Ru104, Rh103, Pd104, Pd105, Pd106, Pd108, Pd110, Ag107, Ag109, Cd108, Cd110, Cd111, Cd112, Cd113, Cd114, Cd116, In113, In115, Sn112, Sn114, Sn115, Sn116, Sn117, Sn118, Sn119, Sn120, Sn122, Sn124, Sb121, Sb123, Te122, Te123, Te124, Te125, Te126, Te128, Te130, I127, Xe126, Xe128, Xe129, Xe130, Xe131, Xe132, Xe134, Xe136, Cs133, Ba130, Ba132, Ba134, Ba135, Ba136, Ba137, Ba138, La138, La139, Ce140, Ce142, Pr141, Nd143, Cd106, Te120, Xe124, Ce136, Ce138, Nd142, Nd144, Nd145, Nd146, Nd148, Nd150, Sm147, Sm148, Sm149, Sm150, Sm152, Sm154, Eu151, Eu153, Gd152, Gd154, Gd155, Gd156, Gd157, Gd158, Gd160, Tb159, Dy158, Dy160, Dy161, Dy162, Dy163, Dy164, Ho165, Er164, Er166, Er167, Er168, Er170, Tm169, Yb170, Yb171, Yb172, Yb173, Yb174, Yb176, Lu175, Lu176, Hf176, Hf177, Hf178, Hf179, Hf180, Ta180, Ta181, W182, W183, W184, W186, Re185, Re187, Os186, Os187, Os188, Os189, Os190, Os192, Ir191, Ir193, Pt192, Pt194, Pt195, Pt196, Pt198, Au197, Hg196, Hg198, Hg199, Hg200, Hg201, Hg202, Hg204, Tl203, Tl205, Pb204, Pb206, Pb207, Pb208, Bi209, Sm144, Dy156, Er162, Yb168, Hf174, W180, Os184, Pt190
+H Number of metallicities: 1
+H Units: Msun, year
+H Table: (M=10.0,Z=0.0)
+H Lifetime: 1.839E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=10.2,Z=0.0)
+H Lifetime: 1.812E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=10.4,Z=0.0)
+H Lifetime: 1.785E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=10.5,Z=0.0)
+H Lifetime: 1.754E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=10.6,Z=0.0)
+H Lifetime: 1.774E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=10.7,Z=0.0)
+H Lifetime: 1.718E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=10.8,Z=0.0)
+H Lifetime: 1.683E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=10.9,Z=0.0)
+H Lifetime: 1.658E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.0,Z=0.0)
+H Lifetime: 1.636E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.1,Z=0.0)
+H Lifetime: 1.614E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.2,Z=0.0)
+H Lifetime: 1.591E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.3,Z=0.0)
+H Lifetime: 1.601E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.4,Z=0.0)
+H Lifetime: 1.549E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.5,Z=0.0)
+H Lifetime: 1.533E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.6,Z=0.0)
+H Lifetime: 1.551E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.7,Z=0.0)
+H Lifetime: 1.486E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.8,Z=0.0)
+H Lifetime: 1.466E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=11.9,Z=0.0)
+H Lifetime: 1.461E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=12.0,Z=0.0)
+H Lifetime: 1.430E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=12.2,Z=0.0)
+H Lifetime: 1.415E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=12.4,Z=0.0)
+H Lifetime: 1.400E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=12.6,Z=0.0)
+H Lifetime: 1.405E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=12.8,Z=0.0)
+H Lifetime: 1.331E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=13.0,Z=0.0)
+H Lifetime: 1.303E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=13.2,Z=0.0)
+H Lifetime: 1.274E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=13.4,Z=0.0)
+H Lifetime: 1.252E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=13.6,Z=0.0)
+H Lifetime: 1.226E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=13.8,Z=0.0)
+H Lifetime: 1.199E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=14.0,Z=0.0)
+H Lifetime: 1.177E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=14.2,Z=0.0)
+H Lifetime: 1.155E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=14.4,Z=0.0)
+H Lifetime: 1.132E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=14.6,Z=0.0)
+H Lifetime: 1.109E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=14.8,Z=0.0)
+H Lifetime: 1.091E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=15.0,Z=0.0)
+H Lifetime: 1.077E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=15.2,Z=0.0)
+H Lifetime: 1.053E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=15.4,Z=0.0)
+H Lifetime: 1.052E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=15.6,Z=0.0)
+H Lifetime: 1.043E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=15.8,Z=0.0)
+H Lifetime: 1.005E+07
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=16.0,Z=0.0)
+H Lifetime: 9.919E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=16.2,Z=0.0)
+H Lifetime: 9.764E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=16.4,Z=0.0)
+H Lifetime: 9.629E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=16.6,Z=0.0)
+H Lifetime: 9.517E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=16.8,Z=0.0)
+H Lifetime: 9.370E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.0,Z=0.0)
+H Lifetime: 9.308E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.1,Z=0.0)
+H Lifetime: 9.240E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.2,Z=0.0)
+H Lifetime: 9.011E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.3,Z=0.0)
+H Lifetime: 8.935E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.4,Z=0.0)
+H Lifetime: 8.894E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.5,Z=0.0)
+H Lifetime: 8.860E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.6,Z=0.0)
+H Lifetime: 8.873E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.7,Z=0.0)
+H Lifetime: 8.708E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.8,Z=0.0)
+H Lifetime: 8.804E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=17.9,Z=0.0)
+H Lifetime: 8.624E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.0,Z=0.0)
+H Lifetime: 8.569E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.1,Z=0.0)
+H Lifetime: 8.556E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.2,Z=0.0)
+H Lifetime: 8.489E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.3,Z=0.0)
+H Lifetime: 8.622E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.4,Z=0.0)
+H Lifetime: 8.390E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.5,Z=0.0)
+H Lifetime: 8.362E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.6,Z=0.0)
+H Lifetime: 8.459E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.7,Z=0.0)
+H Lifetime: 8.399E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.8,Z=0.0)
+H Lifetime: 8.238E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=18.9,Z=0.0)
+H Lifetime: 8.191E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=19.0,Z=0.0)
+H Lifetime: 8.294E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=19.2,Z=0.0)
+H Lifetime: 8.174E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=19.4,Z=0.0)
+H Lifetime: 8.222E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=19.6,Z=0.0)
+H Lifetime: 8.027E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=19.8,Z=0.0)
+H Lifetime: 7.917E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=20.0,Z=0.0)
+H Lifetime: 7.833E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=20.5,Z=0.0)
+H Lifetime: 7.846E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=21.0,Z=0.0)
+H Lifetime: 7.945E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=21.5,Z=0.0)
+H Lifetime: 7.725E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=22.0,Z=0.0)
+H Lifetime: 7.434E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=22.5,Z=0.0)
+H Lifetime: 7.414E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=23.0,Z=0.0)
+H Lifetime: 7.185E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=23.5,Z=0.0)
+H Lifetime: 7.035E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=24.0,Z=0.0)
+H Lifetime: 6.912E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=24.5,Z=0.0)
+H Lifetime: 6.830E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=25.0,Z=0.0)
+H Lifetime: 6.649E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=25.5,Z=0.0)
+H Lifetime: 6.639E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=26.0,Z=0.0)
+H Lifetime: 6.542E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=26.5,Z=0.0)
+H Lifetime: 6.443E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=27.0,Z=0.0)
+H Lifetime: 6.346E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=27.5,Z=0.0)
+H Lifetime: 6.249E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=28.0,Z=0.0)
+H Lifetime: 6.196E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=28.5,Z=0.0)
+H Lifetime: 6.081E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=29.0,Z=0.0)
+H Lifetime: 6.026E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=29.5,Z=0.0)
+H Lifetime: 5.897E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=30.0,Z=0.0)
+H Lifetime: 5.864E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=30.5,Z=0.0)
+H Lifetime: 5.733E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=31.0,Z=0.0)
+H Lifetime: 5.721E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=31.5,Z=0.0)
+H Lifetime: 5.597E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=32.0,Z=0.0)
+H Lifetime: 5.520E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=32.5,Z=0.0)
+H Lifetime: 5.563E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=33.0,Z=0.0)
+H Lifetime: 5.431E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=33.5,Z=0.0)
+H Lifetime: 5.434E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=34.0,Z=0.0)
+H Lifetime: 5.362E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=34.5,Z=0.0)
+H Lifetime: 5.380E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=35.0,Z=0.0)
+H Lifetime: 5.204E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=36.0,Z=0.0)
+H Lifetime: 5.201E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=37.0,Z=0.0)
+H Lifetime: 5.143E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=38.0,Z=0.0)
+H Lifetime: 5.008E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=39.0,Z=0.0)
+H Lifetime: 4.927E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=40.0,Z=0.0)
+H Lifetime: 4.892E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=41.0,Z=0.0)
+H Lifetime: 4.824E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=42.0,Z=0.0)
+H Lifetime: 4.712E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=43.0,Z=0.0)
+H Lifetime: 4.690E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=44.0,Z=0.0)
+H Lifetime: 4.618E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=45.0,Z=0.0)
+H Lifetime: 4.557E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=50.0,Z=0.0)
+H Lifetime: 4.490E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=55.0,Z=0.0)
+H Lifetime: 4.391E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=60.0,Z=0.0)
+H Lifetime: 4.188E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=65.0,Z=0.0)
+H Lifetime: 3.974E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=70.0,Z=0.0)
+H Lifetime: 3.774E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=75.0,Z=0.0)
+H Lifetime: 3.631E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=80.0,Z=0.0)
+H Lifetime: 3.511E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=85.0,Z=0.0)
+H Lifetime: 3.399E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=90.0,Z=0.0)
+H Lifetime: 3.306E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=95.0,Z=0.0)
+H Lifetime: 3.227E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00
+H Table: (M=100.0,Z=0.0)
+H Lifetime: 3.153E+06
+&Isotopes &Yields     
+&H-1      &0.100E+00

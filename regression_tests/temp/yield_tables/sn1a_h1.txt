@@ -1,0 +1,4 @@
+H Yields (Msun) of stable (?) isotopes
+H Tielemann et al. 1986, Table 5
+&Isotopes  &Z=0.02    
+&H-1      &1e-1      

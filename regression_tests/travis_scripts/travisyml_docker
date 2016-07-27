@@ -1,0 +1,7 @@
+sudo: required
+language: python
+services:
+  - docker
+script:
+  - docker build -t testsuite .
+  - docker run testsuite  /bin/sh -c "runipy /home/NuPyCEE/regression_tests/SYGMA_SSP_h_yield_input.ipynb

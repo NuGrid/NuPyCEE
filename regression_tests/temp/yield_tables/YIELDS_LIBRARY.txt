@@ -1,0 +1,134 @@
+############################################################
+####### Library structure & details incl. references ######
+############################################################
+
+AGB + massive stars
+
+	NuGrid:
+	        See NuGrid.txt for more details.
+
+	        Tables:
+        	        isotope_yield_table_MESA_only_fryer12_delay.txt
+        	        isotope_yield_table_MESA_only_fryer12_rapid.txt 
+        	        isotope_yield_table_MESA_only_ye.txt
+
+       		References: Ritter et al., in prep
+                   	    Pignatari et al., http://arxiv.org/abs/1307.6961
+
+
+	Combined yield set of Portinari et al. and Marigo: !!Needs confirmation
+
+
+		Net yields.
+
+		Tables:
+			isotope_yield_table_portinari98_marigo01.txt	
+	
+	
+		References: Marigo et al. 2001, http://ukads.nottingham.ac.uk/abs/2001A%26A...370..194M
+			    Portinari et al. 1998, http://ukads.nottingham.ac.uk/abs/1998A%26A...334..505P
+
+
+SNIa:
+
+	Seitenzahl et. al 2013:
+
+		Metallicit-dependend yields based on 3D delayed-detonation models
+
+		Tables:
+			sn1a_ivo13_stable_z.txt
+			sn1a_ivo13_unstable_z.txt
+			sn1a_ivo13_mix_z.txt
+			
+		References:
+			Seitenzahl et al. 2013, http://ukads.nottingham.ac.uk/abs/2013MNRAS.429.1156S		
+
+	Thielemann et al. 2003: !!Needs confirmation
+		
+		Tables:
+			sn1a_t03.txt
+		
+		References:
+			Thielemann et al. 2003, http://ukads.nottingham.ac.uk/abs/2003fthp.conf..331T
+		
+	Thielemann et al. 1986:
+
+		Tables:
+			sn1a_t86.txt
+
+		References:
+			Tielemann et al. 1986, http://ukads.nottingham.ac.uk/abs/1986A%26A...158...17T 
+
+NS mergers:
+
+	Rosswog et al. 2014:
+
+		Tables:
+			r_process_rosswog_2014.txt 
+			Can be read in with variable nsmerger_table.
+	
+		References:
+			Rosswog et al. 2014, http://ukads.nottingham.ac.uk/abs/2014MNRAS.439..744R	
+
+MHD Jets: !!Needs confirmation
+
+	N. Nishimura et al. 2015:
+		
+		Calculation magnetorotational supernovae (MR-SNe)
+		Can be read in with variable extra_source_table.
+
+		Tables:
+	    		mhd_jet_NTT_prompt.txt
+    			mhd_jet_NTT_delayed.txt
+			
+
+
+CCSC neutrino-driven winds: !!Needs confirmation
+
+	N. Nishimura:
+
+		Pseud-proto-neutron star winds (using an analytic expansion method)
+		trajectories are based on analytic models
+
+   		- 001 is S = 150 and others are S = 400
+    		- Initial abundances at the end of NSE (T9=9) are given as
+       		 X(proton) = Ye,  X(neutron) = 1 - Ye, and X(others) = 0
+		- Setup:
+                 	 	Ye      S
+        	 	#001   0.45    150
+         		#002   0.45    400
+         		#003   0.40    150
+         		#004   0.35    150
+         		#005   0.30    150
+
+		Tables:
+			ndw_wind_expand.001.txt
+			ndw_wind_expand.002.txt	
+			ndw_wind_expand.003.txt
+			ndw_wind_expand.004.txt
+			ndw_wind_expand.005.txt
+
+		References:
+			private communication				
+	
+Big Bang abundances:
+
+
+	Coc et al.:
+
+		Mass fractions.
+
+		Tables:
+			bb_uzan13.txt
+	
+		References: Coc et al. 2013, http://ukads.nottingham.ac.uk/abs/2013arXiv1307.6955C
+		
+	Walker et al.:
+
+		Tables: 
+			bb_walker91.txt	
+
+		References: Walker et al. 1991, http://ukads.nottingham.ac.uk/abs/1991ApJ...376...51W
+			    as applied in Timmes et al., 1995, http://ukads.nottingham.ac.uk/abs/1995ApJS...98..617T
+
+

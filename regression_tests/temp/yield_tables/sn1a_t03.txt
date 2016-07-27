@@ -1,0 +1,13 @@
+H Yields (Msun) of stable isotopes
+H Tielemann et al. 2003, elements extracted from yates 2013, set as (only) dominant isotope
+&Isotopes  &Z=0.02
+&C-12      &0.05
+&N-14      &4.8e-7
+&O-16      &0.14
+&Ne-20     &4.23e-3
+&Mg-24     &1.34e-2
+&Si-28     &0.15
+&S-32      &8.34e-2
+&Ca-40     &1.21e-2
+&Fe-56     &0.74
+&G-1       &0.0

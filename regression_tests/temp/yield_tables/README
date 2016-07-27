@@ -1,0 +1,54 @@
+Content:
+
+The iniabu dir contains for example
+the initial abundances for
+the five metallicities provided
+by NuGrid.
+
+## Name scheme of NuGrid-format yield tables
+
+isotope_yield_table.txt : default table file; should be MESA; ye fallback
+
+fryer12 : with Fryer 2012 mass cut prescription
+yemcut  : mass cut at ye jump; classical approach
+
+MESA_only : tables only with MESA models
+
+## For Wiersma09 comoparison, combined yields from Portinari 1998 and Marigo 2001:
+
+isotope_yield_table_portinari98_marigo01.txt : C,Mg,Fe were modified according to W09.
+
+isotope_yield_table_portinari98_marigo01_nomod.txt : same as 
+                isotope_yield_table_portinari98_marigo01.txt, but without C,Mg,Fe modification
+		(also with all original initial masses)
+
+isotope_yield_table_portinari98_marigo01_nomod_gce_standard.txt : chosen to match NuGrid's initial masses
+								 e.g. 1.672Msun = 1.65Msun
+
+isotope_yield_table_portinari98_marigo01_nomod_gce_addZ: contains additional metallicity
+	Z=0.0004 compared to isotope_yield_table_portinari98_marigo01_nomod_gce_standard.txt
+
+##Notes and naming scheme for the SYGMA Widget in WENDI:
+
+1) analytic prescription (Fryer12)
+    a) delay  (isotope_yield_table_MESA_only_fryer12_delay.txt)
+    b) rapid  (isotope_yield_table_MESA_only_fryer12_rapid.txt)
+    c) exclude neutron-alpha rich freeze-out: this file is at the moment table 1a)
+(isotope_yield_table_MESA_only_fryer12_exclnalpha.txt)
+2) Ye=0.4982 (Young06)
+    a) fallback at Ye (isotope_yield_table_MESA_only_ye.txt)
+    b) fallback motivated by GCE (isotope_yield_table_MESA_only_ye_fallback.txt): this file is at the moment the table 2a)
+
+##for testing :
+
+isotope_yield_table_cnoni.txt
+isotope_yield_table_h1.txt
+
+The .txt files contain yields
+for bb (bb_*) , sn1a (sn1a_*)
+
+The SN1a abundances of Seitenzahl13 are either
+provided divided in stable and unstable ones
+or in a mix of both types.
+
+ 

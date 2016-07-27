@@ -1,0 +1,9 @@
+H Walker 91, but data taken from Timmes95 code
+H Yield in mass fraction
+&Isotopes  &Z=0.0
+&H-1 	   &7.5995E-01
+&H-2 	   &9.1000E-05
+&He-3	   &3.4000E-05
+&He-4 	   &2.4000E-01
+&Li-6	   &1.0000E-12
+&Li-7 	   &8.0000E-10
