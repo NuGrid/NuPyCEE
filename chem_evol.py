@@ -4486,6 +4486,7 @@ class chem_evol(object):
                 print 'mass',masses[idx]
                 print lifetimes[idx]
             print 'end routine'
+	self.lifetime_yield_input = [mass_save,lifetimes_save,metallicity] 
         if self.iolevel >= 1:
 	    for k in range(len(all_metallicities)):
 	        plt.plot(all_masses,all_lifetimes[k])
