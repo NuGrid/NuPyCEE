@@ -588,7 +588,7 @@ class sygma( chem_evol ):
                         if str(iniZ) in allheader[k]:
                                 mfound=float(allheader[k].split(',')[0].split('=')[1])
                                 masses.append(mfound)
-                print 'Found masses: ',masses
+                #print 'Found masses: ',masses
 	
 	mfinals=[]
 	for k in range(len(masses)):	
@@ -676,7 +676,7 @@ class sygma( chem_evol ):
                         if str(iniZ) in allheader[k]:
                                 mfound=float(allheader[k].split(',')[0].split('=')[1])
                                 masses.append(mfound)
-                print 'Found masses: ',masses
+                #print 'Found masses: ',masses
 	if True:
                 x=[]
                 y=[]
