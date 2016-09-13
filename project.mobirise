@@ -22,7 +22,7 @@
     },
     "scrollAnimation": "true",
     "publishType": "local",
-    "publishPath": "file:///Users/christian/Research/PhD/Physics/NUPYCEE/Website/Test1"
+    "publishPath": "file:///Users/christian/Research/PhD/Physics/NUPYCEE/Website/Test2"
   },
   "pages": {
     "index.html": {
@@ -101,7 +101,7 @@
             "fontHoverColor": "@primaryColor",
             "transparent": false,
             "sticky": true,
-            "logo": false,
+            "logo": true,
             "showBrand": true,
             "collapsed": true,
             "hideButtons": true
@@ -109,10 +109,12 @@
           "logo": {
             "image": {
               "active": true,
-              "src": "@THEME_PATH@/components/_images/logo.png",
+              "src": "@PROJECT_PATH@/assets/images/test-244x128-76.png",
               "height": 128,
-              "alt": "Mobirise",
-              "link": "https://mobirise.com"
+              "alt": "Start page",
+              "link": "index.html",
+              "title": "",
+              "linkInNewWindow": false
             },
             "iconFont": {
               "class": "mbr-iconfont mbr-iconfont-menu",
@@ -121,17 +123,25 @@
             }
           },
           "brand": "<a class=\"navbar-caption\" data-app-btn=\"true\" data-app-selector=\".navbar-caption\" href=\"https://mobirise.com\" data-app-placeholder=\"Type Brand Name\" data-toolbar=\"-mbrBtnMove,-mbrBtnAdd,-mbrBtnRemove,mbrColor\"></a>",
-          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"index.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
+          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"overview.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
         },
         {
           "_name": "header1",
           "_afterNavbarItem": ".mbr-section > .mbr-box__magnet",
+          "_styles": {
+            ".mbr-section-title": {
+              "font-size": "46px"
+            },
+            ".btn": {
+              "font-size": "30px"
+            }
+          },
           "_anchor": "header1-1",
           "_params": {
             "parallax": true,
             "bgImageRadio": true,
             "showArrow": true,
-            "bgImage": "@PROJECT_PATH@/assets/images/andromeda-2000x1198-1.jpg",
+            "bgImage": "@PROJECT_PATH@/assets/images/andromeda2-2000x1333-98.jpg",
             "bgColor": "#a07e49",
             "bgColorRadio": false,
             "bgVideo": {
@@ -148,32 +158,7 @@
           },
           "title": "",
           "text": "",
-          "buttons": " <a data-app-btn=\"true\" class=\"btn btn-lg btn-white btn-white-outline\" href=\"https://mobirise.com\" data-toolbar=\"-mbrBtnMove\">NuPyCEE - A NEW GENERATION galaxy framework</a>",
-          "_styles": {
-            ".mbr-section-title": {
-              "font-size": "46px"
-            },
-            ".btn": {
-              "font-size": "24px"
-            }
-          }
-        },
-        {
-          "_name": "footer1",
-          "_anchor": "footer1-2",
-          "_params": {
-            "paddingTop": 2,
-            "paddingBottom": 2,
-            "bgImageRadio": false,
-            "parallax": true,
-            "bgImage": "@THEME_PATH@/components/_images/jumbotron.jpg",
-            "bgColor": "#323232",
-            "bgColorRadio": true,
-            "overlay": true,
-            "overlayOpacity": 0.8,
-            "overlayColor": "#444444"
-          },
-          "text": "Copyright (c) 2016 Mobirise."
+          "buttons": " <a data-app-btn=\"true\" class=\"btn btn-lg btn-white btn-white-outline\" href=\"https://mobirise.com\" data-toolbar=\"-mbrBtnMove\">NuPyCEE - A NEW GENERATION galaxy framework</a>"
         }
       ]
     },
@@ -249,7 +234,7 @@
             "fontHoverColor": "@primaryColor",
             "transparent": false,
             "sticky": true,
-            "logo": false,
+            "logo": true,
             "showBrand": true,
             "collapsed": true,
             "hideButtons": true
@@ -257,10 +242,12 @@
           "logo": {
             "image": {
               "active": true,
-              "src": "@THEME_PATH@/components/_images/logo.png",
+              "src": "@PROJECT_PATH@/assets/images/test-244x128-98.png",
               "height": 128,
               "alt": "Mobirise",
-              "link": "https://mobirise.com"
+              "link": "index.html",
+              "title": "",
+              "linkInNewWindow": false
             },
             "iconFont": {
               "class": "mbr-iconfont mbr-iconfont-menu",
@@ -269,24 +256,29 @@
             }
           },
           "brand": "<a class=\"navbar-caption\" data-app-btn=\"true\" data-app-selector=\".navbar-caption\" href=\"https://mobirise.com\" data-app-placeholder=\"Type Brand Name\" data-toolbar=\"-mbrBtnMove,-mbrBtnAdd,-mbrBtnRemove,mbrColor\"></a>",
-          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"index.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
+          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"overview.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
         },
         {
           "_name": "footer1",
+          "_styles": {
+            "B": {
+              "font-size": "22px"
+            }
+          },
           "_anchor": "footer1-0",
           "_params": {
             "paddingTop": 2,
             "paddingBottom": 2,
-            "bgImageRadio": false,
-            "parallax": true,
-            "bgImage": "@THEME_PATH@/components/_images/jumbotron.jpg",
-            "bgColor": "#323232",
-            "bgColorRadio": true,
-            "overlay": true,
-            "overlayOpacity": 0.8,
-            "overlayColor": "#444444"
+            "bgImageRadio": true,
+            "parallax": false,
+            "bgImage": "@PROJECT_PATH@/assets/images/andromeda2-2000x1333-42.jpg",
+            "bgColor": "#000000",
+            "bgColorRadio": false,
+            "overlay": false,
+            "overlayOpacity": "0.8",
+            "overlayColor": "#000000"
           },
-          "text": "Copyright (c) 2016 Mobirise."
+          "text": "<b>Publications:</b><br>Côté, B., West, C., Heger, A. et al. 2016,&nbsp;, arXiv:1602.04824<b><br></b><br><br>"
         }
       ]
     },
@@ -361,7 +353,7 @@
             "fontHoverColor": "@primaryColor",
             "transparent": false,
             "sticky": true,
-            "logo": false,
+            "logo": true,
             "showBrand": true,
             "collapsed": true,
             "hideButtons": true
@@ -369,10 +361,12 @@
           "logo": {
             "image": {
               "active": true,
-              "src": "@THEME_PATH@/components/_images/logo.png",
+              "src": "@PROJECT_PATH@/assets/images/test-244x128-41.png",
               "height": 128,
               "alt": "Mobirise",
-              "link": "https://mobirise.com"
+              "link": "index.html",
+              "title": "",
+              "linkInNewWindow": false
             },
             "iconFont": {
               "class": "mbr-iconfont mbr-iconfont-menu",
@@ -381,24 +375,29 @@
             }
           },
           "brand": "<a class=\"navbar-caption\" data-app-btn=\"true\" data-app-selector=\".navbar-caption\" href=\"https://mobirise.com\" data-app-placeholder=\"Type Brand Name\" data-toolbar=\"-mbrBtnMove,-mbrBtnAdd,-mbrBtnRemove,mbrColor\"></a>",
-          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"index.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
+          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"overview.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
         },
         {
           "_name": "footer1",
+          "_styles": {
+            "B": {
+              "font-size": "22px"
+            }
+          },
           "_anchor": "footer1-0",
           "_params": {
             "paddingTop": 2,
             "paddingBottom": 2,
-            "bgImageRadio": false,
-            "parallax": true,
-            "bgImage": "@THEME_PATH@/components/_images/jumbotron.jpg",
-            "bgColor": "#323232",
-            "bgColorRadio": true,
-            "overlay": true,
-            "overlayOpacity": 0.8,
-            "overlayColor": "#444444"
+            "bgImageRadio": true,
+            "parallax": false,
+            "bgImage": "@PROJECT_PATH@/assets/images/andromeda2-2000x1333-42.jpg",
+            "bgColor": "#000000",
+            "bgColorRadio": false,
+            "overlay": false,
+            "overlayOpacity": "0.8",
+            "overlayColor": "#000000"
           },
-          "text": "Copyright (c) 2016 Mobirise."
+          "text": "<b>Publications:</b><br>Côté, B., West, C., Heger, A. et al. 2016,&nbsp;, arXiv:1602.04824<b><br></b><br><br>"
         }
       ]
     },
@@ -474,7 +473,7 @@
             "fontHoverColor": "@primaryColor",
             "transparent": false,
             "sticky": true,
-            "logo": false,
+            "logo": true,
             "showBrand": true,
             "collapsed": true,
             "hideButtons": true
@@ -482,10 +481,12 @@
           "logo": {
             "image": {
               "active": true,
-              "src": "@THEME_PATH@/components/_images/logo.png",
+              "src": "@PROJECT_PATH@/assets/images/test-244x128-70.png",
               "height": 128,
               "alt": "Mobirise",
-              "link": "https://mobirise.com"
+              "link": "index.html",
+              "title": "",
+              "linkInNewWindow": false
             },
             "iconFont": {
               "class": "mbr-iconfont mbr-iconfont-menu",
@@ -494,24 +495,29 @@
             }
           },
           "brand": "<a class=\"navbar-caption\" data-app-btn=\"true\" data-app-selector=\".navbar-caption\" href=\"https://mobirise.com\" data-app-placeholder=\"Type Brand Name\" data-toolbar=\"-mbrBtnMove,-mbrBtnAdd,-mbrBtnRemove,mbrColor\"></a>",
-          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"index.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
+          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"overview.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
         },
         {
           "_name": "footer1",
+          "_styles": {
+            "B": {
+              "font-size": "22px"
+            }
+          },
           "_anchor": "footer1-0",
           "_params": {
             "paddingTop": 2,
             "paddingBottom": 2,
-            "bgImageRadio": false,
-            "parallax": true,
-            "bgImage": "@THEME_PATH@/components/_images/jumbotron.jpg",
-            "bgColor": "#323232",
-            "bgColorRadio": true,
-            "overlay": true,
-            "overlayOpacity": 0.8,
-            "overlayColor": "#444444"
+            "bgImageRadio": true,
+            "parallax": false,
+            "bgImage": "@PROJECT_PATH@/assets/images/andromeda2-2000x1333-42.jpg",
+            "bgColor": "#000000",
+            "bgColorRadio": false,
+            "overlay": false,
+            "overlayOpacity": "0.8",
+            "overlayColor": "#000000"
           },
-          "text": "Copyright (c) 2016 Mobirise."
+          "text": "<b>Publications:</b><br>Côté, B., West, C., Heger, A. et al. 2016,&nbsp;, arXiv:1602.04824<b><br></b><br><br>"
         }
       ]
     },
@@ -586,7 +592,7 @@
             "fontHoverColor": "@primaryColor",
             "transparent": false,
             "sticky": true,
-            "logo": false,
+            "logo": true,
             "showBrand": true,
             "collapsed": true,
             "hideButtons": true
@@ -594,10 +600,12 @@
           "logo": {
             "image": {
               "active": true,
-              "src": "@THEME_PATH@/components/_images/logo.png",
+              "src": "@PROJECT_PATH@/assets/images/test-244x128-74.png",
               "height": 128,
               "alt": "Mobirise",
-              "link": "https://mobirise.com"
+              "link": "index.html",
+              "title": "",
+              "linkInNewWindow": false
             },
             "iconFont": {
               "class": "mbr-iconfont mbr-iconfont-menu",
@@ -606,24 +614,29 @@
             }
           },
           "brand": "<a class=\"navbar-caption\" data-app-btn=\"true\" data-app-selector=\".navbar-caption\" href=\"https://mobirise.com\" data-app-placeholder=\"Type Brand Name\" data-toolbar=\"-mbrBtnMove,-mbrBtnAdd,-mbrBtnRemove,mbrColor\"></a>",
-          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"index.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
+          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"overview.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
         },
         {
           "_name": "footer1",
+          "_styles": {
+            "B": {
+              "font-size": "22px"
+            }
+          },
           "_anchor": "footer1-0",
           "_params": {
             "paddingTop": 2,
             "paddingBottom": 2,
-            "bgImageRadio": false,
-            "parallax": true,
-            "bgImage": "@THEME_PATH@/components/_images/jumbotron.jpg",
-            "bgColor": "#323232",
-            "bgColorRadio": true,
-            "overlay": true,
-            "overlayOpacity": 0.8,
-            "overlayColor": "#444444"
+            "bgImageRadio": true,
+            "parallax": false,
+            "bgImage": "@PROJECT_PATH@/assets/images/andromeda2-2000x1333-42.jpg",
+            "bgColor": "#000000",
+            "bgColorRadio": false,
+            "overlay": false,
+            "overlayOpacity": "0.8",
+            "overlayColor": "#000000"
           },
-          "text": "Copyright (c) 2016 Mobirise."
+          "text": "<b>Publications:</b><br>Côté, B., West, C., Heger, A. et al. 2016,&nbsp;, arXiv:1602.04824<b><br></b><br><br>"
         }
       ]
     },
@@ -698,7 +711,7 @@
             "fontHoverColor": "@primaryColor",
             "transparent": false,
             "sticky": true,
-            "logo": false,
+            "logo": true,
             "showBrand": true,
             "collapsed": true,
             "hideButtons": true
@@ -706,10 +719,12 @@
           "logo": {
             "image": {
               "active": true,
-              "src": "@THEME_PATH@/components/_images/logo.png",
+              "src": "@PROJECT_PATH@/assets/images/test-244x128-54.png",
               "height": 128,
               "alt": "Mobirise",
-              "link": "https://mobirise.com"
+              "link": "index.html",
+              "title": "",
+              "linkInNewWindow": false
             },
             "iconFont": {
               "class": "mbr-iconfont mbr-iconfont-menu",
@@ -718,24 +733,29 @@
             }
           },
           "brand": "<a class=\"navbar-caption\" data-app-btn=\"true\" data-app-selector=\".navbar-caption\" href=\"https://mobirise.com\" data-app-placeholder=\"Type Brand Name\" data-toolbar=\"-mbrBtnMove,-mbrBtnAdd,-mbrBtnRemove,mbrColor\"></a>",
-          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"index.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
+          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"overview.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
         },
         {
           "_name": "footer1",
+          "_styles": {
+            "B": {
+              "font-size": "22px"
+            }
+          },
           "_anchor": "footer1-0",
           "_params": {
             "paddingTop": 2,
             "paddingBottom": 2,
-            "bgImageRadio": false,
-            "parallax": true,
-            "bgImage": "@THEME_PATH@/components/_images/jumbotron.jpg",
-            "bgColor": "#323232",
-            "bgColorRadio": true,
-            "overlay": true,
-            "overlayOpacity": 0.8,
-            "overlayColor": "#444444"
+            "bgImageRadio": true,
+            "parallax": false,
+            "bgImage": "@PROJECT_PATH@/assets/images/andromeda2-2000x1333-42.jpg",
+            "bgColor": "#000000",
+            "bgColorRadio": false,
+            "overlay": false,
+            "overlayOpacity": "0.8",
+            "overlayColor": "#000000"
           },
-          "text": "Copyright (c) 2016 Mobirise."
+          "text": "<b>Publications:</b><br>Côté, B., West, C., Heger, A. et al. 2016,&nbsp;, arXiv:1602.04824<b><br></b><br><br>"
         }
       ]
     },
@@ -810,7 +830,7 @@
             "fontHoverColor": "@primaryColor",
             "transparent": false,
             "sticky": true,
-            "logo": false,
+            "logo": true,
             "showBrand": true,
             "collapsed": true,
             "hideButtons": true
@@ -818,10 +838,12 @@
           "logo": {
             "image": {
               "active": true,
-              "src": "@THEME_PATH@/components/_images/logo.png",
+              "src": "@PROJECT_PATH@/assets/images/test-244x128-74.png",
               "height": 128,
               "alt": "Mobirise",
-              "link": "https://mobirise.com"
+              "link": "index.html",
+              "title": "",
+              "linkInNewWindow": false
             },
             "iconFont": {
               "class": "mbr-iconfont mbr-iconfont-menu",
@@ -830,24 +852,29 @@
             }
           },
           "brand": "<a class=\"navbar-caption\" data-app-btn=\"true\" data-app-selector=\".navbar-caption\" href=\"https://mobirise.com\" data-app-placeholder=\"Type Brand Name\" data-toolbar=\"-mbrBtnMove,-mbrBtnAdd,-mbrBtnRemove,mbrColor\"></a>",
-          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"index.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
+          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"overview.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
         },
         {
           "_name": "footer1",
+          "_styles": {
+            "B": {
+              "font-size": "22px"
+            }
+          },
           "_anchor": "footer1-0",
           "_params": {
             "paddingTop": 2,
             "paddingBottom": 2,
-            "bgImageRadio": false,
-            "parallax": true,
-            "bgImage": "@THEME_PATH@/components/_images/jumbotron.jpg",
-            "bgColor": "#323232",
-            "bgColorRadio": true,
-            "overlay": true,
-            "overlayOpacity": 0.8,
-            "overlayColor": "#444444"
+            "bgImageRadio": true,
+            "parallax": false,
+            "bgImage": "@PROJECT_PATH@/assets/images/andromeda2-2000x1333-42.jpg",
+            "bgColor": "#000000",
+            "bgColorRadio": false,
+            "overlay": false,
+            "overlayOpacity": "0.8",
+            "overlayColor": "#000000"
           },
-          "text": "Copyright (c) 2016 Mobirise."
+          "text": "<b>Publications:</b><br>Côté, B., West, C., Heger, A. et al. 2016,&nbsp;, arXiv:1602.04824<b><br></b><br><br>"
         }
       ]
     },
@@ -920,7 +947,7 @@
             "fontHoverColor": "@primaryColor",
             "transparent": false,
             "sticky": true,
-            "logo": false,
+            "logo": true,
             "showBrand": true,
             "collapsed": true,
             "hideButtons": true
@@ -928,10 +955,12 @@
           "logo": {
             "image": {
               "active": true,
-              "src": "@THEME_PATH@/components/_images/logo.png",
+              "src": "@PROJECT_PATH@/assets/images/test-244x128-58.png",
               "height": 128,
               "alt": "Mobirise",
-              "link": "https://mobirise.com"
+              "link": "index.html",
+              "title": "",
+              "linkInNewWindow": false
             },
             "iconFont": {
               "class": "mbr-iconfont mbr-iconfont-menu",
@@ -940,24 +969,198 @@
             }
           },
           "brand": "<a class=\"navbar-caption\" data-app-btn=\"true\" data-app-selector=\".navbar-caption\" href=\"https://mobirise.com\" data-app-placeholder=\"Type Brand Name\" data-toolbar=\"-mbrBtnMove,-mbrBtnAdd,-mbrBtnRemove,mbrColor\"></a>",
-          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"index.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
+          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"overview.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
         },
         {
           "_name": "footer1",
+          "_styles": {
+            "B": {
+              "font-size": "22px"
+            }
+          },
           "_anchor": "footer1-0",
           "_params": {
             "paddingTop": 2,
             "paddingBottom": 2,
-            "bgImageRadio": false,
-            "parallax": true,
-            "bgImage": "@THEME_PATH@/components/_images/jumbotron.jpg",
-            "bgColor": "#323232",
-            "bgColorRadio": true,
-            "overlay": true,
-            "overlayOpacity": 0.8,
-            "overlayColor": "#444444"
+            "bgImageRadio": true,
+            "parallax": false,
+            "bgImage": "@PROJECT_PATH@/assets/images/andromeda2-2000x1333-42.jpg",
+            "bgColor": "#000000",
+            "bgColorRadio": false,
+            "overlay": false,
+            "overlayOpacity": "0.8",
+            "overlayColor": "#000000"
           },
-          "text": "Copyright (c) 2016 Mobirise."
+          "text": "<b>Publications:</b><br>Côté, B., West, C., Heger, A. et al. 2016,&nbsp;, arXiv:1602.04824<b><br></b><br><br>"
+        }
+      ]
+    },
+    "overview.html": {
+      "settings": {
+        "title": "Overview"
+      },
+      "components": [
+        {
+          "_styles": {
+            ".hide-buttons .nav-btn": {
+              "display": "none !important"
+            },
+            ".navbar-caption": {
+              "color": "#ffffff"
+            },
+            ".navbar-toggler": {
+              "color": "#000000"
+            },
+            ".link, .dropdown-item": {
+              "color": "#000000"
+            },
+            ".link": {
+              "font-size": "1.05rem"
+            },
+            ".dropdown-item, .nav-dropdown-sm .link": {
+              "font-size": "1.137rem"
+            },
+            ".link:hover, .dropdown-item:hover, .link:focus, .dropdown-item:focus": {
+              "color": "@primaryColor"
+            },
+            ".link[aria-expanded=\"true\"], .dropdown-menu": {
+              "background": "#e6e6e6"
+            },
+            ".nav-dropdown-sm .link:focus, .nav-dropdown-sm .link:hover, .nav-dropdown-sm .dropdown-item:focus, .nav-dropdown-sm .dropdown-item:hover": {
+              "background": "#f7f7f7!important"
+            },
+            ".navbar, .nav-dropdown-sm, .nav-dropdown-sm .link[aria-expanded=\"true\"], .nav-dropdown-sm .dropdown-menu": {
+              "background": "#ffffff"
+            },
+            ".bg-color.transparent .link": {
+              "color": "#000000",
+              "transition": "none"
+            },
+            ".bg-color.transparent.opened .link": {
+              "transition": "color .2s ease-in-out"
+            },
+            ".bg-color.transparent.opened .link:hover, .bg-color.transparent.opened .link:focus": {
+              "color": "@primaryColor"
+            },
+            ".link[aria-expanded=\"true\"], .dropdown-item[aria-expanded=\"true\"]": {
+              "color": "#c0a375!important"
+            },
+            "&.mbr-navbar--stuck .mbr-navbar__section": {
+              "background": "#2c2c2c"
+            },
+            ".mbr-navbar__section": {},
+            ".mbr-navbar__hamburger": {
+              "color": "#ffffff"
+            },
+            ".close-icon::before, .close-icon::after": {
+              "background-color": "#000000"
+            }
+          },
+          "_name": "menu",
+          "_anchor": "menu-0",
+          "_params": {
+            "bgColor": "#ffffff",
+            "fontSize": "1.05",
+            "fontName": {},
+            "fontColor": "#000000",
+            "fontHoverColor": "@primaryColor",
+            "transparent": false,
+            "sticky": true,
+            "logo": true,
+            "showBrand": true,
+            "collapsed": true,
+            "hideButtons": true
+          },
+          "logo": {
+            "image": {
+              "active": true,
+              "src": "@PROJECT_PATH@/assets/images/test-245x128-94.png",
+              "height": 128,
+              "alt": "Start page",
+              "link": "index.html",
+              "title": "",
+              "linkInNewWindow": false
+            },
+            "iconFont": {
+              "class": "mbr-iconfont mbr-iconfont-menu",
+              "link": "https://mobirise.com",
+              "size": 0
+            }
+          },
+          "brand": "<a class=\"navbar-caption\" data-app-btn=\"true\" data-app-selector=\".navbar-caption\" href=\"https://mobirise.com\" data-app-placeholder=\"Type Brand Name\" data-toolbar=\"-mbrBtnMove,-mbrBtnAdd,-mbrBtnRemove,mbrColor\"></a>",
+          "items": "<li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"overview.html\">OVERVIEW</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link dropdown-toggle\" data-toggle=\"dropdown-submenu\" href=\"https://mobirise.com/\" aria-expanded=\"false\">SYGMA</a><div class=\"dropdown-menu\"><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"sygma.html\">SYGMA</a><a data-app-btn=\"true\" class=\"dropdown-item\" href=\"webinterface.html\">WEB INTERFACE</a></div></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"omega.html\" aria-expanded=\"false\">OMEGA</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"stellab.html\" aria-expanded=\"false\">STELLAB</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"userguide.html\" aria-expanded=\"false\">Userguides</a></li><li class=\"nav-item dropdown\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"documentation.html\" aria-expanded=\"false\">Documentation</a></li><li class=\"nav-item\"><a data-app-btn=\"true\" class=\"nav-link link\" href=\"installation.html\" aria-expanded=\"false\">Installation</a></li><li class=\"nav-item nav-btn\"><a data-app-btn=\"true\" data-button=\"\" data-app-selector=\".btn\" class=\"nav-link btn btn-danger-outline btn-danger\" href=\"https://github.com/NuGrid/NuPyCEE\">Download</a></li>"
+        },
+        {
+          "_styles": {
+            ".mbr-section-title, p": {
+              "color": "#fff"
+            },
+            "P": {
+              "text-align": "left"
+            }
+          },
+          "_name": "content5",
+          "_anchor": "content5-0",
+          "_params": {
+            "paddingTop": "3",
+            "paddingBottom": "1",
+            "bgImageRadio": true,
+            "parallax": true,
+            "bgImage": "@PROJECT_PATH@/assets/images/background-overview-2000x1125-13.jpg",
+            "bgColor": "#fff",
+            "bgColorRadio": false,
+            "bgVideo": {
+              "url": "https://www.youtube.com/watch?v=uNCr7NdOJgw"
+            },
+            "bgVideoRadio": false,
+            "overlay": true,
+            "overlayOpacity": 0.5,
+            "overlayColor": "#000",
+            "showTitle": true,
+            "showCaption": true
+          },
+          "title": "Connecting  nuclear  physics  with observations",
+          "caption": "<p>The NuGrid Python Chemical Evolution Environment (NuPyCEE) allows to simulate the chemical enrichment and stellar feedback of stellar populations. We provide an easy-to-read python code, documentation and userguides. The Stellar Yields for Galactic modeling applications module (SYGMA) models the enrichment and feedback from simple stellar populations. It is the basic building block of the galaxy code One-zone Model for the Evolution of GAlaxies (OMEGA). Our stellar abundance (STELLAB) &nbsp;provides a library of stellar abundances read to be used.</p>"
+        },
+        {
+          "_styles": {
+            ".mbr-section-title, .mbr-section-subtitle": {
+              "text-align": "center"
+            },
+            "H3": {
+              "font-size": "36px"
+            }
+          },
+          "_name": "header3",
+          "_anchor": "header3-0",
+          "_params": {
+            "paddingTop": 1,
+            "paddingBottom": 1,
+            "bgColor": "#fff",
+            "showMeta": true
+          },
+          "title": "Publications",
+          "meta": "<br>Ritter, C., Navarro, J. F., Fryer, C., Côté, B., Herwig, F. 2016, in prep.<br><a href=\"http://adsabs.harvard.edu/abs/2016arXiv160204824C\" class=\"text-info\">Côté, B., West, C., Heger, A. et al. 2016, arXiv:1602.04824</a><br><a href=\"http://adsabs.harvard.edu/abs/2016arXiv160407824C\" class=\"text-info\">Côté, B., O'Shea, B.~W., Ritter, C., Herwig, F., &amp; Venn, K.~A. 2016, arXiv:1604.07824</a><br><a href=\"http://adsabs.harvard.edu/abs/2016ApJ...824...82C\" class=\"text-info\">Côté, B., Ritter, C., O'Shea, B.~W., et al. 2016, ApJ, 824, 82</a><a href=\"http://adsabs.harvard.edu/abs/2016arXiv160204824C\" class=\"text-info\"><br></a>"
+        },
+        {
+          "_styles": {
+            ".mbr-section-title, .mbr-section-subtitle": {
+              "text-align": "center"
+            },
+            "H3": {
+              "font-size": "36px"
+            }
+          },
+          "_name": "header3",
+          "_anchor": "header3-1",
+          "_params": {
+            "paddingTop": 1,
+            "paddingBottom": 1,
+            "bgColor": "#fff",
+            "showMeta": true
+          },
+          "title": "Feedback",
+          "meta": "&nbsp; &nbsp; To report bugs please consider submitting a report as an issue on the GitHub page <a href=\"https://github.com/NuGrid/NuPyCEE/issues\">here</a>. <br>For other comments please contact the developer Christian Ritter (critter[a]uvic.ca) and Benoit Côté (bcote[at]uvic.ca).<br>"
         }
       ]
     }
