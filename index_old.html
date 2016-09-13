@@ -1,0 +1,133 @@
+<html>
+  <head>
+    <title>NuPyCEE</title>
+  </head>
+  <body bgcolor=white>
+
+    <table border="0" cellpadding="10">
+      <tr>
+        <td>
+          <h1>Welcome to the NuPyCEE website</h1>
+        </td>
+      </tr>
+    </table>
+     <p> NuPyCEE is a <b>open-source</b> chemical evolution platform of the <a href="http://nugridstars.org">NuGrid collaboration</a>.
+     The user can choose between the Stellar Yields for galactic modeling applications (<b>SYGMA</b>) module and the One-zone model for the evolution of galaxies (<b>OMEGA</b>) module. 
+      </p>
+
+     <hr>
+
+    <h2> SYGMA web user interface </h2>
+
+     <p>
+      The Stellar Yields for galactic modeling applications (<b>SYGMA</b>) module allows to follow the ejecta of of simple stellar populations in a closed-box mode.
+      </p>
+
+    <p>We provide an online interface where tables of the evolution of the ejecta of SSP's can be downloaded. 
+       Access the interface <a href="http://206.12.59.19/cgi-bin/canfarSessionLauncher.py" target="_blank">here</a>.
+       Start the ipython notebook SYGMA.ipynb with a click. Then you can create the SYGMA interface by clicking in the first field and
+     press shift+enter. For a introduction to the interface have a look <a href="DOC_Interfaces/sygma_doc.html">here</a>.
+
+    </p>
+
+    <h4> Notes: </h4>
+     <p>
+     Stellar yields of AGB and massive stars are calculated with the same nuclear physics and are provided by the NuGrid collaboration.
+     The interface is hosted by NuGrid's WENDI platform. 
+     </p>
+
+
+    <hr>
+
+
+      <h2> Online User guides </h2>
+      <p>
+      As a introduction to the SYGMA and OMEGA code as well as STELLAB module we provide different 
+      interactive online user guides.
+      One can access the web interface <a href="http://206.12.59.19/cgi-bin/canfarSessionLauncher.py" target="_blank">here</a>
+      and choose from the following guides:
+      </p>
+
+      <ol>
+      <li type="circle">SYGMA_Userguide</li>
+  
+      <li type="circle">OMEGA_Userguide</li>
+
+      <li type="circle">STELLAB_Userguide</li>
+      </ol>
+
+       <p>
+      Within each guide the user can execute commands in the same manner as in
+      in a local downloaded version with a few exceptions.
+      </p>
+
+   <hr>
+
+    <h2> Download code </h2>
+    All NuPyCEE is publicly available on github.
+    To download the code git is required on your system.
+    First create a directory, for example NuPyCEE, and navigate in it:
+
+        <div class="highlight">
+         <pre>
+           <code class="language-text" data-lang="text">mkdir NuPyCEE</code>
+	   <code class="language-text" data-lang="text">cd NuPyCEE</code>
+        </pre>
+         </div>
+
+    Now download a copy with
+
+        <div class="highlight"></div>
+         <pre>
+	 <code class="language-text" data-lang="text">git clone https://github.com/NuGrid/NuPyCEE.git .</code>
+        </pre>
+         </div>
+
+
+     <p>The repository can be found <a href="https://github.com/NuGrid/NuPyCEE">here</a>.</p>
+
+     <hr>
+
+    <h2> Running SYGMA and OMEGA locally </h2>
+
+    All python dependencies can be installed via install_dependencies.sh available in the root directory of NuPyCEE.
+    A installation of NuPyCEE is not necessary. Instead, you can access the tools through the interactive ipython interface.
+    To run SYGMA and OMEGA have a look at the tutorials in the online documentations (links below) and
+    the <a href="DOC/nupycee-chapter.pdf">DOC</a> directory of NuPyCEE .</p>
+
+     <p>The online documentation for SYGMA can be found <a href="http://nugrid.github.io/NuPyCEE/SPHINX/build/html/sygma.html">here</a> and for OMEGA  <a href="http://nugrid.github.io/NuPyCEE/SPHINX/build/html/omega.html">here</a>.</p>
+     Detailed explanation of physics and input parameter for OMEGA are found on the WENDI platform in 
+     OMEGA_Userguide.ipynb <a href="http://206.12.59.19/cgi-bin/canfarSessionLauncher.py" target="_blank">here</a>.         
+
+     <hr>
+
+
+    <h2> Publications with NuPyCEE</h2>
+
+      <ol>
+       <li type="circle">Ritter, C., Navarro, J. F., Fryer, C., C&ocirc;t&eacute, B., Herwig, F. 2016, in prep.
+       <li type="circle"><a href="http://adsabs.harvard.edu/abs/2016arXiv160204824C">C&ocirc;t&eacute, B., West, C., Heger, A. et al. 2016, arXiv:1602.04824</a></li>
+       <li type="circle"><a href="http://adsabs.harvard.edu/abs/2016arXiv160407824C">C&ocirc;t&eacute, B., O&#39;Shea, B.~W., Ritter, C., Herwig, F., & Venn, K.~A. 2016, arXiv:1604.07824</a></li>
+      <li type="circle"><a href="http://adsabs.harvard.edu/abs/2016ApJ...824...82C">C&ocirc;t&eacute, B., Ritter, C., O&#39;Shea, B.~W., et al. 2016, ApJ, 824, 82</a></li>
+
+      </ol>
+
+     <hr>
+
+
+    <h2> Comments, suggestions and other kinds of feedback</h2>
+
+    To report code bugs please consider submitting a report as an issue on the GitHub page <a href="https://github.com/NuGrid/NuPyCEE/issues">here</a>. For other comments please contact the developer Christian Ritter (critter[a]uvic.ca) and Benoit C&ocirc;t&eacute (bcote[at]uvic.ca).
+         
+
+    <hr>
+
+    <hr>
+ 
+    &copy; Christian Ritter, Benoit C&ocirc;t&eacute;, critter[a]uvic.ca, 2016
+
+
+
+
+  </body>
+</html>
