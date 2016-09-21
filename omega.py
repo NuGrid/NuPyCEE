@@ -1795,7 +1795,100 @@ class omega( chem_evol ):
 ######################## Here start the analysis methods ######################################
 ###############################################################################################
 
+    def plot_abu_distr(self,species,source='all',norm='',label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
+        '''
+	 Plot abundance distribution at point in time normalized to solar system distribution.
+	
+
+        Parameters
+        ----------
+
+
+	species : array
+             isotopes or element names, in the form ['C'] or ['C-12']
+	time : float
+	     Time in yrs telling when to extract abundances, e.g. birth SS 9.2Gyr
+	source : string
+             Specifies if yields come from
+	     all sources ('all'), including
+	     AGB+SN1a, massive stars. Or from
+	     distinctive sources:
+	     only agb stars ('agb'), only
+	     SN1a ('SN1a'), or only massive stars
+             ('massive')
+        norm : string
+             Choose the solar abundances, e.g. 'Grevesse_Noels_1993', same notation as in stellab?
+	label : string
+	     figure label
+	marker : string
+	     figure marker
+	shape : string
+	     line style	
+	color : string
+	     color of line
+        fig : string,float
+	     to name the plot figure       
+ 	       
+        Examples
+	----------
+
+	>>> s.plot_abu_distr(species=['C-12','O-16'],time=9.2e9,norm='Asplund_et_al_2009')
+
+        '''
+
+	'''
+	Do stuff here.
+
+        yaxis=specie
+        if len(label)<1:
+                label=yaxis
+                if source=='agb':
+                        label=yaxis+', AGB'
+                if source=='massive':
+                        label=yaxis+', Massive'
+                if source=='sn1a':
+                        label=yaxis+', SNIa'
+
+        #Reserved for plotting
+        if not return_x_y:
+            shape,marker,color=self.__msc(source,shape,marker,color)
+
+        x=self.history.age
+        self.x=x
+        y=[]
+        yields_evol_all=self.history.ism_elem_yield
+        if yaxis in self.history.elements:
+            if source == 'all':
+                yields_evol=self.history.ism_elem_yield
+            elif source =='agb':
+                yields_evol=self.history.ism_elem_yield_agb
+            elif source == 'sn1a':
+                yields_evol=self.history.ism_elem_yield_1a
+            elif source == 'massive':
+                yields_evol=self.history.ism_elem_yield_massive
+            idx=self.history.elements.index(yaxis)
+        elif yaxis in self.history.isotopes:
+            if source == 'all':
+                yields_evol=self.history.ism_iso_yield
+            elif source =='agb':
+                yields_evol=self.history.ism_iso_yield_agb
+            elif source == 'sn1a':
+                yields_evol=self.history.ism_iso_yield_1a
+            elif source == 'massive':
+                yields_evol=self.history.ism_iso_yield_massive
+            idx=self.history.isotopes.index(yaxis)
+        else:
+            print 'Isotope or element not available'
+            return 0
+        for k in range(0,len(yields_evol)):
+            if norm == False:
+                y.append(yields_evol[k][idx])
+            else:
+                y.append( yields_evol[k][idx]/yields_evol_all[k][idx])
+
+	#most important stuff not implemented yet.
+	'''
 
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
     
