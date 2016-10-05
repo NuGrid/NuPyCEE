@@ -4022,7 +4022,7 @@ class omega( chem_evol ):
     def plot_abun(self, fig=20, i_sim=-1,\
         solar_norm=False, iso_on=False,\
         list_elem=[], list_iso=[],return_x_y=False, over_plot_solar=False,\
-        solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
+        solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn', f_y_annotate=0.9,\
         marker='o',shape='', color='b', color_s='r', label='Prediction',fsize=[10,4.5],\
         fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,\
         legend_fontsize=14, markersize=5):
@@ -4064,6 +4064,9 @@ class omega( chem_evol ):
         solar_ab_m : string
              Path of the solar normalization containing the mass fraction of each isotope
              Default: solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+        f_y_annotate : float (between 0 and 1)
+             Fraction of the Y axis where the name of the element will be shown
+             Default: f_y_annotate=0.9
         fig : string, float
 	     Figure name.
 	marker : string
@@ -4126,8 +4129,9 @@ class omega( chem_evol ):
 
         # Copy the list of selected elements
         if len(list_elem) > 0 and len(list_iso) == 0:
-            elem_sol = list_elem
-        else:
+             print 'The list_elem option is not implemented yet..'
+        #    if elements are selected 
+        if True:  # Shoul be else once the list_elem is implemented..
             elem_sol_temp = self._iso_abu_to_elem(iso_sol, iso_list=iso_list)
             elem_names = elem_sol_temp[0]  # Name of element
             elem_sol = elem_sol_temp[1]    # Solar elemental abundances
@@ -4156,16 +4160,17 @@ class omega( chem_evol ):
     
             # If the isotope or element is considered ..
             considered = False
-            if len(list_elem) > 0 and len(list_iso) == 0:
-                if name_temp_upper in elem_sol:
-                    considered = True
-            elif iso_temp in iso_names_lower:
+            #if len(list_elem) > 0 and len(list_iso) == 0:
+            #    if name_temp_upper in elem_sol:
+            #        considered = True
+            if iso_temp in iso_names_lower:
                 considered = True
             if considered:
 
                 # Add the selected Z and A numbers
                 if not solar_file.z[i_iso] in Z_numbers:
                     Z_numbers.append(solar_file.z[i_iso])
+                    # Should take the solar element abundances here..
                     i_Z_index += 1
                     iso_array_sol.append([[],[],[],[]])
                 i_iso_index = iso_names_lower.index(iso_temp)
@@ -4252,6 +4257,17 @@ class omega( chem_evol ):
                 # Get the legend
                 plt.plot(iso_array_sol[i_Z][0], iso_m_frac_sim[i_Z], linestyle=shape,\
                      color=color,label=label,marker=marker,markersize=markersize)
+
+                # Annotate the element
+                #ylimm = np.array(plt.gca().get_ylim())
+                #if ylimm[0] == 0.0:
+                #    ylimm[0] = 1.0e-15
+                #print ylimm
+                #yrange = np.log10(ylimm[1]) - np.log10(ylimm[0])
+                #y_an = 10**(ylimm[1] - yrange * (1 - f_y_annotate))
+                #for i_Z in range(len(iso_array_sol)):
+                #    plt.annotate(iso_array_sol[i_Z][3][0], xy=(iso_array_sol[i_Z][0][0],y_an))
+                #    print iso_array_sol[i_Z][3][0], iso_array_sol[i_Z][0][0],y_an
 
             # If elemental abundances ..
             else:
