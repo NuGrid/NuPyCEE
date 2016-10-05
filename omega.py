@@ -4014,3 +4014,260 @@ class omega( chem_evol ):
             mdf_y_ga[i] = mdf_y_ga[i] * cte       
 
         return mdf_x, mdf_y_ga
+
+
+    ##############################################
+    #                 Plot Abun                  #
+    ##############################################
+    def plot_abun(self, fig=20, i_sim=-1,\
+        solar_norm=False, iso_on=False,\
+        list_elem=[], list_iso=[],return_x_y=False, over_plot_solar=False,\
+        solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
+        marker='o',shape='', color='b', color_s='r', label='Prediction',fsize=[10,4.5],\
+        fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,\
+        legend_fontsize=14, markersize=5):
+
+        '''
+	This function plots the abundance distribution in mass
+        fraction at any given point in time or at any given metallicity.
+
+        Parameters
+        ----------
+        i_sim : integer
+             Timestep index at which the abundances will be plotted.
+             Default: -1, last timestep
+        solar_norm: boolean
+             If True, the abundances will be divide by the solar abundances.
+             If False, there is no normalization.
+             Default: False
+        iso_on : boolean
+             If True, the abundances will be in terms of isotopes.
+             If False, the abundances will be in terms of elements.
+        list_elem : array of strings
+             Contain the list of elements included in the abundances distribution.
+             Default: [], all elements will be included.
+             Example: list_elem=['H','He','C','N','O','Fe']
+        list_iso : array of strings
+             Contain the list of isotopes included in the abundances distribution.
+             Default: [], all isotopes will be included.
+             Example: list_iso=['H-1','C-12','C-13','N-14','N-15']
+             Note: list_iso dominates over list_elem is both are used.
+	return_x_y : boolean
+	     If False, show the plot.
+             If True, return two arrays containing the X and Y axis data, respectively.
+             If True and iso_list=True, return a multi-D array [i][j][:] where
+             j=0 -> list of mass numbers A for the isotopes associated with the element i,
+             j=1 -> list of abundances
+        over_plot_solar : boolean
+             If True, plot the solar abundances distribution along with the predictions
+             Note: This option is desactivated if solar_norm=True
+        solar_ab_m : string
+             Path of the solar normalization containing the mass fraction of each isotope
+             Default: solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+        fig : string, float
+	     Figure name.
+	marker : string
+	     Figure marker.
+	shape : string
+	     Line style.
+	color : string
+	     Line color.
+	color_s : string
+	     Line color of the solar abundances pattern.
+	label : string
+	     Figure label.
+	fsize : 2D float array
+	     Figure dimension/size.
+	fontsize : integer
+	     Font size of the numbers on the X and Y axis.
+	rspace : float
+	     Extra space on the right for the legend.
+	bspace : float
+	     Extra space at the bottom for the Y axis label.
+	labelsize : integer
+	     Font size of the X and Y axis labels.
+	legend_fontsize : integer
+ 	     Font size of the legend.
+        markersize : float
+             Size of the markers
+             Default: markersize=5
+
+        '''
+
+        # Copy the list of selected isotopes
+        if len(list_iso) > 0:
+            iso_list_raw = list_iso
+        else:
+            iso_list_raw = self.history.isotopes
+
+        # Make sure to remove Pb, as it is not in the right order in the yields..
+        # This is causing problems.
+        iso_list = []
+        for i in range(0,len(iso_list_raw)):
+            if not iso_list_raw[i].split('-')[0] == 'Pb':
+                iso_list.append(iso_list_raw[i])
+
+        # Read the solar normalization
+        solar_file = ry.iniabu(global_path + solar_ab_m)
+
+        # Make sure the wanted isotopes are available
+        for i_iso in range(0, len(iso_list)):
+            if iso_list[i_iso] not in self.history.isotopes:
+                print iso_list[i_iso], ' is not available..'
+                return
+
+        # Recover the solar isotopes mass fractions
+        iso_sol = np.array(solar_file.iso_abundance(iso_list))
+
+        # Copy the name of selected elements and isotopes
+        iso_names_lower = []
+        for i_el in range(0,len(iso_list)):
+            iso_names_lower.append(iso_list[i_el].lower())
+
+        # Copy the list of selected elements
+        if len(list_elem) > 0 and len(list_iso) == 0:
+            elem_sol = list_elem
+        else:
+            elem_sol_temp = self._iso_abu_to_elem(iso_sol, iso_list=iso_list)
+            elem_names = elem_sol_temp[0]  # Name of element
+            elem_sol = elem_sol_temp[1]    # Solar elemental abundances
+
+        # Define the charges (Z)
+        Z_numbers = []
+
+        # Define the iso array [element][0 -> A; 1 -> abundance]
+        iso_array_sol = []
+    
+        # For all isotopes found in the solar file
+        i_Z_index = -1
+        for i_iso in range(0,len(solar_file.names)):
+    
+            # Extract the name (in lower cases) and the A number
+            name_temp = ''
+            A_temp = ''
+            for i_el in range(len(solar_file.names[i_iso])):
+                if solar_file.names[i_iso][i_el].isdigit():
+                    A_temp += solar_file.names[i_iso][i_el]
+                elif not solar_file.names[i_iso][i_el] == ' ':
+                    name_temp += solar_file.names[i_iso][i_el]
+            A_temp = int(A_temp)
+            iso_temp = name_temp + '-' + str(A_temp)
+            name_temp_upper = name_temp.title()
+    
+            # If the isotope or element is considered ..
+            considered = False
+            if len(list_elem) > 0 and len(list_iso) == 0:
+                if name_temp_upper in elem_sol:
+                    considered = True
+            elif iso_temp in iso_names_lower:
+                considered = True
+            if considered:
+
+                # Add the selected Z and A numbers
+                if not solar_file.z[i_iso] in Z_numbers:
+                    Z_numbers.append(solar_file.z[i_iso])
+                    i_Z_index += 1
+                    iso_array_sol.append([[],[],[],[]])
+                i_iso_index = iso_names_lower.index(iso_temp)
+                iso_array_sol[i_Z_index][0].append(A_temp)
+                iso_array_sol[i_Z_index][1].append(iso_sol[i_iso_index])
+                iso_name_index = iso_names_lower.index(iso_temp)
+                iso_array_sol[i_Z_index][2].append(iso_list[iso_name_index])
+                iso_array_sol[i_Z_index][3].append(name_temp_upper)
+
+        # Get the mass of elements and isotopes at the desired time
+        ymgal_el_sim  = self.history.ism_elem_yield[i_sim]
+        ymgal_iso_sim = self.history.ism_iso_yield[i_sim]
+        ism_mass_sim = sum(ymgal_el_sim)
+
+        # Define the predicted element and isotope mass fractions
+        elem_m_frac_sim = []
+        iso_m_frac_sim = []
+        for i_Z_index in range(0,len(iso_array_sol)):
+            iso_m_frac_sim.append([])
+
+        # For each selected element and isotope ..
+        for i_Z_index in range(0,len(iso_array_sol)):
+    
+            # Get the mass of the current element
+            i_Z_sim = self.history.elements.index(iso_array_sol[i_Z_index][3][0])
+            elem_m_frac_sim.append(ymgal_el_sim[i_Z_sim]/ism_mass_sim)
+    
+            # For isotope having the same Z number ..
+            for i_iso_index in range(0,len(iso_array_sol[i_Z_index][0])):
+                i_iso_sim = self.history.isotopes.index(iso_array_sol[i_Z_index][2][i_iso_index])
+                iso_m_frac_sim[i_Z_index].append(ymgal_iso_sim[i_iso_sim]/ism_mass_sim)
+
+        # Normalize the predictions if needed ..
+        if solar_norm:
+            for i_Z in range(len(iso_array_sol)):
+                elem_m_frac_sim[i_Z] = elem_m_frac_sim[i_Z] / elem_sol[i_Z]
+                for i_iso in range(len(iso_array_sol[i_Z][1])):
+                    iso_m_frac_sim[i_Z][i_iso] = iso_m_frac_sim[i_Z][i_iso] / iso_array_sol[i_Z][1][i_iso]
+
+        # Calculate the min and max value of the A number
+        A_nb_min = 1000
+        A_nb_max = -1000
+        for i_Z in range(len(iso_array_sol)):
+            if max(iso_array_sol[i_Z][0]) > A_nb_max:
+                A_nb_max = max(iso_array_sol[i_Z][0])
+            if min(iso_array_sol[i_Z][0]) < A_nb_min:
+                A_nb_min = min(iso_array_sol[i_Z][0])
+
+        # If the data needs to be returned ..
+        if return_x_y:
+            if iso_on:
+                return iso_m_frac_sim
+            else:
+                return elem_m_frac_sim
+
+        # If a figure is generated ..
+        else:
+
+            # Plot the frame
+            plt.figure(fig, figsize=(fsize[0],fsize[1]))
+            source = 'all'
+            shape,marker,color=self.__msc(source,shape,marker,color)
+
+            # If isotopes abundances ..
+            if iso_on:
+
+                # Plot the isotopes of each elements
+                plt.xlabel('A')
+                if solar_norm:
+                    plt.ylabel('X(A)/X(A)$_\odot$')
+                    plt.plot([A_nb_min,A_nb_max],[1,1], '--k')
+                else:
+                    plt.ylabel('X(A)')
+                    if over_plot_solar:
+                        for i_Z in range(len(iso_array_sol)):
+                            plt.plot(iso_array_sol[i_Z][0], iso_array_sol[i_Z][1], linestyle='--',\
+                                 color=color_s,marker=marker,markersize=markersize)
+                for i_Z in range(len(iso_array_sol)):
+                    plt.plot(iso_array_sol[i_Z][0], iso_m_frac_sim[i_Z], linestyle=shape,\
+                             color=color,marker=marker,markersize=markersize)
+
+            # If elemental abundances ..
+            else:
+
+                # Plot the isotopes of each elements
+                plt.xlabel('Z')
+                if solar_norm:
+                    plt.ylabel('X(Z)/X(Z)$_\odot$')
+                    plt.plot([Z_numbers[0],Z_numbers[-1]],[1,1], '--k')
+                else:
+                    plt.ylabel('X(Z)')
+                    if over_plot_solar:
+                        plt.plot(Z_numbers, elem_sol, linestyle='--',\
+                             color=color_s,label='Solar',marker=marker,markersize=markersize)
+                plt.plot(Z_numbers, elem_m_frac_sim, linestyle=shape,\
+                         color=color,label=label,marker=marker,markersize=markersize)
+
+            # Plot visual aspect
+            plt.yscale('log')
+	    if len(label)>0:
+	            plt.legend()
+            ax=plt.gca()
+            self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
+               rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize, markersize=markersize)
+
