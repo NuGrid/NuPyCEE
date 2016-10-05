@@ -4219,7 +4219,7 @@ class omega( chem_evol ):
             if iso_on:
                 return iso_m_frac_sim
             else:
-                return elem_m_frac_sim
+                return Z_numbers, elem_m_frac_sim
 
         # If a figure is generated ..
         else:
