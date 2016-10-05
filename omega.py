@@ -4243,9 +4243,15 @@ class omega( chem_evol ):
                         for i_Z in range(len(iso_array_sol)):
                             plt.plot(iso_array_sol[i_Z][0], iso_array_sol[i_Z][1], linestyle='--',\
                                  color=color_s,marker=marker,markersize=markersize)
+                        # Get the legend
+                        plt.plot(iso_array_sol[i_Z][0], iso_array_sol[i_Z][1], linestyle='--',\
+                             color=color_s,label='Solar',marker=marker,markersize=markersize)
                 for i_Z in range(len(iso_array_sol)):
                     plt.plot(iso_array_sol[i_Z][0], iso_m_frac_sim[i_Z], linestyle=shape,\
-                             color=color,marker=marker,markersize=markersize)
+                         color=color,marker=marker,markersize=markersize)
+                # Get the legend
+                plt.plot(iso_array_sol[i_Z][0], iso_m_frac_sim[i_Z], linestyle=shape,\
+                     color=color,label=label,marker=marker,markersize=markersize)
 
             # If elemental abundances ..
             else:
