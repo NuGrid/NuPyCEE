@@ -4725,7 +4725,7 @@ class chem_evol(object):
     ##############################################
     #               Iso Abu to Elem              #
     ##############################################
-    def _iso_abu_to_elem(self, yields_iso):
+    def _iso_abu_to_elem(self, yields_iso, iso_list=[]):
 
         '''
         This function converts isotope yields in elements and returns the result. 
@@ -4737,16 +4737,20 @@ class chem_evol(object):
 
         '''
 
+        # Get the list of isotopes
+        if len(iso_list) == 0:
+            iso_list = self.history.isotopes
+
         # Get the list of all the elements
         elements = []
         yields_ele = []
-        for iso in self.history.isotopes:
+        for iso in iso_list:
             ele = iso.split('-')[0]
             if not ele in elements:
                 elements.append(ele)
-                yields_ele.append(yields_iso[self.history.isotopes.index(iso)])
+                yields_ele.append(yields_iso[iso_list.index(iso)])
             else:
-                yields_ele[-1] += yields_iso[self.history.isotopes.index(iso)]
+                yields_ele[-1] += yields_iso[iso_list.index(iso)]
 
         # Return the list of elements, and the associated yields
         return elements,yields_ele
