@@ -4019,11 +4019,12 @@ class omega( chem_evol ):
     ##############################################
     #                 Plot Abun                  #
     ##############################################
-    def plot_abun(self, fig=20, i_sim=-1,\
+
+    def plot_abun(self, fig=20, age=9.2e9,\
         solar_norm=False, iso_on=False,\
         list_elem=[], list_iso=[],return_x_y=False, over_plot_solar=False,\
         solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn', f_y_annotate=0.9,\
-        marker='o',shape='', color='b', color_s='r', label='Prediction',fsize=[10,4.5],\
+        marker='o',marker_s='^',shape='',shape_s='-', color='b', color_s='r', label='Prediction',label_s='solar',fsize=[10,4.5],\
         fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,\
         legend_fontsize=14, markersize=5):
 
@@ -4033,9 +4034,9 @@ class omega( chem_evol ):
 
         Parameters
         ----------
-        i_sim : integer
-             Timestep index at which the abundances will be plotted.
-             Default: -1, last timestep
+	age : float
+	     Time passed since the beginning of the simulation at which abundance distribution is taken.
+             Default: Time until the formation of the pre-solar cloud. 
         solar_norm: boolean
              If True, the abundances will be divide by the solar abundances.
              If False, there is no normalization.
@@ -4071,14 +4072,20 @@ class omega( chem_evol ):
 	     Figure name.
 	marker : string
 	     Figure marker.
+	marker_s : string
+	     Marker of the solar abundance distribution.
 	shape : string
 	     Line style.
+        shape_s : string
+	     Line style of the solar abundance distribution.
 	color : string
 	     Line color.
 	color_s : string
 	     Line color of the solar abundances pattern.
 	label : string
 	     Figure label.
+	label_s : string
+            Label of the solar abundance distribution.
 	fsize : 2D float array
 	     Figure dimension/size.
 	fontsize : integer
@@ -4180,6 +4187,13 @@ class omega( chem_evol ):
                 iso_array_sol[i_Z_index][2].append(iso_list[iso_name_index])
                 iso_array_sol[i_Z_index][3].append(name_temp_upper)
 
+	# Get the index for given age
+	ages = self.history.age
+	timesteps=self.history.timesteps
+	i_sim = min(range(len(ages)), key=lambda i: abs(ages[i]-age))
+
+	print 'Extract abundance from closest available time ','{:.3E}'.format(ages[i_sim]),' yrs'	
+
         # Get the mass of elements and isotopes at the desired time
         ymgal_el_sim  = self.history.ism_elem_yield[i_sim]
         ymgal_iso_sim = self.history.ism_iso_yield[i_sim]
@@ -4280,8 +4294,8 @@ class omega( chem_evol ):
                 else:
                     plt.ylabel('X(Z)')
                     if over_plot_solar:
-                        plt.plot(Z_numbers, elem_sol, linestyle='--',\
-                             color=color_s,label='Solar',marker=marker,markersize=markersize)
+                        plt.plot(Z_numbers, elem_sol, linestyle=shape_s,\
+                             color=color_s,label=label_s,marker=marker_s,markersize=markersize)
                 plt.plot(Z_numbers, elem_m_frac_sim, linestyle=shape,\
                          color=color,label=label,marker=marker,markersize=markersize)
 
