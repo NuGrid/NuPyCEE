@@ -107,6 +107,22 @@ class stellab():
         self.paths.append('milky_way_data/Reddy_et_al_2006_stellab')
         self.paths.append('milky_way_data/Reddy_et_al_2003_stellab')
         self.paths.append('milky_way_data/Spite_et_al_2005_stellab')
+        self.paths.append('milky_way_data/Battistini_Bensby_2016_stellab')
+        self.paths.append('milky_way_data/Nissen_et_al_2014_stellab')
+        self.paths.append('milky_way_data/Ramirez_et_al_2013_stellab')
+        self.paths.append('milky_way_data/Bensby_et_al_2014_stellab')
+        self.paths.append('milky_way_data/Battistini_Bensby_2015_stellab')
+        self.paths.append('milky_way_data/Yong_et_al_2013_stellab')
+        self.paths.append('milky_way_data/Jacobson_et_al_2015_stellab')
+        self.paths.append('milky_way_data/Cohen_et_al_2013_stellab')
+        self.paths.append('milky_way_data/Cohen_et_al_2013_noCEMPs_stellab')
+        self.paths.append('milky_way_data/Adibekyan_et_al_2012_stellab')
+        self.paths.append('milky_way_data/Aoki_Honda_2008_stellab')
+        self.paths.append('milky_way_data/Hansen_et_al_2012_pecu_excluded_stellab')
+        self.paths.append('milky_way_data/Ishigaki_et_al_2012_2013_stellab')
+        self.paths.append('milky_way_data/Roederer_et_al_2009_stellab')
+        self.paths.append('milky_way_data/Roederer_et_al_2014_pecu_excluded_stellab')
+
         self.paths.append('sculptor_data/Kirby_et_al_2010_Sculptor_stellab')
         self.paths.append('sculptor_data/Frebel_2010_Sculptor_stellab')
         self.paths.append('sculptor_data/Starkenburg_et_al_2013_stellab')
@@ -139,7 +155,7 @@ class stellab():
         self.cs.append('og') # Bihain et al. (2004)
         self.cs.append('^m') # Bonifacio et al. (2009)
         self.cs.append('xm') # Caffau et al. (2005)
-        self.cs.append('^b') # Cayrel et al. (2004)
+        self.cs.append('^r') # Cayrel et al. (2004)
         self.cs.append('^c') # Fabbian et al. (2009)
         #        self.cs.append('^g') # Gehren et al. (2006)
         self.cs.append('sc') # Gratton et al. (2003)
@@ -149,16 +165,43 @@ class stellab():
         self.cs.append('^r') # Reddy et al. (2006)
         self.cs.append('sb') # Reddy et al. (2003)
         self.cs.append('ob') # Spite et al. (2005)
+        self.cs.append('oc') # Battistini & Bensby (2016)
+        self.cs.append('xc') # Nissen et al. (2014)
+        self.cs.append('xb') # Ramirez et al. (2013)
+        self.cs.append('xm') # Bensby et al. (2014)
+        self.cs.append('xr') # Battistini & Bensby (2015)
+        self.cs.append('xk') # Yong et al. (2013)
+        self.cs.append('xg') # Jacobson et al. (2015)
+        self.cs.append('xb') # Cohen et al. (2013)
+        self.cs.append('xb') # Cohen et al. noCEMPs (2013)
+        self.cs.append('xg') # Adibekyan et al. (2012)
+        self.cs.append('xb') # Aoki & Honda (2008)
+        self.cs.append('ob') # Hansen et al. (2012)
+        self.cs.append('xm') # Ishigaki et al. (2012-2013)
+        self.cs.append('om') # Roederer et al. (2009)
+        self.cs.append('xr') # Roederer et al. (2014)
+
+        # Sculptor
+        ##########
         self.cs.append('xc') # Kirby et al. (2010) - Sculptor
         self.cs.append('xb') # Frebel (2010) - Sculptor
         self.cs.append('om') # Starkenburg et al. (2013)
         self.cs.append('og') # Jablonka et al. (2015)
+
+        # Fornax
+        ########
 #        self.cs.append('xg') # Kirby et al. (2010) - Fornax
         self.cs.append('oc') # Letarte et al. (2010)
         self.cs.append('ob') # Lemasle et al. (2014)
+
+        # Carina
+        ########
         self.cs.append('og') # Fabrizio et al. (2015)
         self.cs.append('ob') # Lemasle et al. (2012)
         self.cs.append('or') # Venn et al. (2012)
+
+        # LMC
+        #####
         self.cs.append('ob') # Lapenna et al. (2012)
         self.cs.append('or') # Pompeia et al. (2008)
 
@@ -187,6 +230,23 @@ class stellab():
         self.leg.append('Reddy et al. (2006)')
         self.leg.append('Reddy et al. (2003)')
         self.leg.append('Spite et al. (2005)')
+        self.leg.append('Battistini & Bensby (2016)')
+        self.leg.append('Nissen et al. (2014)')
+        self.leg.append('Ramirez et al. (2013)')
+        self.leg.append('Bensby et al. (2014)')
+        self.leg.append('Battistini & Bensby (2015)')
+        self.leg.append('Yong et al. (2013)')
+        self.leg.append('Jacobson et al. (2015)')
+        self.leg.append('Cohen et al. (2013)')
+        self.leg.append('Cohen et al. noCEMPs (2013)')
+        self.leg.append('Adibekyan et al. (2012)')
+        self.leg.append('Aoki & Honda (2008)')
+        self.leg.append('Hansen et al. (2012)')
+        self.leg.append('Ishigaki et al. (2012-13)')
+        self.leg.append('Roederer et al. (2009)')
+#        self.leg.append('Roederer et al. pecul. excluded (2014)')
+        self.leg.append('Roederer et al. (2014)')
+
         self.leg.append('Kirby et al. (2010)')
         self.leg.append('Frebel (2010)')
         self.leg.append('Starkenburg et al. (2013)')
