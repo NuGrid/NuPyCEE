@@ -115,7 +115,7 @@ class sygma( chem_evol ):
                  nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
                  ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',sn1a_energy=1e51,\
-		 ns_merger_on=True, f_binary=1.0, f_merger=0.0028335, \
+		 ns_merger_on=True, f_binary=1.0, f_merger=0.00002, \
                  nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
                  extra_source_on=False, \
                  extra_source_table='yield_tables/extra_source.txt', \
