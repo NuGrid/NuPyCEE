@@ -1,2 +1,6 @@
-start_notebook_server.sh allows to launch a ipython notebook server
-to open the ipython notebooks.
+The ipython notebooks in this directory serve as an introduction
+into how to use the different capabilities of NuPyCEE.
+jupyter allows to run the ipython notebooks and has to be installed. 
+
+start_notebook_server.sh allows to launch a jupyter ipython notebook server
+from which you can open the notebooks.
