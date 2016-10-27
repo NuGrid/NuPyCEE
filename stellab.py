@@ -770,7 +770,7 @@ class stellab():
                 if not return_xy:
 
                     # Reduce the size of APOGEE data
-                    if self.paths[i_obs_index] == 'milky_way_data/APOGEE_stellab':
+                    if self.paths[i_ds] == 'milky_way_data/APOGEE_stellab':
                         ms = 1
                         lw = 1
                     else:
