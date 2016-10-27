@@ -141,7 +141,7 @@ class stellab():
             self.paths_s.append(self.paths[i_path]+'_s')
 
         # List of colors and symbols associated to data sets
-        self.cs.append('.b') # APOGEE - Milky Way
+        self.cs.append('ob') # APOGEE - Milky Way
         self.cs.append('xg') # Frebel (2010) - Milky Way
         self.cs.append('xr') # Venn et al. (2004)
         self.cs.append('xb') # Hinkel et al. (2014)
@@ -273,7 +273,6 @@ class stellab():
             self.elem_list.append([])
             for i_elem in range(0,len(self.solar[i_entry])):
                 self.elem_list[i_entry].append(self.solar[i_entry][i_elem][0])
-
 
         # Declaration of arrays containing information for every solar reference
         self.paths_norm = []  # Path of the files
@@ -469,11 +468,11 @@ class stellab():
     #                Plot Spectro                #
     ##############################################
     def plot_spectro(self,fig=-1, galaxy='', xaxis='[Fe/H]', yaxis='[Mg/Fe]', \
-                     fsize=[10,4.5], fontsize=14, rspace=0.6, bspace=0.15,\
-                     labelsize=15, legend_fontsize=14, ms=6.0, norm='', obs='',\
-                     overplot=False, return_xy=False, show_err=False, \
-                     show_mean_err=False, stat=False, flat=False, show_legend=True, \
-                     sub=1, sub_plot=False, alpha=1.0, lw=1.0):
+                   fsize=[10,4.5], fontsize=14, rspace=0.6, bspace=0.15,\
+                   labelsize=15, legend_fontsize=14, ms=6.0, norm='', obs='',\
+                   overplot=False, return_xy=False, show_err=False, \
+                   show_mean_err=False, stat=False, flat=False, show_legend=True, \
+                   sub=1, sub_plot=False, alpha=1.0, lw=1.0):
  
         '''
         This function plots observational data with the spectroscopic notation:
@@ -573,6 +572,10 @@ class stellab():
 	>>> stellab.plot_spectro(yaxis='[Ti/H]',xaxis='[Mg/H]',galaxy='sculptor',norm='Anders_Grevesse_1989',show_err=True)
 
         '''
+
+        # Copy the marker size
+        ms_copy = ms
+        lw_copy = lw
 
         # Extract the X and Y of the input [X/Y]
         xx, yx = self.__get_x_y(xaxis)
@@ -765,6 +768,15 @@ class stellab():
 
                 # If a plot is generated
                 if not return_xy:
+
+                    # Reduce the size of APOGEE data
+                    if self.paths[i_obs_index] == 'milky_way_data/APOGEE_stellab':
+                        ms = 1
+                        lw = 1
+                    else:
+                        ms = ms_copy
+                        lw = lw_copy
+
                     if re_norm and not sol_ab_found:
                         leg_temp = self.leg[i_ds]+' **'
                     else:
@@ -880,7 +892,6 @@ class stellab():
                             if x_bin[xb] <= xy_plot_all[0][xi][xxi] < x_bin[xb+1]:
                               if xy_plot_all[1][xi][xxi] > -10.0:
                                 y_bin[xb].append(xy_plot_all[1][xi][xxi])
- 
                 
                 y_stat = []
                 for i in range(0,7):
@@ -1103,7 +1114,7 @@ class stellab():
     #                Fig Standard                #
     ##############################################
     def __fig_standard(self, ax, fontsize=8, labelsize=8, lwtickboth=[6,2], \
-                       lwtickmajor=[10,3], markersize=8, rspace=0.6, bspace=0.15, \
+                       lwtickmajor=[10,3], rspace=0.6, bspace=0.15, \
                        legend_fontsize=14):
 
         '''
@@ -1118,9 +1129,9 @@ class stellab():
         ax.xaxis.label.set_size(labelsize)	
 	ax.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
 	ax.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
-	if len(ax.lines)>0:
-		for h in range(len(ax.lines)):
-			ax.lines[h].set_markersize(markersize)
+#	if len(ax.lines)>0:
+#		for h in range(len(ax.lines)):
+#			ax.lines[h].set_markersize(markersize)
 	ax.legend(loc='center left', bbox_to_anchor=(1.01, 0.5), \
              markerscale=0.8,fontsize=legend_fontsize)
         plt.subplots_adjust(right=rspace)
