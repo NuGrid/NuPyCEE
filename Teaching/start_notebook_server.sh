@@ -1,5 +1,8 @@
 #set the path to your NUPYCEE dir
-export SYGMADIR=../
+cd ../
+export SYGMADIR=`pwd`
+cd -
+echo 'set SYGMADIR to '$SYGMADIR
 
 #export path
 export PYTHONPATH=$PYTHONPATH:$SYGMADIR
