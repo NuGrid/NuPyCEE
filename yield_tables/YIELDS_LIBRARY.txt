@@ -50,6 +50,16 @@ SNIa:
 		
 		References:
 			Thielemann et al. 2003, http://ukads.nottingham.ac.uk/abs/2003fthp.conf..331T
+
+	Iwamoto et al. 1999:
+		
+		Tables:
+			sn1a_i99_CDD1.txt
+			sn1a_i99_CDD2.txt
+			sn1a_i99_W7.txt
+		
+		References:
+			Iwamoto et al. 1999 http://adsabs.harvard.edu/abs/1999ApJS..125..439I
 		
 	Thielemann et al. 1986:
 
@@ -59,16 +69,25 @@ SNIa:
 		References:
 			Tielemann et al. 1986, http://ukads.nottingham.ac.uk/abs/1986A%26A...158...17T 
 
-NS mergers:
+NS-NS and BH-NS mergers:
 
 	Rosswog et al. 2014:
 
 		Tables:
-			r_process_rosswog_2014.txt 
-			Can be read in with variable nsmerger_table.
+			r_process_rosswog_2014.txt
+			Can be read in with variable nsmerger_table and bhnsmerger_table.
 	
 		References:
 			Rosswog et al. 2014, http://ukads.nottingham.ac.uk/abs/2014MNRAS.439..744R	
+
+	Arnould et al. 2007:
+
+		Tables:
+			r_process_arnould_2007.txt
+			Can be read in with variable nsmerger_table and bhnsmerger_table.
+	
+		References:
+			Arnould et al. 2007, http://adsabs.harvard.edu/abs/2007PhR...450...97A
 
 MHD Jets: !!Needs confirmation
 
