@@ -10,5 +10,3 @@ This is a code repository containing the simple stellar population code SYGMA (S
 **Userguides**: All of our codes have userguides that are available on WENDI (<a href="http://adsabs.harvard.edu/abs/1999ApJ...513..156M">http://www.nugridstars.org/projects/wendi</a>).
 
 **Acknowledgments**: The three codes are currently considered as unpublished material. Please look regularly in the ACKNOWLEDGMENTS.md file, as we will update the proper references that should be made when using NuGrid chemical evolution tools.
-
-test
