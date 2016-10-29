@@ -2302,11 +2302,14 @@ class chem_evol(object):
            self.history.sn1a_rate == 'maoz' or \
            self.history.sn1a_rate == 'power_law':
 
-            # Get the lifetimes of the considered stars
-            spline_lifetime, spline_min_time = self.__get_spline_info()
+            # Get the lifetimes of the considered stars (if needed ...) 
+            if len(self.poly_fit_dtd_5th) == 0:
+                spline_lifetime, spline_min_time = self.__get_spline_info()
 
         # Normalize the SN Ia rate if not already done
-        if self.history.sn1a_rate == 'exp' and not self.normalized:
+        if len(self.poly_fit_dtd_5th) > 0 and not self.normalized:
+            self.__normalize_poly_fit()
+        elif self.history.sn1a_rate == 'exp' and not self.normalized:
             self.__normalize_efolding(spline_min_time)
         elif self.history.sn1a_rate == 'gauss' and not self.normalized:
             self.__normalize_gauss(spline_min_time)
@@ -3356,7 +3359,7 @@ class chem_evol(object):
                 # Normal integration if beta_pow != -1.0
                 else:
                     temp_int = (t_temp_up**(self.beta_pow+1.0) - \
-                         t_temp_low*(self.beta_pow+1.0)) / (self.beta_pow+1.0)
+                         t_temp_low**(self.beta_pow+1.0)) / (self.beta_pow+1.0)
 
                 # Add the number of SNe Ia (with the wrong units)
                 n1a += temp_int
