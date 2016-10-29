@@ -113,11 +113,14 @@ class sygma( chem_evol ):
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
-                 ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
+                 ini_alpha=True, table='yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt', \
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',sn1a_energy=1e51,\
-		 ns_merger_on=True, f_binary=1.0, f_merger=0.00002, \
+		 ns_merger_on=True, bhns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
+                 t_merger_max=1.0e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
+                 m_ej_bhnsm=2.5e-02, \
+                 bhnsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', \
                  nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
-                 extra_source_on=False, \
+                 extra_source_on=False, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0, \
                  extra_source_table='yield_tables/extra_source.txt', \
 		 f_extra_source=1.0, \
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -126,12 +129,15 @@ class sygma( chem_evol ):
                  nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0.0, \
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
-                 stellar_param_on=False, \
+                 stellar_param_on=False, t_dtd_poly_split=-1.0, \
 		 stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',
-		 dt_in=np.array([]),\
+		 tau_ferrini=False, dt_in=np.array([]),\
+                 nsmerger_dtd_array=np.array([]), bhnsmerger_dtd_array=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]), \
+                 mass_sampled=np.array([]), scale_cor=np.array([]),\
+                 poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
 		 ytables_nsmerger_in=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
@@ -143,24 +149,33 @@ class sygma( chem_evol ):
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table,sn1a_energy=sn1a_energy,\
 		 ns_merger_on=ns_merger_on, nsmerger_table=nsmerger_table, \
 		 f_binary=f_binary, f_merger=f_merger, \
+                 bhns_merger_on=bhns_merger_on,
+                 m_ej_bhnsm=m_ej_bhnsm, bhnsmerger_table=bhnsmerger_table, \
+                 nsm_dtd_power=nsm_dtd_power, \
+                 t_merger_max=t_merger_max, m_ej_nsm = m_ej_nsm, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
                  extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
 		 pop3_table=pop3_table, \
+                 nb_nsm_per_m=nb_nsm_per_m, t_nsm_coal=t_nsm_coal, \
                  imf_bdys_pop3=imf_bdys_pop3, \
                  imf_yields_range_pop3=imf_yields_range_pop3, \
                  starbursts=starbursts, beta_pow=beta_pow, \
                  gauss_dtd=gauss_dtd,exp_dtd=exp_dtd,\
                  nb_1a_per_m=nb_1a_per_m,direct_norm_1a=direct_norm_1a, \
-                 Z_trans=Z_trans, f_arfo=f_arfo, \
+                 Z_trans=Z_trans, f_arfo=f_arfo, t_dtd_poly_split=t_dtd_poly_split, \
                  imf_yields_range=imf_yields_range,exclude_masses=exclude_masses,\
                  netyields_on=netyields_on,wiersmamod=wiersmamod,\
-                 yield_interp=yield_interp, \
-                 ytables_in=ytables_in, \
+                 yield_interp=yield_interp, tau_ferrini=tau_ferrini,\
+                 ytables_in=ytables_in, nsmerger_dtd_array=nsmerger_dtd_array, \
+                 bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
 		 ytables_1a_in=ytables_1a_in, ytables_nsmerger_in=ytables_nsmerger_in, \
-		 dt_in=dt_in,stellar_param_on=stellar_param_on,stellar_param_table=stellar_param_table)
+		 dt_in=dt_in,stellar_param_on=stellar_param_on,\
+                 stellar_param_table=stellar_param_table,\
+                 poly_fit_dtd_5th=poly_fit_dtd_5th,\
+                 poly_fit_range=poly_fit_range)
 
         if self.need_to_quit:
             return
@@ -172,6 +187,8 @@ class sygma( chem_evol ):
 
         # Attribute the input parameter to the current object
         self.sfr = sfr
+        self.mass_sampled = mass_sampled
+        self.scale_cor = scale_cor
 
         # Get the SFR of every timestep
         self.sfrin_i = self.__sfr()
@@ -204,7 +221,7 @@ class sygma( chem_evol ):
             self.sfrin = self.sfrin_i[i-1]
 
             # Run the timestep i
-            self._evol_stars(i)
+            self._evol_stars(i, self.mass_sampled, self.scale_cor)
 
             # Get the new metallicity of the gas
             self.zmetal = self._getmetallicity(i)
