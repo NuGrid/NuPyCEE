@@ -27,6 +27,7 @@ v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg,
 
 v0.4 FEB2015: C. Ritter, B. Cote
 
+v0.5 OCT2016: B. Cote, C. Ritter, A. Paul
 
 Usage
 =====
@@ -253,7 +254,8 @@ class chem_evol(object):
 	Default : false.
 
 
-    total_ejecta_interp : if true then interpolates total ejecta given in yield tables 
+    total_ejecta_interp : boolean
+        if true then interpolates total ejecta given in yield tables 
 			  over initial mass range.  
 
 	Default : True
@@ -274,6 +276,35 @@ class chem_evol(object):
 
         Default value : 0
 
+    poly_fit_dtd : list
+        Array of polynomial coefficients of a customized delay-time distribution
+        function for SNe Ia.  The polynome can be of any order.
+        Example : [0.2, 0.3, 0.1] for rate_snIa(t) = 0.2*t**2 + 0.3*t + 0.1
+        Note : Must be used with the poly_fit_range parameter (see below)
+
+        Default value : np.array([]) --> Desactivated
+
+    poly_fit_range : list --> [t_min,t_max]
+        Time range where the customized delay-time distribution function for
+        SNe Ia will be applied for a simple stellar population.
+
+        Default value : np.array([]) --> Desactivated
+
+    mass_sampled : list
+        Stellar masses that are sampled to eject yields in a stellar population.
+        Warning : The use of this parameter bypasses the IMF calculation and 
+        do not ensure a correlation with the star formation rate.  Each sampled
+        mass will eject the exact amount of mass give in the stellar yields. 
+
+        Default value : np.array([]) --> Desactivated
+
+    scale_cor : 2D list
+        Determine the fraction of yields ejected for any given stellar mass bin.
+        Example : [ [1.0,8], [0.5,100] ] means that stars with initial mass between
+        0 and 8 Msu will eject 100% of their yields, and stars with initial mass
+        between 8 and 100 will eject 50% of their yields.  There is no limit for
+        the number of [%,M_upper_limit] arrays used.
+        Default value : np.array([])  --> Desactivated
 
     Run example
     ===========
@@ -290,10 +321,14 @@ class chem_evol(object):
              sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
-             hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',sn1a_energy=1e51,\
-             ns_merger_on=False, f_binary=1.0, f_merger=0.00002,\
-             nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
-             extra_source_on=False, \
+             hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
+             sn1a_energy=1e51, ns_merger_on=True, bhns_merger_on=False,\
+             f_binary=1.0, f_merger=0.0008, t_merger_max=1.0e10,\
+             m_ej_nsm = 2.5e-02, nb_nsm_per_m=-1.0, \
+             t_nsm_coal=-1.0, m_ej_bhnsm=2.5e-02, nsm_dtd_power=[],\
+             bhnsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', \
+             nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt',\
+             iniabu_table='', extra_source_on=False, \
              extra_source_table='yield_tables/extra_source.txt', \
 	     f_extra_source=1.0, \
              pop3_table='yield_tables/popIII_heger10.txt', \
@@ -302,9 +337,13 @@ class chem_evol(object):
              exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=-1, \
              f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
              netyields_on=False,wiersmamod=False,yield_interp='lin',\
-	     total_ejecta_interp=True,\
-             input_yields=False,t_merge=-1.0,stellar_param_on=True,stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',\
-             popIII_on=True,ism_ini=np.array([]),\
+	     total_ejecta_interp=True, tau_ferrini=False,\
+             input_yields=False,t_merge=-1.0,stellar_param_on=True,\
+             stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',\
+             popIII_on=True, out_follows_E_rate=False, \
+             t_dtd_poly_split=-1.0, \
+             ism_ini=np.array([]), nsmerger_dtd_array=np.array([]),\
+             bhnsmerger_dtd_array=np.array([]),
              ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
              isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
              zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
@@ -313,7 +352,9 @@ class chem_evol(object):
              ej_massive=np.array([]), ej_agb=np.array([]),\
              ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
              ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
-             dt_ssp=np.array([])):
+             dt_ssp=np.array([]), poly_fit_dtd_5th=np.array([]),\
+             mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
+             poly_fit_range=np.array([])):
 
         # Initialize the history class which keeps the simulation in memory
 	self.history = self.__history()
@@ -353,6 +394,7 @@ class chem_evol(object):
         self.iniabu_table = iniabu_table
         self.sn1a_table = sn1a_table
         self.nsmerger_table = nsmerger_table
+        self.bhnsmerger_table = bhnsmerger_table
         self.extra_source_table = extra_source_table
         self.pop3_table = pop3_table
 	self.hardsetZ = hardsetZ
@@ -362,8 +404,19 @@ class chem_evol(object):
 	self.sn1a_on = sn1a_on
 	self.sn1a_energy=sn1a_energy
         self.ns_merger_on = ns_merger_on
+        self.bhns_merger_on = bhns_merger_on
+        self.nsmerger_dtd_array = nsmerger_dtd_array
+        self.len_nsmerger_dtd_array = len(nsmerger_dtd_array)
+        self.bhnsmerger_dtd_array = bhnsmerger_dtd_array
+        self.len_bhnsmerger_dtd_array = len(bhnsmerger_dtd_array)
 	self.f_binary = f_binary
 	self.f_merger = f_merger
+        self.t_merger_max = t_merger_max
+        self.m_ej_nsm = m_ej_nsm
+        self.m_ej_bhnsm = m_ej_bhnsm
+        self.nb_nsm_per_m = nb_nsm_per_m
+        self.t_nsm_coal = t_nsm_coal
+        self.nsm_dtd_power = nsm_dtd_power
         self.special_timesteps = special_timesteps
         self.iolevel = iolevel
         self.nb_1a_per_m = nb_1a_per_m
@@ -377,24 +430,42 @@ class chem_evol(object):
 	self.exp_dtd=exp_dtd
         self.normalized = False # To avoid normalizing SN Ia rate more than once
 	self.nsm_normalized = False # To avoid normalizing NS merger rate more than once
+	self.bhnsm_normalized = False # To avoid normalizing BHNS merger rate more than once
         self.f_arfo = f_arfo
         self.imf_yields_range = imf_yields_range
         self.exclude_masses=exclude_masses
         self.netyields_on=netyields_on
 	self.wiersmamod=wiersmamod
 	self.yield_interp=yield_interp
+        self.out_follows_E_rate = out_follows_E_rate
 	self.total_ejecta_interp=total_ejecta_interp
+        self.tau_ferrini = tau_ferrini
         self.t_merge = t_merge
         self.ism_ini = ism_ini
         self.dt_in = dt_in
+        self.t_dtd_poly_split = t_dtd_poly_split
+        self.poly_fit_dtd_5th = poly_fit_dtd_5th
+        self.poly_fit_range = poly_fit_range
 	self.stellar_param_table=stellar_param_table
 	self.stellar_param_on=stellar_param_on
+
         # Normalization constants for the Kroupa IMF
         if imf_type == 'kroupa':
             self.p0 = 1.0
             self.p1 = 0.08**(-0.3 + 1.3)
             self.p2 = 0.5**(-1.3 + 2.3)
             self.p3 = 1**(-2.3 +2.3)
+
+        # Define the broken power-law of Ferrini IMF approximation
+        self.norm_fer  = [3.1,1.929,1.398,0.9113,0.538,0.3641,0.2972,\
+                          0.2814,0.2827,0.298,0.305,0.3269,0.3423,0.3634]
+        self.alpha_fer = [0.6,0.35,0.15,-0.15,-0.6,-1.05,-1.4,-1.6,-1.7,\
+                          -1.83,-1.85,-1.9,-1.92,-1.94]
+        self.m_up_fer  = [0.15,0.2,0.24,0.31,0.42,0.56,0.76,1.05,1.5,\
+                          3.16,4.0,10.0,20.0,120]
+        for i_fer in range(0,len(self.norm_fer)):
+            self.alpha_fer[i_fer] = self.alpha_fer[i_fer] + 1
+            self.norm_fer[i_fer] = self.norm_fer[i_fer]/(self.alpha_fer[i_fer])
 
         # Parameter that determines if not enough gas is available for star formation
         self.not_enough_gas_count = 0
@@ -408,7 +479,6 @@ class chem_evol(object):
         self.history.timesteps = timesteps
         self.nb_timesteps = len(timesteps)
 
-	
         # If the yield tables has already been read previously ...
         if input_yields:
 
@@ -441,8 +511,9 @@ class chem_evol(object):
         self.nb_timesteps = len(timesteps)
 
         # Initialisation of the storing arrays
-        mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, mdot_massive, mdot_agb, \
-        mdot_1a, mdot_nsm, sn1a_numbers, sn2_numbers, nsm_numbers, imf_mass_ranges, \
+        mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, ymgal_bhnsm,\
+        mdot_massive, mdot_agb, mdot_1a, mdot_nsm, mdot_bhnsm, sn1a_numbers,\
+        sn2_numbers, nsm_numbers, bhnsm_numbers, imf_mass_ranges, \
         imf_mass_ranges_contribution, imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
@@ -461,18 +532,23 @@ class chem_evol(object):
         self.history.ism_iso_yield_agb.append(ymgal_agb[0])
         self.history.ism_iso_yield_1a.append(ymgal_1a[0])
 	self.history.ism_iso_yield_nsm.append(ymgal_nsm[0])
+	self.history.ism_iso_yield_bhnsm.append(ymgal_bhnsm[0])
         self.history.ism_iso_yield_massive.append(ymgal_massive[0])
         self.history.sn1a_numbers.append(0)
 	self.history.nsm_numbers.append(0)
+	self.history.bhnsm_numbers.append(0)
         self.history.sn2_numbers.append(0)
         self.history.m_locked = []
         self.history.m_locked_agb = []
         self.history.m_locked_massive = []
 
-        # Keep track of the mass-loss rate of massive stars
+        # Keep track of the mass-loss rate of massive stars and SNe Ia
         self.massive_ej_rate = []
         for k in range(self.nb_timesteps + 1):
             self.massive_ej_rate.append(0.0)
+        self.sn1a_ej_rate = []
+        for k in range(self.nb_timesteps + 1):
+            self.sn1a_ej_rate.append(0.0)
 
         # Attribute arrays and variables to the current object
         self.mdot = mdot
@@ -481,12 +557,15 @@ class chem_evol(object):
         self.ymgal_agb = ymgal_agb
         self.ymgal_1a = ymgal_1a
 	self.ymgal_nsm = ymgal_nsm
+	self.ymgal_bhnsm = ymgal_bhnsm
         self.mdot_massive = mdot_massive
         self.mdot_agb = mdot_agb
         self.mdot_1a = mdot_1a
 	self.mdot_nsm = mdot_nsm
+	self.mdot_bhnsm = mdot_bhnsm
         self.sn1a_numbers = sn1a_numbers
 	self.nsm_numbers = nsm_numbers
+	self.bhnsm_numbers = bhnsm_numbers
         self.sn2_numbers = sn2_numbers
         self.imf_mass_ranges = imf_mass_ranges
         self.imf_mass_ranges_contribution = imf_mass_ranges_contribution
@@ -540,7 +619,7 @@ class chem_evol(object):
 
         # IMF
         if not self.imf_type in ['salpeter','chabrier','kroupa','input', \
-            'alphaimf','chabrieralpha','fpp']:
+            'alphaimf','chabrieralpha','fpp', 'kroupa93']:
             print 'Error - Selected imf_type is not available.'
             self.need_to_quit = True
 
@@ -560,10 +639,11 @@ class chem_evol(object):
              or (self.transitionmass>self.imf_yields_range[1]):
             print 'Error - Transitionmass outside imf yield range'
             self.need_to_quit = True
-	if ((self.nsmerger_bdys[0] >  self.imf_bdys[1]) or \
-            (self.nsmerger_bdys[1] < self.imf_bdys[0])):
-            print 'Error - part of nsmerger_bdys must be within imf_bdys.'
-            self.need_to_quit = True
+        if self.ns_merger_on:
+	    if ((self.nsmerger_bdys[0] >  self.imf_bdys[1]) or \
+                (self.nsmerger_bdys[1] < self.imf_bdys[0])):
+                print 'Error - part of nsmerger_bdys must be within imf_bdys.'
+                self.need_to_quit = True
 
         # SN Ia delay-time distribution function
         if not self.history.sn1a_rate in \
@@ -592,6 +672,14 @@ class chem_evol(object):
             if self.netyields_on == True:
                 print 'Error - net yields setting not usable with PopIII at the moment.'
                 self.need_to_quit = True
+
+        # If input poly fit DTD, the applicable range must be specified
+        if len(self.poly_fit_dtd_5th) > 0:
+            if not len(self.poly_fit_range) == 2:
+                print 'Error - poly_fit_range must be specified when ',\
+                      'using the poly_fit_dtd_5th parameter the SNe Ia DTD.'
+                self.need_to_quit = True
+
 
     ##############################################
     #                  Get Iniabu                #
@@ -805,19 +893,23 @@ class chem_evol(object):
         ymgal_agb = []
         ymgal_1a = []
 	ymgal_nsm = []
+	ymgal_bhnsm = []
         for k in range(nb_dt_gsa + 1):
             ymgal_massive.append(nb_iso_gsa * [0])
             ymgal_agb.append(nb_iso_gsa * [0])
             ymgal_1a.append(nb_iso_gsa * [0])
-	    ymgal_nsm.append(nb_iso_gsa * [0])
+            ymgal_bhnsm.append(nb_iso_gsa * [0])
+            ymgal_nsm.append(nb_iso_gsa * [0])
         mdot_massive = copy.deepcopy(mdot)
         mdot_agb     = copy.deepcopy(mdot)
         mdot_1a      = copy.deepcopy(mdot)
-	mdot_nsm     = copy.deepcopy(mdot)
+        mdot_nsm     = copy.deepcopy(mdot)
+        mdot_bhnsm   = copy.deepcopy(mdot)
 
         # Number of SNe Ia, core-collapse SNe, and neutron star mergers
         sn1a_numbers = [0] * nb_dt_gsa
 	nsm_numbers = [0] * nb_dt_gsa
+	bhnsm_numbers = [0] * nb_dt_gsa
         sn2_numbers  = [0] * nb_dt_gsa
         self.wd_sn1a_range  = [0] * nb_dt_gsa
         self.wd_sn1a_range1 = [0] * nb_dt_gsa
@@ -832,9 +924,10 @@ class chem_evol(object):
         imf_mass_ranges_mtot = [[]] * (nb_dt_gsa + 1)
 
         # Return all the arrays
-        return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, mdot_massive, \
-               mdot_agb, mdot_1a, mdot_nsm, sn1a_numbers, sn2_numbers, nsm_numbers, \
-               imf_mass_ranges, imf_mass_ranges_contribution, imf_mass_ranges_mtot
+        return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, ymgal_bhnsm,\
+               mdot_massive, mdot_agb, mdot_1a, mdot_nsm, mdot_bhnsm, sn1a_numbers,\
+               sn2_numbers, nsm_numbers, bhnsm_numbers, imf_mass_ranges,\
+               imf_mass_ranges_contribution, imf_mass_ranges_mtot
 
 
     ##############################################
@@ -910,7 +1003,8 @@ class chem_evol(object):
     ##############################################
     #                  Evol Stars                #
     ##############################################
-    def _evol_stars(self, i):
+    def _evol_stars(self, i, mass_sampled=np.array([]), \
+                    scale_cor=np.array([])):
 
         '''
         This function executes a part of a single timestep with the simulation
@@ -922,6 +1016,8 @@ class chem_evol(object):
         ========
 
           i : Index of the current timestep
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
 
         '''
 
@@ -969,6 +1065,7 @@ class chem_evol(object):
                 self.ymgal_agb[i][k] = f_lock * self.ymgal_agb[i-1][k]
                 self.ymgal_1a[i][k] = f_lock * self.ymgal_1a[i-1][k]
 		self.ymgal_nsm[i][k] = f_lock * self.ymgal_nsm[i-1][k]
+		self.ymgal_bhnsm[i][k] = f_lock * self.ymgal_bhnsm[i-1][k]
                 self.m_locked += self.sfrin * self.ymgal[i-1][k]
 
             # Output information
@@ -977,7 +1074,7 @@ class chem_evol(object):
                       ', new ISM mass:','{:.3E}'.format(sum(self.ymgal[i]))
 
             # Calculate stellar ejecta and the number of SNe
-            self.__sfrmdot(i)
+            self.__sfrmdot(i, mass_sampled, scale_cor)
 
         # If no star is forming during the current timestep ...
         else:
@@ -987,11 +1084,16 @@ class chem_evol(object):
             self.ymgal_agb[i] = self.ymgal_agb[i-1]
             self.ymgal_1a[i] = self.ymgal_1a[i-1]
 	    self.ymgal_nsm[i] = self.ymgal_nsm[i-1]
+	    self.ymgal_bhnsm[i] = self.ymgal_bhnsm[i-1]
             self.ymgal_massive[i] = self.ymgal_massive[i-1]
 
             # Output information
             if self.iolevel > 2:
                 print 'Finished getting mdot',self.gettime()
+
+            # Initialize array containing no CC SNe for the SSP_i-1
+            if self.out_follows_E_rate:
+                self.ssp_nb_cc_sne = np.array([])
 		
         # Add stellar ejecta to the gas reservoir
         self.ymgal[i] = np.array(self.ymgal[i]) + np.array(self.mdot[i-1])
@@ -1000,12 +1102,16 @@ class chem_evol(object):
         self.ymgal_massive[i] = np.array(self.ymgal_massive[i]) + \
                                 np.array(self.mdot_massive[i-1])
         self.ymgal_nsm[i] = np.array(self.ymgal_nsm[i]) + np.array(self.mdot_nsm[i-1])
+        self.ymgal_bhnsm[i] = np.array(self.ymgal_bhnsm[i]) + np.array(self.mdot_bhnsm[i-1])
 
         # Convert the mass ejected by massive stars into rate
         if self.history.timesteps[i-1] == 0.0:
             self.massive_ej_rate[i-1] = 0.0
+            self.sn1a_ej_rate[i-1] = 0.0
         else:
             self.massive_ej_rate[i-1] = sum(self.mdot_massive[i-1]) / \
+                self.history.timesteps[i-1]
+            self.sn1a_ej_rate[i-1] = sum(self.mdot_1a[i-1]) / \
                 self.history.timesteps[i-1]
 
 
@@ -1038,9 +1144,11 @@ class chem_evol(object):
         self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
         self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
         self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
+        self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
         self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
         self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
         self.history.nsm_numbers.append(self.nsm_numbers[i-1])
+        self.history.bhnsm_numbers.append(self.bhnsm_numbers[i-1])
         self.history.sn2_numbers.append(self.sn2_numbers[i-1])
         self.history.m_locked.append(self.m_locked)	
         self.history.m_locked_agb.append(self.m_locked_agb)
@@ -1073,6 +1181,8 @@ class chem_evol(object):
             self.history.ism_elem_yield_1a.append(conv[1])
 	    conv = self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h])
 	    self.history.ism_elem_yield_nsm.append(conv[1])
+	    conv = self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h])
+	    self.history.ism_elem_yield_bhnsm.append(conv[1])
             conv = self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h])
             self.history.ism_elem_yield_massive.append(conv[1])
 
@@ -1119,9 +1229,9 @@ class chem_evol(object):
             global_path+self.pop3_table,isotopes,excludemass=self.exclude_masses)
 
         # Check compatibility between PopIII stars and NuGrid yields
-        isotopes_pop3 = self.ytables_pop3.get(10,0.0,'Isotopes')
-        if not isotopes_pop3 == isotopes:
-            print 'Warning - Network not set correctly.'
+#        isotopes_pop3 = self.ytables_pop3.get(10,0.0,'Isotopes')
+#        if not isotopes_pop3 == isotopes:
+#            print 'Warning - Network not set correctly.'
 
         # Interpolate PopIII stellar lifetimes
         self.zm_lifetime_grid_pop3 = \
@@ -1135,6 +1245,10 @@ class chem_evol(object):
         # Read NS merger yields
         self.ytables_nsmerger = ry.read_yield_sn1a_tables( \
             global_path + self.nsmerger_table, isotopes)
+
+        # Read BHNS merger yields
+        self.ytables_bhnsmerger = ry.read_yield_sn1a_tables( \
+            global_path + self.bhnsmerger_table, isotopes)
 
         # Should be modified to include extra source for the yields
         #self.extra_source_on = False
@@ -1156,7 +1270,7 @@ class chem_evol(object):
     ##############################################
     #                  SFR Mdot                  #
     ##############################################
-    def __sfrmdot(self, i):
+    def __sfrmdot(self, i, mass_sampled, scale_cor):
 
         '''
         This function calculates the stellar yields per isotope from the
@@ -1168,6 +1282,8 @@ class chem_evol(object):
         ========
 
           i : Index of the current timestep
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
 
         '''
 
@@ -1184,13 +1300,14 @@ class chem_evol(object):
         # relative to the total stellar mass within imf_bdys.
         mfac = self.__get_mfac()
         #print 'test ',yields_all[mstars.index(9.0)][3]  #N14 3
+
         # Get the mass boundaries on which each star yields will be applied.
         # Ex: 12 Mo model yields might be used for all stars from 8 to 12.5 Mo.
 	# also modifies mstars since some stars could lie outside yield range
 	# therefore we also have to create the yields variable
         mass_bdys,mstars,yields = self.__get_mass_bdys(mstars,yields_all)
-     
         #print 'test ',yields[mstars.index(9.0)][3]  #N14 3
+
         # Apply the IMF on the mass boundaries
         mass_bdys, mstars, yields, massfac, mftot = \
             self.__apply_imf_mass_bdys( mass_bdys, mstars, yields)
@@ -1223,16 +1340,21 @@ class chem_evol(object):
 
         # Calculate ejecta from stars recently formed and add it to the mdot arrays
         self.__calculate_ejecta(mstars, yields, yields_extra, \
-            mass_bdys,massfac, i, func_total_ejecta)
+            mass_bdys,massfac, i, func_total_ejecta, mass_sampled, \
+            scale_cor)
 
         # Add the contribution of SNe Ia, if any ...
-        if (self.sn1a_on == True) and (self.zmetal > 0 or self.hardsetZ > 0):
+        if self.sn1a_on and (self.zmetal > 0 or self.hardsetZ > 0):
             if not (self.imf_bdys[0] > 8 or self.imf_bdys[1] < 3):
                 self.__sn1a_contribution(i)
 
         # Add the contribution of neutron star mergers, if any...
-        if (self.ns_merger_on == True):
+        if self.ns_merger_on:
             self.__nsmerger_contribution(i)
+
+        # Add the contribution of black hole - neutron star mergers, if any...
+        if self.bhns_merger_on:
+            self.__bhnsmerger_contribution(i)
 
     ##############################################
     #               Inter MM Plane               #
@@ -1628,7 +1750,8 @@ class chem_evol(object):
     #             Calculate Ejecta               #
     ##############################################
     def __calculate_ejecta(self, mstars, yields_all, yields_extra, mass_bdys, \
-                           massfac, i, func_total_ejecta):
+                           massfac, i, func_total_ejecta, mass_sampled, \
+                           scale_cor):
 
         '''
         This function calculates the ejecta coming from the stars that are forming
@@ -1644,12 +1767,18 @@ class chem_evol(object):
           mass_bdys : Stellar mass boundaries where yields are applied.
           massfac :  Number of stars in each mass bin (weighted by the IMF)
           i : Index of the current timestep
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
 
         '''
 
         # Variables used for testing
         count_numbers_c = 0
         count_numbers_f = 0
+
+        # Initialize array containing the nb of CC SNe for the SSP_i-1
+        if self.out_follows_E_rate:
+            self.ssp_nb_cc_sne = np.zeros(self.nb_timesteps-i+1,np.float64)
 
         # For every star having yields, from massive down to low-mass stars ...
         for w in range(len(mstars))[::-1]:
@@ -1698,7 +1827,7 @@ class chem_evol(object):
             # Distribute the yields in current and future timesteps
             self.__distribute_yields(i, count_numbers_c, count_numbers_f, yields, \
             yields_extra, maxm, minm, lifetimemin, lifetimemax, p_number, \
-            mstars, w, func_total_ejecta)
+            mstars, w, func_total_ejecta, mass_sampled, scale_cor)
 
 
     ##############################################
@@ -1706,7 +1835,7 @@ class chem_evol(object):
     ##############################################
     def __distribute_yields(self, i, count_numbers_c, count_numbers_f, yields, \
           yields_extra, maxm, minm, lifetimemin, lifetimemax, p_number, mstars, \
-          w, func_total_ejecta):
+          w, func_total_ejecta, mass_sampled, scale_cor):
 
         '''
         This function distributes the ejecta of a specific stellar mass bin over
@@ -1729,6 +1858,8 @@ class chem_evol(object):
           p_number : IMF (number) coefficient in the mass interval.
           mstars : Initial mass of stellar models available in the input yields.
           w : Index of the stellar model providing the yields
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
 
         '''
 
@@ -1788,7 +1919,7 @@ class chem_evol(object):
             # Add the yields to mdot arrays
             break_bol = self.__add_yields_mdot( minm1, maxm1, yields, \
                 yields_extra, i, j, w, number_stars, mstars, tt, lifetimemax, \
-                    p_number, func_total_ejecta)
+                    p_number, func_total_ejecta, mass_sampled, scale_cor)
 
             # Look if the last function demanded a break
             if break_bol:
@@ -1864,7 +1995,8 @@ class chem_evol(object):
     #              Add yields Mdot               #
     ##############################################
     def __add_yields_mdot(self, minm1, maxm1, yields, yields_extra, i, j, w,\
-            number_stars, mstars, tt, lifetimemax, p_number, func_total_ejecta):
+            number_stars, mstars, tt, lifetimemax, p_number, func_total_ejecta,\
+            mass_sampled, scale_cor):
 
         '''
         This function adds the yields of the stars formed during timestep i
@@ -1886,11 +2018,13 @@ class chem_evol(object):
           tt : Time between timestep j and timestep i.
           lifetimemax : Maximum lifetime .
           p_number : IMF (number) coefficient in the mass interval.
+          mass_sampled : Stars sampled in the IMF by an external program
+          scale_cor : Envelope correction for the IMF
+
 
         '''
         # Scale the total yields (see func_total_eject)
 	if (self.total_ejecta_interp == True):
-		#print 'minm1,maxm1',minm1,maxm1
 		m_tot_ejecta=(func_total_ejecta(minm1)+func_total_ejecta(maxm1)) / 2.0
         	scalefactor = m_tot_ejecta / sum(yields)
 		
@@ -1900,6 +2034,23 @@ class chem_evol(object):
         # Output information
         if self.iolevel > 1:
             print 'Scalefactor:', scalefactor
+
+        # Calculate the scaling factor if mass_sampled is provided
+        if len(mass_sampled) > 0:
+            number_stars, yield_factor = self.__get_yield_factor(minm1, \
+                maxm1, mass_sampled, func_total_ejecta, mstars[w])
+
+        # If the IMF is full ...
+        else:
+
+            # If the is a correction to apply to the scale factor ...
+            if len(scale_cor) > 0:
+                scalefactor_factor = self.__get_scale_cor(minm1,\
+                    maxm1, scale_cor)
+                scalefactor = scalefactor * scalefactor_factor
+
+            # Calculate the factor that multiplies the yields
+            yield_factor = scalefactor * number_stars
 
         # For every isotope ...
         for k in range(len(self.ymgal[i])):
@@ -1917,30 +2068,32 @@ class chem_evol(object):
 
 		#if self.history.isotopes[k]=='N-14':
 			#print 'N14: ',mstars[w],yields[k],scalefactor,number_stars			
-
                 # In the case of an extra source in massive stars ...
                 if self.extra_source_on:
                     self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                        yields_extra[k] * self.f_extra_source * scalefactor * number_stars
+                        yields_extra[k] * self.f_extra_source * yield_factor
                     self.mdot[j][k] = self.mdot[j][k] + \
-                        yields_extra[k] * self.f_extra_source * scalefactor * number_stars
+                        yields_extra[k] * self.f_extra_source * yield_factor
                     
                 # Add the contribution of massive stars
                 if k >= 76:
                     self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                        self.f_arfo * yields[k] * scalefactor * number_stars
+                        self.f_arfo * yields[k] * yield_factor
                 else:
                     self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                        yields[k] * scalefactor * number_stars
+                        yields[k] * yield_factor
 
             # Add contribution of AGB stars
             else:
                 self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
-                    yields[k] * scalefactor * number_stars
+                    yields[k] * yield_factor
 
         # Count the number of core-collapse SNe
         if mstars[w] > self.transitionmass:
             self.sn2_numbers[j] += number_stars
+            if self.out_follows_E_rate:
+                self.ssp_nb_cc_sne[j-i-1] += number_stars
+#                self.ssp_nb_cc_sne[j-i+1] += number_stars
         if ((minm1 >= 3) and (maxm1 <= 8)) or ((minm1 < 3) and (maxm1 > 8)):
             self.wd_sn1a_range1[j] += number_stars
         elif minm1 < 3 and maxm1 > 3:
@@ -1993,6 +2146,124 @@ class chem_evol(object):
 
         # Return whether the parent function needs to break or not
         return break_bol
+
+
+    ##############################################
+    #               Get Yield Factor             #
+    ##############################################
+    def __get_yield_factor(self, minm1, maxm1, mass_sampled, \
+                           func_total_ejecta, m_table):
+
+        '''
+        This function calculates the factor that must be multiplied to
+        the input stellar yields, given the mass bin implied for the 
+        considered timestep and the stellar masses sampled by an external
+        program.
+   
+        Argument
+        ========
+
+          minm1 : Minimum stellar mass having ejecta in this timestep j
+          maxm1 : Minimum stellar mass having ejecta in this timestep j
+          mass_sampled : Stellar mass sampled by an external program
+          func_total_ejecta : Relation between M_tot_ej and stellar mass
+          m_table : Mass of the star in the table providing the yields
+
+        '''
+
+        # Initialisation of the number of stars sampled in this mass bin
+        nb_sampled_stars = 0.0
+
+        # Initialisation of the total mass ejected
+        m_ej_sampled = 0.0
+
+        # For all mass sampled ...
+        for i_gyf in range(0,len(mass_sampled)):
+
+            # If the mass is within the mass bin considered in this step ...
+            if mass_sampled[i_gyf] >= minm1 and mass_sampled[i_gyf] < maxm1:
+
+                # Add a star and cumulate the mass ejected
+                m_ej_sampled += func_total_ejecta(mass_sampled[i_gyf])
+                nb_sampled_stars += 1.0
+
+            # Stop the loop if the mass bin has been covered
+            if mass_sampled[i_gyf] >= maxm1:
+                break
+
+        # If no star is sampled in the current mass bin ...
+        if nb_sampled_stars == 0.0:
+
+            # No ejecta
+            return 0.0, 0.0
+
+        # If stars have been sampled ...
+        else:
+
+            # Calculate an adapted scalefactor parameter and return yield_factor
+            return nb_sampled_stars, m_ej_sampled / func_total_ejecta(m_table)
+
+
+    ##############################################
+    #                Get Scale Cor               #
+    ##############################################
+    def __get_scale_cor(self, minm1, maxm1, scale_cor):
+
+        '''
+        This function calculates the envelope correction that must be
+        applied to the IMF.  This correction can be used the increase
+        or reduce the number of stars in a particular mass bin, without
+        creating a new IMF.  It returns the scalefactor_factor, that will
+        be multiplied to scalefactor (e.g., 1.0 --> no correction)
+   
+        Argument
+        ========
+
+          minm1 : Minimum stellar mass having ejecta in this timestep j
+          maxm1 : Minimum stellar mass having ejecta in this timestep j
+          scale_cor : Envelope correction for the IMF
+
+        '''
+
+        # Initialization of the scalefactor correction factor
+        scalefactor_factor = 0.0
+
+        # Calculate the width of the stellar mass bin
+        m_bin_width_inv = 1 / (maxm1 - minm1)
+
+        # Cumulate the number of overlaped array bins
+        nb_overlaps = 0
+
+        # For each mass bin in the input scale_cor array ...
+        for i_gsc in range(0,len(scale_cor)):
+
+            # Copy the lower-mass limit of the current array bin
+            if i_gsc == 0:
+                m_low_temp = 0.0
+            else:
+                m_low_temp = scale_cor[i_gsc-1][0]
+
+            # If the array bin overlaps the considered stellar mass bin ...
+            if (scale_cor[i_gsc][0] > minm1 and scale_cor[i_gsc][0] <= maxm1)\
+              or (m_low_temp > minm1 and m_low_temp < maxm1)\
+              or (scale_cor[i_gsc][0] >= maxm1 and m_low_temp <= minm1):
+
+                # Calculate the stellar bin fraction covered by the array bin
+                frac_temp = (min(maxm1, scale_cor[i_gsc][0]) - \
+                            max(minm1, m_low_temp)) * m_bin_width_inv
+
+                # Cumulate the correction 
+                scalefactor_factor += frac_temp * scale_cor[i_gsc][1]
+
+                # Increment the number of overlaps
+                nb_overlaps += 1
+
+        # Warning is no overlap
+        if nb_overlaps == 0:
+            print '!!Warning - No overlap with scale_cor!!'
+
+        # Return the scalefactor correction factor
+        return scalefactor_factor
 
 
     ##############################################
@@ -2055,45 +2326,63 @@ class chem_evol(object):
             tt += self.history.timesteps[j]
             timemax = tt
 
-            # Calculate the number of SNe Ia if with Vogelsberger SN Ia rate
-            if self.history.sn1a_rate=='vogelsberger':
-            	n1a = self.__vogelsberger13(timemin, timemax)
+            # For an input polynomial DTD ...
+            if len(self.poly_fit_dtd_5th) > 0:
 
-            # No SN Ia if the minimum current stellar lifetime is too long
-            if spline_min_time > timemax:
-                n1a = 0
+                # If no SN Ia ...
+                if timemax < self.poly_fit_range[0] or \
+                   timemin > self.poly_fit_range[1]:
+                    n1a = 0.0
 
-            # If SNe Ia occur during this timestep j ...		
+                # If SNe Ia occur during this timestep j ...
+                else:
+
+                    # Calculate the number of SNe Ia and white dwarfs (per Mo)
+                    wd_number = 0.0 # Could be calculated if needed
+                    n1a = self.__poly_dtd(timemin, timemax)
+                    
+            # For other DTDs ...
             else:
 
-                # Set the lower time limit for the integration
-                if timemin < spline_min_time:
-                    timemin = spline_min_time 
+              # Calculate the number of SNe Ia if with Vogelsberger SN Ia rate
+              if self.history.sn1a_rate=='vogelsberger':
+                  n1a = self.__vogelsberger13(timemin, timemax)
 
-                # For an exponential SN Ia rate ...
-                if self.history.sn1a_rate == 'exp':
+              # No SN Ia if the minimum current stellar lifetime is too long
+              if spline_min_time > timemax:
+                  n1a = 0
+
+              # If SNe Ia occur during this timestep j ...		
+              else:
+
+                  # Set the lower time limit for the integration
+                  if timemin < spline_min_time:
+                      timemin = spline_min_time 
+
+                  # For an exponential SN Ia rate ...
+                  if self.history.sn1a_rate == 'exp':
        
-                    # Calculate the number of SNe Ia and white dwarfs (per Mo)
-                    n1a, wd_number = self.__efolding(timemin, \
-                        timemax, spline_lifetime)
+                      # Calculate the number of SNe Ia and white dwarfs (per Mo)
+                      n1a, wd_number = self.__efolding(timemin, \
+                          timemax, spline_lifetime)
 
-                # For a power law SN Ia rate ...
-                elif self.history.sn1a_rate == 'maoz' or \
-                     self.history.sn1a_rate == 'power_law':
+                  # For a power law SN Ia rate ...
+                  elif self.history.sn1a_rate == 'maoz' or \
+                       self.history.sn1a_rate == 'power_law':
 
-                    # Calculate the number of SNe Ia and white dwarfs (per Mo)
-                    n1a, wd_number = self.__maoz12_powerlaw(timemin, \
-                        timemax, spline_lifetime)
+                      # Calculate the number of SNe Ia and white dwarfs (per Mo)
+                      n1a, wd_number = self.__maoz12_powerlaw(timemin, \
+                          timemax, spline_lifetime)
 
-                # For a gaussian SN Ia rate ...
-                elif self.history.sn1a_rate == 'gauss':
+                  # For a gaussian SN Ia rate ...
+                  elif self.history.sn1a_rate == 'gauss':
 
-                    # Calculate the number of SNe Ia and white dwarfs (per Mo)
-                    n1a, wd_number = self.__gauss(timemin, \
-                        timemax, spline_lifetime)
+                      # Calculate the number of SNe Ia and white dwarfs (per Mo)
+                      n1a, wd_number = self.__gauss(timemin, \
+                          timemax, spline_lifetime)
 
-                # Cumulate the number of white dwarfs in the SN Ia mass range
-                self.wd_sn1a_range[j] += (wd_number * self.m_locked)	
+                  # Cumulate the number of white dwarfs in the SN Ia mass range
+                  self.wd_sn1a_range[j] += (wd_number * self.m_locked)
 
             # Convert number of SNe Ia per Mo into real number of SNe Ia
             n1a = n1a * self.m_locked
@@ -2117,13 +2406,14 @@ class chem_evol(object):
             self.mdot[j] = np.array(self.mdot[j]) +  np.array(n1a * yields1a)
             self.mdot_1a[j] = np.array(self.mdot_1a[j]) + np.array(n1a*yields1a)
 
+
     #############################################
     #            NS Merger Contribution         #
     #############################################
     def __nsmerger_contribution(self, i):
         '''
-        This function calculates the contribution of neutron star mergers on the stellar ejecta
-        and adds it to the mdot array.
+        This function calculates the contribution of neutron star mergers
+        on the stellar ejecta and adds it to the mdot array.
 
         Arguments
         =========
@@ -2157,6 +2447,10 @@ class chem_evol(object):
             tt += self.history.timesteps[j]
             timemax = tt
 
+            # Stop if the SSP no more NS merger occurs 
+            if timemin >= self.t_merger_max:
+                break
+
 	    # Calculate the number of NS mergers per stellar mass
             nns_m = self.__nsmerger_num(timemin, timemax)
 
@@ -2165,8 +2459,11 @@ class chem_evol(object):
             self.nsm_numbers[j] += nns_m
 
             # Add the contribution of NS mergers to the timestep j
-            self.mdot[j] = np.array(self.mdot[j]) + np.array(nns_m * yieldsnsm)
-            self.mdot_nsm[j] = np.array(self.mdot_nsm[j]) + np.array(nns_m * yieldsnsm)
+            self.mdot[j] = np.array(self.mdot[j]) + \
+                np.array(nns_m * self.m_ej_nsm * yieldsnsm)
+            self.mdot_nsm[j] = np.array(self.mdot_nsm[j]) + \
+                np.array(nns_m * self.m_ej_nsm * yieldsnsm)
+
 
     ##############################################
     #               NS merger number             #
@@ -2184,6 +2481,68 @@ class chem_evol(object):
             timemax : Upper boundary of time interval.
 
         '''
+
+        # If an input DTD array is provided ...
+        if self.len_nsmerger_dtd_array > 0:
+            
+            # Find the lower and upper Z boundaries
+            if self.zmetal <= self.Z_nsmerger[0]:
+                i_Z_low = 0
+                i_Z_up  = 0
+            elif self.zmetal >= self.Z_nsmerger[-1]:
+                i_Z_low = -1
+                i_Z_up  = -1
+            else:
+                i_Z_low = 0
+                i_Z_up  = 1
+                while self.zmetal > self.Z_nsmerger[i_Z_up]:
+                    i_Z_low += 1
+                    i_Z_up  += 1
+
+            # Get the number of NSMs at the lower Z boundary
+            nb_NSMs_low = self.__get_nb_nsm_array(timemin, timemax, i_Z_low)
+            
+            # Return the number of NSM .. if no interpolation is needed
+            if i_Z_up == i_Z_low:
+                return nb_NSMs_low
+
+            # Interpolate the number of NSMs .. if needed
+            else:
+                nb_NSMs_up = self.__get_nb_nsm_array(timemin, timemax, i_Z_up)
+                lg_Z_low   = np.log10(self.Z_nsmerger[i_Z_low])
+                lg_Z_up    = np.log10(self.Z_nsmerger[i_Z_up])
+                lg_Z_metal = np.log10(self.zmetal)
+                a = (nb_NSMs_up - nb_NSMs_low) / (lg_Z_up - lg_Z_low)
+                b = nb_NSMs_low - a * lg_Z_low
+                return a * lg_Z_metal + b
+
+        # If all NSMs occur after a time t_NSM_coal ...
+        if self.t_nsm_coal > 0.0:
+
+            # Return all NSMs if t_NSM_coal is in the current time interval
+            if timemin <= self.t_nsm_coal and self.t_nsm_coal < timemax:
+                return self.nb_nsm_per_m
+            else:
+                return 0.0
+
+        # If the NSM DTD is a power law ...
+        if len(self.nsm_dtd_power) > 0:
+
+            # Copy the power law characteristics
+            t_min_temp = self.nsm_dtd_power[0]
+            t_max_temp = self.nsm_dtd_power[1]
+            alpha_temp = self.nsm_dtd_power[2]
+
+            # Return the number of NSMs
+            if timemax < t_min_temp or timemin > t_max_temp:
+                return 0.0
+            elif alpha_temp == -1.0:
+                return self.A_nsmerger * \
+                  (np.log(min(t_max_temp,timemax)) - np.log(max(t_min_temp,timemin)))
+            else:
+                return self.A_nsmerger / (1+alpha_temp) * \
+                  (min(t_max_temp,timemax)**(1+alpha_temp) - \
+                    max(t_min_temp,timemin)**(1+alpha_temp))
 
         # Values of bounds on the piecewise DTDs, in Myr
         lower = 10
@@ -2402,6 +2761,51 @@ class chem_evol(object):
         # return the number of neutron star mergers produced in this time interval
         return nns_m
 
+
+    ##############################################
+    #              Get Nb NSM Array              #
+    ##############################################
+    def __get_nb_nsm_array(self, timemin, timemax, i_Z_temp):
+        '''
+        This function returns the number of NSMs that occur within 
+        a specific time interval for the input DTD array.
+        
+        Arguments
+        =========
+
+            timemin : Lower time intervall of the OMEGA timestep
+            timemax : Upper time intervall of the OMEGA timestep
+            i_Z_temp : Index of the considered Z in the DTD array
+
+        '''
+
+        # If there are some NSMs ...
+        nb_NSMs_temp = 0.0
+        if timemin < max(self.nsmerger_dtd_array[i_Z_temp][0]) and \
+           timemax > min(self.nsmerger_dtd_array[i_Z_temp][0]):
+                
+            # Find the lower time boundary of the first input interval
+            i_t_low = 0
+            while timemin > self.nsmerger_dtd_array[i_Z_temp][0][i_t_low+1]:
+                i_t_low += 1
+
+            # While the current input interval is still within timemin - timemax ...
+            while timemax > self.nsmerger_dtd_array[i_Z_temp][0][i_t_low]:
+
+                # Cumulate the number of NSMs
+                dt_NSM_temp = \
+                    min(timemax, self.nsmerger_dtd_array[i_Z_temp][0][i_t_low+1]) - \
+                    max(timemin, self.nsmerger_dtd_array[i_Z_temp][0][i_t_low])
+                nb_NSMs_temp += \
+                    self.nsmerger_dtd_array[i_Z_temp][1][i_t_low] * dt_NSM_temp
+
+                # Go to the next interval
+                i_t_low += 1
+
+        # Return the number of NSMs
+        return nb_NSMs_temp
+
+
     ##############################################
     #               NS Merger Rate               #
     ##############################################
@@ -2439,6 +2843,7 @@ class chem_evol(object):
         # return the appropriate NS merger rate for time t
         return func
 
+
     ##############################################
     #           NS merger normalization          #
     ##############################################
@@ -2465,12 +2870,218 @@ class chem_evol(object):
         # multiply number by fraction which will form neutron star mergers
         N *= self.f_merger
 
+        # Define the number of NSM per Msun formed .. if not already given
+        if self.nb_nsm_per_m < 0.0:
+            self.nb_nsm_per_m = N / M
+
 	# Calculate the normalization constants for Z_o and 0.1Z_o
 	self.A_nsmerger_02 = N / ((196.4521885+6592.893564)*M)
 	self.A_nsmerger_002 = N / ((856.0742532+849.6301493)*M)
 
+        # Initialization for the input DTD .. if chosen
+        if self.len_nsmerger_dtd_array > 0:
+            self.Z_nsmerger   = np.zeros(self.len_nsmerger_dtd_array)
+            for i_dtd in range(0,self.len_nsmerger_dtd_array):
+                self.Z_nsmerger[i_dtd] = self.nsmerger_dtd_array[i_dtd][2]
+                if max(self.nsmerger_dtd_array[i_dtd][0]) < self.history.tend:
+                    self.nsmerger_dtd_array[i_dtd][0].append(2.*self.history.tend)
+                    self.nsmerger_dtd_array[i_dtd][1].append(0.0)
+
+        # Calculate the normalization of the power law .. if chosen
+        elif len(self.nsm_dtd_power) > 0:
+            t_min_temp = self.nsm_dtd_power[0]
+            t_max_temp = self.nsm_dtd_power[1]
+            alpha_temp = self.nsm_dtd_power[2]
+            if alpha_temp == -1.0:
+                self.A_nsmerger = self.nb_nsm_per_m / \
+                    ( np.log(t_max_temp) - np.log(t_min_temp) )
+            else:
+                self.A_nsmerger = self.nb_nsm_per_m * (1+alpha_temp) / \
+                    ( t_max_temp**(1+alpha_temp) - t_min_temp**(1+alpha_temp) )
+
         # Ensure normalization only occurs once
         self.nsm_normalized = True
+
+
+    #############################################
+    #           BHNS Merger Contribution        #
+    #############################################
+    def __bhnsmerger_contribution(self, i):
+        '''
+        This function calculates the contribution of BH-NS mergers on the stellar ejecta
+        and adds it to the mdot array.
+
+        Arguments
+        =========
+
+            i : index of the current timestep
+
+        '''
+
+	# Get BHNS merger yields
+        tables_Z = self.ytables_bhnsmerger.metallicities
+        for tz in tables_Z:
+            if self.zmetal > tz:
+                yieldsbhnsm = self.ytables_bhnsmerger.get(Z=tz, quantity='Yields')
+                break
+            if self.zmetal <= tables_Z[-1]:
+                yieldsbhnsm = self.ytables_bhnsmerger.get(Z=tables_Z[-1], quantity='Yields')
+                break
+
+	# initialize variables which cumulate in loop
+        tt = 0
+
+        # Normalize ...
+	if not self.bhnsm_normalized:
+            self.__normalize_bhnsmerger()
+
+        # For every upcoming timestep j, starting with the current one...
+        for j in range(i-1, self.nb_timesteps):
+
+            # Set the upper and lower time boundary of the timestep j
+            timemin = tt
+            tt += self.history.timesteps[j]
+            timemax = tt
+
+            # Stop if the SSP no more BHNS merger occurs 
+            #if timemin >= self.t_bhns_merger_max:
+            #    break
+
+	    # Calculate the number of BHNS mergers per unit of stellar mass formed
+            nbhns_m = self.__bhnsmerger_num(timemin, timemax)
+
+            # Calculate the number of BHNS mergers in the current SSP
+            nbhns_m = nbhns_m * self.m_locked
+            self.bhnsm_numbers[j] += nbhns_m
+
+            # Add the contribution of NS mergers to the timestep j
+            self.mdot_bhnsm[j] = np.array(self.mdot_bhnsm[j]) + np.array(nbhns_m * self.m_ej_bhnsm * yieldsbhnsm)
+            self.mdot[j] = np.array(self.mdot[j]) + np.array(nbhns_m * self.m_ej_bhnsm * yieldsbhnsm)
+
+
+    ##############################################
+    #              BHNS merger number            #
+    ##############################################
+    def __bhnsmerger_num(self, timemin, timemax):
+
+        '''
+        This function returns the number of BH-NS mergers, per units of stellar mass
+        formed, occurring within a given time interval using a delay-time distribution
+        function.
+        
+        Arguments
+        =========
+        
+            timemin : Lower boundary of time interval.
+            timemax : Upper boundary of time interval.
+
+        '''
+
+        # If an input DTD array is provided ...
+        if self.len_bhnsmerger_dtd_array > 0:
+            
+            # Find the lower and upper Z boundaries
+            if self.zmetal <= self.Z_bhnsmerger[0]:
+                i_Z_low = 0
+                i_Z_up  = 0
+            elif self.zmetal >= self.Z_bhnsmerger[-1]:
+                i_Z_low = -1
+                i_Z_up  = -1
+            else:
+                i_Z_low = 0
+                i_Z_up  = 1
+                while self.zmetal > self.Z_bhnsmerger[i_Z_up]:
+                    i_Z_low += 1
+                    i_Z_up  += 1
+
+            # Get the number of BHNSMs at the lower Z boundary
+            nb_BHNSMs_low = self.__get_nb_bhnsm_array(timemin, timemax, i_Z_low)
+            
+            # Return the number of BHNSM .. if no interpolation is needed
+            if i_Z_up == i_Z_low:
+                return nb_BHNSMs_low
+
+            # Interpolate the number of BHNSMs .. if needed
+            else:
+                nb_BHNSMs_up = self.__get_nb_bhnsm_array(timemin, timemax, i_Z_up)
+                lg_Z_low   = np.log10(self.Z_bhnsmerger[i_Z_low])
+                lg_Z_up    = np.log10(self.Z_bhnsmerger[i_Z_up])
+                lg_Z_metal = np.log10(self.zmetal)
+                a = (nb_BHNSMs_up - nb_BHNSMs_low) / (lg_Z_up - lg_Z_low)
+                b = nb_BHNSMs_low - a * lg_Z_low
+                return a * lg_Z_metal + b
+
+        # Return zero if no DTD is selected
+        else:
+            return 0.0
+
+
+    ##############################################
+    #             Get Nb BHNSM Array             #
+    ##############################################
+    def __get_nb_bhnsm_array(self, timemin, timemax, i_Z_temp):
+        '''
+        This function returns the number of BHNSMs that occur within 
+        a specific time interval for the input DTD array.
+        
+        Arguments
+        =========
+
+            timemin : Lower time intervall of the OMEGA timestep
+            timemax : Upper time intervall of the OMEGA timestep
+            i_Z_temp : Index of the considered Z in the DTD array
+
+        '''
+
+        # If there are some BHNSMs ...
+        nb_BHNSMs_temp = 0.0
+        if timemin < max(self.bhnsmerger_dtd_array[i_Z_temp][0]) and \
+           timemax > min(self.bhnsmerger_dtd_array[i_Z_temp][0]):
+                
+            # Find the lower time boundary of the first input interval
+            i_t_low = 0
+            while timemin > self.bhnsmerger_dtd_array[i_Z_temp][0][i_t_low+1]:
+                i_t_low += 1
+
+            # While the current input interval is still within timemin - timemax ...
+            while timemax > self.bhnsmerger_dtd_array[i_Z_temp][0][i_t_low]:
+
+                # Cumulate the number of NSMs
+                dt_BHNSM_temp = \
+                    min(timemax, self.bhnsmerger_dtd_array[i_Z_temp][0][i_t_low+1]) - \
+                    max(timemin, self.bhnsmerger_dtd_array[i_Z_temp][0][i_t_low])
+                nb_BHNSMs_temp += \
+                    self.bhnsmerger_dtd_array[i_Z_temp][1][i_t_low] * dt_BHNSM_temp
+
+                # Go to the next interval
+                i_t_low += 1
+
+        # Return the number of NSMs
+        return nb_BHNSMs_temp
+
+
+    ##############################################
+    #         BHNS merger normalization          #
+    ##############################################
+    def __normalize_bhnsmerger(self):
+        '''
+        This function normalizes the delay time distribution of BH-NS merger
+        to appropriately compute the total number of BH-NS mergers in an SSP.
+
+        '''
+
+        # Calculate the normalization of the input DTD .. if chosen
+        if self.len_bhnsmerger_dtd_array > 0:
+            self.Z_bhnsmerger   = np.zeros(self.len_bhnsmerger_dtd_array)
+            for i_dtd in range(0,self.len_bhnsmerger_dtd_array):
+                self.Z_bhnsmerger[i_dtd] = self.bhnsmerger_dtd_array[i_dtd][2]
+                if max(self.bhnsmerger_dtd_array[i_dtd][0]) < self.history.tend:
+                    self.bhnsmerger_dtd_array[i_dtd][0].append(2.*self.history.tend)
+                    self.bhnsmerger_dtd_array[i_dtd][1].append(0.0)
+        
+        # Ensure normalization only occurs once
+        self.bhnsm_normalized = True
+
 
     ##############################################
     #              Vogelsberger 13               #
@@ -3062,6 +3673,152 @@ class chem_evol(object):
 
 
     ##############################################
+    #                  Poly DTD                  #
+    ##############################################
+    def __poly_dtd(self, timemin, timemax):
+
+        '''
+        This function returns the total number of SNe Ia (per Mo formed) for
+        a given time interval.  It uses an input DTD polynomial function of
+        any order.
+   
+        Arguments
+        =========
+
+          timemin : Lower limit of the time (age) interval
+          timemax : Upper limit of the time (age) interval
+
+        '''
+
+        # Initialization of the integrated DTD with upper and lower mass limit
+        int_poly_up = 0.0
+        int_poly_low = 0.0
+
+        # Set the upper and lower time limit of the integration
+        t_up_int = min(timemax, self.poly_fit_range[1])
+        t_low_int = max(timemin, self.poly_fit_range[0])
+
+        # If this is a split poly DTD ...
+        if self.t_dtd_poly_split > 0.0:
+
+            # If in the first section ...
+            if t_up_int <= self.t_dtd_poly_split:
+
+              # For each order of the polynomial fit ...
+              for i_npf in range(0,len(self.poly_fit_dtd_5th[0])):
+
+                # Cumulate with the upper and lower limits
+                exp_poly = len(self.poly_fit_dtd_5th[0]) - i_npf - 1
+                int_poly_up += self.poly_fit_dtd_5th[0][i_npf] * \
+                    t_up_int**(exp_poly+1) / (exp_poly+1)
+                int_poly_low += self.poly_fit_dtd_5th[0][i_npf] * \
+                    t_low_int**(exp_poly+1) / (exp_poly+1)
+
+            # If in the second section ...
+            elif t_low_int >= self.t_dtd_poly_split:
+
+              # For each order of the polynomial fit ...
+              for i_npf in range(0,len(self.poly_fit_dtd_5th[1])):
+
+                # Cumulate with the upper and lower limits
+                exp_poly = len(self.poly_fit_dtd_5th[1]) - i_npf - 1
+                int_poly_up += self.poly_fit_dtd_5th[1][i_npf] * \
+                    t_up_int**(exp_poly+1) / (exp_poly+1)
+                int_poly_low += self.poly_fit_dtd_5th[1][i_npf] * \
+                    t_low_int**(exp_poly+1) / (exp_poly+1)
+
+            # If overlap ...
+            else:
+
+              # For each order of the polynomial fit ...
+              for i_npf in range(0,len(self.poly_fit_dtd_5th[0])):
+
+                # Cumulate with the upper and lower limits
+                exp_poly = len(self.poly_fit_dtd_5th[0]) - i_npf - 1
+                int_poly_up += self.poly_fit_dtd_5th[0][i_npf] * \
+                    self.t_dtd_poly_split**(exp_poly+1) / (exp_poly+1)
+                int_poly_low += self.poly_fit_dtd_5th[0][i_npf] * \
+                    t_low_int**(exp_poly+1) / (exp_poly+1)
+                exp_poly = len(self.poly_fit_dtd_5th[1]) - i_npf - 1
+                int_poly_up += self.poly_fit_dtd_5th[1][i_npf] * \
+                    t_up_int**(exp_poly+1) / (exp_poly+1)
+                int_poly_low += self.poly_fit_dtd_5th[1][i_npf] * \
+                    self.t_dtd_poly_split**(exp_poly+1) / (exp_poly+1)
+
+        # If this is not a split poly DTD ...
+        else:
+
+            # For each order of the polynomial fit ...
+            for i_npf in range(0,len(self.poly_fit_dtd_5th)):
+
+                # Cumulate with the upper and lower limits
+                exp_poly = len(self.poly_fit_dtd_5th) - i_npf - 1
+                int_poly_up += self.poly_fit_dtd_5th[i_npf] * \
+                    t_up_int**(exp_poly+1) / (exp_poly+1)
+                int_poly_low += self.poly_fit_dtd_5th[i_npf] * \
+                    t_low_int**(exp_poly+1) / (exp_poly+1)
+ 
+        # Return the number of SNe Ia n this time bin
+        if (int_poly_up - int_poly_low) < 0.0: # can happen since it's a fit
+            return 0.0
+        else:
+            return self.A_poly * (int_poly_up - int_poly_low)
+
+
+    ##############################################
+    #              Normalize Poly Fit            #
+    ##############################################
+    def __normalize_poly_fit(self):
+
+        '''
+        This function normalizes the polynomial input DTD function.  Can
+        be any polynomial order.
+
+        '''
+
+        # Initialization of the integrated DTD with upper and lower mass limit
+        int_poly_up = 0.0
+        int_poly_low = 0.0
+
+        # If it is a split poly DTD ...
+        if self.t_dtd_poly_split > 0.0:
+
+          # For each order of the polynomial fit ...
+          for i_npf in range(0,len(self.poly_fit_dtd_5th[0])):
+
+              # Cumulate with the upper and lower limits
+              exp_poly = len(self.poly_fit_dtd_5th[0]) - i_npf - 1
+              int_poly_up += self.poly_fit_dtd_5th[0][i_npf] * \
+                  self.t_dtd_poly_split**(exp_poly+1) / (exp_poly+1)
+              int_poly_low += self.poly_fit_dtd_5th[0][i_npf] * \
+                  self.poly_fit_range[0]**(exp_poly+1) / (exp_poly+1)
+              exp_poly = len(self.poly_fit_dtd_5th[1]) - i_npf - 1
+              int_poly_up += self.poly_fit_dtd_5th[1][i_npf] * \
+                  self.poly_fit_range[1]**(exp_poly+1) / (exp_poly+1)
+              int_poly_low += self.poly_fit_dtd_5th[1][i_npf] * \
+                  self.t_dtd_poly_split**(exp_poly+1) / (exp_poly+1)
+
+        # If it not is a split poly DTD ...
+        else:
+
+            # For each order of the polynomial fit ...
+            for i_npf in range(0,len(self.poly_fit_dtd_5th)):
+
+                # Cumulate with the upper and lower limits
+                exp_poly = len(self.poly_fit_dtd_5th) - i_npf - 1
+                int_poly_up += self.poly_fit_dtd_5th[i_npf] * \
+                    self.poly_fit_range[1]**(exp_poly+1) / (exp_poly+1)
+                int_poly_low += self.poly_fit_dtd_5th[i_npf] * \
+                    self.poly_fit_range[0]**(exp_poly+1) / (exp_poly+1)
+
+        # Calculate the normalization constant
+        self.A_poly = self.nb_1a_per_m / (int_poly_up - int_poly_low)
+
+        # Avoid renormalizing during the next timesteps
+        self.normalized = True 
+
+
+    ##############################################
     #                     IMF                    #
     ##############################################
     def _imf(self, mmin, mmax, inte, mass=0):
@@ -3152,6 +3909,20 @@ class chem_evol(object):
                 self.imfnorm = 1.0 / quad(self.__g2_chabrier_alphaimf, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
+	# Kroupa 1993 - IMF
+	elif self.imf_type=='kroupa93':
+
+            # Choose the right option
+            if inte == 0:
+                return self.imfnorm * self.__g1_kroupa93_alphaimf(mass)
+            if inte == 1:
+                return quad(self.__g1_kroupa93_alphaimf, mmin, mmax)[0]
+            if inte == 2:
+                return quad(self.__g2_kroupa93_alphaimf, mmin, mmax)[0]
+            if inte == -1:
+                self.imfnorm = 1.0 / quad(self.__g2_kroupa93_alphaimf, \
+                    self.imf_bdys[0], self.imf_bdys[1])[0]
+
 	# Kroupa IMF
 	elif self.imf_type=='kroupa':
 
@@ -3175,7 +3946,33 @@ class chem_evol(object):
             if inte == 1:
                 return quad(self.__g1_fpp, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_fpp, mmin, mmax)[0]
+                #return quad(self.__g2_fpp, mmin, mmax)[0]
+ 
+                #if mmin < 0.8:
+                #    print '!!Error - Ferrini IMF not fitted below 0.8 Msun!!'
+
+                # Find the lower mass bin
+                i_fer = 0
+                while mmin >= self.m_up_fer[i_fer]:
+                    i_fer += 1
+
+                # Integrate this mass bin ...
+                imf_int = 0.0
+                imf_int += self.norm_fer[i_fer] * \
+                       (min(mmax,self.m_up_fer[i_fer])**self.alpha_fer[i_fer]\
+                           - mmin**self.alpha_fer[i_fer])
+
+                # For the remaining mass bin ...
+                if not mmax <= self.m_up_fer[i_fer]:
+                  for i_fer2 in range((i_fer+1),len(self.m_up_fer)):
+                    if mmax >= self.m_up_fer[i_fer2-1]:
+                      imf_int += self.norm_fer[i_fer2] * \
+                          (min(mmax,self.m_up_fer[i_fer2])**self.alpha_fer[i_fer2]\
+                           - self.m_up_fer[i_fer2-1]**self.alpha_fer[i_fer2])
+
+                # Return the integration
+                return imf_int
+
             if inte == -1:
                 self.imfnorm = 1.0 / quad(self.__g2_fpp, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
@@ -3365,6 +4162,56 @@ class chem_evol(object):
             return 0.158 * np.exp( -np.log10(mass/0.079)**2 / (2.0 * 0.69**2))
         else:
             return 0.0443 * mass * mass**(-self.alphaimf)
+
+
+    ##############################################
+    #            G1 Kroupa93 AlphaIMF            #
+    ##############################################
+    def __g1_kroupa93_alphaimf(self, mass):
+
+	'''
+        This function returns the number of stars having a certain stellar mass
+        with a Kroupa et al. (1993) IMF.
+
+        Arguments
+        =========
+
+          mass : Stellar mass.
+
+        '''
+
+        # Select the right mass regime
+        if mass < 0.5:
+            return 0.035 * mass**(-1.3)
+        elif mass < 1.0:
+            return 0.019 * mass**(-2.2)
+        else:
+            return 0.019 * mass**(-2.7)
+
+
+    ##############################################
+    #            G2 Kroupa93 AlphaIMF            #
+    ##############################################
+    def __g2_kroupa93_alphaimf(self, mass):
+
+	'''
+        This function returns the total mass of stars having a certain stellar
+        mass with a Kroupa et al. (1993) IMF.
+
+        Arguments
+        =========
+
+          mass : Stellar mass.
+
+        '''
+
+        # Select the right mass regime
+        if mass < 0.5:
+            return 0.035 * mass * mass**(-1.3)
+        elif mass < 1.0:
+            return 0.019 * mass * mass**(-2.2)
+        else:
+            return 0.019 * mass * mass**(-2.7)
 
 
     ##############################################
@@ -4254,6 +5101,13 @@ class chem_evol(object):
                         print 'inimass', inimass, \
                               'problem wiht massejected',massejected
                     return massejected
+                elif (inimass < m_stars[0] and inimass >= self.imf_yields_range_pop3[0]):
+                    massejected = slope[0] * inimass + intercept[0]
+                    if massejected < 0:
+                        print slope[h], intercept[h]
+                        print 'inimass', inimass, \
+                              'problem wiht massejected',massejected
+                    return massejected
 
         # Return the stellar masses, yields and ejecta function at Z = 0
         return mstars, yields_all, func_total_ejecta
@@ -4800,6 +5654,7 @@ class chem_evol(object):
             self.ism_iso_yield_massive = []
             self.ism_iso_yield_1a = []
 	    self.ism_iso_yield_nsm = []
+	    self.ism_iso_yield_bhnsm = []
             self.isotopes = []
             self.elements = []
             self.ism_elem_yield = []
@@ -4807,8 +5662,10 @@ class chem_evol(object):
             self.ism_elem_yield_massive = []
             self.ism_elem_yield_1a = []
 	    self.ism_elem_yield_nsm = []
+	    self.ism_elem_yield_bhnsm = []
             self.sn1a_numbers = []
 	    self.nsm_numbers = []
+	    self.bhnsm_numbers = []
             self.sn2_numbers = []
 	    self.t_m_bdys = []
 
