@@ -1,0 +1,3 @@
+This directory hosts the regression test suite of NuPyCEE.
+Travis is triggered through GitHub and executes ../.travis.yml.
+The current test notebook is SYGMA_SSP_h_yield_input.ipynb.
