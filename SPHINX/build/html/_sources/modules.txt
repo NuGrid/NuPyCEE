@@ -6,3 +6,4 @@ NUPYCEE framework
 
    sygma
    omega
+   stellab

@@ -26,6 +26,7 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="SYGMA DOC v1.0 documentation" href="index.html" />
     <link rel="up" title="NUPYCEE framework" href="modules.html" />
+    <link rel="next" title="STELLAB Module" href="stellab.html" />
     <link rel="prev" title="SYGMA Module" href="sygma.html" /> 
   </head>
   <body role="document">
@@ -38,6 +39,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="stellab.html" title="STELLAB Module"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sygma.html" title="SYGMA Module"
              accesskey="P">previous</a> |</li>
@@ -75,6 +79,7 @@ the NuGrid collaboration</dd>
 </dl>
 <p>v0.4 FEB2015: C. Ritter, B. Cote</p>
 <p>v0.5 MAR2015: B. Cote</p>
+<p>v0.6 OCT2016: B. Cote</p>
 </div>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
@@ -101,138 +106,123 @@ the NuGrid collaboration</dd>
 <p>Analysis functions: See the Sphinx documentation</p>
 <dl class="class">
 <dt id="omega.omega">
-<em class="property">class </em><code class="descclassname">omega.</code><code class="descname">omega</code><span class="sig-paren">(</span><em>galaxy='none', in_out_control=False, SF_law=False, DM_evolution=False, Z_trans=1e-20, f_dyn=0.1, sfe=0.1, outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, m_DM_0=100000000000.0, mass_loading=1.0, t_star=-1.0, sfh_file='none', in_out_ratio=1.0, stellar_mass_0=-1.0, z_dependent=True, exp_ml=2.0, nsmerger_bdys=[8, 100], imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1, 100], sn1a_rate='power_law', iniZ=0.0, dt=1000000.0, special_timesteps=30, tend=13000000000.0, mgal=-1, transitionmass=8, iolevel=0, ini_alpha=True, table='yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt', hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt', ns_merger_on=True, f_binary=1.0, f_merger=0.0028335, nsmerger_table='yield_tables/r_process_rosswog_2014.txt', iniabu_table='', extra_source_on=False, extra_source_table='yield_tables/extra_source.txt', f_extra_source=1.0, pop3_table='yield_tables/popIII_heger10.txt', imf_bdys_pop3=[0.1, 100], imf_yields_range_pop3=[10, 30], starbursts=[], beta_pow=-1.0, gauss_dtd=[1000000000.0, 660000000.0], exp_dtd=2000000000.0, nb_1a_per_m=0.001, f_arfo=1, t_merge=-1.0, imf_yields_range=[1, 30], exclude_masses=[], netyields_on=False, wiersmamod=False, skip_zero=False, redshift_f=0.0, print_off=False, long_range_ref=False, f_s_enhance=1.0, m_gas_f=10000000000.0, cl_SF_law=False, external_control=False, calc_SSP_ej=False, input_yields=False, popIII_on=True, stellar_param_on=False, sfh_array=array([], dtype=float64), ism_ini=array([], dtype=float64), mdot_ini=array([], dtype=float64), mdot_ini_t=array([], dtype=float64), ytables_in=array([], dtype=float64), zm_lifetime_grid_nugrid_in=array([], dtype=float64), isotopes_in=array([], dtype=float64), ytables_pop3_in=array([], dtype=float64), zm_lifetime_grid_pop3_in=array([], dtype=float64), ytables_1a_in=array([], dtype=float64), ytables_nsmerger_in=array([], dtype=float64), dt_in=array([], dtype=float64), dt_split_info=array([], dtype=float64), ej_massive=array([], dtype=float64), ej_agb=array([], dtype=float64), ej_sn1a=array([], dtype=float64), ej_massive_coef=array([], dtype=float64), ej_agb_coef=array([], dtype=float64), ej_sn1a_coef=array([], dtype=float64), dt_ssp=array([], dtype=float64), yield_interp='lin'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">omega.</code><code class="descname">omega</code><span class="sig-paren">(</span><em>galaxy='none', in_out_control=False, SF_law=False, DM_evolution=False, Z_trans=1e-20, f_dyn=0.1, sfe=0.1, outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, m_DM_0=100000000000.0, mass_loading=1.0, t_star=-1.0, sfh_file='none', in_out_ratio=1.0, stellar_mass_0=-1.0, z_dependent=True, exp_ml=2.0, nsmerger_bdys=[8, 100], imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1, 100], sn1a_rate='power_law', iniZ=0.0, dt=1000000.0, special_timesteps=30, tend=13000000000.0, mgal=10000000000.0, transitionmass=8, iolevel=0, ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0, table='yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt', hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[], sn1a_table='yield_tables/sn1a_t86.txt', ns_merger_on=True, f_binary=1.0, f_merger=0.0008, t_merger_max=10000000000.0, m_ej_nsm=0.025, nsmerger_table='yield_tables/r_process_rosswog_2014.txt', bhns_merger_on=False, m_ej_bhnsm=0.025, bhnsmerger_table='yield_tables/r_process_rosswog_2014.txt', iniabu_table='', extra_source_on=False, extra_source_table='yield_tables/extra_source.txt', f_extra_source=1.0, pop3_table='yield_tables/popIII_heger10.txt', imf_bdys_pop3=[0.1, 100], imf_yields_range_pop3=[10, 30], starbursts=[], beta_pow=-1.0, gauss_dtd=[1000000000.0, 660000000.0], exp_dtd=2000000000.0, nb_1a_per_m=0.001, f_arfo=1, t_merge=-1.0, imf_yields_range=[1, 30], exclude_masses=[], netyields_on=False, wiersmamod=False, skip_zero=False, redshift_f=0.0, print_off=False, long_range_ref=False, f_s_enhance=1.0, m_gas_f=-1.0, cl_SF_law=False, external_control=False, calc_SSP_ej=False, tau_ferrini=False, input_yields=False, popIII_on=True, t_sf_z_dep=1.0, m_crit_on=False, norm_crit_m=8000000000.0, mass_frac_SSP=0.5, sfh_array_norm=-1.0, imf_rnd_sampling=False, out_follows_E_rate=False, r_gas_star=-1.0, cte_m_gas=-1.0, t_dtd_poly_split=-1.0, stellar_param_on=False, bhnsmerger_dtd_array=array([], dtype=float64), DM_array=array([], dtype=float64), nsmerger_dtd_array=array([], dtype=float64), sfh_array=array([], dtype=float64), ism_ini=array([], dtype=float64), mdot_ini=array([], dtype=float64), mdot_ini_t=array([], dtype=float64), ytables_in=array([], dtype=float64), zm_lifetime_grid_nugrid_in=array([], dtype=float64), isotopes_in=array([], dtype=float64), ytables_pop3_in=array([], dtype=float64), zm_lifetime_grid_pop3_in=array([], dtype=float64), ytables_1a_in=array([], dtype=float64), ytables_nsmerger_in=array([], dtype=float64), dt_in=array([], dtype=float64), dt_split_info=array([], dtype=float64), ej_massive=array([], dtype=float64), ej_agb=array([], dtype=float64), ej_sn1a=array([], dtype=float64), ej_massive_coef=array([], dtype=float64), ej_agb_coef=array([], dtype=float64), ej_sn1a_coef=array([], dtype=float64), dt_ssp=array([], dtype=float64), yield_interp='lin', mass_sampled=array([], dtype=float64), scale_cor=array([], dtype=float64), mass_sampled_ssp=array([], dtype=float64), scale_cor_ssp=array([], dtype=float64), poly_fit_dtd_5th=array([], dtype=float64), poly_fit_range=array([], dtype=float64), m_tot_ISM_t_in=array([], dtype=float64)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">chem_evol.chem_evol</span></code></p>
 <p>Important : By default, a closed box model is always assumed.</p>
-<p>galaxy : string</p>
-<blockquote>
-<div><p>Name of the target galaxy.  By using a known galaxy, the code
+<dl class="docutils">
+<dt>galaxy <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">Name of the target galaxy.  By using a known galaxy, the code
 automatically selects the corresponding star formation history, stellar
 mass, and total mass (when available).  By using &#8216;none&#8217;, the user has
 perfect control of these three last parameters.</p>
 <p>Choices : &#8216;milky_way&#8217;, &#8216;milky_way_cte&#8217;, &#8216;sculptor&#8217;, &#8216;carina&#8217;, &#8216;fornax&#8217;,
 &#8216;none&#8217;</p>
 <p>Default value : &#8216;none&#8217;</p>
-<p>Special note : The &#8216;milky_way_cte&#8217; option uses the Milky Way&#8217;s
+<p class="last">Special note : The &#8216;milky_way_cte&#8217; option uses the Milky Way&#8217;s
 characteristics, but with a constant star formation history.</p>
-</div></blockquote>
-<p>cte_sfr : float</p>
-<blockquote>
-<div><p>Constant star formation history in [Mo/yr].</p>
-<p>Default value : 1.0</p>
-</div></blockquote>
-<p>rand_sfh : float</p>
-<blockquote>
-<div><p>Maximum possible ratio between the maximum and the minimum values of a star
+</dd>
+<dt>cte_sfr <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Constant star formation history in [Mo/yr].</p>
+<p class="last">Default value : 1.0</p>
+</dd>
+<dt>rand_sfh <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Maximum possible ratio between the maximum and the minimum values of a star
 formation history that is randomly generated.</p>
 <p>Default value : 0.0 (deactivated)</p>
-<p>Special note : A value greater than zero automatically generates a random
+<p class="last">Special note : A value greater than zero automatically generates a random
 star formation history, which pypasses the use of the cte_sfr parameter.</p>
-</div></blockquote>
-<p>sfh_file : string</p>
-<blockquote>
-<div><p>Path to a file containing an input star formation history.  The first and
+</dd>
+<dt>sfh_file <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">Path to a file containing an input star formation history.  The first and
 second columns must be the age of the galaxy in [yr] and the star
 formation rate in [Mo/yr].</p>
 <p>Default value : &#8216;none&#8217; (deactivated)</p>
-<p>Special note : When a path is specified, it by passes the cte_sfr and the
+<p class="last">Special note : When a path is specified, it by passes the cte_sfr and the
 and_sfh parameters.</p>
-</div></blockquote>
-<p>stellar_mass_0 : float</p>
-<blockquote>
-<div><p>Current stellar mass of the galaxy, in [Mo], at the end of the simulation.</p>
-<p>Default value : -1.0 (you need to specify a value with unknown galaxies)</p>
-</div></blockquote>
-<p>in_out_control : boolean</p>
-<blockquote>
-<div><p>The in_out_control implementation enables control of the outflow and
+</dd>
+<dt>stellar_mass_0 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Current stellar mass of the galaxy, in [Mo], at the end of the simulation.</p>
+<p class="last">Default value : -1.0 (you need to specify a value with unknown galaxies)</p>
+</dd>
+<dt>in_out_control <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first">The in_out_control implementation enables control of the outflow and
 the inflow rates independently by using constant values (see outflow_rate
 and inflow_rate) or by using a mass-loading factor that connects the
 rates to the star formation history (see mass_loading and in_out_ratio).</p>
-<p>Default value : False (deactivated)</p>
-</div></blockquote>
-<p>mass_loading : float</p>
-<blockquote>
-<div><p>Ratio between the outflow rate and the star formation rate.</p>
-<p>Default value : 1.0</p>
-</div></blockquote>
-<p>outflow_rate : float</p>
-<blockquote>
-<div><p>Constant outflow rate in [Mo/yr].</p>
+<p class="last">Default value : False (deactivated)</p>
+</dd>
+<dt>mass_loading <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Ratio between the outflow rate and the star formation rate.</p>
+<p class="last">Default value : 1.0</p>
+</dd>
+<dt>outflow_rate <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Constant outflow rate in [Mo/yr].</p>
 <p>Default value : -1.0 (deactivated)</p>
-<p>Special note : A value greater or equal to zero activates the constant
+<p class="last">Special note : A value greater or equal to zero activates the constant
 utflow mode, which bypasses the use of the mass_loading parameter.</p>
-</div></blockquote>
-<p>in_out_ratio : float</p>
-<blockquote>
-<div><p>Used in : in_out_control mode</p>
+</dd>
+<dt>in_out_ratio <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Used in : in_out_control mode</p>
 <p>Ratio between the inflow rate and the outflow rate.  This parameter is
 used to calculate the inflow rate, not the outflow rate.</p>
-<p>Default value : 1.0</p>
-</div></blockquote>
-<p>inflow_rate : float</p>
-<blockquote>
-<div><p>Used in : in_out_control mode</p>
-<p>Constant inflow rate in [Mo/yr].</p>
+<p class="last">Default value : 1.0</p>
+</dd>
+<dt>inflow_rate <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Used in : in_out_control mode
+Constant inflow rate in [Mo/yr].</p>
 <p>Default value : -1.0 (deactivated)</p>
-<p>Special note : A value greater or equal to zero activates the constant
+<p class="last">Special note : A value greater or equal to zero activates the constant
 inflow mode, which bypasses the use of the in_out_ratio parameter.</p>
-</div></blockquote>
-<p>SF_law : boolean</p>
-<blockquote>
-<div><p>The SF_law inplementation assumes a Kennicutt-Schmidt star formation law
+</dd>
+<dt>SF_law <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first">The SF_law inplementation assumes a Kennicutt-Schmidt star formation law
 and combines it to the known input star formation history in order to
 derive the mass of the gas reservoir at every timestep.</p>
-<p>Default value : False (deactivated)</p>
-</div></blockquote>
-<p>sfe : float</p>
-<blockquote>
-<div><p>Used in : SF_law and DM_evolution modes</p>
+<p class="last">Default value : False (deactivated)</p>
+</dd>
+<dt>sfe <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Used in : SF_law and DM_evolution modes</p>
 <p>Star formation efficiency present in the Kennicutt-Schmidt law.</p>
-<p>Default value : 0.1</p>
-</div></blockquote>
-<p>f_dyn : float</p>
-<blockquote>
-<div><p>Used in : SF_law and DM_evolution modes</p>
-<p>Scaling factor used to calculate the star formation timescale present in
+<p class="last">Default value : 0.1</p>
+</dd>
+<dt>f_dyn <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Used in : SF_law and DM_evolution modes
+Scaling factor used to calculate the star formation timescale present in
 the Kennicutt-Schmidt law.  We assume that this timescale is equal to a
 fraction of the dynamical timescale of the virialized system (dark and
 baryonic matter), t_star = f_dyn * t_dyn.</p>
-<p>Default value : 0.1</p>
-</div></blockquote>
-<p>m_DM_0 : float</p>
-<blockquote>
-<div><p>Used in : SF_law and DM_evolution modes</p>
-<p>Current dark matter halo mass of the galaxy, in [Mo], at the end of the
+<p class="last">Default value : 0.1</p>
+</dd>
+<dt>m_DM_0 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Used in : SF_law and DM_evolution modes
+Current dark matter halo mass of the galaxy, in [Mo], at the end of the
 simulations.</p>
-<p>Default value : 1.0e+11</p>
-</div></blockquote>
-<p>t_star : float</p>
-<blockquote>
-<div><p>Used in : SF_law and DM_evolution modes</p>
-<p>Star formation timescale, in [yr], used in the Kennicutt-Schmidt law.</p>
-<p>Default value = -1.0 (deactivated)</p>
-<p>Special note : A positive value activates the use of this parameter, 
+<p class="last">Default value : 1.0e+11</p>
+</dd>
+<dt>t_star <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Used in : SF_law and DM_evolution modes
+Star formation timescale, in [yr], used in the Kennicutt-Schmidt law.
+Default value = -1.0 (deactivated)</p>
+<p class="last">Special note : A positive value activates the use of this parameter, 
 which bypasses the f_dyn parameter.</p>
-</div></blockquote>
-<p>DM_evolution : boolean</p>
-<blockquote>
-<div><p>The DM_evolution implementation is an extension of the SF_law option.
+</dd>
+<dt>DM_evolution <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first">The DM_evolution implementation is an extension of the SF_law option.
 In addition to using a Kennicutt-Schmidt star formation law, it assumes
 an evolution in the total mass of the galaxy as function of time.  With
 this prescription, the mass-loading factor has a mass dependency.  The
 mass_loading parameter then only represents the final value at the end
 of the simulation.</p>
-<p>Default value : False (deactivated)</p>
-</div></blockquote>
-<p>exp_ml : float</p>
-<blockquote>
-<div><p>Used in : DM_evolution mode</p>
+<p class="last">Default value : False (deactivated)</p>
+</dd>
+<dt>exp_ml <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Used in : DM_evolution mode</p>
 <p>Exponent of the mass dependency of the mass-loading factor.  This last
 factor is proportional to M_vir**(-exp_ml/3), where M_vir is the sum of
 dark and baryonic matter.</p>
-<p>Default value : 2.0</p>
-</div></blockquote>
+<p class="last">Default value : 2.0</p>
+</dd>
+</dl>
 <dl class="docutils">
 <dt>special_timesteps <span class="classifier-delimiter">:</span> <span class="classifier">integer</span></dt>
 <dd><p class="first">Number of special timesteps.  This option (already activated by default)
@@ -309,6 +299,10 @@ yields are used.</p>
 </dl>
 <p class="last">Default value : &#8216;power_law&#8217;</p>
 </dd>
+<dt>sn1a_energy <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first">Energy ejected by single SNIa event. Units in erg.</p>
+<p class="last">Default value : 1e51</p>
+</dd>
 <dt>ns_merger_on <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
 <dd><p class="first">True or False to include or exclude the contribution of neutron star mergers.</p>
 <p class="last">Default value: True</p>
@@ -372,9 +366,11 @@ as used e.g. in Wiersma+ (2009); Does not require net yields.</p>
 are net yields.</p>
 <p class="last">Default : false.</p>
 </dd>
-<dt>total_ejecta_interp <span class="classifier-delimiter">:</span> <span class="classifier">if true then interpolates total ejecta given in yield tables </span></dt>
-<dd><blockquote class="first">
-<div>over initial mass range.</div></blockquote>
+<dt>total_ejecta_interp <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><dl class="first docutils">
+<dt>if true then interpolates total ejecta given in yield tables </dt>
+<dd>over initial mass range.</dd>
+</dl>
 <p class="last">Default : True</p>
 </dd>
 <dt>stellar_param_on <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
@@ -390,8 +386,227 @@ derived from stellar evolution calculations.</p>
 <dd><p class="first">Specifies the amount of output for testing purposes (up to 3).</p>
 <p class="last">Default value : 0</p>
 </dd>
+<dt>poly_fit_dtd <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first">Array of polynomial coefficients of a customized delay-time distribution
+function for SNe Ia.  The polynome can be of any order.
+Example : [0.2, 0.3, 0.1] for rate_snIa(t) = 0.2*t**2 + 0.3*t + 0.1
+Note : Must be used with the poly_fit_range parameter (see below)</p>
+<p class="last">Default value : np.array([]) &#8211;&gt; Desactivated</p>
+</dd>
+<dt>poly_fit_range <span class="classifier-delimiter">:</span> <span class="classifier">list &#8211;&gt; [t_min,t_max]</span></dt>
+<dd><p class="first">Time range where the customized delay-time distribution function for
+SNe Ia will be applied for a simple stellar population.</p>
+<p class="last">Default value : np.array([]) &#8211;&gt; Desactivated</p>
+</dd>
+<dt>mass_sampled <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first">Stellar masses that are sampled to eject yields in a stellar population.
+Warning : The use of this parameter bypasses the IMF calculation and 
+do not ensure a correlation with the star formation rate.  Each sampled
+mass will eject the exact amount of mass give in the stellar yields.</p>
+<p class="last">Default value : np.array([]) &#8211;&gt; Desactivated</p>
+</dd>
+<dt>scale_cor <span class="classifier-delimiter">:</span> <span class="classifier">2D list</span></dt>
+<dd>Determine the fraction of yields ejected for any given stellar mass bin.
+Example : [ [1.0,8], [0.5,100] ] means that stars with initial mass between
+0 and 8 Msu will eject 100% of their yields, and stars with initial mass
+between 8 and 100 will eject 50% of their yields.  There is no limit for
+the number of [%,M_upper_limit] arrays used.
+Default value : np.array([])  &#8211;&gt; Desactivated</dd>
 </dl>
 <p class="rubric">Methods</p>
+<dl class="method">
+<dt id="omega.omega.plot_abu_distr">
+<code class="descname">plot_abu_distr</code><span class="sig-paren">(</span><em>species, source='all', norm='', label='', shape='', marker='', color='', markevery=20, multiplot=False, return_x_y=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_abu_distr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_abu_distr" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Plot abundance distribution at point in time normalized to solar system distribution.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>species</strong> : array</p>
+<blockquote>
+<div><p>isotopes or element names, in the form [&#8216;C&#8217;] or [&#8216;C-12&#8217;]</p>
+</div></blockquote>
+<p><strong>time</strong> : float</p>
+<blockquote>
+<div><p>Time in yrs telling when to extract abundances, e.g. birth SS 9.2Gyr</p>
+</div></blockquote>
+<p><strong>source</strong> : string</p>
+<blockquote>
+<div><p>Specifies if yields come from
+all sources (&#8216;all&#8217;), including
+AGB+SN1a, massive stars. Or from
+distinctive sources:
+only agb stars (&#8216;agb&#8217;), only
+SN1a (&#8216;SN1a&#8217;), or only massive stars
+(&#8216;massive&#8217;)</p>
+</div></blockquote>
+<p><strong>norm</strong> : string</p>
+<blockquote>
+<div><p>Choose the solar abundances, e.g. &#8216;Grevesse_Noels_1993&#8217;, same notation as in stellab?</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>figure label</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>figure marker</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>line style</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>color of line</p>
+</div></blockquote>
+<p><strong>fig</strong> : string,float</p>
+<blockquote class="last">
+<div><p>to name the plot figure</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">plot_abu_distr</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;C-12&#39;</span><span class="p">,</span><span class="s1">&#39;O-16&#39;</span><span class="p">],</span><span class="n">time</span><span class="o">=</span><span class="mf">9.2e9</span><span class="p">,</span><span class="n">norm</span><span class="o">=</span><span class="s1">&#39;Asplund_et_al_2009&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="omega.omega.plot_abun">
+<code class="descname">plot_abun</code><span class="sig-paren">(</span><em>fig=20, age=9200000000.0, solar_norm=False, iso_on=False, list_elem=[], list_iso=[], return_x_y=False, over_plot_solar=False, solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn', f_y_annotate=0.9, marker='o', marker_s='^', shape='', shape_s='-', color='b', color_s='r', label='Prediction', label_s='solar', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, markersize=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_abun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_abun" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the abundance distribution in mass
+fraction at any given point in time or at any given metallicity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>age</strong> : float</p>
+<blockquote>
+<div><p>Time passed since the beginning of the simulation at which abundance distribution is taken.
+Default: Time until the formation of the pre-solar cloud.</p>
+</div></blockquote>
+<p><strong>solar_norm: boolean</strong></p>
+<blockquote>
+<div><p>If True, the abundances will be divide by the solar abundances.
+If False, there is no normalization.
+Default: False</p>
+</div></blockquote>
+<p><strong>iso_on</strong> : boolean</p>
+<blockquote>
+<div><p>If True, the abundances will be in terms of isotopes.
+If False, the abundances will be in terms of elements.</p>
+</div></blockquote>
+<p><strong>list_elem</strong> : array of strings</p>
+<blockquote>
+<div><p>Contain the list of elements included in the abundances distribution.
+Default: [], all elements will be included.
+Example: list_elem=[&#8216;H&#8217;,&#8217;He&#8217;,&#8217;C&#8217;,&#8217;N&#8217;,&#8217;O&#8217;,&#8217;Fe&#8217;]</p>
+</div></blockquote>
+<p><strong>list_iso</strong> : array of strings</p>
+<blockquote>
+<div><p>Contain the list of isotopes included in the abundances distribution.
+Default: [], all isotopes will be included.
+Example: list_iso=[&#8216;H-1&#8217;,&#8217;C-12&#8217;,&#8217;C-13&#8217;,&#8217;N-14&#8217;,&#8217;N-15&#8217;]
+Note: list_iso dominates over list_elem is both are used.</p>
+</div></blockquote>
+<p><strong>return_x_y</strong> : boolean</p>
+<blockquote>
+<div><p>If False, show the plot.
+If True, return two arrays containing the X and Y axis data, respectively.
+If True and iso_list=True, return a multi-D array [i][j][:] where
+j=0 -&gt; list of mass numbers A for the isotopes associated with the element i,
+j=1 -&gt; list of abundances</p>
+</div></blockquote>
+<p><strong>over_plot_solar</strong> : boolean</p>
+<blockquote>
+<div><p>If True, plot the solar abundances distribution along with the predictions
+Note: This option is desactivated if solar_norm=True</p>
+</div></blockquote>
+<p><strong>solar_ab_m</strong> : string</p>
+<blockquote>
+<div><p>Path of the solar normalization containing the mass fraction of each isotope
+Default: solar_ab_m=&#8217;yield_tables/iniabu/iniab2.0E-02GN93.ppn&#8217;</p>
+</div></blockquote>
+<p><strong>f_y_annotate</strong> : float (between 0 and 1)</p>
+<blockquote>
+<div><p>Fraction of the Y axis where the name of the element will be shown
+Default: f_y_annotate=0.9</p>
+</div></blockquote>
+<p><strong>fig</strong> : string, float</p>
+<blockquote>
+<div><p>Figure name.</p>
+</div></blockquote>
+<p><strong>marker</strong> : string</p>
+<blockquote>
+<div><p>Figure marker.</p>
+</div></blockquote>
+<p><strong>marker_s</strong> : string</p>
+<blockquote>
+<div><p>Marker of the solar abundance distribution.</p>
+</div></blockquote>
+<p><strong>shape</strong> : string</p>
+<blockquote>
+<div><p>Line style.</p>
+</div></blockquote>
+<p><strong>shape_s</strong> : string</p>
+<blockquote>
+<div><p>Line style of the solar abundance distribution.</p>
+</div></blockquote>
+<p><strong>color</strong> : string</p>
+<blockquote>
+<div><p>Line color.</p>
+</div></blockquote>
+<p><strong>color_s</strong> : string</p>
+<blockquote>
+<div><p>Line color of the solar abundances pattern.</p>
+</div></blockquote>
+<p><strong>label</strong> : string</p>
+<blockquote>
+<div><p>Figure label.</p>
+</div></blockquote>
+<p><strong>label_s</strong> : string</p>
+<blockquote>
+<div><p>Label of the solar abundance distribution.</p>
+</div></blockquote>
+<p><strong>fsize</strong> : 2D float array</p>
+<blockquote>
+<div><p>Figure dimension/size.</p>
+</div></blockquote>
+<p><strong>fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the numbers on the X and Y axis.</p>
+</div></blockquote>
+<p><strong>rspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space on the right for the legend.</p>
+</div></blockquote>
+<p><strong>bspace</strong> : float</p>
+<blockquote>
+<div><p>Extra space at the bottom for the Y axis label.</p>
+</div></blockquote>
+<p><strong>labelsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the X and Y axis labels.</p>
+</div></blockquote>
+<p><strong>legend_fontsize</strong> : integer</p>
+<blockquote>
+<div><p>Font size of the legend.</p>
+</div></blockquote>
+<p><strong>markersize</strong> : float</p>
+<blockquote class="last">
+<div><p>Size of the markers
+Default: markersize=5</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="omega.omega.plot_dark_matter">
 <code class="descname">plot_dark_matter</code><span class="sig-paren">(</span><em>fig=11, marker='', shape='', color='', label='Dark matter', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_dark_matter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_dark_matter" title="Permalink to this definition">¶</a></dt>
@@ -616,7 +831,7 @@ SN Ia (&#8216;sn1a&#8217;), or only massive stars
 
 <dl class="method">
 <dt id="omega.omega.plot_mass">
-<code class="descname">plot_mass</code><span class="sig-paren">(</span><em>fig=0, specie='C', source='all', norm=False, label='', shape='', marker='', color='', markevery=20, multiplot=False, return_x_y=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_mass" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_mass</code><span class="sig-paren">(</span><em>fig=0, specie='C', source='all', norm=False, label='', shape='', marker='', color='', markevery=20, multiplot=False, return_x_y=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, show_legend=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_mass" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
 <div>mass evolution (in Msun) of an element or isotope vs time.</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
@@ -658,8 +873,12 @@ SN1a (&#8216;SN1a&#8217;), or only massive stars
 <div><p>color of line</p>
 </div></blockquote>
 <p><strong>fig</strong> : string,float</p>
-<blockquote class="last">
+<blockquote>
 <div><p>to name the plot figure</p>
+</div></blockquote>
+<p><strong>show_legend</strong> : boolean</p>
+<blockquote class="last">
+<div><p>Default True. Show or not the legend</p>
 </div></blockquote>
 </td>
 </tr>
@@ -800,7 +1019,7 @@ if &#8216;ini&#8217;, normalization ot initial abundance</p>
 
 <dl class="method">
 <dt id="omega.omega.plot_mdf">
-<code class="descname">plot_mdf</code><span class="sig-paren">(</span><em>fig=19, return_x_y=False, axis_mdf='[Fe/H]', dx=0.05, solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn', sigma_gauss=0.0, nb_sigma=3.0, marker='', shape='', color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_mdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_mdf" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_mdf</code><span class="sig-paren">(</span><em>fig=19, return_x_y=False, axis_mdf='[Fe/H]', dx=0.05, solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn', sigma_gauss=0.0, nb_sigma=3.0, marker='', shape='', norm=True, color='', label='', fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_mdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_mdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function plots the stellar metallicity distribution function (MDF),
 or the distribution function of any other abundance ratio.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -836,6 +1055,11 @@ gaussian function.</p>
 <blockquote>
 <div><p>When sigma_gauss is greater than zero, nb_sigma is the number of
 sigma by which the X axis range is expanded.</p>
+</div></blockquote>
+<p><strong>norm</strong> : boolean</p>
+<blockquote>
+<div><p>Normalize the MDF is True
+Default : True</p>
 </div></blockquote>
 <p><strong>fig</strong> : string, float</p>
 <blockquote>
@@ -1141,7 +1365,7 @@ if &#8216;redshift&#8217;: experimental! use with caution; redshift evolution</p
 
 <dl class="method">
 <dt id="omega.omega.plot_spectro">
-<code class="descname">plot_spectro</code><span class="sig-paren">(</span><em>fig=3, xaxis='age', yaxis='[Fe/H]', source='all', label='', shape='-', marker='o', color='k', markevery=100, show_data=False, show_sculptor=False, show_legend=True, return_x_y=False, sub_plot=False, linewidth=3, sub=1, plot_data=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, only_one_iso=False, solar_ab=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_spectro"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_spectro" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_spectro</code><span class="sig-paren">(</span><em>fig=3, xaxis='age', yaxis='[Fe/H]', source='all', label='', shape='-', marker='o', color='k', markevery=100, show_data=False, show_sculptor=False, show_legend=True, return_x_y=False, sub_plot=False, linewidth=3, sub=1, plot_data=False, fsize=[10, 4.5], fontsize=14, rspace=0.6, bspace=0.15, labelsize=15, legend_fontsize=14, only_one_iso=False, solar_ab='', sfr_thresh=0.0, m_formed_thresh=1.0, solar_norm=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.plot_spectro"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.plot_spectro" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots elements in spectroscopic notation:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1301,7 +1525,7 @@ SN1a (&#8216;sn1a&#8217;), or only massive stars
 
 <dl class="method">
 <dt id="omega.omega.run_step">
-<code class="descname">run_step</code><span class="sig-paren">(</span><em>i</em>, <em>sfr_rs</em>, <em>m_added=array([]</em>, <em>dtype=float64)</em>, <em>m_lost=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.run_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.run_step" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run_step</code><span class="sig-paren">(</span><em>i</em>, <em>sfr_rs</em>, <em>m_added=array([]</em>, <em>dtype=float64)</em>, <em>m_lost=0.0</em>, <em>mass_sampled=array([]</em>, <em>dtype=float64)</em>, <em>scale_cor=array([]</em>, <em>dtype=float64)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/omega.html#omega.run_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#omega.omega.run_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function calculates the evolution of one single step in the
 chemical evolution.</p>
 </dd></dl>
@@ -1337,6 +1561,9 @@ can have different lengths</p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="sygma.html"
                         title="previous chapter">SYGMA Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="stellab.html"
+                        title="next chapter">STELLAB Module</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -1370,6 +1597,9 @@ can have different lengths</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="stellab.html" title="STELLAB Module"
+             >next</a> |</li>
         <li class="right" >
           <a href="sygma.html" title="SYGMA Module"
              >previous</a> |</li>
