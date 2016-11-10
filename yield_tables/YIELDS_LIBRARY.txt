@@ -29,6 +29,16 @@ AGB + massive stars
 			    Portinari et al. 1998, http://ukads.nottingham.ac.uk/abs/1998A%26A...334..505P
 
 
+	PoP III stars by Heger et al. 2010. 
+
+		popIII_heger.txt contains models with S4 piston, explosion energy of 1.2B and 
+		no mixing (published apj300379t8_mrt.txt).
+
+		Tables:
+			popIII_heger10.txt 
+
+		References: Heger et al. 2010, http://ukads.nottingham.ac.uk/abs/2010ApJ...724..341H
+
 SNIa:
 
 	Seitenzahl et. al 2013:
