@@ -4498,7 +4498,7 @@ class omega( chem_evol ):
     def plot_abun(self, fig=20, age=9.2e9,\
         solar_norm=False, iso_on=False,\
         list_elem=[], list_iso=[],return_x_y=False, over_plot_solar=False,\
-        solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn', f_y_annotate=0.9,\
+        solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn', species_labels=True,f_y_annotate=0.9,\
         marker='o',marker_s='^',shape='',shape_s='-', color='b', color_s='r', label='Prediction',label_s='solar',fsize=[10,4.5],\
         fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,\
         legend_fontsize=14, markersize=5):
@@ -4727,12 +4727,12 @@ class omega( chem_evol ):
             if iso_on:
 
                 # Plot the isotopes of each elements
-                plt.xlabel('A')
+                plt.xlabel('mass number A')
                 if solar_norm:
-                    plt.ylabel('X(A)/X(A)$_\odot$')
-                    plt.plot([A_nb_min,A_nb_max],[1,1], '--k')
+                    plt.ylabel('X/X$_\odot$')
+                    plt.plot([A_nb_min,A_nb_max+10],[1,1], '--k')
                 else:
-                    plt.ylabel('X(A)')
+                    plt.ylabel('mass number A')
                     if over_plot_solar:
                         for i_Z in range(len(iso_array_sol)):
                             plt.plot(iso_array_sol[i_Z][0], iso_array_sol[i_Z][1], linestyle='--',\
@@ -4746,6 +4746,14 @@ class omega( chem_evol ):
                 # Get the legend
                 plt.plot(iso_array_sol[i_Z][0], iso_m_frac_sim[i_Z], linestyle=shape,\
                      color=color,label=label,marker=marker,markersize=markersize)
+
+
+                if species_labels:
+                     for i_Z in range(len(iso_array_sol)):
+                          #print 'iso ',iso_array_sol[i_Z][2]
+			  #for h in range(len(iso_array_sol[i_Z][2])):
+		          plt.annotate(iso_array_sol[i_Z][2][0].split('-')[0],(iso_array_sol[i_Z][0][0], iso_m_frac_sim[i_Z][0]), \
+				xytext=(-2,0),textcoords='offset points',horizontalalignment='right', verticalalignment='top') 		  
 
                 # Annotate the element
                 #ylimm = np.array(plt.gca().get_ylim())
@@ -4762,12 +4770,12 @@ class omega( chem_evol ):
             else:
 
                 # Plot the isotopes of each elements
-                plt.xlabel('Z')
+                plt.xlabel('charge number Z')
                 if solar_norm:
-                    plt.ylabel('X(Z)/X(Z)$_\odot$')
+                    plt.ylabel('X/X$_\odot$')
                     plt.plot([Z_numbers[0],Z_numbers[-1]],[1,1], '--k')
                 else:
-                    plt.ylabel('X(Z)')
+                    plt.ylabel('X')
                     if over_plot_solar:
                         plt.plot(Z_numbers, elem_sol, linestyle=shape_s,\
                              color=color_s,label=label_s,marker=marker_s,markersize=markersize)
