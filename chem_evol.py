@@ -1254,7 +1254,14 @@ class chem_evol(object):
         #self.extra_source_on = False
         #self.ytables_extra = 0
         if self.extra_source_on == True:
-            self.ytables_extra = ry.read_yield_sn1a_tables( \
+
+            #if absolute path don't apply global_path
+            if self.extra_source_table[0] == '/':
+                self.ytables_extra = ry.read_yield_sn1a_tables( \
+			self.extra_source_table, isotopes)
+            else:
+
+                self.ytables_extra = ry.read_yield_sn1a_tables( \
                 global_path + self.extra_source_table, isotopes)
 
 	#Read stellar parameter. stellar_param
