@@ -83,7 +83,7 @@ class stellab():
         self.leg       = []  # Legend
 
         # List of all the data sets (path)
-        self.paths.append('milky_way_data/APOGEE_stellab')
+        self.paths.append('milky_way_data/APOGEE_R13_stellab')
         self.paths.append('milky_way_data/Frebel_2010_Milky_Way_stellab')
         self.paths.append('milky_way_data/Venn_et_al_2004_stellab')
         self.paths.append('milky_way_data/Hinkel_et_al_2014_stellab')
@@ -141,7 +141,7 @@ class stellab():
             self.paths_s.append(self.paths[i_path]+'_s')
 
         # List of colors and symbols associated to data sets
-        self.cs.append('ob') # APOGEE - Milky Way
+        self.cs.append('ob') # APOGEE R13 - Milky Way
         self.cs.append('xg') # Frebel (2010) - Milky Way
         self.cs.append('xr') # Venn et al. (2004)
         self.cs.append('xb') # Hinkel et al. (2014)
@@ -206,7 +206,7 @@ class stellab():
         self.cs.append('or') # Pompeia et al. (2008)
 
         # List of legends associated to data sets
-        self.leg.append('APOGEE (R12)')
+        self.leg.append('APOGEE (R13)')
         self.leg.append('Frebel (2010)')
         self.leg.append('Venn et al. (2004)')
         self.leg.append('Hinkel et al. (2014)')
@@ -283,6 +283,7 @@ class stellab():
         self.paths_norm.append('Grevesse_Noels_1993')
         self.paths_norm.append('Grevesse_Sauval_1998')
         self.paths_norm.append('Asplund_et_al_2009')
+        self.paths_norm.append('Asplund_et_al_2005')
         self.paths_norm.append('Lodders_et_al_2009')
 
         # For every solar reference ...
