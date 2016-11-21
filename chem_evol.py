@@ -706,7 +706,7 @@ class chem_evol(object):
             else:
 
                 # Get the primordial composition of Walker et al. (1991)
-	        iniabu_table = 'yield_tables/bb_walker91.txt'
+	        iniabu_table = 'yield_tables/iniabu/iniab_bb_walker91.txt'
                 ytables_bb = ry.read_yield_sn1a_tables( \
                     global_path+iniabu_table, self.history.isotopes)
 

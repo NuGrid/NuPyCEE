@@ -71,7 +71,7 @@ For the necessary structure see again the default choice of that variable.
 
 For example with artificial yields of only H-1, you can try
 
->>> s2 = s.sygma(iniZ=0.0001,dt=1e8,tend=1.5e10, mgal=1e11,table='yield_tables/isotope_yield_table_h1.txt',
+>>> s2 = s.sygma(iniZ=0.0001,dt=1e8,tend=1.5e10, mgal=1e11,table='yield_tables/agb_and_massive_stars_h1.txt',
     sn1a_table='yield_tables/sn1a_h1.txt',iniabu_table='yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt')
 
 '''
@@ -113,7 +113,7 @@ class sygma( chem_evol ):
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
-                 ini_alpha=True, table='yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt', \
+                 ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',sn1a_energy=1e51,\
 		 ns_merger_on=True, bhns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
                  t_merger_max=1.0e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
@@ -130,7 +130,7 @@ class sygma( chem_evol ):
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
                  stellar_param_on=False, t_dtd_poly_split=-1.0, \
-		 stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',
+		 stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
 		 tau_ferrini=False, dt_in=np.array([]),\
                  nsmerger_dtd_array=np.array([]), bhnsmerger_dtd_array=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\

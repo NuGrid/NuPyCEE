@@ -240,7 +240,7 @@ class omega( chem_evol ):
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  tend=13e9, mgal=1.0e10, transitionmass=8, iolevel=0, \
                  ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0,\
-                 table='yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt', \
+                 table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[],\
                  sn1a_table='yield_tables/sn1a_t86.txt',\
                  ns_merger_on=True, f_binary=1.0, f_merger=0.0008,\
@@ -495,7 +495,7 @@ class omega( chem_evol ):
 
         # Read the primordial composition of the inflow gas
         if self.in_out_control or self.SF_law or self.DM_evolution:
-            prim_comp_table = 'yield_tables/bb_walker91.txt'
+            prim_comp_table = 'yield_tables/iniabu/iniab_bb_walker91.txt'
 	    self.prim_comp = ry.read_yield_sn1a_tables(global_path + \
                 prim_comp_table, self.history.isotopes)
 

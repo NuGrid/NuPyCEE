@@ -5,15 +5,13 @@
 AGB + massive stars
 
 	NuGrid:
-	        See NuGrid.txt for more details.
-
 	        Tables:
-        	        isotope_yield_table_MESA_only_fryer12_delay.txt
-        	        isotope_yield_table_MESA_only_fryer12_rapid.txt 
-        	        isotope_yield_table_MESA_only_ye.txt
+        	        agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt
+        	        agb_and_massive_stars_nugrid_MESAonly_fryer12rapid.txt 
+        	        agb_and_massive_stars_nugrid_MESAonly_ye.txt
 
        		References: Ritter et al., in prep
-                   	    Pignatari et al., http://arxiv.org/abs/1307.6961
+                   	    Pignatari et al. 2016, http://adsabs.harvard.edu/abs/2016ApJS..225...24P
 
 
 	Combined yield set of Portinari et al. and Marigo: !!Needs confirmation
@@ -22,7 +20,7 @@ AGB + massive stars
 		Net yields.
 
 		Tables:
-			isotope_yield_table_portinari98_marigo01.txt	
+			agb_and_massive_stars_portinari98_marigo01.txt	
 	
 	
 		References: Marigo et al. 2001, http://ukads.nottingham.ac.uk/abs/2001A%26A...370..194M
