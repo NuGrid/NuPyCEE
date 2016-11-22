@@ -1028,7 +1028,7 @@ class sygma( chem_evol ):
 	ax=plt.gca()
 	self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         #return x,y
-        self.__save_data(header=[headerx,headery],data=[x,y])
+        #self.__save_data(header=[headerx,headery],data=[x,y])
 
 
     def plot_mass_ratio(self,fig=0,species_ratio='C/N',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,logy=True):
