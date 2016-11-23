@@ -165,7 +165,7 @@ class read_nugrid_parameter():
 
 
                 M: Stellar mass in Msun
-                Z: Stellar metallicity (e.g. solar: 0.02)
+                Z: Stellar metallicity (e.g. Z=0.02)
                 quantity: table attribute or data column/data_cols
 
         '''
@@ -497,7 +497,151 @@ class read_nugrid_yields():
                         #return set1[k]
 			self.yield_data[idx][idx_col][k] = value
 
-    def write_table(self,filename='isotope_yield_table_mod.txt'):
+    def write_single_table(self,filename,headers,data,dcols=['Isotopes','Yields','Z','A'],header_char='H',sldir='.',sep='&'):
+		'''
+		Method for writeing data in GCE format in Ascii files.
+		Reads either elements or isotopes
+		dcols[0] needs to contain either isotopes or elements
+
+		Note the attribute name at position i in dcols will be associated
+		with the column data at index i in data.
+		Also the number of data columns(in data) must equal the number
+		of data attributes (in dcols)
+		Also all the lengths of that columns must all be the same.
+		Input:
+		filename: The file where this data will be written.
+		Headers: A list of Header strings or if the file being written 
+			 is of type trajectory, this is a List of strings
+			 that contain header attributes and their associated 
+			 values which are seperated by a '='. 
+		dcols: A list of data attributes
+		data:  A list of lists (or of numpy arrays).
+		header_char  the character that indicates a header lines
+		sldir: Where this fill will be written.
+		sep: What seperatesa the data column attributes
+		trajectory: Boolean of if we are writeing a trajectory type file
+		'''
+
+		import re
+		import utils as u
+
+		#check if input are elements or isotopes
+		if not '-' in data[0][0]:
+			iso_inp=False
+			dcols=dcols+['Z']
+		else:
+			iso_inp=True
+			dcols=dcols+['Z','A']
+		#Attach Z and A
+		if iso_inp==True:
+			data.append([])
+			data.append([])
+			u.convert_specie_naming_from_h5_to_ppn(data[0])
+			Z=u.znum_int
+			A=u.amass_int
+			for i in range(len(data[0])):
+				zz=str(int(Z[i]))
+				aa=str(int(A[i]))
+				data[1][i]='{:.3E}'.format(data[1][i])+' '
+				data[-2].append(zz)
+				data[-1].append(aa)
+
+
+		else:
+			#in order to get Z , create fake isotope from element
+			fake_iso=[]
+			for k in range(len(data[0])):
+				fake_iso.append(data[0][k]+'-99')
+			#print fake_iso
+                        data.append([])
+                        u.convert_specie_naming_from_h5_to_ppn(fake_iso)
+                        Z=u.znum_int
+			for i in range(len(data[0])):
+				zz=str(int(Z[i]))
+				data[1][i]='{:.3E}'.format(data[1][i])+' '
+				data[-1].append(zz)
+
+
+		if sldir.endswith(os.sep):
+			filename = str(sldir)+str(filename)
+		else:
+			filename = str(sldir)+os.sep+str(filename)
+		tmp=[] #temp variable
+		lines=[]#list of the data lines
+		lengthList=[]# list of the longest element (data or column name)
+			     # in each column
+		#CR to surpress too much output	     
+		#if os.path.exists(filename):
+			#print 'This method will add table to existing file '+ filename
+		
+		if len(data)!=len(dcols):
+			print 'The number of data columns does not equal the number of Data attributes'
+			print 'returning none'
+			return None
+		for i in xrange(len(headers)):
+			tmp.append(header_char+' '+headers[i]+'\n')
+		headers=tmp
+		tmp=''
+		
+		for i in xrange(len(data)): #Line length stuff
+			length=len(dcols[i])+1
+			for j in xrange(len(data[i])):
+				tmp2=data[i][j]
+				if isinstance(data[i][j],float):
+					tmp2='{:.3E}'.format(data[i][j])+' '
+					data[i][j] = tmp2
+				if len(str(tmp2))>length:
+					length=len(str(tmp2))
+			lengthList.append(length)
+		
+		tmp=''
+		tmp1=''
+		for i in xrange(len(dcols)):
+			tmp1=dcols[i]
+			if len(dcols[i]) < lengthList[i]:
+				j=lengthList[i]-len(dcols[i])
+				for k in xrange(j):
+					tmp1+=' '
+			tmp+=sep+tmp1
+		tmp+='\n'
+		dcols=tmp
+		tmp=''
+		for i in xrange(len(data[0])):
+			for j in xrange(len(data)):
+				if type(data[j][i]) == str:
+					#match = re.match(r"([a-z]+)([0-9]+)",data[j][i], re.I)
+                                        #items = match.groups()
+                                        tmp1=data[j][i]#items[0].capitalize()+'-'+items[1]
+                                	if len(str(data[j][i])) < lengthList[j]:
+                                        	l=lengthList[j]-len(tmp1)
+                                        	for k in xrange(l):
+                                                	tmp1+=' '
+					extra=''	
+				#else:
+                                #        tmp1=data[j][i]
+                                #        if len(data[j][i]) < lengthList[j]:
+                                #                l=lengthList[j]-len(data[j][i]))
+                                #                for k in xrange(l):
+                                #                        tmp1+=' '
+
+
+				tmp+=sep+tmp1
+			lines.append(tmp+'\n')
+			tmp=''
+			
+		f=open(filename,'a')
+		for i in xrange(len(headers)):
+			f.write(headers[i])
+		f.write(dcols)
+		for i in xrange(len(lines)):
+			f.write(lines[i])
+		
+		f.close()
+		return None
+
+
+
+    def write_table(self,filename='isotope_yield_table_mod.txt',iolevel=0):
 
 	'''
 		Allows to write out table in NuGrid yield table format.
@@ -509,8 +653,6 @@ class read_nugrid_yields():
 		needs ascii_table.py from NuGrid python tools
 
 	'''
-	#part of the NuGrid python tools
-	import ascii_table as ascii1
 
 	import getpass
 	user=getpass.getuser()
@@ -542,7 +684,8 @@ class read_nugrid_yields():
 	f.close()
 
 	for k in range(len(tables)):
-		print 'Write table ',tables[k]
+		if iolevel>0:
+		        print 'Write table ',tables[k]
 		mass=float(self.table_mz[k].split(',')[0].split('=')[1])
 		metallicity=float(self.table_mz[k].split(',')[1].split('=')[1][:-1])
 		data=self.yield_data[k]	
@@ -569,10 +712,10 @@ class read_nugrid_yields():
 		data=[species,list(yields),mass_frac_ini]
 
 		headers=[special_header]+attr_lines
-		ascii1.writeGCE_table(filename=filename,headers=headers,data=data,dcols=dcols)
+		self.write_single_table(filename=filename,headers=headers,data=data,dcols=dcols)
+	print 'Yields table ',filename,' created.'
 
-
-    def get(self,M=0,Z=-1,quantity='',specie=''):
+    def get(self,M=0.,Z=-1.,quantity='',specie=''):
 
         '''
                 Allows to extract table data in 2 Modes:
@@ -590,11 +733,31 @@ class read_nugrid_yields():
 
                    get(tableattribute)
 
+	        Parameters
+	        ----------
 
-                M: Stellar mass in Msun
-                Z: Stellar metallicity (e.g. solar: 0.02)
-                quantity: table attribute or data column/data_cols
-                specie: optional, return certain specie (e.g. 'H-1')
+                M: float
+			Stellar mass in Msun
+			default: 0 
+                Z: float 
+			Stellar metallicity (e.g. 0.02)
+		quantity: string
+                	table attribute or data column/data_cols
+                specie: string
+			optional, return certain specie (e.g. 'H-1')
+
+
+		table1.get(Z=0.02,quantity='masses')
+
+		Examples
+        	----------
+
+		
+        	>>> table1.get(M=2.0,Z=0.02,quantity='Yields')
+
+        	>>> table1.get(Z=0.02,quantity='masses')
+ 
+
 
 
         '''

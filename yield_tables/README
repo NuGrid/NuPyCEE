@@ -58,6 +58,8 @@ agb_and_massive_stars_portinari98_marigo01_nomod_gce_addZ: contains additional m
 1) analytic prescription (Fryer12)
     a) delay  (agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt)
     b) rapid  (agb_and_massive_stars_nugrid_MESAonly_fryer12rapid.txt)
+    c) mix    (agb_and_massive_stars_nugrid_MESAonly_fryer12mix.txt)
+	Mix of 50% - 50% mix of delay and rapid yields
 2) Ye=0.4982 (Young06)
     a) fallback at Ye (agb_and_massive_stars_nugrid_MESAonly_ye.txt)
 

@@ -8,6 +8,7 @@ AGB + massive stars
 	        Tables:
         	        agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt
         	        agb_and_massive_stars_nugrid_MESAonly_fryer12rapid.txt 
+			agb_and_massive_stars_nugrid_MESAonly_fryer12mix.txt
         	        agb_and_massive_stars_nugrid_MESAonly_ye.txt
 
        		References: Ritter et al., in prep

@@ -526,7 +526,7 @@ class sygma( chem_evol ):
         Examples
         ----------
 
-        >>> s.plot_table_param(quantity='Lifetiem')
+        >>> s.plot_table_param(quantity='Lifetime')
 
 
 
