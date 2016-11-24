@@ -1,3 +1,5 @@
+H Name: NuGrid yields Set1 with set1.2, set1.1, set1.3a, set1.4a, set1.5a
+H Name: Test table with H only
 H NuGrid yields Set1: set1.2, set1.1, set1.3a, set1.4a, set1.5a
 H Data prepared by: critter
 H Data prepared date: 01 Mar 2014
