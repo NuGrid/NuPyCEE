@@ -1,3 +1,5 @@
+H CCSN neutrino-driven wind abundances in mass fraction
+&Isotopes &Z=0.02
 &H-1      &3.71081E-08
 &H-2      &3.21065E-12
 &He-3     &2.22573E-15

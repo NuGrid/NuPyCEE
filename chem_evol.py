@@ -217,7 +217,7 @@ class chem_evol(object):
     table : string
         Path pointing toward the stellar yield tables for massive and AGB stars.
 
-        Default value : 'yield_tables/isotope_yield_table_MESA_only_fryer12_delay.txt' (NuGrid)
+        Default value : 'yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt' (NuGrid)
 
     sn1a_table : string
         Path pointing toward the stellar yield table for SNe Ia.
@@ -320,7 +320,7 @@ class chem_evol(object):
     def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
              sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
-             ini_alpha=True, table='yield_tables/isotope_yield_table.txt', \
+             ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
              sn1a_energy=1e51, ns_merger_on=True, bhns_merger_on=False,\
              f_binary=1.0, f_merger=0.0008, t_merger_max=1.0e10,\
@@ -329,8 +329,9 @@ class chem_evol(object):
              bhnsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', \
              nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt',\
              iniabu_table='', extra_source_on=False, \
-             extra_source_table='yield_tables/extra_source.txt', \
-	     f_extra_source=1.0, \
+             extra_source_table=['yield_tables/extra_source.txt'], \
+	     f_extra_source=[1.0], \
+	     extra_source_mass_range=[[8,30]], \
              pop3_table='yield_tables/popIII_heger10.txt', \
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
@@ -339,7 +340,7 @@ class chem_evol(object):
              netyields_on=False,wiersmamod=False,yield_interp='lin',\
 	     total_ejecta_interp=True, tau_ferrini=False,\
              input_yields=False,t_merge=-1.0,stellar_param_on=True,\
-             stellar_param_table='yield_tables/isotope_yield_table_MESA_only_param.txt',\
+             stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',\
              popIII_on=True, out_follows_E_rate=False, \
              t_dtd_poly_split=-1.0, \
              ism_ini=np.array([]), nsmerger_dtd_array=np.array([]),\
@@ -390,6 +391,7 @@ class chem_evol(object):
 	self.imf_yields_range_pop3=imf_yields_range_pop3
 	self.extra_source_on = extra_source_on
 	self.f_extra_source= f_extra_source
+	self.extra_source_mass_range=extra_source_mass_range
 	self.table = table
         self.iniabu_table = iniabu_table
         self.sn1a_table = sn1a_table
@@ -1211,7 +1213,11 @@ class chem_evol(object):
             self.default_yields = False
 
         # Read stellar yields
-        ytables = ry.read_nugrid_yields(global_path + self.table,excludemass=self.exclude_masses)
+
+        if self.table[0] == '/':
+            ytables = ry.read_nugrid_yields(self.table,excludemass=self.exclude_masses)
+	else:	
+	    ytables = ry.read_nugrid_yields(global_path + self.table,excludemass=self.exclude_masses)
         self.ytables = ytables
 
         # Interpolate stellar lifetimes
@@ -1255,14 +1261,17 @@ class chem_evol(object):
         #self.ytables_extra = 0
         if self.extra_source_on == True:
 
-            #if absolute path don't apply global_path
-            if self.extra_source_table[0] == '/':
-                self.ytables_extra = ry.read_yield_sn1a_tables( \
-			self.extra_source_table, isotopes)
-            else:
-
-                self.ytables_extra = ry.read_yield_sn1a_tables( \
-                global_path + self.extra_source_table, isotopes)
+	    #go over all extra sources
+	    self.ytables_extra =[]
+	    for ee in range(len(self.extra_source_table)):  
+	
+               #if absolute path don't apply global_path
+               if self.extra_source_table[ee][0] == '/':
+                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
+			self.extra_source_table[ee], isotopes))
+               else:
+                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
+                     global_path + self.extra_source_table[ee], isotopes))
 
 	#Read stellar parameter. stellar_param
 	if self.stellar_param_on:
@@ -1423,25 +1432,28 @@ class chem_evol(object):
         yields_extra = []
         if True: #self.default_yields == False:
             if self.extra_source_on:
-		#check available metallicities
-                tables_Z = self.ytables_extra.metallicities
-		#sort lowest to highest
-		tables_Z.sort(reverse=True) 
-                for tz in tables_Z:
+               #go over all extra sources
+	       yields_extra=[]
+	       for ee in range(len(self.ytables_extra)):  
+		  #check available metallicities
+                  tables_Z = self.ytables_extra[ee].metallicities
+	 	  #sort lowest to highest
+		  tables_Z.sort(reverse=True)
+                  for tz in tables_Z:
 		    # if current Z above available
                     if self.zmetal > tz:
-                        yields_extra = \
-                        self.ytables_extra.get(Z=tz, quantity='Yields')
+                        yields_extra.append( \
+                        self.ytables_extra[ee].get(Z=tz, quantity='Yields'))
                         break
 		    #if current Z below available
                     if self.zmetal < tables_Z[-1]:
-                        yields_extra = \
-                        self.ytables_extra.get(Z=tables_Z[-1],quantity='Yields')
+                        yields_extra.append( \
+                        self.ytables_extra[ee].get(Z=tables_Z[-1],quantity='Yields'))
                         break
 		    else:
 			if self.zmetal>=tz:
-				yields_extra = \
-				self.ytables_extra.get(Z=tz,quantity='Yields')
+				yields_extra.append( \
+				self.ytables_extra[ee].get(Z=tz,quantity='Yields'))
 					    
 
         # Output information
@@ -2076,12 +2088,14 @@ class chem_evol(object):
 		#if self.history.isotopes[k]=='N-14':
 			#print 'N14: ',mstars[w],yields[k],scalefactor,number_stars			
                 # In the case of an extra source in massive stars ...
-                if self.extra_source_on:
-                    self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                        yields_extra[k] * self.f_extra_source * yield_factor
-                    self.mdot[j][k] = self.mdot[j][k] + \
-                        yields_extra[k] * self.f_extra_source * yield_factor
+                #if self.extra_source_on:
+                #    self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
+                #        yields_extra[k] * self.f_extra_source * yield_factor
+                #    self.mdot[j][k] = self.mdot[j][k] + \
+                #        yields_extra[k] * self.f_extra_source * yield_factor
                     
+
+
                 # Add the contribution of massive stars
                 if k >= 76:
                     self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
@@ -2094,6 +2108,22 @@ class chem_evol(object):
             else:
                 self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
                     yields[k] * yield_factor
+
+            #here extra source contributions are added
+            if self.extra_source_on:
+		for ee in range(len(yields_extra)):    
+	            if ((minm1 >= self.extra_source_mass_range[ee][0]) and (maxm1 <= self.extra_source_mass_range[ee][1])):	
+			
+		       self.mdot[j][k] = self.mdot[j][k] + \
+                       yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
+
+		       if mstars[w] > self.transitionmass:
+                         self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
+                           yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
+                       else:
+                        self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
+		           yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
+
 
         # Count the number of core-collapse SNe
         if mstars[w] > self.transitionmass:

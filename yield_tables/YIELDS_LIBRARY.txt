@@ -111,7 +111,7 @@ MHD Jets: !!Needs confirmation
 			
 
 
-CCSC neutrino-driven winds: !!Needs confirmation
+CCSN neutrino-driven winds: !!Needs confirmation
 
 	N. Nishimura:
 

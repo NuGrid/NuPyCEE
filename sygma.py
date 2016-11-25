@@ -121,8 +121,9 @@ class sygma( chem_evol ):
                  bhnsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', \
                  nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
                  extra_source_on=False, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0, \
-                 extra_source_table='yield_tables/extra_source.txt', \
-		 f_extra_source=1.0, \
+                 extra_source_table=['yield_tables/extra_source.txt'], \
+		 f_extra_source=[1.0], \
+     	         extra_source_mass_range=[[8,30]], \
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
@@ -155,6 +156,7 @@ class sygma( chem_evol ):
                  t_merger_max=t_merger_max, m_ej_nsm = m_ej_nsm, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
                  extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
+		 extra_source_mass_range=extra_source_mass_range, \
 		 pop3_table=pop3_table, \
                  nb_nsm_per_m=nb_nsm_per_m, t_nsm_coal=t_nsm_coal, \
                  imf_bdys_pop3=imf_bdys_pop3, \
