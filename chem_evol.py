@@ -332,6 +332,7 @@ class chem_evol(object):
              extra_source_table=['yield_tables/extra_source.txt'], \
 	     f_extra_source=[1.0], \
 	     extra_source_mass_range=[[8,30]], \
+	     extra_source_exclude_Z=[], \
              pop3_table='yield_tables/popIII_heger10.txt', \
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
@@ -392,6 +393,7 @@ class chem_evol(object):
 	self.extra_source_on = extra_source_on
 	self.f_extra_source= f_extra_source
 	self.extra_source_mass_range=extra_source_mass_range
+	self.extra_source_exclude_Z=extra_source_exclude_Z
 	self.table = table
         self.iniabu_table = iniabu_table
         self.sn1a_table = sn1a_table
@@ -2111,19 +2113,24 @@ class chem_evol(object):
 
             #here extra source contributions are added
             if self.extra_source_on:
-		for ee in range(len(yields_extra)):    
-	            if ((minm1 >= self.extra_source_mass_range[ee][0]) and (maxm1 <= self.extra_source_mass_range[ee][1])):	
+
+		       #print self.Z_gridpoint,self.extra_source_exclude_Z   		    
+		    for ee in range(len(yields_extra)):
+		       if not self.Z_gridpoint in self.extra_source_exclude_Z[ee]:
+			if ((minm1 >= self.extra_source_mass_range[ee][0]) and (maxm1 <= self.extra_source_mass_range[ee][1])):	
 			
-		       self.mdot[j][k] = self.mdot[j][k] + \
-                       yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
+		          self.mdot[j][k] = self.mdot[j][k] + \
+                          yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
 
-		       if mstars[w] > self.transitionmass:
-                         self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                           yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
-                       else:
-                        self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
-		           yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
-
+		          if mstars[w] > self.transitionmass:
+                            self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
+                            yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
+                          else:
+                            self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
+		            yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
+		       #else:
+			  #if k==0:
+		             # print 'self.Z_gridpoint',ee,self.f_extra_source[ee],self.Z_gridpoint,' excluded for ',self.zmetal
 
         # Count the number of core-collapse SNe
         if mstars[w] > self.transitionmass:
