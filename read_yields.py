@@ -620,13 +620,13 @@ class read_nugrid_yields():
         '''
 	#scale down to Z=0.00001
 	#print 'get yields   ',Z
-	if float(Z) == 0.00001:
-		#scale abundance
-		if quantity=='Yields':
-			return self.get_scaled_Z(M=M,Z=Z,quantity=quantity,specie=specie)
+	#if float(Z) == 0.00001:
+	#	#scale abundance
+	#	if quantity=='Yields':
+	#		return self.get_scaled_Z(M=M,Z=Z,quantity=quantity,specie=specie)
 		#Take all other parameter from Z=0.0001 case
-		else:
-			Z=0.0001
+	#	else:
+	#		Z=0.0001
 
         all_tattrs=False
         if Z ==-1:
