@@ -54,7 +54,7 @@ class read_nugrid_parameter():
 	######read through all lines
         for line in lines:
             if 'H' in line[0]:
-                if not 'Table' in line:
+                if not 'Table:' in line:
                     if header_done==False:
                         header1.append(line.strip())
                     else:

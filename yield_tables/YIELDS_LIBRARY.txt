@@ -38,6 +38,18 @@ AGB + massive stars
 
 		References: Heger et al. 2010, http://ukads.nottingham.ac.uk/abs/2010ApJ...724..341H
 
+
+	Massive stars by Kobayashi et al. 2006
+
+		The yield table contains massive star yields from Kobayashi06  and complementing 
+		AGB yields from NuGrid. AGB yields at Z=0.004 correspond to yields at Z=0.006. 
+		
+		Tables:
+			agb_and_massive_stars_nugrid_K06.txt
+
+		References: Kobayashi et al. 2006, http://ukads.nottingham.ac.uk/abs/2006ApJ...653.1145K 
+			
+
 SNIa:
 
 	Seitenzahl et. al 2013:
