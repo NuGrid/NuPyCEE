@@ -42,13 +42,29 @@ AGB + massive stars
 	Massive stars by Kobayashi et al. 2006
 
 		The yield table contains massive star yields from Kobayashi06  and complementing 
-		AGB yields from NuGrid. AGB yields at Z=0.004 correspond to yields at Z=0.006. 
-		
+		AGB yields from NuGrid. AGB yields at Z=0.004 correspond to NuGrid yields at Z=0.006. 
+		The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.		
+
 		Tables:
 			agb_and_massive_stars_nugrid_K06.txt
 
 		References: Kobayashi et al. 2006, http://ukads.nottingham.ac.uk/abs/2006ApJ...653.1145K 
 			
+	Massive stars by Nomoto et al. 2013
+
+		The yield table contains massive star yields from the compilation by Nomoto et al. 2013.
+		Complemented with AGB stars from NuGrid. AGB yields at Z=0.004 and Z=0.008 correspond to NuGrid yields at Z=0.006.
+		The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.		
+	
+
+		Tables:
+			agb_and_massive_stars_nugrid_N13.txt
+
+
+		References:
+
+			http://adsabs.harvard.edu/abs/2013ARA%26A..51..457N
+			http://star.herts.ac.uk/~chiaki/works/YIELD_CK13.DAT (Yields Table 13 in Nomoto et al. 2013)
 
 SNIa:
 
