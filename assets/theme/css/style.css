@@ -636,7 +636,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 
 .mbr-section-full {
   display: table;
-  height: 80vh;
+  height: 60vh;
   padding-bottom: 0;
   padding-top: 0;
   table-layout: fixed;
