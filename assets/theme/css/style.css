@@ -880,7 +880,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .mbr-gallery .mbr-gallery-item {
   position: relative;
   display: inline-block;
-  width: 25%; }
+  width: 15%; }
   @media (max-width: 768px) {
     .mbr-gallery .mbr-gallery-item {
       width: 50%; } }
