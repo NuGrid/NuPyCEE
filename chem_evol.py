@@ -178,7 +178,24 @@ class chem_evol(object):
     ns_merger_on : boolean
         True or False to include or exclude the contribution of neutron star mergers.
 
-        Default value: True
+        Note : If t_nsm_coal or nsm_dtd_power is not used (see below), the delay time
+        distribution of neutron star mergers is given by the standard population synthesis
+        models of Dominik et al. (2012), using Z = 0.002 and Z = 0.02.  In this case, the
+        total number of neutron star mergers can be tuned using f_binary and f_merger
+        (see below).
+        Default value : False
+
+    f_binary : float
+        Binary fraction for massive stars used to determine the total number of neutron
+        star mergers in a simple stellar population.
+
+        Default value : 1.0
+
+    f_merger : float
+        Fraction of massive star binary systems that lead to neutron star mergers in a
+        simple stellar population.
+
+        Default value : 0.0008
 
     beta_pow : float
         Slope of the power law for custom SN Ia rate, R = Constant * t^-beta_pow.
@@ -282,13 +299,13 @@ class chem_evol(object):
         Example : [0.2, 0.3, 0.1] for rate_snIa(t) = 0.2*t**2 + 0.3*t + 0.1
         Note : Must be used with the poly_fit_range parameter (see below)
 
-        Default value : np.array([]) --> Desactivated
+        Default value : np.array([]) --> Deactivated
 
     poly_fit_range : list --> [t_min,t_max]
         Time range where the customized delay-time distribution function for
         SNe Ia will be applied for a simple stellar population.
 
-        Default value : np.array([]) --> Desactivated
+        Default value : np.array([]) --> Deactivated
 
     mass_sampled : list
         Stellar masses that are sampled to eject yields in a stellar population.
@@ -296,7 +313,7 @@ class chem_evol(object):
         do not ensure a correlation with the star formation rate.  Each sampled
         mass will eject the exact amount of mass give in the stellar yields. 
 
-        Default value : np.array([]) --> Desactivated
+        Default value : np.array([]) --> Deactivated
 
     scale_cor : 2D list
         Determine the fraction of yields ejected for any given stellar mass bin.
@@ -304,7 +321,34 @@ class chem_evol(object):
         0 and 8 Msu will eject 100% of their yields, and stars with initial mass
         between 8 and 100 will eject 50% of their yields.  There is no limit for
         the number of [%,M_upper_limit] arrays used.
-        Default value : np.array([])  --> Desactivated
+
+        Default value : np.array([]) --> Deactivated
+
+    t_nsm_coal : float
+        When greater than zero, t_nsm_coal sets the delay time (since star formation)
+        after which all neutron star mergers occur in a simple stellar population.
+
+        Default value : -1 --> Deactivated
+
+    nsm_dtd_power : 3-index array --> [t_min, t_max, slope_of_the_power_law]
+        When used, nsm_dtd_power defines a delay time distribution for neutron
+        star mergers in the form of a power law, for a simple stellar population.
+
+        Exemple: [1.e7, 1.e10, -1.] --> t^-1 from 10 Myr to 10 Gyr
+        Default value : [] --> Deactivated
+
+    nb_nsm_per_m : float
+        Number of neutron star mergers per stellar mass formed in a simple
+        stellar population.
+
+        Note : This parameter is only considered when t_nsm_coal or nsm_dtd_power
+        is used to define the delay time of neutron star mergers.
+        Default value : -1 --> Deactivated
+
+    m_ej_nsm : float
+        Mass ejected per neutron star merger event.
+
+        Default value : 2.5e-02
 
     Run example
     ===========
@@ -322,7 +366,7 @@ class chem_evol(object):
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
-             sn1a_energy=1e51, ns_merger_on=True, bhns_merger_on=False,\
+             sn1a_energy=1e51, ns_merger_on=False, bhns_merger_on=False,\
              f_binary=1.0, f_merger=0.0008, t_merger_max=1.0e10,\
              m_ej_nsm = 2.5e-02, nb_nsm_per_m=-1.0, \
              t_nsm_coal=-1.0, m_ej_bhnsm=2.5e-02, nsm_dtd_power=[],\
