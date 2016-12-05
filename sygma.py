@@ -1016,8 +1016,6 @@ class sygma( chem_evol ):
 			#if idx==4:
 			#	ax1.plot([],[],marker=marker[idx1],color='k',linestyle='None',label='M='+str(mini))
 			#ax.plot(x[-1],y[-1],marker=marker[idx1],color=color[idx],linestyle=linestyle[idx])
-		#print x
-		#print y
 		if len(label)==0:
 			plt.plot(x,y,label='Z='+str(Z),marker=marker,color=color,linestyle=shape)
 		else:
@@ -1033,7 +1031,7 @@ class sygma( chem_evol ):
         #self.__save_data(header=[headerx,headery],data=[x,y])
 
 
-    def plot_mass_ratio(self,fig=0,species_ratio='C/N',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,logy=True):
+    def plot_mass_ratio(self,fig=0,xaxis='age',species_ratio='C/N',source='all',label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,logy=True):
 
         '''
 	Mass ratio of two species indicated by species_ratio over time.
@@ -1046,7 +1044,10 @@ class sygma( chem_evol ):
 
 
 	specie : string
-	     ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 	
+	     ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 
+	xaxis  : string
+             if 'age' : time evolution
+	     if '[Fe/H]' : use [Fe/H]
 	source : string
              Specifies if yields come from
 	     all sources ('all'), including
@@ -1055,8 +1056,6 @@ class sygma( chem_evol ):
 	     only agb stars ('agb'), only
 	     SN1a ('SN1a'), or only massive stars
              ('massive')
-        norm : boolean
-             If True, normalize to current total ISM mass
 	label : string
 	     figure label
 	marker : string
@@ -1084,46 +1083,63 @@ class sygma( chem_evol ):
 		if source=='sn1a':
 			label=species_ratio+', SNIa'
 
+
+
         #Reserved for plotting
         if not return_x_y:
             shape,marker,color=self.__msc(source,shape,marker,color)
 
-
-
- 
 	specie1=species_ratio.split('/')[0]
 	specie2=species_ratio.split('/')[1]
 
+	norm = 'no'
         x,y1=self.plot_mass(fig=0,specie=specie1,source=source,norm=norm,label=label,shape=shape,marker=marker,color=color,markevery=20,multiplot=False,return_x_y=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14)
 
         x,y2=self.plot_mass(fig=0,specie=specie2,source=source,norm=norm,label=label,shape=shape,marker=marker,color=color,markevery=20,multiplot=False,return_x_y=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14)
- 
-        
-	y=np.array(y1)/np.array(y2)
-         #Reserved for plotting
+
+        y_temp=[]
+        for k in range(len(y1)):
+	    if y2[k]==0.:
+	       y_temp.append(0.)
+	    else:
+	       y_temp.append(y1[k]/y2[k])
+	y=y_temp
+
+ 	if xaxis == '[Fe/H]': 
+	    age,fe_h=self.plot_spectro(return_x_y=True,xaxis='age',yaxis='[Fe/H]')
+	    #match ages in x and age_dum
+	    y_temp=[]
+	    for k in range(len(age)):
+	         idx=x.index(age[k])
+                 y_temp.append(y[idx] )
+            y = y_temp
+	    x = fe_h
+        #Reserved for plotting
         if not return_x_y:
            plt.figure(fig, figsize=(fsize[0],fsize[1]))
-           plt.xscale('log')
-           plt.xlabel('age [yr]')
-           if norm == False:
-               plt.ylabel('yield ratio')
-	       if logy==True:
-                   plt.yscale('log')
-           else:
-               plt.ylabel('(IMF-weighted) fraction of ejecta')
+	   if xaxis=='age':
+              plt.xlabel('age [yr]')
+              plt.xscale('log')
+           elif xaxis=='[Fe/H]':
+	      plt.xlabel('[Fe/H]')
+           plt.ylabel('mass ratio X$_i$/X$_j$')
+	   if logy==True:
+            plt.yscale('log')
         self.y=y
         #If x and y need to be returned ...
         if return_x_y:
             return x, y
 
         else:
+	    if len(label)==0:
+		label=specie1+'/'+specie2
             plt.plot(x,y,label=label,linestyle=shape,marker=marker,color=color,markevery=markevery)
             plt.legend()
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    plt.xlim(self.history.dt,self.history.tend)	
+	    if xaxis=='age':
+	        plt.xlim(self.history.dt,self.history.tend)	
 	    #self.__save_data(header=['Age[yr]',specie],data=[x,y])
-
        
 
 
@@ -1139,7 +1155,6 @@ class sygma( chem_evol ):
 
 	specie : string
              1) isotope or element name, in the form 'C' or 'C-12'
-	     2) ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 	
 	source : string
              Specifies if yields come from
 	     all sources ('all'), including
@@ -1348,13 +1363,12 @@ class sygma( chem_evol ):
 
         '''
 	Plots mass fraction of isotope or element
-	vs either time or other isotope or element.
+	vs time.
 
         Parameters
         ----------
 	xaxis : string 
             either 'age' for time
-	    or isotope name, in the form e.g. 'C-12'
 	yaxis : string
             isotope name, in the same form as for xaxis
 
@@ -1412,7 +1426,7 @@ class sygma( chem_evol ):
 	      yields_evol=self.history.ism_iso_yield_1a
 	    elif source == 'massive':
 	     yields_evol=self.history.ism_iso_yield_massive
-	     iso_idx=self.history.isotopes.index(xaxis)
+	    iso_idx=self.history.isotopes.index(xaxis)
             x=[]
 	    for k in range(1,len(yields_evol)):
 	       if norm=='no':
@@ -2601,221 +2615,6 @@ class sygma( chem_evol ):
 	#print mean_val
 
 	return mean_val,bin_bdys,y,color,label
-
-
-    def plot_iso_ratio(self,fig=18,source='all',marker='',shape='',\
-        color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
-        bspace=0.15,labelsize=15,legend_fontsize=14,return_x_y=False,
-        xaxis='age',yaxis='C-12/C-13',markevery=500,\
-        solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
-        solar_iso='solar_normalization/Asplund_et_al_2009_iso.txt'):
-
-	'''
-
-	Plots ratios of isotopes.
-
-
-        Parameters
-        ----------
-
-	yaxis: string
-		Ratio of isotopes, e.g. C-12/C-13
-
-
-        Examples
-        ----------
-
-	>>> s.plot_iso_ratio(yaxis='C-12/C-13') 	
-
-	'''
-
-
-        # Declaration of the array to plot
-        x = []
-        y = []
-
-        # Access solar abundance
-        iniabu=ry.iniabu(global_path+solar_ab)
-        x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
-        elements,x_ini=self._iso_abu_to_elem(x_ini_iso)
-
-        # Get the wanted source
-        if source == 'all':
-            yields_evol=self.history.ism_iso_yield
-            yields_evol_el=self.history.ism_elem_yield
-        elif source =='agb':
-            yields_evol=self.history.ism_iso_yield_agb
-            yields_evol_el=self.history.ism_elem_yield_agb
-        elif source == 'sn1a':
-            yields_evol=self.history.ism_iso_yield_1a
-            yields_evol_el=self.history.ism_elem_yield_1a
-        elif source == 'massive':
-            yields_evol=self.history.ism_iso_yield_massive
-            yields_evol_el=self.history.ism_elem_yield_massive
-        else:
-            print '!! Source not valid !!'
-            return
-
-        # Verify the X-axis
-        xaxis_ratio = False
-        if xaxis == 'age':
-            x = self.history.age
-        elif xaxis[0] == '[' and xaxis[-1] == ']':
-            xaxis_elem1 =xaxis.split('/')[0][1:]
-            xaxis_elem2 =xaxis.split('/')[1][:-1]
-            if not xaxis_elem1 in self.history.elements and \
-               not xaxis_elem2 in self.history.elements:
-                 print '!! Elements in xaxis are not valid !!'
-                 return
-
-            #X-axis ini values
-            x_elem1_ini=x_ini[elements.index(xaxis_elem1)]
-            x_elem2_ini=x_ini[elements.index(xaxis_elem2)]
-
-            #X-axis gce values
-            elem_idx1=self.history.elements.index(xaxis_elem1)
-            elem_idx2=self.history.elements.index(xaxis_elem2)
-
-            for k in range(0,len(yields_evol_el)):
-                if sum(yields_evol_el[k]) == 0:
-                    continue
-                #in case no contribution during timestep
-                x1=yields_evol_el[k][elem_idx1]/sum(yields_evol_el[k])
-                x2=yields_evol_el[k][elem_idx2]/sum(yields_evol_el[k])
-                spec=np.log10(x1/x2) - np.log10(x_elem1_ini/x_elem2_ini)
-                x.append(spec)
-        else:
-            xaxis_ratio = True
-            x_1 = ''
-            x_2 = ''
-            is_x_1 = True
-            for ix in range(0,len(xaxis)):
-                if xaxis[ix] == '/' and is_x_1:
-                    is_x_1 = False
-                else:
-                    if is_x_1:
-                        x_1 += xaxis[ix]
-                    else:
-                        x_2 += xaxis[ix]
-            if len(x_2) == 0:
-                print '!! xaxis not valid.  Need to be \'age\' or a ratio !!'
-                return
-
-        # Verify the Y-axis
-        y_1 = ''
-        y_2 = ''
-        is_y_1 = True
-        for iy in range(0,len(yaxis)):
-            if yaxis[iy] == '/' and is_y_1:
-                is_y_1 = False
-            else:
-                if is_y_1:
-                    y_1 += yaxis[iy]
-                else:
-                    y_2 += yaxis[iy]
-        if len(y_2) == 0:
-            print '!! yaxis not valid.  Need to be a ratio !!'
-            return
-
-        # Get the isotopes for X-axis
-        if xaxis_ratio:
-          if x_1 in self.history.isotopes and x_2 in self.history.isotopes:
-            idx_1=self.history.isotopes.index(x_1)
-            idx_2=self.history.isotopes.index(x_2)
-            x1_elem = str(x_1.split('-')[0])
-            x2_elem = str(x_2.split('-')[0])
-            x1_at_nb = float(x_1.split('-')[1])
-            x2_at_nb = float(x_2.split('-')[1])
-          else:
-            print '!! Isotopes in xaxis are not valid !!'
-            return
-
-        # Get the isotopes for Y-axis
-        if y_1 in self.history.isotopes and y_2 in self.history.isotopes:
-            idy_1=self.history.isotopes.index(y_1)
-            idy_2=self.history.isotopes.index(y_2)
-            y1_elem = str(y_1.split('-')[0])
-            y2_elem = str(y_2.split('-')[0])
-            y1_at_nb = float(y_1.split('-')[1])
-            y2_at_nb = float(y_2.split('-')[1])
-        else:
-            print '!! Isotopes in yaxis are not valid !!'
-            return
-
-        # Set the default label .. if not defined
-        if len(label)<1:
-            label=yaxis
-            if source=='agb':
-                label=yaxis+', AGB'
-            elif source=='massive':
-                label=yaxis+', Massive'
-            elif source=='sn1a':
-                label=yaxis+', SNIa'
-
-        # Get the solar values
-        if xaxis_ratio:
-            x1_sol, x2_sol, y1_sol, y2_sol = \
-              self.__read_solar_iso(solar_iso, x_1, x_2, y_1, y_2)
-        else:
-            x1_sol, x2_sol, y1_sol, y2_sol = \
-                self.__read_solar_iso(solar_iso, '', '', y_1, y_2)
-
-        # Calculate the isotope ratios (mass ratio)
-        #for k in range(0,len(yields_evol)):
-        #    if xaxis_ratio:
-        #        x.append( yields_evol[k][idx_1] / yields_evol[k][idx_2] )
-        #    y.append( yields_evol[k][idy_1] / yields_evol[k][idy_2] )
-
-        # Calculate the isotope ratios (delta notation)
-        for k in range(0,len(yields_evol)):
-            if xaxis_ratio:
-                ratio_sample = (yields_evol[k][idx_1]/yields_evol[k][idx_2])*\
-                               (x2_at_nb / x1_at_nb)
-                ratio_std = x1_sol / x2_sol
-                x.append( ((ratio_sample/ratio_std) - 1) * 1000)
-            ratio_sample = (yields_evol[k][idy_1]/yields_evol[k][idy_2])*\
-                           (y2_at_nb / y1_at_nb)
-            ratio_std = y1_sol / y2_sol
-            y.append( ((ratio_sample/ratio_std) - 1) * 1000)
-    
-        #Reserved for plotting
-        if not return_x_y:
-            shape,marker,color=self.__msc(source,shape,marker,color)
-
-        #x=x[1:]
-        #y=y[1:]
-
-
-        #Reserved for plotting
-        if not return_x_y:
-           plt.figure(fig, figsize=(fsize[0],fsize[1]))
-           if xaxis == 'age':
-               plt.xscale('log')
-           #plt.yscale('log')
-           plt.ylabel("$\delta$($^{"+str(int(y1_at_nb))+"}$"+y1_elem+"/$^{"+\
-                           str(int(y2_at_nb))+"}$"+y2_elem+")")
-           if xaxis == 'age':
-               plt.xlabel('age [yr]')
-           elif xaxis_ratio:
-               plt.xlabel("$\delta$($^{"+str(int(x1_at_nb))+"}$"+x1_elem+"/$^{"+\
-                           str(int(x2_at_nb))+"}$"+x2_elem+")")
-           else:
-               plt.xlabel(xaxis)
-
-        #If x and y need to be returned ...
-        if return_x_y:
-            return x, y
-
-        else:
-            plt.plot(x,y,label=label,linestyle=shape,marker=marker,\
-                     color=color,markevery=markevery)
-            plt.legend()
-            ax=plt.gca()
-            self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
-                  rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    #plt.xlim(self.history.dt,self.history.tend)	
-	    self.__save_data(header=['Iso mass ratio',yaxis],data=[x,y])
-
 
 
     ##############################################
