@@ -243,7 +243,7 @@ class omega( chem_evol ):
                  table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[],\
                  sn1a_table='yield_tables/sn1a_t86.txt',\
-                 ns_merger_on=True, f_binary=1.0, f_merger=0.0008,\
+                 ns_merger_on=False, f_binary=1.0, f_merger=0.0008,\
                  t_merger_max=1.0e10, m_ej_nsm = 2.5e-02, \
                  nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', \
                  bhns_merger_on=False, m_ej_bhnsm=2.5e-02, \
@@ -2403,117 +2403,6 @@ class omega( chem_evol ):
 	    self.save_data(header=['Age[yrs]',specie],data=[x,y])
 
 
-    def plot_mass_ratio(self,fig=0,xaxis='age',species_ratio='C/N',source='all',label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,logy=True):
-
-        '''
-	Mass ratio of two species indicated by species_ratio over time.
-	Choice can either be elemental ratio or isotopic ratios.
-	Masses of species are in solar masses.
-	Note: Similar to plot_mass but with ratios of masses. 
-
-        Parameters
-        ----------
-
-
-	specie : string
-	     ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 
-	xaxis  : string
-             if 'age' : time evolution
-	     if '[Fe/H]' : use [Fe/H]
-	source : string
-             Specifies if yields come from
-	     all sources ('all'), including
-	     AGB+SN1a, massive stars. Or from
-	     distinctive sources:
-	     only agb stars ('agb'), only
-	     SN1a ('SN1a'), or only massive stars
-             ('massive')
-	label : string
-	     figure label
-	marker : string
-	     figure marker
-	shape : string
-	     line style	
-	color : string
-	     color of line
-        fig : string,float
-	     to name the plot figure       
-	logy : bool
-             if yes, choose yaxis in log scale 	      
- 
-        Examples
-	----------
-
-	>>> s.plot_mass_ratio('C-12')
-
-        '''
-	if len(label)<1:
-		if source=='agb':
-			label=species_ratio+', AGB'
-		if source=='massive':
-			label=species_ratio+', Massive'
-		if source=='sn1a':
-			label=species_ratio+', SNIa'
-
-
-
-        #Reserved for plotting
-        if not return_x_y:
-            shape,marker,color=self.__msc(source,shape,marker,color)
-
-	specie1=species_ratio.split('/')[0]
-	specie2=species_ratio.split('/')[1]
-
-	norm = False
-        x,y1=self.plot_mass(fig=0,specie=specie1,source=source,norm=norm,label=label,shape=shape,marker=marker,color=color,markevery=20,multiplot=False,return_x_y=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14)
-
-        x,y2=self.plot_mass(fig=0,specie=specie2,source=source,norm=norm,label=label,shape=shape,marker=marker,color=color,markevery=20,multiplot=False,return_x_y=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14)
-
-        y_temp=[]
-        for k in range(len(y1)):
-	    if y2[k]==0.:
-	       y_temp.append(0.)
-	    else:
-	       y_temp.append(y1[k]/y2[k])
-	y=y_temp
-
- 	if xaxis == '[Fe/H]': 
-	    age,fe_h=self.plot_spectro(return_x_y=True,xaxis='age',yaxis='[Fe/H]')
-	    #match ages in x and age_dum
-	    y_temp=[]
-	    for k in range(len(age)):
-	         idx=x.index(age[k])
-                 y_temp.append(y[idx] )
-            y = y_temp
-	    x = fe_h
-        #Reserved for plotting
-        if not return_x_y:
-           plt.figure(fig, figsize=(fsize[0],fsize[1]))
-	   if xaxis=='age':
-              plt.xlabel('age [yr]')
-              plt.xscale('log')
-           elif xaxis=='[Fe/H]':
-	      plt.xlabel('[Fe/H]')
-           plt.ylabel('mass ratio X$_i$/X$_j$')
-	   if logy==True:
-            plt.yscale('log')
-        self.y=y
-        #If x and y need to be returned ...
-        if return_x_y:
-            return x, y
-
-        else:
-	    if len(label)==0:
-		label=specie1+'/'+specie2
-            plt.plot(x,y,label=label,linestyle=shape,marker=marker,color=color,markevery=markevery)
-            plt.legend()
-            ax=plt.gca()
-            self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    if xaxis=='age':
-	        plt.xlim(self.history.dt,self.history.tend)	
-	    #self.__save_data(header=['Age[yr]',specie],data=[x,y])
-       
-
     def plot_massfrac(self,fig=2,xaxis='age',yaxis='O-16',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
@@ -4071,7 +3960,10 @@ class omega( chem_evol ):
             print 'Not available with a closed box.'
 
 
-    def plot_iso_ratio_delta(self,return_x_y=False,
+    ###################################################
+    #                  Plot Iso Ratio                 #
+    ###################################################
+    def plot_iso_ratio(self,return_x_y=False,
         xaxis='age',yaxis='C-12/C-13',\
         solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
         solar_iso='solar_normalization/Asplund_et_al_2009_iso.txt',\
