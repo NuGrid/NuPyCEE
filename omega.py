@@ -252,7 +252,7 @@ class omega( chem_evol ):
                  extra_source_table=['yield_tables/extra_source.txt'], \
  		 f_extra_source=[1.0], \
      	         extra_source_mass_range=[[8,30]], \
-		 extra_source_exclude_Z=[], \
+		 extra_source_exclude_Z=[[]], \
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0, gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
