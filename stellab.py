@@ -44,6 +44,9 @@ import math
 import os
 from matplotlib.lines import Line2D
 
+#import read_yields
+import read_yields as ry
+
 # Define workspace
 global global_path
 try:
@@ -472,7 +475,7 @@ class stellab():
                    fsize=[10,4.5], fontsize=14, rspace=0.6, bspace=0.15,\
                    labelsize=15, legend_fontsize=14, ms=6.0, norm='', obs='',\
                    overplot=False, return_xy=False, show_err=False, \
-                   show_mean_err=False, stat=False, flat=False, show_legend=True, \
+                   show_mean_err=False, stat=False, flat=False,abundistr=False,show_legend=True, \
                    sub=1, sub_plot=False, alpha=1.0, lw=1.0):
  
         '''
@@ -644,12 +647,17 @@ class stellab():
             ret_y = []
             ret_x_err = []
             ret_y_err = []
+            #store index of stars of all data sets
+            ret_star_i = []
 
         # For every data set ...
         for i_obs_index in range(0,len_i_obs):
 
           # Copy the data set index
           i_ds = i_obs[i_obs_index]
+
+          #store temporary index of stars for current data set
+          ret_star_i_tmp = []
 
           # If the current data set contains the input elements ...
           if elem_in[0][0] in self.elem_list[i_ds] and \
@@ -679,7 +687,7 @@ class stellab():
                   for i_star in range(0,len(self.ab[i_ds])):
                       xy_plot[i_x_y][i_star]  = self.ab[i_ds][i_star][i_num][0]
                       err_plot[i_x_y][i_star] = self.ab[i_ds][i_star][i_num][1]
-
+                      ret_star_i_tmp.append(i_star)
               # If the data need to be manipulated to recover the wanted ratio ...
               else:
 
@@ -701,11 +709,13 @@ class stellab():
                               if self.ab[i_ds][i_star][i_num][0] == -30.0 or \
                                  self.ab[i_ds][i_star][i_denom][0] == -30.0 :
                                   xy_plot[i_x_y][i_star] = -30.0
+                                  ret_star_i_tmp.append(i_star)
                               else:
                                   xy_plot[i_x_y][i_star] = \
                                     self.ab[i_ds][i_star][i_num][0] - \
                                       self.ab[i_ds][i_star][i_denom][0]
-                            
+                                  ret_star_i_tmp.append(i_star)
+    
                       # If a multiplication is needed to recover the input ratio ..
                       # Want [A/C] with nominator [A/B] and denominator [B/C]
                       else:
@@ -715,7 +725,7 @@ class stellab():
                               xy_plot[i_x_y][i_star] = \
                                 self.ab[i_ds][i_star][i_num][0] + \
                                   self.ab[i_ds][i_star][i_denom][0]
-
+                              ret_star_i_tmp.append(i_star) 
 
               # If a re-normalization is needed ...
               if re_norm and ok_for_plot:
@@ -763,6 +773,8 @@ class stellab():
                           print 'Solar value for '+warn_el+' not found in ' + \
                           self.leg[i_ds]+'.  '+warn_ratio + ' was not modified.'
                       self.leg[i_ds]
+
+            #####################################################
 
             # If ratio is available
             if ok_for_plot:
@@ -847,6 +859,7 @@ class stellab():
                             ret_y.append(xy_plot[1][i_ret])
                             ret_x_err.append(err_plot[0][i_ret])
                             ret_y_err.append(err_plot[1][i_ret])
+                            ret_star_i.append(ret_star_i_tmp[i_ret])
 
             # If the average error need to be calculated...
             if show_mean_err:
@@ -957,6 +970,9 @@ class stellab():
                        sum_x/sum_count, sum_y/sum_count
               else:
                 return ret_x, ret_y, ret_x_err, ret_y_err, sum_count, sum_count
+            if abundistr:
+                return ret_x, ret_y, ret_x_err, ret_y_err,ret_star_i 
+
             return ret_x, ret_y
 
 
@@ -1157,14 +1173,143 @@ class stellab():
     ##############################################
     #              List Ref Papers               #
     ##############################################
-    def list_ref_papers(self):
+    def list_ref_papers(self,galaxy=''):
 
         '''
-        This function plots the list of data sets available.
+        This function prints lists of available data sets.
+
+        Parameters
+        ---------
+
+        galaxy : string
+
+            Name of the target galaxy for which data sets will be displayed.  
+            If empty includes data sets of all available galaxies.
+
+            Choices : 'milky_way', 'sculptor', 'carina', 'fornax'
+
+            Default value : ''
 
         '''
 
+        if len(galaxy)==0:
+           # Print every available observational reference papers
+           for i_lsn in range(0,len(self.paths)):
+              print self.paths[i_lsn] 
+        else:
+           i_obs = self.__get_i_data_galaxy(galaxy)
+	   for i_ref in i_obs:
+	      print self.paths[i_ref]	 
 
-        # Print every available observational reference papers
-        for i_lsn in range(0,len(self.paths)):
-            print self.paths[i_lsn] 
+
+    ##############################################
+    #                 Plot Abun                  #
+    ##############################################
+
+    def plot_abun(self,fig=-1,obs='milky_way_data/Venn_et_al_2004_stellab',\
+		    star_idx=0,fsize=[10,4.5],label='Star 1',elem_label_on=True,fontsize=14,shape='-',color='k', rspace=0.6, bspace=0.15,\
+                   labelsize=15, legend_fontsize=14, ms=6.0, norm='',\
+                   marker='o',markersize=3,return_xy=False,show_err=False, \
+                   show_mean_err=False, stat=False, flat=False, show_legend=True, \
+                   sub=1, sub_plot=False, alpha=1.0, lw=1.0):
+
+ 
+        '''
+        Plots abundance distribution [Elements/Fe] vs Z
+
+        Parameters
+        ---------
+
+        elements : array
+	'''
+        
+        overplot=False
+        
+        # get the elements available
+
+        # Get the indexes for the wanted references
+        i_obs = self.__get_i_data_set([obs])
+        i_ds=i_obs[0]
+        elements = self.elem_list[i_ds]    
+        print 'Number of elements available in dataset: ',elements
+        # get [X/Fe] for each element
+        abunds_y=[]
+        abunds_y_err=[] 
+        eles_found=[]
+        num_stars=0
+        for k in range(len(elements)):
+            yaxis='['+elements[k]+'/'+'Fe]'
+            ret_x, ret_y, ret_x_err, ret_y_err,ret_star_i=self.plot_spectro(fig=-1, galaxy='', xaxis='[Fe/H]', yaxis=yaxis, \
+                   fsize=[10,4.5], fontsize=14, rspace=0.6, bspace=0.15,\
+                   labelsize=15, legend_fontsize=14, ms=6.0, norm='', obs=[obs],\
+                   overplot=False, return_xy=True, show_err=True, \
+                   show_mean_err=False, stat=False, flat=False, show_legend=True, \
+                   sub=1, sub_plot=False, alpha=1.0, lw=1.0,abundistr=True)
+		
+	    if star_idx in ret_star_i:
+	       idx=ret_star_i.index(star_idx)  
+               #ret_x[idx]
+               abunds_y.append(ret_y[idx])
+               #ret_x_err[idx]
+               abunds_y_err.append(ret_y_err[idx])
+               eles_found.append(elements[k])
+               #print 'get value: ',ret_y[idx]
+            if len(ret_star_i)>num_stars:
+               num_stars=len(ret_star_i) 
+        print 'Number of stars available in dataset: ',num_stars
+        err_on = show_err                
+        self.__plot_distr(eles_found,abunds_y,abunds_y_err,err_on,elem_label_on,shape,color,label,marker,markersize) 
+
+
+    def __plot_distr(self, elements,abunds,abunds_err,err_on,label_on,shape,color,label,marker,markersize):
+
+        '''
+        Helping function to plot the abundance distribution [Elements/Fe] vs Z
+
+        Parameters
+        ---------
+
+        elements : array
+	  list of elements to be plotted
+	abunds : array 
+	       abundances as [X/Fe] 
+        label_on : boolean
+	       if true plots the element label for each element
+
+        '''
+
+	Z_numbers=[]
+        for i_ele in range(len(elements)):
+	  # get name of element
+	  Z=ry.get_z_from_el(elements[i_ele])
+	  Z_numbers.append(Z)
+
+        Z_numbers_sort=[]
+        abunds_sort=[]
+	idx_sorted=sorted(range(len(Z_numbers)),key=lambda x:Z_numbers[x])		
+        for k in range(len(idx_sorted)):
+	   Z_numbers_sort.append(Z_numbers[idx_sorted[k]])
+	   abunds_sort.append(abunds[idx_sorted[k]])	 
+
+	plt.ylabel('[X/Fe]')
+        plt.xlabel('charge number Z')
+        plt.plot(Z_numbers_sort, abunds_sort, linestyle=shape,\
+                         color=color,label=label,marker=marker,markersize=markersize)
+
+	## plot element labels 
+	if label_on:
+	  for i_ele in range(len(elements)):    	
+       	      plt.annotate(elements[i_ele],(Z_numbers[i_ele],abunds[i_ele]), \
+		    xytext=(-2,0),textcoords='offset points',horizontalalignment='right', verticalalignment='top') 		  
+
+
+        #err on
+        if err_on:
+           plt.errorbar(Z_numbers[i_ele],abunds[i_ele], \
+		    xerr=0, yerr=abunds_err[i_ele],
+		    color=color,marker=marker, ecolor=color, \
+		    label=label, markersize=markersize, \
+                            alpha=1)
+
+
+
