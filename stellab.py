@@ -1201,28 +1201,24 @@ class stellab():
 	   for i_ref in i_obs:
 	      print self.paths[i_ref]	 
 
-
     ##############################################
-    #                 Plot Abun                  #
+    #                 Get star id                #
     ##############################################
 
-    def plot_abun(self,fig=-1,obs='milky_way_data/Venn_et_al_2004_stellab',\
-		    star_idx=0,fsize=[10,4.5],label='Star 1',elem_label_on=True,fontsize=14,shape='-',color='k', rspace=0.6, bspace=0.15,\
-                   labelsize=15, legend_fontsize=14, ms=6.0, norm='',\
-                   marker='o',markersize=3,return_xy=False,show_err=False, \
-                   show_mean_err=False, stat=False, flat=False, show_legend=True, \
-                   sub=1, sub_plot=False, alpha=1.0, lw=1.0):
+    def get_star_id(self,find_elements=['Sc'],obs='milky_way_data/Venn_et_al_2004_stellab'):
 
- 
         '''
         Plots abundance distribution [Elements/Fe] vs Z
 
         Parameters
         ---------
 
-        elements : array
-	'''
-        
+        find_elements : array
+	    Find all stars
+	obs : string
+	    Star data set
+        '''
+		    
         overplot=False
         
         # get the elements available
@@ -1237,6 +1233,65 @@ class stellab():
         abunds_y_err=[] 
         eles_found=[]
         num_stars=0
+	star_ids=[]
+        for k in range(len(find_elements)):
+            yaxis='['+find_elements[k]+'/'+'Fe]'
+            ret_x, ret_y, ret_x_err, ret_y_err,ret_star_i=self.plot_spectro(fig=-1, galaxy='', xaxis='[Fe/H]', yaxis=yaxis, \
+                   fsize=[10,4.5], fontsize=14, rspace=0.6, bspace=0.15,\
+                   labelsize=15, legend_fontsize=14, ms=6.0, norm='', obs=[obs],\
+                   overplot=False, return_xy=True, show_err=True, \
+                   show_mean_err=False, stat=False, flat=False, show_legend=True, \
+                   sub=1, sub_plot=False, alpha=1.0, lw=1.0,abundistr=True)
+
+	    if k==0:
+	      star_ids=ret_star_i
+            else:  
+	      star_ids_tmp=[]
+              for h in range(len(star_ids)):
+	           if star_ids[h] in ret_star_i:
+		      star_ids_tmp.append(star_ids[h])
+	      star_ids=star_ids_tmp	 
+	      
+        return star_ids		      
+
+    ##############################################
+    #                 Plot Abun                  #
+    ##############################################
+
+    def plot_abun(self,fig=-1,obs='milky_way_data/Venn_et_al_2004_stellab',\
+		    star_idx=0,find_elements=[],fsize=[10,4.5],label='Star 1',elem_label_on=True,fontsize=14,shape='-',color='k', rspace=0.6, bspace=0.15,\
+                   labelsize=15, legend_fontsize=14, ms=6.0, norm='',\
+                   marker='o',markersize=3,return_xy=False,show_err=True, \
+                   show_mean_err=False, stat=False, flat=False, show_legend=True, \
+                   sub=1, sub_plot=False, alpha=1.0, lw=1.0,iolevel=0):
+
+ 
+        '''
+        Plots abundance distribution [Elements/Fe] vs Z
+
+        Parameters
+        ---------
+
+        elements : array
+	find_elements : array
+	    Plot only  
+	'''
+        
+        overplot=False
+        
+        # get the elements available
+
+        # Get the indexes for the wanted references
+        i_obs = self.__get_i_data_set([obs])
+        i_ds=i_obs[0]
+        elements = self.elem_list[i_ds]   
+	if iolevel>0:
+            print 'Number of elements available in dataset: ',elements
+        # get [X/Fe] for each element
+        abunds_y=[]
+        abunds_y_err=[] 
+        eles_found=[]
+        num_stars=0
         for k in range(len(elements)):
             yaxis='['+elements[k]+'/'+'Fe]'
             ret_x, ret_y, ret_x_err, ret_y_err,ret_star_i=self.plot_spectro(fig=-1, galaxy='', xaxis='[Fe/H]', yaxis=yaxis, \
@@ -1245,7 +1300,7 @@ class stellab():
                    overplot=False, return_xy=True, show_err=True, \
                    show_mean_err=False, stat=False, flat=False, show_legend=True, \
                    sub=1, sub_plot=False, alpha=1.0, lw=1.0,abundistr=True)
-		
+	       	    
 	    if star_idx in ret_star_i:
 	       idx=ret_star_i.index(star_idx)  
                #ret_x[idx]
@@ -1255,13 +1310,14 @@ class stellab():
                eles_found.append(elements[k])
                #print 'get value: ',ret_y[idx]
             if len(ret_star_i)>num_stars:
-               num_stars=len(ret_star_i) 
-        print 'Number of stars available in dataset: ',num_stars
+               num_stars=len(ret_star_i)
+	if iolevel>0:
+            print 'Number of stars available in dataset: ',num_stars
         err_on = show_err                
-        self.__plot_distr(eles_found,abunds_y,abunds_y_err,err_on,elem_label_on,shape,color,label,marker,markersize) 
+        self.__plot_distr(fig,eles_found,abunds_y,abunds_y_err,err_on,elem_label_on,shape,color,label,marker,markersize,fsize) 
 
 
-    def __plot_distr(self, elements,abunds,abunds_err,err_on,label_on,shape,color,label,marker,markersize):
+    def __plot_distr(self,fig, elements,abunds,abunds_err,err_on,label_on,shape,color,label,marker,markersize,fsize):
 
         '''
         Helping function to plot the abundance distribution [Elements/Fe] vs Z
@@ -1277,6 +1333,7 @@ class stellab():
 	       if true plots the element label for each element
 
         '''
+        plt.figure(fig,figsize=(fsize[0],fsize[1]))
 
 	Z_numbers=[]
         for i_ele in range(len(elements)):
@@ -1305,7 +1362,8 @@ class stellab():
 
         #err on
         if err_on:
-           plt.errorbar(Z_numbers[i_ele],abunds[i_ele], \
+	   for i_ele in range(len(elements)):	
+              plt.errorbar(Z_numbers[i_ele],abunds[i_ele], \
 		    xerr=0, yerr=abunds_err[i_ele],
 		    color=color,marker=marker, ecolor=color, \
 		    label=label, markersize=markersize, \
