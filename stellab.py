@@ -66,25 +66,32 @@ class stellab():
 
     # Input paramters
     def __init__(self):
- 
+
+
+	# read abundance data library via 
+	# index file abundance_data_library.txt
+	# creates self.paths, self.paths_s, self.cs, self.leg
+        self.read_abundance_data_library(global_path+'/stellab_data/abundance_data_library.txt')
+
         # Declaration of the name of available galaxies
-        self.galaxy_name = []
-        self.galaxy_name.append('milky_way')
-        self.galaxy_name.append('sculptor')
-        self.galaxy_name.append('fornax')
-        self.galaxy_name.append('carina')
-        self.galaxy_name.append('lmc')
+        #self.galaxy_name = []
+        #self.galaxy_name.append('milky_way')
+        #self.galaxy_name.append('sculptor')
+        #self.galaxy_name.append('fornax')
+        #self.galaxy_name.append('carina')
+        #self.galaxy_name.append('lmc')
 
         # Declaration of arrays containing information on every data set
         self.elem_list = []  # Available elements
         self.elem      = []  # Nominator and denominator of each abundance ratio
         self.ab        = []  # Stellar abundances
-        self.paths     = []  # Path to the stellar abundances file
-        self.paths_s   = []  # Path to the solar values
+        #self.paths     = []  # Path to the stellar abundances file
+        #self.paths_s   = []  # Path to the solar values
         self.solar     = []  # Solar values used
-        self.cs        = []  # Color and symbol
-        self.leg       = []  # Legend
+        #self.cs        = []  # Color and symbol
+        #self.leg       = []  # Legend
 
+        '''
         # List of all the data sets (path)
         self.paths.append('milky_way_data/APOGEE_R13_stellab')
         self.paths.append('milky_way_data/Frebel_2010_Milky_Way_stellab')
@@ -138,11 +145,13 @@ class stellab():
         self.paths.append('carina_data/Venn_et_al_2012_stellab')
         self.paths.append('lmc_data/Lapenna_et_al_2012_stellab')
         self.paths.append('lmc_data/Pompeia_et_al_2008_stellab')
+        '''
 
-        # List of all the solar values used in the data sets
-        for i_path in range(0,len(self.paths)):
-            self.paths_s.append(self.paths[i_path]+'_s')
+        ## List of all the solar values used in the data sets
+        #for i_path in range(0,len(self.paths)):
+        #    self.paths_s.append(self.paths[i_path]+'_s')
 
+	'''
         # List of colors and symbols associated to data sets
         self.cs.append('ob') # APOGEE R13 - Milky Way
         self.cs.append('xg') # Frebel (2010) - Milky Way
@@ -262,6 +271,8 @@ class stellab():
         self.leg.append('Venn et al. (2012)')
         self.leg.append('Lapenna et al. (2012)')
         self.leg.append('Pompeia et al. (2008)')
+        '''
+
 
         # For every data set ...
         for i_entry in range(0,len(self.paths)):
@@ -294,6 +305,60 @@ class stellab():
 
             # Copy the solar values
             self.__read_solar_norm(self.paths_norm[i_sol], i_sol)
+
+
+    ##############################################
+    #        Read abundance data library         #
+    ##############################################
+
+    def read_abundance_data_library(self,filename):
+
+        # open index file
+	f=open(filename)
+        lines=f.readlines()  
+	f.close()
+
+	# Declaration of the name of available galaxies
+       
+        # name of galaxy
+	self.galaxy_name = []
+	# color + symbol
+        self.cs=[]
+	# legend
+        self.leg=[] 
+        # path to the stellar abundances file
+        self.paths = []
+        for k in range(len(lines)):
+		line = lines[k]
+		#ignore header
+		if k == 0:
+			continue
+		#if commented line
+		if line[0] == '#':
+			continue
+                # Declaration of the name of available galaxies
+		if  line[0] == 'H':
+			galaxy=line[1:].strip()
+			self.galaxy_name.append(galaxy)
+			#print 'found galaxy ',galaxy
+		# read data set
+		else:
+			#print line
+			path = 'stellab_data/'+line.split('&')[0].strip()
+			leg = line.split('&')[1].strip()
+			cs = line.split('&')[2].strip()
+			self.paths.append(path)
+			self.leg.append(leg)
+			self.cs.append(cs)
+			#print 'path : ',path
+			#print 'leg : ',leg
+
+        self.paths_s   = []  # Path to the solar values
+
+        # List of all the solar values used in the data sets
+	for i_path in range(0,len(self.paths)):
+	        self.paths_s.append(self.paths[i_path]+'_s')
+
 
     ##############################################
     #               Read Data File               #
@@ -392,7 +457,7 @@ class stellab():
         self.sol_norm.append([])
 
         # Open the data file
-        with open(global_path+'solar_normalization/'+file_path+'.txt', 'r')\
+        with open(global_path+'stellab_data/solar_normalization/'+file_path+'.txt', 'r')\
           as data_file:
 
             # For every line (for each element) ...
