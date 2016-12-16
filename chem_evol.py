@@ -376,7 +376,7 @@ class chem_evol(object):
              extra_source_table=['yield_tables/extra_source.txt'], \
 	     f_extra_source=[1.0], \
 	     extra_source_mass_range=[[8,30]], \
-	     extra_source_exclude_Z=[], \
+	     extra_source_exclude_Z=[[]], \
              pop3_table='yield_tables/popIII_heger10.txt', \
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
@@ -728,6 +728,20 @@ class chem_evol(object):
                       'using the poly_fit_dtd_5th parameter the SNe Ia DTD.'
                 self.need_to_quit = True
 
+        if self.extra_source_on:
+	     lt=len(self.extra_source_table)
+             lf=len(self.f_extra_source)
+	     lmr=len(self.extra_source_mass_range)
+	     leZ=len(self.extra_source_exclude_Z)
+	     if (not lt == lf):
+		 print 'Error - parameter extra_source_table and f_extra_source not of equal size'
+		 self.need_to_quit = True
+	     if	(not lt == lmr):
+		 print 'Error - parameter extra_source_table and  extra_source_mass_range not of equal size'    
+		 self.need_to_quit = True    
+             if  (not lt == leZ):
+                 print 'Error - parameter extra_source_table and extra_source_exclude_Z not of equal size'
+		 self.need_to_quit = True
 
     ##############################################
     #                  Get Iniabu                #
