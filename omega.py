@@ -822,11 +822,11 @@ class omega( chem_evol ):
 
             # Read Chiappini et al. (2001) SFH
             if self.galaxy == 'milky_way': 
-                self.__copy_sfr_input('milky_way_data/sfh_mw_cmr01.txt')
+                self.__copy_sfr_input('stellab_data/milky_way_data/sfh_mw_cmr01.txt')
 
             # Read constant SFH
             else:
-                self.__copy_sfr_input('milky_way_data/sfh_cte.txt')
+                self.__copy_sfr_input('stellab_data/milky_way_data/sfh_cte.txt')
 
         # Sculptor dwarf galaxy ...
         elif self.galaxy == 'sculptor':
@@ -837,7 +837,7 @@ class omega( chem_evol ):
             self.stellar_mass_0 = self.stellar_mass_0 * (1-self.mass_frac_SSP)
 
             # Read deBoer et al. (2012) SFH
-            self.__copy_sfr_input('sculptor_data/sfh_deBoer12.txt')
+            self.__copy_sfr_input('stellab_data/sculptor_data/sfh_deBoer12.txt')
 
         # Fornax dwarf galaxy ...
         elif self.galaxy == 'fornax':
@@ -848,7 +848,7 @@ class omega( chem_evol ):
             self.stellar_mass_0 = self.stellar_mass_0 * (1-self.mass_frac_SSP)
 
             # Read deBoer et al. (2012) SFH
-            self.__copy_sfr_input('fornax_data/sfh_fornax_deboer_et_al_2012.txt')
+            self.__copy_sfr_input('stellab_data/fornax_data/sfh_fornax_deboer_et_al_2012.txt')
 
         # Carina dwarf galaxy ...
         elif self.galaxy == 'carina':
@@ -2681,7 +2681,7 @@ class omega( chem_evol ):
             sol_values_ab = []
 
             # Open the data file
-            with open(global_path+'solar_normalization/'+solar_norm+'.txt', 'r') as data_file:
+            with open(global_path+'stellab_data/solar_normalization/'+solar_norm+'.txt', 'r') as data_file:
 
                 # For every line (for each element) ...
                 i_elem = 0
@@ -3966,7 +3966,7 @@ class omega( chem_evol ):
     def plot_iso_ratio(self,return_x_y=False,
         xaxis='age',yaxis='C-12/C-13',\
         solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
-        solar_iso='solar_normalization/Asplund_et_al_2009_iso.txt',\
+        solar_iso='stellab_data/solar_normalization/Asplund_et_al_2009_iso.txt',\
         fig=18,source='all',marker='',shape='',\
         color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
         bspace=0.15,labelsize=15,legend_fontsize=14):

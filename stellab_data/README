@@ -1,0 +1,16 @@
+This directory contains the stellar abundance data read
+by STELLAB and by OMEGA.
+
+The STELLAB module reads only files available in 
+
+	abundance_data_library.txt
+
+You can use your own data set with STELLAB.
+
+1) Add your own data set (table file) into this directory
+   or a subdirectory.
+2) Add a line to abundance_data_library.txt to make your table
+   visible for STELLAB.
+   Each line has the path to the table file, the name as it
+   will appear in any figure legend and the marker-color combination
+   for the style of the data points.
