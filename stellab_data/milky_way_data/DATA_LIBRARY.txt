@@ -1,0 +1,27 @@
+############################################################
+####### Observational data library structure & details incl. references ######
+############################################################
+
+APOGEE:
+
+	Release 13 of the APOGEE survey
+
+		
+
+		Tables:
+			APOGEE_R13_stellab.txt
+			APOGEE_R13_stellab_s.txt
+
+		References:
+			See http://www.sdss.org/collaboration/citing-sdss
+			http://adsabs.harvard.edu/abs/2010SPIE.7735E..46W
+			http://adsabs.harvard.edu/cgi-bin/bib_query?arXiv:1608.02013
+			
+
+	Release 12 
+
+		Tables:
+			APOGEE_stellab.txt
+			APOGEE_stellab_s.txt		
+
+
