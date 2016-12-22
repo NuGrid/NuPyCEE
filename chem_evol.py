@@ -2187,9 +2187,10 @@ class chem_evol(object):
                             self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
 		            yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
 		       #else:
-			  #if k==0:
-		             # print 'self.Z_gridpoint',ee,self.f_extra_source[ee],self.Z_gridpoint,' excluded for ',self.zmetal
+		          #if k==0:
+		          #   print self.zmetal,'Z_gridpoint',self.Z_gridpoint,self.extra_source_mass_range[ee]
 
+        #print 'general : ',self.zmetal,'Z_gridpoint',self.Z_gridpoint
         # Count the number of core-collapse SNe
         if mstars[w] > self.transitionmass:
             self.sn2_numbers[j] += number_stars

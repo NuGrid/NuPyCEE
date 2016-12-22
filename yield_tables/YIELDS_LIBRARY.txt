@@ -52,14 +52,19 @@ AGB + massive stars
 			
 	Massive stars by Nomoto et al. 2013
 
-		The yield table contains massive star yields from the compilation by Nomoto et al. 2013.
-		Complemented with AGB stars from NuGrid. AGB yields at Z=0.004 and Z=0.008 correspond to NuGrid yields at Z=0.006.
-		The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.		
-	
+
+		agb_and_massive_stars_nugrid_N13.txt:
+		     The yield table contains massive star yields from the compilation by Nomoto et al. 2013.
+		     Complemented with AGB stars from NuGrid. AGB yields at Z=0.004 and Z=0.008 correspond to NuGrid yields at Z=0.006.
+		     The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.		
+	        popIII_N13.txt:
+		     The yield table contains PopIII massive stars which undergo SN, HN and PISN.
+		     The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.
+		     PISN come from Umeda et al. 2002 (see Nomoto et al. 2013).
 
 		Tables:
 			agb_and_massive_stars_nugrid_N13.txt
-
+			popIII_N13.txt
 
 		References:
 
