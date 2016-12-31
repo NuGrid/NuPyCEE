@@ -702,7 +702,7 @@ class stellab():
 
             # Use the Milky Way
             i_obs = self.__get_i_data_galaxy('milky_way')
-
+            print 'test: ',i_obs
         # Keep the number of indexes in memory
         len_i_obs = len(i_obs)
 
@@ -1094,7 +1094,7 @@ class stellab():
                 ds_name = ''
                 if len(self.paths[i_look]) > nb_char:
                     for i_extr in range(0,nb_char):
-                        ds_name += self.paths[i_look][i_extr]
+                        ds_name += self.paths[i_look][i_extr+13]
 
                 # Add the index if it's for the right galaxy
                 if ds_name == galaxy:
