@@ -22,6 +22,7 @@ script:
   - python -m regression_tests.selftest
   - runipy regression_tests/SYGMA_SSP_h_yield_input.ipynb True
   - runipy regression_tests/Plotting_functions.ipynb True
+  - runipy regression_tests/Stellab_tests.ipynb
 notifications:
   slack: nugrid:wTgGR31cFsNUqfytUDZ5ZLug
   email: false
