@@ -1,57 +1,57 @@
 H Lists all datasets to be read in by STELLAB
 H milky_way
-milky_way_data/APOGEE_R13_stellab & APOGEE (R13) & ob
-milky_way_data/Frebel_2010_Milky_Way_stellab & Frebel (2010) & xg
-milky_way_data/Venn_et_al_2004_stellab & Venn et al. (2004) & xr
-milky_way_data/Hinkel_et_al_2014_stellab & Hinkel et al. (2014) & xb
-milky_way_data/Akerman_et_al_2004_stellab & Akerman et al. (2004) & sr
-milky_way_data/Andrievsky_et_al_2007_stellab & Andrievsky et al. (2007) & og
-milky_way_data/Andrievsky_et_al_2008_stellab & Andrievsky et al. (2008) & og
-milky_way_data/Andrievsky_et_al_2010_stellab & Andrievsky et al. (2010) & og
-milky_way_data/Bensby_et_al_2005_stellab & Bensby et al. (2005) & om
-#milky_way_data/Bensby_Feltzing_2006_stellab & Bensby & Feltzing(2006) & ^g
-#        milky_way_data/Bergemann_Gehren_2008_stellab & ^g
-milky_way_data/Bihain_et_al_2004_stellab & Bihain et al. (2004) & og
-milky_way_data/Bonifacio_et_al_2009_stellab & Bonifacio et al. (2009) & ^m
-milky_way_data/Caffau_et_al_2005_stellab & Caffau et al. (2005) & xm
-milky_way_data/Cayrel_et_al_2004_stellab & Cayrel et al. (2004) & ^r
-milky_way_data/Fabbian_et_al_2009_stellab & Fabbian et al. (2009) & ^c
-#        milky_way_data/Gehren_et_al_2006_stellab & Gehren et al. (2009) & ^g
-milky_way_data/Gratton_et_al_2003_stellab & Gratton et al. (2003) & sc
-milky_way_data/Israelian_et_al_2004_stellab & Israelian et al. (2004) & oc
-milky_way_data/Lai_et_al_2008_stellab & Lai et al. (2008) & or
-milky_way_data/Nissen_et_al_2007_stellab & Nissen et al. (2007) & ^g
-milky_way_data/Reddy_et_al_2006_stellab & Reddy et al. (2006) & ^r
-milky_way_data/Reddy_et_al_2003_stellab & Reddy et al. (2003) & sb
-milky_way_data/Spite_et_al_2005_stellab & Spite et al. (2005) & ob
-milky_way_data/Battistini_Bensby_2016_stellab & Battistini & Bensby (2016) & oc
-milky_way_data/Nissen_et_al_2014_stellab & Nissen et al. (2014) & xc
-milky_way_data/Ramirez_et_al_2013_stellab & Ramirez et al. (2013) & xb
-milky_way_data/Bensby_et_al_2014_stellab & Bensby et al. (2014) & xm
-milky_way_data/Battistini_Bensby_2015_stellab & Battistini & Bensby (2015) & xr
-milky_way_data/Yong_et_al_2013_stellab & Yong et al. (2013) & xk
-milky_way_data/Jacobson_et_al_2015_stellab & Jacobsen et al. (2015) & xg
-milky_way_data/Cohen_et_al_2013_stellab & Cohen et al. (2013) & xb
-milky_way_data/Cohen_et_al_2013_noCEMPs_stellab & Cohen et al. noCEMPs (2013) & xb
-milky_way_data/Adibekyan_et_al_2012_stellab & Adibekyan et al. (2012) & xg
-milky_way_data/Aoki_Honda_2008_stellab & Aoki & Honda (2008) & xb
-milky_way_data/Hansen_et_al_2012_pecu_excluded_stellab & Hansen et al. (2012) & ob
-milky_way_data/Ishigaki_et_al_2012_2013_stellab & Ishigaki et al. (2012-13) & xm
-milky_way_data/Roederer_et_al_2009_stellab & Roederer et al. (2009) & om
-milky_way_data/Roederer_et_al_2014_pecu_excluded_stellab & Roederer et al. (2014) & xr
+milky_way_data/APOGEE_R13_stellab && APOGEE (R13) && ob
+milky_way_data/Frebel_2010_Milky_Way_stellab && Frebel (2010) && xg
+milky_way_data/Venn_et_al_2004_stellab && Venn et al. (2004) && xr
+milky_way_data/Hinkel_et_al_2014_stellab && Hinkel et al. (2014) && xb
+milky_way_data/Akerman_et_al_2004_stellab && Akerman et al. (2004) && sr
+milky_way_data/Andrievsky_et_al_2007_stellab && Andrievsky et al. (2007) && og
+milky_way_data/Andrievsky_et_al_2008_stellab && Andrievsky et al. (2008) && og
+milky_way_data/Andrievsky_et_al_2010_stellab && Andrievsky et al. (2010) && og
+milky_way_data/Bensby_et_al_2005_stellab && Bensby et al. (2005) && om
+#milky_way_data/Bensby_Feltzing_2006_stellab && Bensby & Feltzing(2006) && ^g
+#        milky_way_data/Bergemann_Gehren_2008_stellab && ^g
+milky_way_data/Bihain_et_al_2004_stellab && Bihain et al. (2004) && og
+milky_way_data/Bonifacio_et_al_2009_stellab && Bonifacio et al. (2009) && ^m
+milky_way_data/Caffau_et_al_2005_stellab && Caffau et al. (2005) && xm
+milky_way_data/Cayrel_et_al_2004_stellab && Cayrel et al. (2004) && ^r
+milky_way_data/Fabbian_et_al_2009_stellab && Fabbian et al. (2009) && ^c
+#        milky_way_data/Gehren_et_al_2006_stellab && Gehren et al. (2009) && ^g
+milky_way_data/Gratton_et_al_2003_stellab && Gratton et al. (2003) && sc
+milky_way_data/Israelian_et_al_2004_stellab && Israelian et al. (2004) && oc
+milky_way_data/Lai_et_al_2008_stellab && Lai et al. (2008) && or
+milky_way_data/Nissen_et_al_2007_stellab && Nissen et al. (2007) && ^g
+milky_way_data/Reddy_et_al_2006_stellab && Reddy et al. (2006) && ^r
+milky_way_data/Reddy_et_al_2003_stellab && Reddy et al. (2003) && sb
+milky_way_data/Spite_et_al_2005_stellab && Spite et al. (2005) && ob
+milky_way_data/Battistini_Bensby_2016_stellab && Battistini & Bensby (2016) && oc
+milky_way_data/Nissen_et_al_2014_stellab && Nissen et al. (2014) && xc
+milky_way_data/Ramirez_et_al_2013_stellab && Ramirez et al. (2013) && xb
+milky_way_data/Bensby_et_al_2014_stellab && Bensby et al. (2014) && xm
+milky_way_data/Battistini_Bensby_2015_stellab && Battistini & Bensby (2015) && xr
+milky_way_data/Yong_et_al_2013_stellab && Yong et al. (2013) && xk
+milky_way_data/Jacobson_et_al_2015_stellab && Jacobsen et al. (2015) && xg
+milky_way_data/Cohen_et_al_2013_stellab && Cohen et al. (2013) && xb
+milky_way_data/Cohen_et_al_2013_noCEMPs_stellab && Cohen et al. noCEMPs (2013) && xb
+milky_way_data/Adibekyan_et_al_2012_stellab && Adibekyan et al. (2012) && xg
+milky_way_data/Aoki_Honda_2008_stellab && Aoki & Honda (2008) && xb
+milky_way_data/Hansen_et_al_2012_pecu_excluded_stellab && Hansen et al. (2012) && ob
+milky_way_data/Ishigaki_et_al_2012_2013_stellab && Ishigaki et al. (2012-13) && xm
+milky_way_data/Roederer_et_al_2009_stellab && Roederer et al. (2009) && om
+milky_way_data/Roederer_et_al_2014_pecu_excluded_stellab && Roederer et al. (2014) && xr
 H sculptor
-sculptor_data/Kirby_et_al_2010_Sculptor_stellab & Kirby et al. (2010) & xc
-sculptor_data/Frebel_2010_Sculptor_stellab & Frebel (2010) & xb
-sculptor_data/Starkenburg_et_al_2013_stellab & Starkenburg et al. (2013) & om
-sculptor_data/Jablonka_et_al_2015_stellab & Jablonka et al. (2015) & og
+sculptor_data/Kirby_et_al_2010_Sculptor_stellab && Kirby et al. (2010) && xc
+sculptor_data/Frebel_2010_Sculptor_stellab && Frebel (2010) && xb
+sculptor_data/Starkenburg_et_al_2013_stellab && Starkenburg et al. (2013) && om
+sculptor_data/Jablonka_et_al_2015_stellab && Jablonka et al. (2015) && og
 H fornax
-#        fornax_data/Kirby_et_al_2010_Fornax_stellab & Kirby et al. (2010) & xg
-fornax_data/Letarte_et_al_2010_stellab & Letarte et al. (2010) & oc
-fornax_data/Lemasle_et_al_2014_stellab & Lemasle et al. (2014) & ob
+#        fornax_data/Kirby_et_al_2010_Fornax_stellab & Kirby et al. (2010) && xg
+fornax_data/Letarte_et_al_2010_stellab && Letarte et al. (2010) && oc
+fornax_data/Lemasle_et_al_2014_stellab && Lemasle et al. (2014) && ob
 H carina
-carina_data/Fabrizio_et_al_2015_stellab & Fabrizio et al. (2015) & og
-carina_data/Lemasle_et_al_2012_stellab & Lemasle et al. (2012) & ob
-carina_data/Venn_et_al_2012_stellab & Venn et al. (2012) & or
+carina_data/Fabrizio_et_al_2015_stellab && Fabrizio et al. (2015) && og
+carina_data/Lemasle_et_al_2012_stellab && Lemasle et al. (2012) && ob
+carina_data/Venn_et_al_2012_stellab && Venn et al. (2012) && or
 H lmc
-lmc_data/Lapenna_et_al_2012_stellab & Lapenna et al. (2012) & ob
-lmc_data/Pompeia_et_al_2008_stellab & Pompeia et al. (2008) & or
+lmc_data/Lapenna_et_al_2012_stellab && Lapenna et al. (2012) && ob
+lmc_data/Pompeia_et_al_2008_stellab && Pompeia et al. (2008) && or

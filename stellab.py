@@ -344,9 +344,9 @@ class stellab():
 		# read data set
 		else:
 			#print line
-			path = 'stellab_data/'+line.split('&')[0].strip()
-			leg = line.split('&')[1].strip()
-			cs = line.split('&')[2].strip()
+			path = 'stellab_data/'+line.split('&&')[0].strip()
+			leg = line.split('&&')[1].strip()
+			cs = line.split('&&')[2].strip()
 			self.paths.append(path)
 			self.leg.append(leg)
 			self.cs.append(cs)
@@ -702,7 +702,6 @@ class stellab():
 
             # Use the Milky Way
             i_obs = self.__get_i_data_galaxy('milky_way')
-            print 'test: ',i_obs
         # Keep the number of indexes in memory
         len_i_obs = len(i_obs)
 
