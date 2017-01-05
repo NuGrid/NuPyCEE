@@ -1,5 +1,4 @@
-
-H Name: Table based on Portinari98 and Marigo01
+H Name: based on Portinari98 and Marigo01
 H Table: (M=0.837,Z=0.0127)
 H Lifetime: 1.999E+10
 H Mfinal: 5.406E-01
