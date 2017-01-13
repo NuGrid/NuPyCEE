@@ -1,0 +1,18 @@
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "# Trigger interactive or non-interactive depending on command line argument\n",
+    "import sys\n",
+    "__RUNIPY__ = sys.argv[0]\n",
+    "\n",
+    "if __RUNIPY__:\n",
+    "    %matplotlib inline\n",
+    "else:\n",
+    "    %pylab nbagg"
+   ]
+  },
