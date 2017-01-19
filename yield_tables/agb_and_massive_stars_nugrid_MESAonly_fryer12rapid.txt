@@ -3130,7 +3130,7 @@ H Mfinal: 2.700E+00
 &Bi-209   &1.547E-08 &8.718E-10 &83&209
 H Table: (M=25.0,Z=0.02)
 H Lifetime: 7.580E+06
-H Mfinal: 9.071E+00
+H Mfinal: 1.281E+01
 &Isotopes &Yields    &X0        &Z &A  
 &H-1      &7.642E+00 &7.064E-01 &1 &1  
 &H-2      &1.192E-05 &1.371E-05 &1 &2  
