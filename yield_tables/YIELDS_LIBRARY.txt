@@ -28,6 +28,25 @@ AGB + massive stars
 			    Portinari et al. 1998, http://ukads.nottingham.ac.uk/abs/1998A%26A...334..505P
 
 
+	F.R.U.I.T.Y., Cristallo et al.
+ 
+
+		AGB yields are from FRUITY and massive star yields from NuGrid. Lifetimes for AGB models 
+		were taken from NuGrid. Note NuGrid models are based on alpha-enhanced initial abundances 
+		at Z=0.006 and Z=0.001 while FRUITY models are not. 
+		Note: Adjust the yield mass range to imf_yields_range=[1.3,30].
+
+		Tables:
+			agb_and_massive_stars_nugrid_FRUITY.txt
+
+		References: 
+			
+			Cristallo et al. 2016, https://arxiv.org/abs/1610.05475
+			Cristallo et al. 2015, http://adsabs.harvard.edu/abs/2015ApJS..219...40C
+			Data from fruity.oa-teramo.inaf.it/modelli.pl
+
+			
+
 	PoP III stars by Heger et al. 2010. 
 
 		popIII_heger.txt contains models with S4 piston, explosion energy of 1.2B and 
