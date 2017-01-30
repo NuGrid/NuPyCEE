@@ -53,7 +53,7 @@ AGB + massive stars
 	
 		
 		Table:
-			agb_and_massive_stars_nugrid_K06.txt			
+			agb_and_massive_stars_nugrid_K10.txt			
 
 		References:
 			Karakas et al. 2010, http://adsabs.harvard.edu/abs/2010MNRAS.403.1413K	
