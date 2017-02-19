@@ -5029,6 +5029,7 @@ class chem_evol(object):
 
             # Get its yields
             y = ytables.get(Z=Z_gridpoint, M=m, quantity='Yields')
+	    #print 'test Z: ',Z_gridpoint,' M: ',m
             mfinal = ytables.get(Z=Z_gridpoint, M=m, quantity='Mfinal')
 	    iso_name=ytables.get(Z=Z_gridpoint, M=m, quantity='Isotopes')
 
@@ -5178,8 +5179,8 @@ class chem_evol(object):
         # The wiersma interpolation below has to be checked.
         if self.yield_interp == 'wiersma': #self.netyields_on==True:
             # Get the yields corrected for the different initial abundances
-            yields = self.__correct_iniabu(ymgal_t, self.ytables_pop3, 0, m_stars)
-
+            #yields = self.__correct_iniabu(ymgal_t, self.ytables_pop3, 0, m_stars)
+            print 'Net-yields approach is not applied for PopIII yield input fot time'
 
         # Get the actual stellar masses and total mass ejected
         x_all = np.array(m_stars)
