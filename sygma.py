@@ -780,12 +780,12 @@ class sygma( chem_evol ):
 	plt.xlabel('initial mass [M$_{\odot}$]')
 	#plt.xscale('log')
 
-    def plot_table_yield(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab='',netyields_iniabu=''):
+    def plot_table_yield(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_abu='',netyields_iniabu=''):
 
         '''
 
-	Plots the yields of the yield input grid versus initial mass or
-	Z or [Fe/H]. Yield can be plotted in solar masses or in spectroscopic notation.
+	Plots the yields of the yield input grid versus initial mass. Yields can be plotted in solar masses or in spectroscopic notation.
+
 
         Parameters
         ----------
@@ -799,40 +799,78 @@ class sygma( chem_evol ):
 	     specifies the metallicity to be plotted
 	masses : list
 	     if empty plot all available masses for metallicity iniZ; else choose only masses in list masses
-	netyields : bool
-	     if true assume net yields in table and add corresponding initial contribution to get total yields
 	table : string
 	     table to plot data from; default sygma input table
+	solar_abu : string
+	     solar abundance for spectroscopic notation 
+             default: yield_tables/iniabu/iniab2.0E-02GN93.ppn (if empty string)
+	netyields : bool
+	     if true assume net yields in table and add corresponding initial contribution to get total yields
+        netyields_iniabu : string
+             initial abundance, only used in conjuction with net yields      
 
         Examples
         ----------
 
         >>> s.plot_iso_ratio(yaxis='C-12')
+        >>> s.plot_iso_ratio(yaxis='C/Fe')
+	>>> s.plot_iso_ratio(yaxis='[C/Fe]')
+        >>> s.plot_iso_ratio(xaxis='[Fe/H]',yaxis='[C/Fe]')
 
         
 	'''
 	import read_yields as ry
 	import re
+
+
 	y_table=ry.read_nugrid_yields(global_path+table)
         plt.figure(fig, figsize=(fsize[0],fsize[1]))
-	spec=False
-	if '[' in yaxis:
-		spec=True
-	
-	# for spectroscopic notation need initial abundance of elements or isotopes
-	if True: #spec==True or '[' in xaxis:
-                ini_list=['iniab1.0E-02GN93.ppn' ,'iniab1.0E-03GN93_alpha.ppn','iniab1.0E-04GN93_alpha.ppn','iniab2.0E-02GN93.ppn' ,'iniab6.0E-03GN93_alpha.ppn','iniab1.0E-05GN93_alpha_scaled.ppn','iniab1.0E-06GN93_alpha_scaled.ppn']
-                iniZs=[0.01,0.001,0.0001,0.02,0.006,0.00001,0.000001]
-                ymgal=[]
-		if len(netyields_iniabu)==0:
-                	for metal in iniZs:
-                    		if metal == float(iniZ):
-                            		iniabu=ry.iniabu(global_path+'yield_tables/iniabu/'+ini_list[iniZs.index(iniZ)])
-		else:
-			iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
+
+
+	#spectroscopic notation?
+	specx=False
+	specy=False
+	if ('[' in yaxis):
+		specy=True
+	if ('[' in xaxis):
+		specx=True
+
+
+        ####Get solar metallicity elements, if necessary
+	if specx or specy:
+		if len(solar_abu) ==0:
+                     iniabu_sol=ry.iniabu(global_path+'yield_tables/iniabu/iniab2.0E-02GN93.ppn')
+                else:
+		     iniabu_sol=ry.iniabu(global_path+solar_abu)
+		isonames=iniabu_sol.names
+
+		ini_elems_frac_sol=[]
+		ini_elems_sol=[]
+		for k in range(len(isonames)):
+				elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
+				A=int(re.split('(\d+)',isonames[k])[1])
+				if elem not in ini_elems_sol:
+					ini_elems_sol.append(elem)
+					ini_elems_frac_sol.append(iniabu_sol.iso_abundance(elem+'-'+str(A)))
+				else:
+					ini_elems_frac_sol[ini_elems_sol.index(elem)]+= iniabu_sol.iso_abundance(elem+'-'+str(A))
+
+		ini_isos_frac_sol=[]
+		ini_isos_sol=[]
+		for k in range(len(isonames)):
+					elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
+					A=int(re.split('(\d+)',isonames[k])[1])
+					newname=elem+'-'+str(A)
+					ini_isos_sol.append(newname)
+					ini_isos_frac_sol.append(iniabu_sol.iso_abundance(elem+'-'+str(A)))
+
+
+	# for net yields need initial abundance of elements or isotopes
+	if netyields:
+
+		iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
 		isonames=iniabu.names
 		#get initial elements 
-		#if not '-' in yaxis:
 		if True:
 			ini_elems=[]
 			ini_elems_frac=[]
@@ -844,8 +882,6 @@ class sygma( chem_evol ):
 					ini_elems_frac.append(iniabu.iso_abundance(elem+'-'+str(A)))
 				else:
 					ini_elems_frac[ini_elems.index(elem)]+=iniabu.iso_abundance(elem+'-'+str(A))
-			#ini_species=ini_elems
-			#ini_species_frac=ini_elems_frac
 		#get isotopes
 		if True:	
 			ini_isos=[]
@@ -856,40 +892,9 @@ class sygma( chem_evol ):
 				newname=elem+'-'+str(A)
 				ini_isos.append(newname)
 				ini_isos_frac.append(iniabu.iso_abundance(elem+'-'+str(A)))
-                        #ini_species=ini_isos
-                        #ini_species_frac=ini_isos_frac
-
-	####Get solar Z either from 
-	if len(solar_ab) ==0:
-		iniabu=ry.iniabu(global_path+'yield_tables/iniabu/iniab2.0E-02GN93.ppn')
-	else:
-		iniabu=ry.iniabu(global_path+solar_ab)
-	#ini_elems=[]
-	ini_elems_frac_sol=[]
-	ini_elems=[]
-	for k in range(len(isonames)):
-			elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
-			A=int(re.split('(\d+)',isonames[k])[1])
-			if elem not in ini_elems:
-				ini_elems.append(elem)
-				ini_elems_frac_sol.append(iniabu.iso_abundance(elem+'-'+str(A)))
-			else:
-				ini_elems_frac_sol[ini_elems.index(elem)]+=iniabu.iso_abundance(elem+'-'+str(A))
-
-	ini_isos_frac_sol=[]
-        for k in range(len(isonames)):
-                                elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
-                                A=int(re.split('(\d+)',isonames[k])[1])
-				newname=elem+'-'+str(A)
-				#ini_isos.append(newname)
-				ini_isos_frac_sol.append(iniabu.iso_abundance(elem+'-'+str(A)))
-                        #ini_species=ini_isos
-                        #ini_species_frac=ini_isos_frac
 
 
 
-	#print 'test'
-	#prepare yield table data
 
 	#find all available masses
 	if len(masses)==0:
@@ -898,7 +903,11 @@ class sygma( chem_evol ):
 			if str(iniZ) in allheader[k]:
 				mfound=float(allheader[k].split(',')[0].split('=')[1])	
 				masses.append(mfound)
-		print 'Found masses: ',masses
+		#print 'Available masses: ',masses
+
+
+	# calculate and collect values to plot
+
 	idx1=-1
 	Z=iniZ
 	y_delay=y_table
@@ -909,121 +918,159 @@ class sygma( chem_evol ):
 			
 			idx1+=1
 			totmass=sum(y_delay.get(M=mini,Z=Z,quantity='Yields'))
-			mfinal = y_delay.get(Z=Z, M=mini, quantity='Mfinal')
+			if netyields:
+				mfinal = y_delay.get(Z=Z, M=mini, quantity='Mfinal')
 
-			if '[' in xaxis:
-				x1=xaxis.split('/')[0][1:]
-				x2=xaxis.split('/')[1][:-1]
-				#print 'for xaxis',x1,x2
-				if '-' in xaxis:
-					ini_species=ini_isos
-					ini_species_frac=ini_isos_frac
-	                                yx2=y_delay.get(M=mini,Z=Z,specie=x2)
-        	                        yx1=y_delay.get(M=mini,Z=Z,specie=x1)
-					ini_species_frac_sol=ini_iso_frac_sol
-
+			#if xaxis spectro notation
+			if (not 'mini' in xaxis):
+				if specx:
+					x1=xaxis.split('/')[0][1:]
+					x2=xaxis.split('/')[1][:-1]
 				else:
-					ini_species=ini_elems
-					ini_species_frac=ini_elems_frac
-					ini_species_frac_sol=ini_elem_frac_sol
-					isoavail=y_delay.get(M=mini,Z=Z,quantity='Isotopes')
+					x1=xaxis
+				#if isotope
+				if '-' in xaxis:
+					if specx:
+	                                	yx2=y_delay.get(M=mini,Z=Z,specie=x2)
+        	                        yx1=y_delay.get(M=mini,Z=Z,specie=x1)
+					if netyields:
+						ini_species=ini_isos
+						ini_species_frac=ini_isos_frac
+					if specx:
+						ini_species_frac_sol=ini_isos_frac_sol
+						ini_species_sol = ini_isos_sol
+
+				#if element
+				else:
 					yx2=0
 					yx1=0
 					#sum up isotopes to get elements
-					#print isoavail
-					#print mini,Z
-					for k in range(len(isoavail)):
+					isoavail=y_delay.get(M=mini,Z=Z,quantity='Isotopes')
+                                        for k in range(len(isoavail)):
 						if x1 == isoavail[k].split('-')[0]:
 							yx1+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
-                                                if x2 == isoavail[k].split('-')[0]:
-                                                        yx2+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
-					
-				x1_ini=ini_species_frac[ini_species.index(x1)]
-				x2_ini=ini_species_frac[ini_species.index(x2)]
-				x1_ini_sol=ini_species_frac_sol[ini_species.index(x1)]
-				x2_ini_sol=ini_species_frac_sol[ini_species.index(x2)]
+						if specx:
+                                                	if x2 == isoavail[k].split('-')[0]:
+                                                	        yx2+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
+					if netyields:
+						ini_species=ini_elems
+						ini_species_frac=ini_elems_frac
+					if specx:
+						ini_species_frac_sol=ini_elems_frac_sol
+						ini_species_sol = ini_elems_sol 
+				if specy:
+					x1_ini_sol=ini_species_frac_sol[ini_species_sol.index(x1)]
+					x2_ini_sol=ini_species_frac_sol[ini_species_sol.index(x2)]
 
-				if netyields==True:
+				if netyields:
+					x1_ini=ini_species_frac[ini_species.index(x1)]
+					if specx:
+						x2_ini=ini_species_frac[ini_species.index(x2)]
+						miniadd=(x2_ini*(m-mfinal))
+						yx2_frac=( yx2+miniadd  )/totmass
 					miniadd=(x1_ini*(mini-mfinal))
 					yx1_frac=( yx1+miniadd  )/totmass
-					miniadd=(x2_ini*(m-mfinal))
-					yx2_frac=( yx2+miniadd  )/totmass
 				else:
-					yx2_frac=yx2/totmass
-					yx1_frac=yx1/totmass
-				x.append( np.log10( yx1_frac/yx2_frac * x2_ini_sol/x1_ini_sol) )
-				plt.xlabel(xaxis)
-				headerx=xaxis
-			elif 'mini' == xaxis:
+					if specx:
+						yx2_frac=yx2 #/totmass
+					yx1_frac=yx1 #/totmass
+				if specx:
+					if yx2_frac==0:
+						print 'mini: ',mini,x2,' 0 value: yx2_frac',yx2_frac
+					else:
+						x.append( np.log10( yx1_frac/yx2_frac * x2_ini_sol/x1_ini_sol) )
+					plt.xlabel(xaxis)
+					headerx=xaxis
+				else:
+					x.append(yx1)
+					plt.xlabel('yield [M$_{\odot}$]')
+					headerx='yields/Msun'
+					plt.xscale('log')
+			else:  #'mini' == xaxis:
 				x.append(mini)
 				plt.xlabel('initial mass [M$_{\odot}$]')
 				headerx='Mini/Msun'
-			else:
-				return 'wrong input'	
+			#else:
+			#	return 'wrong input'	
 			#	x.append(y_delay.get(M=mini,Z=Z,specie=xaxis))
 
-			if '[' in yaxis:
-                                y1=yaxis.split('/')[0][1:]
-                                y2=yaxis.split('/')[1][:-1]
-                                if '-' in yaxis:
-                                        ini_species=ini_isos
-					ini_species_frac=ini_isos_frac
-					ini_species_frac_sol=ini_isos_frac_sol
-                                        yy2=y_delay.get(M=mini,Z=Z,specie=y2)
-                                        yy1=y_delay.get(M=mini,Z=Z,specie=y1)
-                                else:
-                                        ini_species=ini_elems
-					ini_species_frac=ini_elems_frac
-					ini_species_frac_sol=ini_elems_frac_sol
-                                        isoavail=y_delay.get(M=mini,Z=Z,quantity='Isotopes')
-                                        yy2=0
-                                        yy1=0
-                                        #sum up isotopes to get elements
-                                        for k in range(len(isoavail)):
-                                                if y1 == isoavail[k].split('-')[0]:
-                                                        yy1+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
-                                                if y2 == isoavail[k].split('-')[0]:
-                                                        yy2+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
 
-				y1_ini=ini_species_frac[ini_species.index(y1)]
-				y2_ini=ini_species_frac[ini_species.index(y2)]
-				y1_ini_sol=ini_species_frac_sol[ini_species.index(y1)]
-				y2_ini_sol=ini_species_frac_sol[ini_species.index(y2)]
-				yy1_1=yy1
-				yy2_1=yy2
-                                if netyields==True:
-                                        miniadd=(y1_ini*(mini-mfinal))
-					yy1_1=( yy1+miniadd  )
-                                        miniadd=(y2_ini*(mini-mfinal))
-					yy2_1=( yy2+miniadd  )
-                                if yy1_1==0 or yy2_1==0:
-                                        print 'Zeros for ',mini,' skip mass ',yy1,yy2
-                                        x=x[:-1]
-                                        continue
-				yy1_frac=yy1_1/totmass
-				yy2_frac=yy2_1/totmass
-				y.append( np.log10( yy1_frac/yy2_frac * y2_ini_sol/y1_ini_sol) )
-				plt.ylabel(yaxis)
-				headery=yaxis
-			#for yields
-			else:
-				if netyields==True:
-					y_ini=ini_isos_frac[ini_isos.index(yaxis)]
-					miniadd=(y_ini*(mini-mfinal))
-					y.append(y_delay.get(M=mini,Z=Z,specie=yaxis) + miniadd)
+			### yaxis
+
+			if True: #(not 'mini' in xaxis):
+				if specy:
+					y1=yaxis.split('/')[0][1:]
+					y2=yaxis.split('/')[1][:-1]
 				else:
-					y.append(y_delay.get(M=mini,Z=Z,specie=yaxis))
-				plt.ylabel('yield [M$_{\odot}$]')
-				headery='Yields/Msun'
-			#if idx==4:
-			#	ax1.plot([],[],marker=marker[idx1],color='k',linestyle='None',label='M='+str(mini))
-			#ax.plot(x[-1],y[-1],marker=marker[idx1],color=color[idx],linestyle=linestyle[idx])
+					y1=yaxis
+				#if isotope
+				if '-' in yaxis:
+					if specy:
+	                                	yy2=y_delay.get(M=mini,Z=Z,specie=y2)
+        	                        yy1=y_delay.get(M=mini,Z=Z,specie=y1)
+					#print 'get',yy1,mini,Z,y1
+					if netyields:
+						ini_species=ini_isos
+						ini_species_frac=ini_isos_frac
+					if specy:
+						ini_species_frac_sol=ini_isos_frac_sol
+						ini_species_sol = ini_isos_sol
+				#if element
+				else:
+					yy2=0
+					yy1=0
+					#sum up isotopes to get elements
+					isoavail=y_delay.get(M=mini,Z=Z,quantity='Isotopes')
+                                        for k in range(len(isoavail)):
+						if y1 == isoavail[k].split('-')[0]:
+							yy1+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
+						if specy:
+                                                	if y2 == isoavail[k].split('-')[0]:
+                                                	        yy2+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
+					if netyields:
+						ini_species=ini_elems
+						ini_species_frac=ini_elems_frac
+					if specy:
+						ini_species_frac_sol=ini_elems_frac_sol
+						#print 'so true',ini_elems_frac_sol
+						ini_species_sol = ini_elems_sol 
+				if specy:
+					y1_ini_sol=ini_species_frac_sol[ini_species_sol.index(y1)]
+					y2_ini_sol=ini_species_frac_sol[ini_species_sol.index(y2)]
+
+				if netyields:
+					y1_ini=ini_species_frac[ini_species.index(y1)]
+					if specy:
+						y2_ini=ini_species_frac[ini_species.index(y2)]
+						miniadd=(y2_ini*(m-mfinal))
+						yy2_frac=( yy2+miniadd  )/totmass
+					miniadd=(y1_ini*(mini-mfinal))
+					yy1_frac=( yy1+miniadd  )/totmass
+				else:
+					if specy:
+						yy2_frac=yy2 #/totmass
+					yy1_frac=yy1 #/totmass
+				if specy:
+					if yy2_frac==0:
+						print 'mini: ',mini,y2,' 0 value: yy2_frac',yy2_frac
+					else:
+						y.append( np.log10( yy1_frac/yy2_frac * y2_ini_sol/y1_ini_sol) )
+					plt.ylabel(yaxis)
+					headery=yaxis
+				else:
+					y.append(yy1)
+					plt.ylabel('yield [M$_{\odot}$]')
+					headery='yields/Msun'
+					plt.yscale('log')
+		#plot results for specific mass
+		#print 'x: ',x
+		#print 'y: ',y
 		if len(label)==0:
 			plt.plot(x,y,label='Z='+str(Z),marker=marker,color=color,linestyle=shape)
 		else:
 			plt.plot(x,y,label=label,marker=marker,color=color,linestyle=shape)
 
-	if '[' in xaxis and '[' in yaxis:
+	if specx and specy:
 		for k in range(len(x)):
 			plt.annotate(str(masses[k]), xy = (x[k], y[k]),xytext = (0, 0), textcoords = 'offset points')
 
