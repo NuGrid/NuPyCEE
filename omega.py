@@ -1437,7 +1437,7 @@ class omega( chem_evol ):
         # Variable to keep track of the OMEGA's timestep
         i_dt_csa = 0
         t_csa = 0.0
-        nb_dt_csa = self.nb_timesteps + 1
+        nb_dt_csa = self.nb_timesteps
 
         # If just one entry ...
         if len(self.DM_array) == 1:
@@ -1475,7 +1475,7 @@ class omega( chem_evol ):
 
         # If the array has been read completely, but the DM array is
         # not full, fil the rest of the array with the last read value
-        while i_dt_csa < nb_dt_csa:
+        while i_dt_csa < nb_dt_csa+1:
             self.m_DM_t[i_dt_csa] = self.DM_array[-1][1]
             i_dt_csa += 1
 
