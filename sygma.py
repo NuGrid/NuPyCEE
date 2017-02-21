@@ -895,7 +895,6 @@ class sygma( chem_evol ):
 
 
 
-
 	#find all available masses
 	if len(masses)==0:
 		allheader=y_table.table_mz

@@ -924,13 +924,25 @@ class read_yield_sn1a_tables():
 
                 quantity: if 'Yields' return yields
 			  if 'Isotopes' return all isotopes available
-
+			  Default: 'Yields'
+		specie: specie in yield table. Only with quantity='Yields' 
         '''
 
 	if quantity=='Yields':
-        	idx = (np.abs(np.array(self.metallicities)-Z)).argmin()
+		if Z not in self.metallicities:
+        		idx = (np.abs(np.array(self.metallicities)-Z)).argmin()
+			print 'use closest Z=',self.metallicities[idx]
+		else:
+			idx = self.metallicities.index(Z)
         	yields=self.yields[idx]
-        	return np.array(yields)
+		if len(specie)==0:
+        		return np.array(yields)
+		else:
+			if specie in self.isotopes:
+				idx=self.isotopes.index(specie)
+				return yields[idx]
+			else:
+				print 'Specie not available'
 	elif quantity=='Isotopes':
 		return self.isotopes
 
