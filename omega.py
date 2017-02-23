@@ -1849,13 +1849,13 @@ class omega( chem_evol ):
 
                     # Move to the next external bin
                     i_ext += 1
-                    if i_ext == len_mdot_ini_i_merg:
+                    if i_ext == (len_mdot_ini_i_merg-1):
                         break
                     t_ext_prev = t_ext
                     t_ext = self.mdot_ini_t[i_merg][i_ext+1]
 
                 # Quit the loop if all external bins have been considered
-                if i_ext == len_mdot_ini_i_merg:
+                if i_ext == (len_mdot_ini_i_merg-1):
                     break
 
                 # While we need to change the current time bin ...
