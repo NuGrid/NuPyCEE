@@ -350,6 +350,36 @@ class chem_evol(object):
 
         Default value : 2.5e-02
 
+    Delayed extra source
+    Adding source that requires delay-time distribution (DTD) functions
+    -------------------------------------------------------------------
+    delayed_extra_dtd : multi-D Numpy array --> [nb_sources][nb_Z]
+        nb_sources is the number of different input astrophysical site (e.g.,
+        SNe Ia, neutron star mergers).
+        nb_Z is the number of available metallicities.
+        delayed_extra_dtd[i][j] is a 2D array in the form of 
+        [ number_of_times ][ 0-time, 1-rate ].
+
+        Defalut value : np.array([]), deactivated
+        
+    delayed_extra_dtd_norm : multi-D Numpy array --> [nb_sources]
+        Total number of delayed sources occurring per Msun formed,
+        for each source and each metallicity.
+
+        Defalut value : np.array([]), deactivated
+
+    delayed_extra_yields : Numpy array of strings
+        Path to the yields table for each source.
+
+        Defalut value : np.array([]), deactivated
+
+    delayed extra_yields_norm : multi-D Numpy array --> [nb_sources][nb_Z]
+        Fraction of the yield table (float) that will be ejected per event,
+        for each source and each metallicity. This will be the mass ejected
+        per event if the yields are in mass fraction (normalized to 1).
+
+        Defalut value : np.array([]), deactivated
+
     Run example
     ===========
 
@@ -387,7 +417,7 @@ class chem_evol(object):
              input_yields=False,t_merge=-1.0,stellar_param_on=True,\
              stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',\
              popIII_on=True, out_follows_E_rate=False, \
-             t_dtd_poly_split=-1.0, \
+             t_dtd_poly_split=-1.0, delayed_extra_log=False, \
              ism_ini=np.array([]), nsmerger_dtd_array=np.array([]),\
              bhnsmerger_dtd_array=np.array([]),
              ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
@@ -400,7 +430,9 @@ class chem_evol(object):
              ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
              dt_ssp=np.array([]), poly_fit_dtd_5th=np.array([]),\
              mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
-             poly_fit_range=np.array([])):
+             poly_fit_range=np.array([]),\
+             delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
+             delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([])):
 
         # Initialize the history class which keeps the simulation in memory
 	self.history = self.__history()
@@ -494,8 +526,18 @@ class chem_evol(object):
         self.t_dtd_poly_split = t_dtd_poly_split
         self.poly_fit_dtd_5th = poly_fit_dtd_5th
         self.poly_fit_range = poly_fit_range
-	self.stellar_param_table=stellar_param_table
-	self.stellar_param_on=stellar_param_on
+	self.stellar_param_table = stellar_param_table
+	self.stellar_param_on = stellar_param_on
+        self.delayed_extra_log = delayed_extra_log
+        self.delayed_extra_dtd = delayed_extra_dtd
+        self.delayed_extra_dtd_norm = delayed_extra_dtd_norm
+        self.delayed_extra_yields = delayed_extra_yields
+        self.delayed_extra_yields_norm = delayed_extra_yields_norm
+        self.nb_delayed_extra = len(self.delayed_extra_dtd)
+
+        # Normalization of the delayed extra sources
+        if self.nb_delayed_extra > 0:
+            self.__normalize_delayed_extra()
 
         # Normalization constants for the Kroupa IMF
         if imf_type == 'kroupa':
@@ -560,8 +602,9 @@ class chem_evol(object):
 
         # Initialisation of the storing arrays
         mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, ymgal_bhnsm,\
-        mdot_massive, mdot_agb, mdot_1a, mdot_nsm, mdot_bhnsm, sn1a_numbers,\
-        sn2_numbers, nsm_numbers, bhnsm_numbers, imf_mass_ranges, \
+        ymgal_delayed_extra, mdot_massive, mdot_agb, mdot_1a, mdot_nsm,\
+        mdot_bhnsm, mdot_delayed_extra, sn1a_numbers, sn2_numbers, nsm_numbers,\
+        bhnsm_numbers, delayed_extra_numbers, imf_mass_ranges, \
         imf_mass_ranges_contribution, imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
@@ -606,14 +649,17 @@ class chem_evol(object):
         self.ymgal_1a = ymgal_1a
 	self.ymgal_nsm = ymgal_nsm
 	self.ymgal_bhnsm = ymgal_bhnsm
+        self.ymgal_delayed_extra = ymgal_delayed_extra
         self.mdot_massive = mdot_massive
         self.mdot_agb = mdot_agb
         self.mdot_1a = mdot_1a
 	self.mdot_nsm = mdot_nsm
 	self.mdot_bhnsm = mdot_bhnsm
+        self.mdot_delayed_extra = mdot_delayed_extra
         self.sn1a_numbers = sn1a_numbers
 	self.nsm_numbers = nsm_numbers
 	self.bhnsm_numbers = bhnsm_numbers
+        self.delayed_extra_numbers = delayed_extra_numbers
         self.sn2_numbers = sn2_numbers
         self.imf_mass_ranges = imf_mass_ranges
         self.imf_mass_ranges_contribution = imf_mass_ranges_contribution
@@ -956,17 +1002,25 @@ class chem_evol(object):
         ymgal_1a = []
 	ymgal_nsm = []
 	ymgal_bhnsm = []
+        ymgal_delayed_extra = []
         for k in range(nb_dt_gsa + 1):
             ymgal_massive.append(nb_iso_gsa * [0])
             ymgal_agb.append(nb_iso_gsa * [0])
             ymgal_1a.append(nb_iso_gsa * [0])
             ymgal_bhnsm.append(nb_iso_gsa * [0])
             ymgal_nsm.append(nb_iso_gsa * [0])
+        for iiii in range(0,self.nb_delayed_extra):
+            ymgal_delayed_extra.append([])
+            for k in range(nb_dt_gsa + 1):
+                ymgal_delayed_extra[iiii].append(nb_iso_gsa * [0])
         mdot_massive = copy.deepcopy(mdot)
         mdot_agb     = copy.deepcopy(mdot)
         mdot_1a      = copy.deepcopy(mdot)
         mdot_nsm     = copy.deepcopy(mdot)
         mdot_bhnsm   = copy.deepcopy(mdot)
+        mdot_delayed_extra = []
+        for iiii in range(0,self.nb_delayed_extra):
+            mdot_delayed_extra.append(copy.deepcopy(mdot))
 
         # Number of SNe Ia, core-collapse SNe, and neutron star mergers
         sn1a_numbers = [0] * nb_dt_gsa
@@ -975,6 +1029,9 @@ class chem_evol(object):
         sn2_numbers  = [0] * nb_dt_gsa
         self.wd_sn1a_range  = [0] * nb_dt_gsa
         self.wd_sn1a_range1 = [0] * nb_dt_gsa
+        delayed_extra_numbers = []
+        for iiii in range(0,self.nb_delayed_extra):
+            delayed_extra_numbers.append([0] * nb_dt_gsa)
 
         # Star formation
         self.number_stars_born = [0] * (nb_dt_gsa + 1)
@@ -987,9 +1044,10 @@ class chem_evol(object):
 
         # Return all the arrays
         return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, ymgal_bhnsm,\
-               mdot_massive, mdot_agb, mdot_1a, mdot_nsm, mdot_bhnsm, sn1a_numbers,\
-               sn2_numbers, nsm_numbers, bhnsm_numbers, imf_mass_ranges,\
-               imf_mass_ranges_contribution, imf_mass_ranges_mtot
+               ymgal_delayed_extra, mdot_massive, mdot_agb, mdot_1a, mdot_nsm, mdot_bhnsm,\
+               mdot_delayed_extra, sn1a_numbers, sn2_numbers, nsm_numbers, bhnsm_numbers,\
+               delayed_extra_numbers, imf_mass_ranges, imf_mass_ranges_contribution,\
+               imf_mass_ranges_mtot
 
 
     ##############################################
@@ -1129,6 +1187,10 @@ class chem_evol(object):
 		self.ymgal_nsm[i][k] = f_lock * self.ymgal_nsm[i-1][k]
 		self.ymgal_bhnsm[i][k] = f_lock * self.ymgal_bhnsm[i-1][k]
                 self.m_locked += self.sfrin * self.ymgal[i-1][k]
+            for iiii in range(0,self.nb_delayed_extra):
+                for k in range(self.len_ymgal):
+                    self.ymgal_delayed_extra[iiii][i][k] = \
+                        f_lock * self.ymgal_delayed_extra[iiii][i-1][k]
 
             # Output information
             if self.iolevel >= 1:
@@ -1148,6 +1210,8 @@ class chem_evol(object):
 	    self.ymgal_nsm[i] = self.ymgal_nsm[i-1]
 	    self.ymgal_bhnsm[i] = self.ymgal_bhnsm[i-1]
             self.ymgal_massive[i] = self.ymgal_massive[i-1]
+            for iiii in range(0,self.nb_delayed_extra):
+                self.ymgal_delayed_extra[iiii][i] = self.ymgal_delayed_extra[iiii][i-1]
 
             # Output information
             if self.iolevel > 2:
@@ -1165,6 +1229,10 @@ class chem_evol(object):
                                 np.array(self.mdot_massive[i-1])
         self.ymgal_nsm[i] = np.array(self.ymgal_nsm[i]) + np.array(self.mdot_nsm[i-1])
         self.ymgal_bhnsm[i] = np.array(self.ymgal_bhnsm[i]) + np.array(self.mdot_bhnsm[i-1])
+        if self.nb_delayed_extra > 0:
+            self.ymgal_delayed_extra[iiii][i] = \
+              np.array(self.ymgal_delayed_extra[iiii][i]) + \
+                np.array(self.mdot_delayed_extra[iiii][i-1])
 
         # Convert the mass ejected by massive stars into rate
         if self.history.timesteps[i-1] == 0.0:
@@ -1316,6 +1384,13 @@ class chem_evol(object):
         self.ytables_bhnsmerger = ry.read_yield_sn1a_tables( \
             global_path + self.bhnsmerger_table, isotopes)
 
+        # Read delayed extra yields
+        if self.nb_delayed_extra > 0:
+          self.ytables_delayed_extra = []
+          for i_syt in range(0,self.nb_delayed_extra):
+            self.ytables_delayed_extra.append(ry.read_yield_sn1a_tables( \
+            global_path + self.delayed_extra_yields[i_syt], isotopes))
+
         # Should be modified to include extra source for the yields
         #self.extra_source_on = False
         #self.ytables_extra = 0
@@ -1431,6 +1506,10 @@ class chem_evol(object):
         # Add the contribution of black hole - neutron star mergers, if any...
         if self.bhns_merger_on:
             self.__bhnsmerger_contribution(i)
+
+        # Add the contribution of delayed extra sources, if any...
+        if len(self.delayed_extra_dtd) > 0:
+            self.__delayed_extra_contribution(i)
 
     ##############################################
     #               Inter MM Plane               #
@@ -3174,7 +3253,7 @@ class chem_evol(object):
 
 
     ##############################################
-    #         BHNS merger normalization          #
+    #         BHNS Merger Normalization          #
     ##############################################
     def __normalize_bhnsmerger(self):
         '''
@@ -3194,6 +3273,340 @@ class chem_evol(object):
         
         # Ensure normalization only occurs once
         self.bhnsm_normalized = True
+
+
+    #############################################
+    #           Normalize Delayed Extra         #
+    #############################################
+    def __normalize_delayed_extra(self):
+
+        '''
+        This function normalize the DTD of all input delayed extra sources.
+
+        '''
+
+        # Create the normalization factor array
+        self.delayed_extra_dtd_A_norm = []
+
+        # For each delayed source ...
+        for i_e_nde in range(0,self.nb_delayed_extra):
+          self.delayed_extra_dtd_A_norm.append([])
+
+          # For each metallicity ...
+          for i_Z_nde in range(0,len(self.delayed_extra_dtd[i_e_nde])):
+
+            # Copy the lower and upper time boundaries
+            t_low_nde = self.delayed_extra_dtd[i_e_nde][i_Z_nde][0][0]
+            t_up_nde  = self.delayed_extra_dtd[i_e_nde][i_Z_nde][-1][0]
+
+            # Integrate the entire DTD
+            N_tot_nde = self.__delayed_extra_num(t_low_nde,t_up_nde,i_e_nde,i_Z_nde)
+
+            # Assigne the normalization factor
+            self.delayed_extra_dtd_A_norm[i_e_nde].append(\
+                self.delayed_extra_dtd_norm[i_e_nde][i_Z_nde] / N_tot_nde)
+
+
+    #############################################
+    #          Delayed Extra Contribution       #
+    #############################################
+    def __delayed_extra_contribution(self, i):
+
+        '''
+        This function calculates the contribution of delayed extra source
+        and adds it to the mdot array.
+
+        Arguments
+        =========
+
+            i : index of the current timestep
+
+        '''
+
+        # For each delayed extra source ...
+        for i_extra in range(0,self.nb_delayed_extra):
+
+            # Get the yields and metallicity indexes of the considered source
+            Z_extra, yextra_low, yextra_up, iZ_low, iZ_up = \
+                self.__get_YZ_delayed_extra(i_extra)
+         
+            # Initialize age of the latest SSP, which cumulate in loop
+            tt = 0
+
+            # Define the ultimate min and max times
+            tmax_extra = max(self.delayed_extra_dtd[i_extra][iZ_low][-1][0],\
+                             self.delayed_extra_dtd[i_extra][iZ_up ][-1][0])
+            tmin_extra = min(self.delayed_extra_dtd[i_extra][iZ_low][0][0],\
+                             self.delayed_extra_dtd[i_extra][iZ_up ][0][0])
+
+            # For every upcoming timestep j, starting with the current one...
+            for j in range(i-1, self.nb_timesteps):
+
+              # Set the upper and lower time boundary of the timestep j
+              timemin = tt
+              tt += self.history.timesteps[j]
+              timemax = tt
+
+              # Stop if the SSP do not contribute anymore to the delayed extra source
+              if timemin >= tmax_extra:
+                  break
+
+              # If the is someting to eject during this timestep j ...
+              if timemax > tmin_extra:
+
+                # Get the total number of sources and yields (interpolated)
+                nb_sources_extra_tot, yields_extra_interp = \
+                    self.__get_nb_y_interp(timemin, timemax, i_extra, iZ_low, iZ_up,\
+                        yextra_low, yextra_up, Z_extra)
+
+                # Calculate the number of sources in the current SSP (not per Msun)
+                self.delayed_extra_numbers[i_extra][j] += nb_sources_extra_tot
+
+                # Add the contribution of the sources to the timestep j
+                self.mdot_delayed_extra[i_extra][j] = \
+                    np.array(self.mdot_delayed_extra[i_extra][j]) + yields_extra_interp
+                self.mdot[j] = np.array(self.mdot[j]) + yields_extra_interp
+
+
+    #############################################
+    #             Get YZ Delayed Extra          #
+    #############################################
+    def __get_YZ_delayed_extra(self, i_extra):
+
+        '''
+        This function returns the yields, metallicities, and Z boundary indexes
+        for a considered delayed extra source (according to the ISM metallicity).
+
+        Arguments
+        =========
+
+          i_extra : index of the extra source
+
+        '''
+
+        # Get the number of metallicities considered source (in decreasing order)
+        Z_extra =  self.ytables_delayed_extra[i_extra].metallicities
+        nb_Z_extra = len(self.delayed_extra_dtd[i_extra])
+
+        # Set the Z indexes if only one metallicity is provided
+        if nb_Z_extra == 1:
+            iZ_low = iZ_up = 0
+
+        # If several metallicities are provided ...
+        else:
+
+            # Search the input metallicity interval that englobe self.zmetal
+            # Copy the lowest input Z is zmetal is lower (same for higher than highest)
+            if self.zmetal <= Z_extra[-1]:
+                iZ_low = iZ_up = -1
+            elif self.zmetal >= Z_extra[0]:
+                iZ_low = iZ_up = 0
+            else:
+                iZ_low = 1
+                iZ_up = 0
+                while self.zmetal < Z_extra[iZ_low]:
+                    iZ_low += 1
+                    iZ_up += 1
+
+        # Get the yields table for the lower and upper Z boundaries
+        yextra_low = self.ytables_delayed_extra[i_extra].get( \
+            Z=Z_extra[iZ_low], quantity='Yields')
+        yextra_up  = self.ytables_delayed_extra[i_extra].get( \
+            Z=Z_extra[iZ_up],  quantity='Yields')
+
+        # Return the metallicities and the yields and Z boundaries
+        return Z_extra, yextra_low, yextra_up, iZ_low, iZ_up
+
+
+    #############################################
+    #               Get Nb Y Interp             #
+    #############################################
+    def __get_nb_y_interp(self, timemin, timemax, i_extra, iZ_low, iZ_up,\
+                          yextra_low, yextra_up, Z_extra):
+
+        '''
+        This function returns the yields, metallicities, and Z boundary indexes
+        for a considered delayed extra source (according to the ISM metallicity).
+
+        Arguments
+        =========
+
+          timemin : Lower boundary of the time interval.
+          timemax : Upper boundary of the time interval.
+          i_extra : Index of the extra source.
+          iZ_low  : Lower index of the provided input Z in the delayed extra yields table.
+          iZ_up   : Upper index of the provided input Z in the delayed extra yields table.
+          yextra_low : Delayed extra yields of the lower Z.
+          yextra_up  : Delayed extra yields of the upper Z.
+          Z_extra : List of provided Z in the delayed extra yields table.
+
+        '''
+
+        # Calculate the number of sources per unit of Msun formed (lower Z)
+        nb_sources_low = self.__delayed_extra_num(timemin, timemax, i_extra, iZ_low)
+
+        # Normalize the number of sources (still per unit of Msun formed)
+        # This needs to be before calculating ejecta_Z_low!
+        nb_sources_low *= self.delayed_extra_dtd_A_norm[i_extra][iZ_low]
+
+        # Calculate the total ejecta (yields) for the lower Z
+        ejecta_Z_low = np.array(nb_sources_low * self.m_locked *
+            yextra_low * self.delayed_extra_yields_norm[i_extra][iZ_low])
+
+        # If we do not need to interpolate between Z
+        if iZ_up == iZ_low:
+
+            # Return the total number of sources and ejecta for the lower Z
+            return nb_sources_low * self.m_locked, ejecta_Z_low
+
+        # If we need to interpolate between Z
+        else:
+
+            # Calculate the number of sources per unit of Msun formed (upper Z)
+            nb_sources_up = self.__delayed_extra_num(timemin, timemax, i_extra, iZ_up)
+
+            # Normalize the number of sources (still per unit of Msun formed)
+            # This needs to be before calculating ejecta_Z_up!
+            nb_sources_up *= self.delayed_extra_dtd_A_norm[i_extra][iZ_up]
+
+            # Calculate the total ejecta (yields) for the lower Z
+            ejecta_Z_up = np.array(nb_sources_up * self.m_locked *
+                yextra_up * self.delayed_extra_yields_norm[i_extra][iZ_up])
+
+            # Interpolate the number of sources (N = aa*log10(Z) + bb)
+            aa = (nb_sources_up - nb_sources_low) / \
+                 (np.log10(Z_extra[iZ_up]) - np.log10(Z_extra[iZ_low]))
+            bb = nb_sources_up - aa * np.log10(Z_extra[iZ_up])
+            nb_sources_interp = aa * np.log10(self.zmetal) + bb
+
+            # Interpolate the yields (Y = aa*log10(Z) + bb)
+            aa = (ejecta_Z_up - ejecta_Z_low) / \
+                 (np.log10(Z_extra[iZ_up]) - np.log10(Z_extra[iZ_low]))
+            bb = ejecta_Z_up - aa * np.log10(Z_extra[iZ_up])
+            ejecta_interp = aa * np.log10(self.zmetal) + bb
+
+            # Return the total number of sources and ejecta for the interpolation
+            return nb_sources_interp * self.m_locked, ejecta_interp
+
+
+    #############################################
+    #              Delayed Extra Num            #
+    #############################################
+    def __delayed_extra_num(self, timemin, timemax, i_extra, i_ZZ):
+
+        '''
+        This function returns the integrated number of delayed extra source within
+        a given OMEGA time interval for a given source and metallicity
+
+        Arguments
+        =========
+
+          timemin : Lower boundary of the OMEGA time interval.
+          timemax : Upper boundary of the OMEGA time interval.
+          i_extra : Index of the extra source.
+          iZZ     : Index of the provided input Z in the delayed extra yields table.
+
+        '''
+
+        # Initialize the number of sources that occur between timemin and timemax
+        N_den = 0
+
+        # Search the lower boundary input time interval
+        i_search = 0
+        while timemin > self.delayed_extra_dtd[i_extra][i_ZZ][i_search+1][0]:
+            i_search += 1
+
+        # Copie the current time
+        t_cur = max(self.delayed_extra_dtd[i_extra][i_ZZ][0][0], timemin)
+        timemax_cor = min(timemax,self.delayed_extra_dtd[i_extra][i_ZZ][-1][0])
+
+        # While the is still time to consider in the OMEGA timestep ...
+        while abs(timemax_cor - t_cur) > 0.01:
+
+            # Integrate the DTD
+            t_min_temp = max(t_cur,self.delayed_extra_dtd[i_extra][i_ZZ][i_search][0])
+            t_max_temp = min(timemax_cor,self.delayed_extra_dtd[i_extra][i_ZZ][i_search+1][0])
+            N_den += self.__integrate_delayed_extra_DTD(\
+                t_min_temp, t_max_temp, i_extra, i_ZZ, i_search)
+
+            # Go to the next delayed input timestep
+            t_cur += t_max_temp - t_min_temp
+            i_search += 1
+
+        # Return the number of occuring sources
+        return N_den
+
+
+    #############################################
+    #        Integrate Delayed Extra DTD        #
+    #############################################
+    def __integrate_delayed_extra_DTD(self, t_min_temp, t_max_temp, i_extra, i_ZZ, i_search):
+
+        '''
+        This function returns the integrated number of delayed extra source within
+        a given time interval for a given source and metallicity.
+
+        Note: There is no normalization here, as this function is actualy used for
+              the normalization process.
+
+        Arguments
+        =========
+
+          t_min_temp : Lower boundary of the delayed extra input time interval.
+          t_max_temp : Upper boundary of the delayed extra time interval.
+          i_extra  : Index of the extra source.
+          iZZ      : Index of the provided input Z in the delayed extra yields table.
+          i_search : Index of the lower input timestep interval
+
+        '''
+
+        # If we integrate in the log-log space
+        # Rate = R = bt^a --> logR = a*logt + logb
+        if self.delayed_extra_log:
+
+          # Copy the boundary conditions of the input DTD interval
+          lg_t_max_tmp = np.log10(self.delayed_extra_dtd[i_extra][i_ZZ][i_search+1][0])
+          lg_t_min_tmp = np.log10(self.delayed_extra_dtd[i_extra][i_ZZ][i_search][0])
+          lg_R_max_tmp = np.log10(self.delayed_extra_dtd[i_extra][i_ZZ][i_search+1][1])
+          lg_R_min_tmp = np.log10(self.delayed_extra_dtd[i_extra][i_ZZ][i_search][1])
+
+          # Calculate the coefficients "a" and "b"
+          a_ided = (lg_R_max_tmp - lg_R_min_tmp) / (lg_t_max_tmp - lg_t_min_tmp)
+          b_ided = 10**(lg_R_max_tmp - a_ided * lg_t_max_tmp)
+
+          # If not a power law with an index of -1
+          if a_ided > -0.999999 or a_ided < -1.0000001:
+
+              # Integrate
+              N_ided = (b_ided / (a_ided+1)) * \
+                  (t_max_temp**(a_ided+1) - t_min_temp**(a_ided+1))
+           
+          # If a power law with an index of -1
+          else:
+
+              # Integrate with a natural logarithm 
+              N_ided = b_ided * (np.log(t_max_temp) - np.log(t_min_temp))
+
+        # If we integrate NOT in the log-log space
+        # Rate = R = a * t + b
+        else:
+
+          # Copy the boundary conditions of the input DTD interval
+          t_max_tmp = self.delayed_extra_dtd[i_extra][i_ZZ][i_search+1][0]
+          t_min_tmp = self.delayed_extra_dtd[i_extra][i_ZZ][i_search][0]
+          R_max_tmp = self.delayed_extra_dtd[i_extra][i_ZZ][i_search+1][1]
+          R_min_tmp = self.delayed_extra_dtd[i_extra][i_ZZ][i_search][1]
+
+          # Calculate the coefficients "a" and "b"
+          a_ided = (R_max_tmp - R_min_tmp) / (t_max_tmp - t_min_tmp)
+          b_ided = R_max_tmp - a_ided * t_max_tmp
+
+          # Integrate
+          N_ided = 0.5 * a_ided * (t_max_temp**2 - t_min_temp**2) + \
+              b_ided * (t_max_temp - t_min_temp)
+
+        # Return the number of extra sources
+        return N_ided
 
 
     ##############################################
