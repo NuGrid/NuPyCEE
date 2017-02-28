@@ -133,14 +133,16 @@ class sygma( chem_evol ):
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
                  stellar_param_on=False, t_dtd_poly_split=-1.0, \
 		 stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
-		 tau_ferrini=False, dt_in=np.array([]),\
+		 tau_ferrini=False, delayed_extra_log=False, dt_in=np.array([]),\
                  nsmerger_dtd_array=np.array([]), bhnsmerger_dtd_array=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]), \
                  mass_sampled=np.array([]), scale_cor=np.array([]),\
                  poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
-		 ytables_nsmerger_in=np.array([])):
+		 ytables_nsmerger_in=np.array([]),\
+                 delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
+                 delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
@@ -170,6 +172,7 @@ class sygma( chem_evol ):
                  imf_yields_range=imf_yields_range,exclude_masses=exclude_masses,\
                  netyields_on=netyields_on,wiersmamod=wiersmamod,\
                  yield_interp=yield_interp, tau_ferrini=tau_ferrini,\
+                 delayed_extra_log=delayed_extra_log,\
                  ytables_in=ytables_in, nsmerger_dtd_array=nsmerger_dtd_array, \
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
@@ -179,7 +182,11 @@ class sygma( chem_evol ):
 		 dt_in=dt_in,stellar_param_on=stellar_param_on,\
                  stellar_param_table=stellar_param_table,\
                  poly_fit_dtd_5th=poly_fit_dtd_5th,\
-                 poly_fit_range=poly_fit_range)
+                 poly_fit_range=poly_fit_range,\
+                 delayed_extra_dtd=delayed_extra_dtd,\
+                 delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
+                 delayed_extra_yields=delayed_extra_yields,\
+                 delayed_extra_yields_norm=delayed_extra_yields_norm)
 
         if self.need_to_quit:
             return
