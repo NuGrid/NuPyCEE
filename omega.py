@@ -267,7 +267,7 @@ class omega( chem_evol ):
                  sfh_array_norm=-1.0, imf_rnd_sampling=False,\
                  out_follows_E_rate=False,\
                  r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
-		 stellar_param_on=False,\
+		 stellar_param_on=False, delayed_extra_log=False,\
                  bhnsmerger_dtd_array=np.array([]), \
                  DM_array=np.array([]), nsmerger_dtd_array=np.array([]),\
                  sfh_array=np.array([]),ism_ini=np.array([]),\
@@ -284,7 +284,9 @@ class omega( chem_evol ):
                  mass_sampled=np.array([]), scale_cor=np.array([]),\
                  mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
                  poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
-                 m_tot_ISM_t_in=np.array([])):
+                 m_tot_ISM_t_in=np.array([]),\
+                 delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
+                 delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([])):
 
         # Announce the beginning of the simulation 
         print 'OMEGA run in progress..'
@@ -325,6 +327,7 @@ class omega( chem_evol ):
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
                  ytables_1a_in=ytables_1a_in, \
+                 delayed_extra_log=delayed_extra_log, \
                  nsmerger_dtd_array=nsmerger_dtd_array,\
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
 		 ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
@@ -333,7 +336,11 @@ class omega( chem_evol ):
                  ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\
                  ej_sn1a_coef=ej_sn1a_coef,dt_ssp=dt_ssp,\
 		 yield_interp=yield_interp,\
-                 poly_fit_dtd_5th=poly_fit_dtd_5th,poly_fit_range=poly_fit_range)
+                 poly_fit_dtd_5th=poly_fit_dtd_5th,poly_fit_range=poly_fit_range,\
+                 delayed_extra_dtd=delayed_extra_dtd,\
+                 delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
+                 delayed_extra_yields=delayed_extra_yields,\
+                 delayed_extra_yields_norm=delayed_extra_yields_norm)
 
         # Quit if something bad happened in chem_evol ..
         if self.need_to_quit:
@@ -634,10 +641,12 @@ class omega( chem_evol ):
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
-        self.ymgal_1a, self.ymgal_nsm, self.ymgal_bhnsm, self.mdot_massive, \
+        self.ymgal_1a, self.ymgal_nsm, self.ymgal_bhnsm, \
+        self.ymgal_delayed_extra, self.mdot_massive, \
         self.mdot_agb, self.mdot_1a, self.mdot_nsm, self.mdot_bhnsm, \
+        self.mdot_delayed_extra, \
         self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, self.bhnsm_numbers,\
- 	self.imf_mass_ranges, \
+ 	self.delayed_extra_numbers, self.imf_mass_ranges, \
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
@@ -715,10 +724,12 @@ class omega( chem_evol ):
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
-        self.ymgal_1a, self.ymgal_nsm, self.ymgal_bhnsm, self.mdot_massive, \
+        self.ymgal_1a, self.ymgal_nsm, self.ymgal_bhnsm, \
+        self.ymgal_delayed_extra, self.mdot_massive, \
         self.mdot_agb, self.mdot_1a, self.mdot_nsm, self.mdot_bhnsm, \
+        self.mdot_delayed_extra, \
         self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, self.bhnsm_numbers,\
- 	self.imf_mass_ranges, \
+ 	self.delayed_extra_numbers, self.imf_mass_ranges, \
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal)
 
