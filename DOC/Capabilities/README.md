@@ -1,7 +1,6 @@
-NUPYCEE
+Capabilities
 =======
 
-Capabilties
 
 Start the notebook server via start_notebook_server.sh
 to access the ipython notebooks introduced below.
