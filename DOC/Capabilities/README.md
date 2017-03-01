@@ -10,7 +10,8 @@ to access the ipython notebooks introduced below.
 **Delayed Extra Sources**
 
 	Add extra enrichment sources which require DTD; for example SNIa channels
-	Delayed_extra_sources.ipynb
+	
+	\mathit{Delayed_extra_sources.ipynb}
 
 **Extra Source**
 	
