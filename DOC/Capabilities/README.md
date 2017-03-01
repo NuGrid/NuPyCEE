@@ -11,17 +11,19 @@ to access the ipython notebooks introduced below.
 
 	Add extra enrichment sources which require DTD; for example SNIa channels
 	
-	\mathit{Delayed_extra_sources.ipynb}
+	Delayed_extra_sources.ipynb
 
 **Extra Source**
 	
 	Add extra yields to existing stellar yield input; choose mass range
+
 	Extra_source.ipynb
 
 
 **Net yields input**
 
 	Describing how to add net yields.
+
 	Netyields.ipynb
 
 
