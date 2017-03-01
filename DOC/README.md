@@ -20,6 +20,8 @@ Most documentation is available as ipython notebooks.
 **SPHINX**
 
 	Source code of documentation. For display see
-	[this link](http://nugrid.github.io/NuPyCEE/SPHINX/build/html/index.html).
+	http://nugrid.github.io/NuPyCEE/SPHINX/build/html/index.html
 
 **DOC_Interfaces**
+
+	Some documentation of the SYGMA interface.
