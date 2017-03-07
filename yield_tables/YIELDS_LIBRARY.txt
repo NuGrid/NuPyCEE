@@ -10,6 +10,8 @@ AGB + massive stars
         	        agb_and_massive_stars_nugrid_MESAonly_fryer12rapid.txt 
 			agb_and_massive_stars_nugrid_MESAonly_fryer12mix.txt
         	        agb_and_massive_stars_nugrid_MESAonly_ye.txt
+			agb_and_massive_stars_nugrid_MESAonly_fryer12delay_wind_preexp.txt
+			
 
        		References: Ritter et al., in prep
                    	    Pignatari et al. 2016, http://adsabs.harvard.edu/abs/2016ApJS..225...24P
@@ -17,12 +19,22 @@ AGB + massive stars
 
 	Combined yield set of Portinari et al. and Marigo: !!Needs confirmation
 
-
-		Net yields.
+		Use net yields of Portinari and Marigo.
+		To use net yields input the following parameter are needed: yield_interp_st='wiersma', netyields_on_st=True and wiersmamod_st=True
+		Net yields with masses up to 7Msun are from Marigo, above those of Portinari are taken.  
+		Only isotopes are selected which are available in both yield sets and go up to Fe.
 
 		Tables:
-			agb_and_massive_stars_portinari98_marigo01.txt	
-	
+			Ritter et al. 2017, In table Z=0.0127,0.004 based on Z=0.019 and Z=0.004 yields from Margio and Z=0.02 and Z=0.004 yields from Portinari.
+			Initial masses go from the lowest mass available up to 100Msun. 		 
+				agb_and_massive_stars_portinari98_marigo01.txt	
+			Table with Z=0.004,0.008,0.02 based on Z=0.019 and Z=0.008, 0.004 yields from Margio and Z=0.02,0.008,0.004 yields from Portinari	
+			All initial masses available are taken which go up to 1000Msun.
+			100Msun at Z=0.008 not available and replaced with 120Msun.
+			The 60Msun at Z=0.004 is not available and replaced with the 40Msun.
+			For uniform grid use 1, 1.65,2.0, 2.2, 2.5, 3.0, 3.5,4.0, 4.5, 5.0 and the closest available mass.
+				agb_and_massive_stars_portinari98_marigo01_gce2.txt
+
 	
 		References: Marigo et al. 2001, http://ukads.nottingham.ac.uk/abs/2001A%26A...370..194M
 			    Portinari et al. 1998, http://ukads.nottingham.ac.uk/abs/1998A%26A...334..505P
@@ -30,14 +42,23 @@ AGB + massive stars
 
 	F.R.U.I.T.Y., Cristallo et al.
  
-
 		AGB yields are from FRUITY and massive star yields (delayed explosion) from NuGrid. Lifetimes for AGB models 
 		were taken from NuGrid. Note NuGrid models are based on alpha-enhanced initial abundances 
 		at Z=0.006 and Z=0.001 while FRUITY models are not. 
 		Note: Adjust the yield mass range to imf_yields_range=[1.3,30].
 
 		Tables:
-			agb_and_massive_stars_nugrid_FRUITY.txt
+
+			AGB yields are from FRUITY and massive star yields (delayed explosion) from NuGrid. Lifetimes for AGB models 
+			were taken from NuGrid. Note NuGrid models are based on alpha-enhanced initial abundances 
+			at Z=0.006 and Z=0.001 while FRUITY models are not. 
+			Note: Adjust the yield mass range to imf_yields_range=[1.3,30].
+			Available is Z=0.02,0.01,0.006,0.001,Z=0.0001
+				agb_and_massive_stars_nugrid_FRUITY.txt
+			AGB yields are from FRUITY and massive star yields are from Kobayashi et al 2016 (see below.).
+					
+				agb_and_massive_stars_K06_FRUITY.txt
+				
 
 		References: 
 			
@@ -48,12 +69,17 @@ AGB + massive stars
 
 	Karakas et al. 2010
 
-		AGB yields from Karakas10 and massive star yields (delayed explosion) from NuGrid.
-		Lifetimes were not available for 2Msun at Z=0.004,0.008 and were supplied from 1.9Msun cases.
-	
+
 		
 		Table:
-			agb_and_massive_stars_nugrid_K10.txt			
+
+			AGB yields from Karakas10 and massive star yields (delayed explosion) from NuGrid.
+			Lifetimes were not available for 2Msun at Z=0.004,0.008 and were supplied from 1.9Msun cases.
+				agb_and_massive_stars_nugrid_K10.txt
+			
+			AGB yields from Karaks and massive star yields from Kobayashi06.					
+			The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.		
+			agb_and_massive_stars_K10_K06.txt
 
 		References:
 			Karakas et al. 2010, http://adsabs.harvard.edu/abs/2010MNRAS.403.1413K	
@@ -76,7 +102,15 @@ AGB + massive stars
 		The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.		
 
 		Tables:
-			agb_and_massive_stars_nugrid_K06.txt
+			The yield table contains massive star yields from Kobayashi06  and complementing 
+			AGB yields from NuGrid. AGB yields at Z=0.004 correspond to NuGrid yields at Z=0.006. 
+			The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.		
+				agb_and_massive_stars_nugrid_K06.txt
+
+			AGB yields from Karaks and massive star yields from Kobayashi06.				
+			The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.		
+	
+				agb_and_massive_stars_K10_K06.txt
 
 		References: Kobayashi et al. 2006, http://ukads.nottingham.ac.uk/abs/2006ApJ...653.1145K 
 			
