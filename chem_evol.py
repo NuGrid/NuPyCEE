@@ -99,6 +99,15 @@ class chem_evol(object):
 
         Default value : 13.0e9
 
+    dt_split_info : numpy array
+        Information regarding the creation of a timestep array with varying step size.
+        Array format : dt_split_info[number of conditions][0->dt,1->upper time limit]
+        Exemple : dt_split_info = [[1e6,40e6],[1e8,13e9]] means the timesteps will be
+                  of 1 Myr until the time reaches 40 Myr, after which the timesteps
+                  will be of 100 Myr until the time reaches 13 Gyr.  The number of 
+                  "split" is unlimited, but the array must be in chronological order.
+        Default value : [] --> Not taken into account
+
     imf_bdys : list
         Upper and lower mass limits of the initial mass function (IMF) [Mo].
 
@@ -419,7 +428,7 @@ class chem_evol(object):
              popIII_on=True, out_follows_E_rate=False, \
              t_dtd_poly_split=-1.0, delayed_extra_log=False, \
              ism_ini=np.array([]), nsmerger_dtd_array=np.array([]),\
-             bhnsmerger_dtd_array=np.array([]),
+             bhnsmerger_dtd_array=np.array([]),\
              ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
              isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
              zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
@@ -523,6 +532,7 @@ class chem_evol(object):
         self.t_merge = t_merge
         self.ism_ini = ism_ini
         self.dt_in = dt_in
+        self.dt_split_info = dt_split_info
         self.t_dtd_poly_split = t_dtd_poly_split
         self.poly_fit_dtd_5th = poly_fit_dtd_5th
         self.poly_fit_range = poly_fit_range
@@ -565,7 +575,10 @@ class chem_evol(object):
         self.__check_inputs()
 
         # Initialisation of the timesteps 
-        timesteps = self.__get_timesteps()
+        if len(self.dt_split_info) > 0: # and len(self.ej_massive) == 0:
+            timesteps = self.__build_split_dt()
+        else:
+            timesteps = self.__get_timesteps()
         self.history.timesteps = timesteps
         self.nb_timesteps = len(timesteps)
 
@@ -596,9 +609,9 @@ class chem_evol(object):
         self.len_ymgal = len(ymgal)
 
         # Initialisation of the timesteps 
-        timesteps = self.__get_timesteps()
-        self.history.timesteps = timesteps
-        self.nb_timesteps = len(timesteps)
+        #timesteps = self.__get_timesteps()
+        #self.history.timesteps = timesteps
+        #self.nb_timesteps = len(timesteps)
 
         # Initialisation of the storing arrays
         mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, ymgal_bhnsm,\
@@ -1048,6 +1061,36 @@ class chem_evol(object):
                mdot_delayed_extra, sn1a_numbers, sn2_numbers, nsm_numbers, bhnsm_numbers,\
                delayed_extra_numbers, imf_mass_ranges, imf_mass_ranges_contribution,\
                imf_mass_ranges_mtot
+
+
+    ##############################################
+    #               Build Split dt               #
+    ##############################################
+    def __build_split_dt(self):
+
+        '''
+        Create a timesteps array from the dt_split_info array.
+
+        '''
+
+        # Declaration of the the timestep array to be return
+        dt_in_split = []
+
+        # Initiation of the time for the upcomming simulation
+        t_bsd = 0.0
+
+        # For each split condition ...
+        for i_bsd in range(0,len(self.dt_split_info)):
+
+            # While the time still satisfies the current condition ...
+            while t_bsd < self.dt_split_info[i_bsd][1]:
+
+                # Add the timestep and update the time
+                dt_in_split.append(self.dt_split_info[i_bsd][0])
+                t_bsd += dt_in_split[-1]
+
+        # Return the timesteps array
+        return dt_in_split
 
 
     ##############################################
