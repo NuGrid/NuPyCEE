@@ -26,5 +26,10 @@ to access the ipython notebooks introduced below.
 
 	Netyields.ipynb
 
+**Timesteps Size Management**
+
+	Describing the different options to deal with timestep sizes.
+
+	Timesteps_size_management.ipynb.ipynb
 
 
