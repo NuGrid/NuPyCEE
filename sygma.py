@@ -140,7 +140,7 @@ class sygma( chem_evol ):
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]), \
                  mass_sampled=np.array([]), scale_cor=np.array([]),\
                  poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
-		 ytables_nsmerger_in=np.array([]),\
+		 ytables_nsmerger_in=np.array([]), dt_split_info=np.array([]),\
                  delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
                  delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([])):
 
@@ -181,7 +181,7 @@ class sygma( chem_evol ):
 		 ytables_1a_in=ytables_1a_in, ytables_nsmerger_in=ytables_nsmerger_in, \
 		 dt_in=dt_in,stellar_param_on=stellar_param_on,\
                  stellar_param_table=stellar_param_table,\
-                 poly_fit_dtd_5th=poly_fit_dtd_5th,\
+                 poly_fit_dtd_5th=poly_fit_dtd_5th, dt_split_info=dt_split_info, \
                  poly_fit_range=poly_fit_range,\
                  delayed_extra_dtd=delayed_extra_dtd,\
                  delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
