@@ -268,7 +268,7 @@ class omega( chem_evol ):
                  out_follows_E_rate=False,\
                  r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
 		 stellar_param_on=False, delayed_extra_log=False,\
-                 bhnsmerger_dtd_array=np.array([]), \
+                 bhnsmerger_dtd_array=np.array([]),\
                  DM_array=np.array([]), nsmerger_dtd_array=np.array([]),\
                  sfh_array=np.array([]),ism_ini=np.array([]),\
                  mdot_ini=np.array([]), mdot_ini_t=np.array([]),\
