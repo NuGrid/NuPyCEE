@@ -122,7 +122,7 @@ class sygma( chem_evol ):
                  nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
                  extra_source_on=False, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0, \
                  extra_source_table=['yield_tables/extra_source.txt'], \
-		 f_extra_source=[1.0], \
+		 f_extra_source=[1.0], pre_calculate_SSPs=False, \
      	         extra_source_mass_range=[[8,30]], \
 		 extra_source_exclude_Z=[[]], \
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -138,7 +138,7 @@ class sygma( chem_evol ):
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]), \
-                 mass_sampled=np.array([]), scale_cor=np.array([]),\
+                 mass_sampled=np.array([]), scale_cor=np.array([]), \
                  poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
 		 ytables_nsmerger_in=np.array([]), dt_split_info=np.array([]),\
                  delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
@@ -161,7 +161,7 @@ class sygma( chem_evol ):
                  extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
 		 extra_source_mass_range=extra_source_mass_range, \
 		 extra_source_exclude_Z=extra_source_exclude_Z,
-		 pop3_table=pop3_table, \
+		 pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
                  nb_nsm_per_m=nb_nsm_per_m, t_nsm_coal=t_nsm_coal, \
                  imf_bdys_pop3=imf_bdys_pop3, \
                  imf_yields_range_pop3=imf_yields_range_pop3, \
@@ -181,8 +181,8 @@ class sygma( chem_evol ):
 		 ytables_1a_in=ytables_1a_in, ytables_nsmerger_in=ytables_nsmerger_in, \
 		 dt_in=dt_in,stellar_param_on=stellar_param_on,\
                  stellar_param_table=stellar_param_table,\
-                 poly_fit_dtd_5th=poly_fit_dtd_5th, dt_split_info=dt_split_info, \
-                 poly_fit_range=poly_fit_range,\
+                 poly_fit_dtd_5th=poly_fit_dtd_5th, \
+                 poly_fit_range=poly_fit_range, dt_split_info=dt_split_info, \
                  delayed_extra_dtd=delayed_extra_dtd,\
                  delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
                  delayed_extra_yields=delayed_extra_yields,\
