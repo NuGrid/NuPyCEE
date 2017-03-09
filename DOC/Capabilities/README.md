@@ -19,6 +19,12 @@ to access the ipython notebooks introduced below.
 
 	Extra_source.ipynb
 
+**Reducing Computing Time**
+	
+	Pre-calculate simple stellar populations to make OMEGA runs faster.
+
+	Fast_chem_evol.ipynb
+
 
 **Net Yields Input**
 
