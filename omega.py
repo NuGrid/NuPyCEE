@@ -250,7 +250,7 @@ class omega( chem_evol ):
                  bhnsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', \
                  iniabu_table='', extra_source_on=False, \
                  extra_source_table=['yield_tables/extra_source.txt'], \
- 		 f_extra_source=[1.0], \
+ 		 f_extra_source=[1.0], pre_calculate_SSPs=False, \
      	         extra_source_mass_range=[[8,30]], \
 		 extra_source_exclude_Z=[[]], \
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -268,7 +268,7 @@ class omega( chem_evol ):
                  out_follows_E_rate=False,\
                  r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
 		 stellar_param_on=False, delayed_extra_log=False,\
-                 bhnsmerger_dtd_array=np.array([]),\
+                 bhnsmerger_dtd_array=np.array([]), dt_in_SSPs=np.array([]), \
                  DM_array=np.array([]), nsmerger_dtd_array=np.array([]),\
                  sfh_array=np.array([]),ism_ini=np.array([]),\
                  mdot_ini=np.array([]), mdot_ini_t=np.array([]),\
@@ -309,7 +309,7 @@ class omega( chem_evol ):
                  extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
 		 extra_source_mass_range=extra_source_mass_range, \
 		 extra_source_exclude_Z=extra_source_exclude_Z,\
- 		 pop3_table=pop3_table, \
+ 		 pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
                  imf_bdys_pop3=imf_bdys_pop3, \
                  imf_yields_range_pop3=imf_yields_range_pop3, \
                  starbursts=starbursts, beta_pow=beta_pow, \
@@ -326,7 +326,7 @@ class omega( chem_evol ):
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
-                 ytables_1a_in=ytables_1a_in, \
+                 ytables_1a_in=ytables_1a_in, dt_in_SSPs=dt_in_SSPs, \
                  delayed_extra_log=delayed_extra_log, \
                  nsmerger_dtd_array=nsmerger_dtd_array,\
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
@@ -2165,7 +2165,6 @@ class omega( chem_evol ):
             self.sfrin = self.history.sfr_abs[i-1] * self.history.timesteps[i-1]
 
         else:
-
             # Calculate the total mass of stars formed during this timestep
             self.sfrin = sfr_rs * self.history.timesteps[i-1]
             self.history.sfr_abs[i-1] = sfr_rs
