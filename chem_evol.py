@@ -440,7 +440,7 @@ class chem_evol(object):
              ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
              dt_ssp=np.array([]), poly_fit_dtd_5th=np.array([]),\
              mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
-             poly_fit_range=np.array([]),\
+             poly_fit_range=np.array([]), SSPs_in=np.array([]),\
              delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
              delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([])):
 
@@ -474,6 +474,7 @@ class chem_evol(object):
         self.iniZ = iniZ
 	self.imf_bdys=imf_bdys
 	self.nsmerger_bdys=nsmerger_bdys
+        self.popIII_on = popIII_on
 	self.imf_bdys_pop3=imf_bdys_pop3
 	self.imf_yields_range_pop3=imf_yields_range_pop3
 	self.extra_source_on = extra_source_on
@@ -481,6 +482,7 @@ class chem_evol(object):
 	self.extra_source_mass_range=extra_source_mass_range
 	self.extra_source_exclude_Z=extra_source_exclude_Z
         self.pre_calculate_SSPs = pre_calculate_SSPs
+        self.SSPs_in = SSPs_in
 	self.table = table
         self.iniabu_table = iniabu_table
         self.sn1a_table = sn1a_table
@@ -612,13 +614,6 @@ class chem_evol(object):
 
             # Initialisation of the yield tables
             self.__set_yield_tables()
-
-        # Copy the metallicities and put them in increasing order
-        self.Z_table_SSP = copy.deepcopy(self.ytables.metallicities)
-        if popIII_on and iniZ <= 0.0 and Z_trans > 0.0:
-            self.Z_table_SSP.append(0.0)
-        self.Z_table_SSP = sorted(self.Z_table_SSP)
-        self.nb_Z_table_SSP = len(self.Z_table_SSP)
 
         # If SSPs needs to be pre-calculated ..
         if self.pre_calculate_SSPs:
@@ -6282,30 +6277,40 @@ class chem_evol(object):
 
         '''
 
-        # Define the SSP timesteps
-        len_dt_SSPs = len(self.dt_in_SSPs)
-        if len_dt_SSPs == 0:
-            dt_in_ras = self.history.timesteps
-            len_dt_SSPs = self.nb_timesteps
-        else:
-            dt_in_ras = self.dt_in_SSPs
+        # Copy the metallicities and put them in increasing order
+        self.Z_table_SSP = copy.deepcopy(self.ytables.metallicities)
+        if self.popIII_on and self.iniZ <= 0.0 and self.Z_trans > 0.0:
+            self.Z_table_SSP.append(0.0)
+        self.Z_table_SSP = sorted(self.Z_table_SSP)
+        self.nb_Z_table_SSP = len(self.Z_table_SSP)
 
-        # Declare the SSP ejecta arrays [Z][dt][iso]
-        self.ej_SSP = np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_isotopes))
+        # If the SSPs are not given as an input ..
+        if len(self.SSPs_in) == 0:
 
-        # For each metallicity ...
-        for i_ras in range(0,self.nb_Z_table_SSP):
+          # Define the SSP timesteps
+          len_dt_SSPs = len(self.dt_in_SSPs)
+          if len_dt_SSPs == 0:
+              dt_in_ras = self.history.timesteps
+              len_dt_SSPs = self.nb_timesteps
+          else:
+              dt_in_ras = self.dt_in_SSPs
 
-            # Use a dummy iniabu file if the metallicity is not zero
-            if self.Z_table_SSP[i_ras] == 0:
-                iniabu_t = ''
-                hardsetZ2 = self.hardsetZ
-            else:
-                iniabu_t='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
-                hardsetZ2 = self.Z_table_SSP[i_ras]
+          # Declare the SSP ejecta arrays [Z][dt][iso]
+          self.ej_SSP = np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_isotopes))
 
-            # Run a SYGMA simulation (1 Msun SSP)
-            sygma_inst = sygma.sygma(pre_calculate_SSPs=False, \
+          # For each metallicity ...
+          for i_ras in range(0,self.nb_Z_table_SSP):
+
+              # Use a dummy iniabu file if the metallicity is not zero
+              if self.Z_table_SSP[i_ras] == 0:
+                  iniabu_t = ''
+                  hardsetZ2 = self.hardsetZ
+              else:
+                  iniabu_t='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+                  hardsetZ2 = self.Z_table_SSP[i_ras]
+
+              # Run a SYGMA simulation (1 Msun SSP)
+              sygma_inst = sygma.sygma(pre_calculate_SSPs=False, \
                  imf_type=self.imf_type, alphaimf=self.alphaimf, \
                  imf_bdys=self.history.imf_bdys, sn1a_rate=self.history.sn1a_rate, \
                  iniZ=self.Z_table_SSP[i_ras], dt=self.history.dt, \
@@ -6346,31 +6351,41 @@ class chem_evol(object):
                  delayed_extra_yields=self.delayed_extra_yields, \
                  delayed_extra_yields_norm=self.delayed_extra_yields_norm)
 
-            # Copy the ejecta arrays from the SYGMA simulation
-            # and convert the mass into log(masses)
-            for i_step in range(len_dt_SSPs):
-                for i_iso in range(self.nb_isotopes):
-                    if sygma_inst.mdot[i_step][i_iso] > 0.0:
-                        self.ej_SSP[i_ras][i_step][i_iso] = \
-                            np.log10(sygma_inst.mdot[i_step][i_iso])
-                    else:
-                        self.ej_SSP[i_ras][i_step][i_iso] = -30.0
+              # Copy the ejecta arrays from the SYGMA simulation
+              # and convert the mass into log(masses)
+              for i_step in range(len_dt_SSPs):
+                  for i_iso in range(self.nb_isotopes):
+                      if sygma_inst.mdot[i_step][i_iso] > 0.0:
+                          self.ej_SSP[i_ras][i_step][i_iso] = \
+                              np.log10(sygma_inst.mdot[i_step][i_iso])
+                      else:
+                          self.ej_SSP[i_ras][i_step][i_iso] = -30.0
 
-            # If this is the last Z entry ..
-            if i_ras == self.nb_Z_table_SSP - 1:
+              # If this is the last Z entry ..
+              if i_ras == self.nb_Z_table_SSP - 1:
 
-                # Keep in memory the number of timesteps in SYGMA
-                self.nb_steps_table = len(sygma_inst.history.timesteps)
-                self.dt_ssp = sygma_inst.history.timesteps
+                  # Keep in memory the number of timesteps in SYGMA
+                  self.nb_steps_table = len(sygma_inst.history.timesteps)
+                  self.dt_ssp = sygma_inst.history.timesteps
 
-                # Keep the time of ssp in memory
-                self.t_ssp = np.zeros(self.nb_steps_table)
-                self.t_ssp[0] = self.dt_ssp[0]
-                for i_ras in range(1,self.nb_steps_table):
-                    self.t_ssp[i_ras] = self.t_ssp[i_ras-1] + self.dt_ssp[i_ras]
+                  # Keep the time of ssp in memory
+                  self.t_ssp = np.zeros(self.nb_steps_table)
+                  self.t_ssp[0] = self.dt_ssp[0]
+                  for i_ras in range(1,self.nb_steps_table):
+                      self.t_ssp[i_ras] = self.t_ssp[i_ras-1] + self.dt_ssp[i_ras]
 
-            # Clear the memory
-            del sygma_inst
+              # Clear the memory
+              del sygma_inst
+
+        # If the SSPs are given as an input ..
+        else:
+
+            # Copy the SSPs
+            self.ej_SSP = self.SSPs_in[0]
+            self.nb_steps_table = len(self.ej_SSP[0])
+            self.dt_ssp = self.SSPs_in[1]
+            self.t_ssp = self.SSPs_in[2]
+            del self.SSPs_in
 
 
     ##############################################
