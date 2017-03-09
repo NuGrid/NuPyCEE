@@ -36,6 +36,6 @@ to access the ipython notebooks introduced below.
 
 	Describing the different options to deal with timestep sizes.
 
-	Timesteps_size_management.ipynb.ipynb
+	Timesteps_size_management.ipynb
 
 
