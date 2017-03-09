@@ -69,7 +69,6 @@ except KeyError:
 global_path=global_path+'/'
 
 # Import the class that reads the input yield tables
-import sygma
 import read_yields as ry
 
 
@@ -6286,6 +6285,8 @@ class chem_evol(object):
 
         # If the SSPs are not given as an input ..
         if len(self.SSPs_in) == 0:
+
+          import sygma
 
           # Define the SSP timesteps
           len_dt_SSPs = len(self.dt_in_SSPs)
