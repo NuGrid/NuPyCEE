@@ -69,6 +69,7 @@ except KeyError:
 global_path=global_path+'/'
 
 # Import the class that reads the input yield tables
+import sygma
 import read_yields as ry
 
 
@@ -413,7 +414,7 @@ class chem_evol(object):
              nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt',\
              iniabu_table='', extra_source_on=False, \
              extra_source_table=['yield_tables/extra_source.txt'], \
-	     f_extra_source=[1.0], \
+	     f_extra_source=[1.0], pre_calculate_SSPs=False,\
 	     extra_source_mass_range=[[8,30]], \
 	     extra_source_exclude_Z=[[]], \
              pop3_table='yield_tables/popIII_heger10.txt', \
@@ -432,7 +433,7 @@ class chem_evol(object):
              ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
              isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
              zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
-             ytables_nsmerger_in=np.array([]), \
+             ytables_nsmerger_in=np.array([]), dt_in_SSPs=np.array([]),\
              dt_in=np.array([]),dt_split_info=np.array([]),\
              ej_massive=np.array([]), ej_agb=np.array([]),\
              ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
@@ -479,6 +480,7 @@ class chem_evol(object):
 	self.f_extra_source= f_extra_source
 	self.extra_source_mass_range=extra_source_mass_range
 	self.extra_source_exclude_Z=extra_source_exclude_Z
+        self.pre_calculate_SSPs = pre_calculate_SSPs
 	self.table = table
         self.iniabu_table = iniabu_table
         self.sn1a_table = sn1a_table
@@ -532,6 +534,7 @@ class chem_evol(object):
         self.t_merge = t_merge
         self.ism_ini = ism_ini
         self.dt_in = dt_in
+        self.dt_in_SSPs = dt_in_SSPs
         self.dt_split_info = dt_split_info
         self.t_dtd_poly_split = t_dtd_poly_split
         self.poly_fit_dtd_5th = poly_fit_dtd_5th
@@ -581,6 +584,12 @@ class chem_evol(object):
             timesteps = self.__get_timesteps()
         self.history.timesteps = timesteps
         self.nb_timesteps = len(timesteps)
+        if self.pre_calculate_SSPs:
+            self.t_ce = np.zeros(self.nb_timesteps)
+            self.t_ce[0] = self.history.timesteps[0]
+            for i_init in range(1,self.nb_timesteps):
+                self.t_ce[i_init] = self.t_ce[i_init-1] + \
+                    self.history.timesteps[i_init]
 
         # If the yield tables has already been read previously ...
         if input_yields:
@@ -604,14 +613,28 @@ class chem_evol(object):
             # Initialisation of the yield tables
             self.__set_yield_tables()
 
+        # Copy the metallicities and put them in increasing order
+        self.Z_table_SSP = copy.deepcopy(self.ytables.metallicities)
+        if popIII_on and iniZ <= 0.0 and Z_trans > 0.0:
+            self.Z_table_SSP.append(0.0)
+        self.Z_table_SSP = sorted(self.Z_table_SSP)
+        self.nb_Z_table_SSP = len(self.Z_table_SSP)
+
+        # If SSPs needs to be pre-calculated ..
+        if self.pre_calculate_SSPs:
+
+            # Calculate all SSPs
+            self.__run_all_ssps()
+
+            # Calculate the interpolation coefficients (between metallicities)
+            self.__calculate_int_coef()
+
+            # Create the arrays that will contain the interpolated isotopes
+            self.ej_SSP_int = np.zeros((self.nb_steps_table,self.nb_isotopes))
+
         # Initialisation of the composition of the gas reservoir
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
-
-        # Initialisation of the timesteps 
-        #timesteps = self.__get_timesteps()
-        #self.history.timesteps = timesteps
-        #self.nb_timesteps = len(timesteps)
 
         # Initialisation of the storing arrays
         mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, ymgal_bhnsm,\
@@ -630,29 +653,40 @@ class chem_evol(object):
         if iolevel >= 1:
              print 'Number of timesteps: ', '{:.1E}'.format(len(timesteps))
 
-        # Add the initialized arrays to the history class
-        self.history.gas_mass.append(sum(ymgal[0]))
-        self.history.ism_iso_yield.append(ymgal[0])
-        self.history.ism_iso_yield_agb.append(ymgal_agb[0])
-        self.history.ism_iso_yield_1a.append(ymgal_1a[0])
-	self.history.ism_iso_yield_nsm.append(ymgal_nsm[0])
-	self.history.ism_iso_yield_bhnsm.append(ymgal_bhnsm[0])
-        self.history.ism_iso_yield_massive.append(ymgal_massive[0])
-        self.history.sn1a_numbers.append(0)
-	self.history.nsm_numbers.append(0)
-	self.history.bhnsm_numbers.append(0)
-        self.history.sn2_numbers.append(0)
-        self.history.m_locked = []
-        self.history.m_locked_agb = []
-        self.history.m_locked_massive = []
+        # Create empty arrays if on the fast mode
+        if self.pre_calculate_SSPs:
+            self.history.gas_mass.append(sum(ymgal[0]))
+            self.history.ism_iso_yield.append(ymgal[0])
+            self.history.m_locked = []
+            self.history.m_locked_agb = []
+            self.history.m_locked_massive = []
+            self.massive_ej_rate = []
+            self.sn1a_ej_rate = []
 
-        # Keep track of the mass-loss rate of massive stars and SNe Ia
-        self.massive_ej_rate = []
-        for k in range(self.nb_timesteps + 1):
-            self.massive_ej_rate.append(0.0)
-        self.sn1a_ej_rate = []
-        for k in range(self.nb_timesteps + 1):
-            self.sn1a_ej_rate.append(0.0)
+        # Add the initialized arrays to the history class
+        else:
+            self.history.gas_mass.append(sum(ymgal[0]))
+            self.history.ism_iso_yield.append(ymgal[0])
+            self.history.ism_iso_yield_agb.append(ymgal_agb[0])
+            self.history.ism_iso_yield_1a.append(ymgal_1a[0])
+            self.history.ism_iso_yield_nsm.append(ymgal_nsm[0])
+	    self.history.ism_iso_yield_bhnsm.append(ymgal_bhnsm[0])
+            self.history.ism_iso_yield_massive.append(ymgal_massive[0])
+            self.history.sn1a_numbers.append(0)
+	    self.history.nsm_numbers.append(0)
+            self.history.bhnsm_numbers.append(0)
+            self.history.sn2_numbers.append(0)
+            self.history.m_locked = []
+            self.history.m_locked_agb = []
+            self.history.m_locked_massive = []
+
+            # Keep track of the mass-loss rate of massive stars and SNe Ia
+            self.massive_ej_rate = []
+            for k in range(self.nb_timesteps + 1):
+                self.massive_ej_rate.append(0.0)
+            self.sn1a_ej_rate = []
+            for k in range(self.nb_timesteps + 1):
+                self.sn1a_ej_rate.append(0.0)
 
         # Attribute arrays and variables to the current object
         self.mdot = mdot
@@ -686,7 +720,8 @@ class chem_evol(object):
         self.zmetal = zmetal
 
         # Get coefficients for the fraction of white dwarfs fit (2nd poly)
-        self.__get_coef_wd_fit()
+        if not pre_calculate_SSPs:
+            self.__get_coef_wd_fit()
 
         # Output information
         if iolevel > 0:
@@ -1000,14 +1035,12 @@ class chem_evol(object):
         nb_iso_gsa = len(self.history.isotopes)
 
         # Stellar ejecta
-        mdot = []
-        for k in range(nb_dt_gsa):
-            mdot.append(nb_iso_gsa * [0])
+        mdot = np.zeros((nb_dt_gsa,nb_iso_gsa))
 
         # Gas reservoir
-        ymgal = [list(ymgal)]
-        for k in range(nb_dt_gsa):
-            ymgal.append(nb_iso_gsa * [0])
+        temp = copy.deepcopy(ymgal)
+        ymgal = np.zeros((nb_dt_gsa+1,nb_iso_gsa))
+        ymgal[0] += np.array(temp)
 
         # Massive stars, AGB stars, SNe Ia ejecta, and neutron star merger ejecta
         ymgal_massive = []
@@ -1016,38 +1049,54 @@ class chem_evol(object):
 	ymgal_nsm = []
 	ymgal_bhnsm = []
         ymgal_delayed_extra = []
-        for k in range(nb_dt_gsa + 1):
-            ymgal_massive.append(nb_iso_gsa * [0])
-            ymgal_agb.append(nb_iso_gsa * [0])
-            ymgal_1a.append(nb_iso_gsa * [0])
-            ymgal_bhnsm.append(nb_iso_gsa * [0])
-            ymgal_nsm.append(nb_iso_gsa * [0])
-        for iiii in range(0,self.nb_delayed_extra):
-            ymgal_delayed_extra.append([])
+        if self.pre_calculate_SSPs:
+            mdot_massive = []
+            mdot_agb     = []
+            mdot_1a      = []
+            mdot_nsm     = []
+            mdot_bhnsm   = []
+            mdot_delayed_extra = []
+            sn1a_numbers = []
+            nsm_numbers = []
+	    bhnsm_numbers = []
+            sn2_numbers  = []
+            self.wd_sn1a_range  = []
+            self.wd_sn1a_range1 = []
+            delayed_extra_numbers = []
+            self.number_stars_born = []
+        else:
             for k in range(nb_dt_gsa + 1):
-                ymgal_delayed_extra[iiii].append(nb_iso_gsa * [0])
-        mdot_massive = copy.deepcopy(mdot)
-        mdot_agb     = copy.deepcopy(mdot)
-        mdot_1a      = copy.deepcopy(mdot)
-        mdot_nsm     = copy.deepcopy(mdot)
-        mdot_bhnsm   = copy.deepcopy(mdot)
-        mdot_delayed_extra = []
-        for iiii in range(0,self.nb_delayed_extra):
-            mdot_delayed_extra.append(copy.deepcopy(mdot))
+                ymgal_massive.append(nb_iso_gsa * [0])
+                ymgal_agb.append(nb_iso_gsa * [0])
+                ymgal_1a.append(nb_iso_gsa * [0])
+                ymgal_bhnsm.append(nb_iso_gsa * [0])
+                ymgal_nsm.append(nb_iso_gsa * [0])
+            for iiii in range(0,self.nb_delayed_extra):
+                ymgal_delayed_extra.append([])
+                for k in range(nb_dt_gsa + 1):
+                    ymgal_delayed_extra[iiii].append(nb_iso_gsa * [0])
+            mdot_massive = copy.deepcopy(mdot)
+            mdot_agb     = copy.deepcopy(mdot)
+            mdot_1a      = copy.deepcopy(mdot)
+            mdot_nsm     = copy.deepcopy(mdot)
+            mdot_bhnsm   = copy.deepcopy(mdot)
+            mdot_delayed_extra = []
+            for iiii in range(0,self.nb_delayed_extra):
+                mdot_delayed_extra.append(copy.deepcopy(mdot))
 
-        # Number of SNe Ia, core-collapse SNe, and neutron star mergers
-        sn1a_numbers = [0] * nb_dt_gsa
-	nsm_numbers = [0] * nb_dt_gsa
-	bhnsm_numbers = [0] * nb_dt_gsa
-        sn2_numbers  = [0] * nb_dt_gsa
-        self.wd_sn1a_range  = [0] * nb_dt_gsa
-        self.wd_sn1a_range1 = [0] * nb_dt_gsa
-        delayed_extra_numbers = []
-        for iiii in range(0,self.nb_delayed_extra):
-            delayed_extra_numbers.append([0] * nb_dt_gsa)
+            # Number of SNe Ia, core-collapse SNe, and neutron star mergers
+            sn1a_numbers = [0] * nb_dt_gsa
+            nsm_numbers = [0] * nb_dt_gsa
+	    bhnsm_numbers = [0] * nb_dt_gsa
+            sn2_numbers  = [0] * nb_dt_gsa
+            self.wd_sn1a_range  = [0] * nb_dt_gsa
+            self.wd_sn1a_range1 = [0] * nb_dt_gsa
+            delayed_extra_numbers = []
+            for iiii in range(0,self.nb_delayed_extra):
+                delayed_extra_numbers.append([0] * nb_dt_gsa)
 
-        # Star formation
-        self.number_stars_born = [0] * (nb_dt_gsa + 1)
+            # Star formation
+            self.number_stars_born = [0] * (nb_dt_gsa + 1)
 
         # Related to the IMF
         self.history.imf_mass_ranges = [[]] * (nb_dt_gsa + 1)
@@ -1187,7 +1236,6 @@ class chem_evol(object):
         # Update the time of the simulation.  Here, i is in fact the end point
         # of the current timestep which extends from i-1 to i.
         self.t += self.history.timesteps[i-1]
-
         # Output information
         if self.iolevel >= 1:
             tenth = self.nb_timesteps / (10.)
@@ -1222,7 +1270,11 @@ class chem_evol(object):
 
             # Lock gas into stars
             f_lock = 1.0e0 - self.sfrin
-            for k in range(self.len_ymgal):
+            if self.pre_calculate_SSPs:
+                self.ymgal[i] = f_lock * self.ymgal[i-1]
+                self.m_locked += self.sfrin * sum(self.ymgal[i-1])
+            else:
+              for k in range(self.len_ymgal):
                 self.ymgal[i][k] = f_lock * self.ymgal[i-1][k]
 		self.ymgal_massive[i][k] = f_lock * self.ymgal_massive[i-1][k]
                 self.ymgal_agb[i][k] = f_lock * self.ymgal_agb[i-1][k]
@@ -1230,7 +1282,7 @@ class chem_evol(object):
 		self.ymgal_nsm[i][k] = f_lock * self.ymgal_nsm[i-1][k]
 		self.ymgal_bhnsm[i][k] = f_lock * self.ymgal_bhnsm[i-1][k]
                 self.m_locked += self.sfrin * self.ymgal[i-1][k]
-            for iiii in range(0,self.nb_delayed_extra):
+              for iiii in range(0,self.nb_delayed_extra):
                 for k in range(self.len_ymgal):
                     self.ymgal_delayed_extra[iiii][i][k] = \
                         f_lock * self.ymgal_delayed_extra[iiii][i-1][k]
@@ -1240,21 +1292,29 @@ class chem_evol(object):
                 print 'Mass locked away:','{:.3E}'.format(self.m_locked), \
                       ', new ISM mass:','{:.3E}'.format(sum(self.ymgal[i]))
 
-            # Calculate stellar ejecta and the number of SNe
-            self.__sfrmdot(i, mass_sampled, scale_cor)
+            # Add the pre-calculated SSP ejecta .. if fast mode
+            if self.pre_calculate_SSPs:
+                self.__add_ssp_ejecta(i)
+
+            # Calculate stellar ejecta and the number of SNe .. if normal mode
+            else:
+                self.__sfrmdot(i, mass_sampled, scale_cor)
 
         # If no star is forming during the current timestep ...
         else:
 
             # Use the previous gas reservoir for the current timestep
-            self.ymgal[i] = self.ymgal[i-1]
-            self.ymgal_agb[i] = self.ymgal_agb[i-1]
-            self.ymgal_1a[i] = self.ymgal_1a[i-1]
-	    self.ymgal_nsm[i] = self.ymgal_nsm[i-1]
-	    self.ymgal_bhnsm[i] = self.ymgal_bhnsm[i-1]
-            self.ymgal_massive[i] = self.ymgal_massive[i-1]
-            for iiii in range(0,self.nb_delayed_extra):
-                self.ymgal_delayed_extra[iiii][i] = self.ymgal_delayed_extra[iiii][i-1]
+            if self.pre_calculate_SSPs:
+                self.ymgal[i] = self.ymgal[i-1]
+            else:
+                self.ymgal[i] = self.ymgal[i-1]
+                self.ymgal_agb[i] = self.ymgal_agb[i-1]
+                self.ymgal_1a[i] = self.ymgal_1a[i-1]
+                self.ymgal_nsm[i] = self.ymgal_nsm[i-1]
+	        self.ymgal_bhnsm[i] = self.ymgal_bhnsm[i-1]
+                self.ymgal_massive[i] = self.ymgal_massive[i-1]
+                for iiii in range(0,self.nb_delayed_extra):
+                    self.ymgal_delayed_extra[iiii][i] = self.ymgal_delayed_extra[iiii][i-1]
 
             # Output information
             if self.iolevel > 2:
@@ -1265,27 +1325,30 @@ class chem_evol(object):
                 self.ssp_nb_cc_sne = np.array([])
 		
         # Add stellar ejecta to the gas reservoir
-        self.ymgal[i] = np.array(self.ymgal[i]) + np.array(self.mdot[i-1])
-        self.ymgal_agb[i] = np.array(self.ymgal_agb[i])+np.array(self.mdot_agb[i-1])
-        self.ymgal_1a[i] = np.array(self.ymgal_1a[i]) + np.array(self.mdot_1a[i-1])
-        self.ymgal_massive[i] = np.array(self.ymgal_massive[i]) + \
-                                np.array(self.mdot_massive[i-1])
-        self.ymgal_nsm[i] = np.array(self.ymgal_nsm[i]) + np.array(self.mdot_nsm[i-1])
-        self.ymgal_bhnsm[i] = np.array(self.ymgal_bhnsm[i]) + np.array(self.mdot_bhnsm[i-1])
-        if self.nb_delayed_extra > 0:
-            self.ymgal_delayed_extra[iiii][i] = \
-              np.array(self.ymgal_delayed_extra[iiii][i]) + \
-                np.array(self.mdot_delayed_extra[iiii][i-1])
-
-        # Convert the mass ejected by massive stars into rate
-        if self.history.timesteps[i-1] == 0.0:
-            self.massive_ej_rate[i-1] = 0.0
-            self.sn1a_ej_rate[i-1] = 0.0
+        if self.pre_calculate_SSPs:
+            self.ymgal[i] += self.mdot[i-1]
         else:
-            self.massive_ej_rate[i-1] = sum(self.mdot_massive[i-1]) / \
-                self.history.timesteps[i-1]
-            self.sn1a_ej_rate[i-1] = sum(self.mdot_1a[i-1]) / \
-                self.history.timesteps[i-1]
+            self.ymgal[i] = np.array(self.ymgal[i]) + np.array(self.mdot[i-1])
+            self.ymgal_agb[i] = np.array(self.ymgal_agb[i])+np.array(self.mdot_agb[i-1])
+            self.ymgal_1a[i] = np.array(self.ymgal_1a[i]) + np.array(self.mdot_1a[i-1])
+            self.ymgal_massive[i] = np.array(self.ymgal_massive[i]) + \
+                                np.array(self.mdot_massive[i-1])
+            self.ymgal_nsm[i] = np.array(self.ymgal_nsm[i]) + np.array(self.mdot_nsm[i-1])
+            self.ymgal_bhnsm[i] = np.array(self.ymgal_bhnsm[i]) + np.array(self.mdot_bhnsm[i-1])
+            if self.nb_delayed_extra > 0:
+                self.ymgal_delayed_extra[iiii][i] = \
+                  np.array(self.ymgal_delayed_extra[iiii][i]) + \
+                    np.array(self.mdot_delayed_extra[iiii][i-1])
+
+            # Convert the mass ejected by massive stars into rate
+            if self.history.timesteps[i-1] == 0.0:
+                self.massive_ej_rate[i-1] = 0.0
+                self.sn1a_ej_rate[i-1] = 0.0
+            else:
+                self.massive_ej_rate[i-1] = sum(self.mdot_massive[i-1]) / \
+                    self.history.timesteps[i-1]
+                self.sn1a_ej_rate[i-1] = sum(self.mdot_1a[i-1]) / \
+                    self.history.timesteps[i-1]
 
 
     ##############################################
@@ -1310,22 +1373,29 @@ class chem_evol(object):
         '''
 
         # Keep the current in memory
-        self.history.metallicity.append(self.zmetal)
-        self.history.age.append(self.t)
-        self.history.gas_mass.append(sum(self.ymgal[i]))
-        self.history.ism_iso_yield.append(self.ymgal[i])
-        self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
-        self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
-        self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
-        self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
-        self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
-        self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
-        self.history.nsm_numbers.append(self.nsm_numbers[i-1])
-        self.history.bhnsm_numbers.append(self.bhnsm_numbers[i-1])
-        self.history.sn2_numbers.append(self.sn2_numbers[i-1])
-        self.history.m_locked.append(self.m_locked)	
-        self.history.m_locked_agb.append(self.m_locked_agb)
-        self.history.m_locked_massive.append(self.m_locked_massive)
+        if self.pre_calculate_SSPs:
+            self.history.metallicity.append(self.zmetal)
+            self.history.age.append(self.t)
+            self.history.gas_mass.append(sum(self.ymgal[i]))
+            self.history.ism_iso_yield.append(self.ymgal[i])
+            self.history.m_locked.append(self.m_locked)
+        else:
+            self.history.metallicity.append(self.zmetal)
+            self.history.age.append(self.t)
+            self.history.gas_mass.append(sum(self.ymgal[i]))
+            self.history.ism_iso_yield.append(self.ymgal[i])
+            self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
+            self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
+            self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
+            self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
+            self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
+            self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
+            self.history.nsm_numbers.append(self.nsm_numbers[i-1])
+            self.history.bhnsm_numbers.append(self.bhnsm_numbers[i-1])
+            self.history.sn2_numbers.append(self.sn2_numbers[i-1])
+            self.history.m_locked.append(self.m_locked)	
+            self.history.m_locked_agb.append(self.m_locked_agb)
+            self.history.m_locked_massive.append(self.m_locked_massive)
 
 
     ##############################################
@@ -1345,7 +1415,15 @@ class chem_evol(object):
         self.history.imf_mass_ranges_mtot = self.imf_mass_ranges_mtot
 
         # Convert isotopes into elements
-        for h in range(len(self.history.ism_iso_yield)):
+        if self.pre_calculate_SSPs:
+          for h in range(len(self.history.ism_iso_yield)):
+            conv = self._iso_abu_to_elem(self.history.ism_iso_yield[h])
+            self.history.ism_elem_yield.append(conv[1])
+            # List of all the elements
+            if h == 0:
+               self.history.elements = conv[0]
+        else:
+          for h in range(len(self.history.ism_iso_yield)):
             conv = self._iso_abu_to_elem(self.history.ism_iso_yield[h])
             self.history.ism_elem_yield.append(conv[1])
             conv = self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h])
@@ -1358,7 +1436,6 @@ class chem_evol(object):
 	    self.history.ism_elem_yield_bhnsm.append(conv[1])
             conv = self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h])
             self.history.ism_elem_yield_massive.append(conv[1])
-
             # List of all the elements
             if h == 0:
                self.history.elements = conv[0]
@@ -6191,7 +6268,324 @@ class chem_evol(object):
         '''
 
         out = 'Run time: '+str(round((t_module.time() - self.start_time),2))+"s"
-        return out	
+        return out
+
+
+    ##############################################
+    #                Run All SSPs                #
+    ##############################################
+    def __run_all_ssps(self):
+
+        '''
+        Create a SSP with SYGMA for each metallicity available in the yield tables.
+        Each SSP has a total mass of 1 Msun, is it can easily be re-normalized.
+
+        '''
+
+        # Define the SSP timesteps
+        len_dt_SSPs = len(self.dt_in_SSPs)
+        if len_dt_SSPs == 0:
+            dt_in_ras = self.history.timesteps
+            len_dt_SSPs = self.nb_timesteps
+        else:
+            dt_in_ras = self.dt_in_SSPs
+
+        # Declare the SSP ejecta arrays [Z][dt][iso]
+        self.ej_SSP = np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_isotopes))
+
+        # For each metallicity ...
+        for i_ras in range(0,self.nb_Z_table_SSP):
+
+            # Use a dummy iniabu file if the metallicity is not zero
+            if self.Z_table_SSP[i_ras] == 0:
+                iniabu_t = ''
+                hardsetZ2 = self.hardsetZ
+            else:
+                iniabu_t='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+                hardsetZ2 = self.Z_table_SSP[i_ras]
+
+            # Run a SYGMA simulation (1 Msun SSP)
+            sygma_inst = sygma.sygma(pre_calculate_SSPs=False, \
+                 imf_type=self.imf_type, alphaimf=self.alphaimf, \
+                 imf_bdys=self.history.imf_bdys, sn1a_rate=self.history.sn1a_rate, \
+                 iniZ=self.Z_table_SSP[i_ras], dt=self.history.dt, \
+                 special_timesteps=self.special_timesteps, \
+                 nsmerger_bdys=self.nsmerger_bdys, tend=self.history.tend, \
+                 mgal=1.0, transitionmass=self.transitionmass, \
+                 table=self.table, hardsetZ=hardsetZ2, \
+                 sn1a_on=self.sn1a_on, sn1a_table=self.sn1a_table, \
+                 sn1a_energy=self.sn1a_energy, ns_merger_on=self.ns_merger_on, \
+                 bhns_merger_on=self.bhns_merger_on, f_binary=self.f_binary, \
+                 f_merger=self.f_merger, t_merger_max=self.t_merger_max, \
+                 m_ej_nsm=self.m_ej_nsm, nsm_dtd_power=self.nsm_dtd_power,\
+                 m_ej_bhnsm=self.m_ej_bhnsm, bhnsmerger_table=self.bhnsmerger_table, \
+                 nsmerger_table=self.nsmerger_table, iniabu_table=iniabu_t, \
+                 extra_source_on=self.extra_source_on, nb_nsm_per_m=self.nb_nsm_per_m, \
+                 t_nsm_coal=self.t_nsm_coal, extra_source_table=self.extra_source_table, \
+		 f_extra_source=self.f_extra_source, \
+     	         extra_source_mass_range=self.extra_source_mass_range, \
+		 extra_source_exclude_Z=self.extra_source_exclude_Z, \
+                 pop3_table=self.pop3_table, imf_bdys_pop3=self.imf_bdys_pop3, \
+                 imf_yields_range_pop3=self.imf_yields_range_pop3, \
+                 starbursts=self.starbursts, beta_pow=self.beta_pow, \
+                 gauss_dtd=self.gauss_dtd, exp_dtd=self.exp_dtd, \
+                 nb_1a_per_m=self.nb_1a_per_m, direct_norm_1a=self.direct_norm_1a, \
+                 imf_yields_range=self.imf_yields_range, \
+                 exclude_masses=self.exclude_masses, netyields_on=self.netyields_on, \
+                 wiersmamod=self.wiersmamod, yield_interp=self.yield_interp, \
+                 stellar_param_on=self.stellar_param_on, \
+                 t_dtd_poly_split=self.t_dtd_poly_split, \
+		 stellar_param_table=self.stellar_param_table, \
+                 tau_ferrini=self.tau_ferrini, delayed_extra_log=self.delayed_extra_log, \
+                 dt_in=dt_in_ras, nsmerger_dtd_array=self.nsmerger_dtd_array, \
+                 bhnsmerger_dtd_array=self.bhnsmerger_dtd_array, \
+                 poly_fit_dtd_5th=self.poly_fit_dtd_5th, \
+                 poly_fit_range=self.poly_fit_range, \
+                 delayed_extra_dtd=self.delayed_extra_dtd, \
+                 delayed_extra_dtd_norm=self.delayed_extra_dtd_norm, \
+                 delayed_extra_yields=self.delayed_extra_yields, \
+                 delayed_extra_yields_norm=self.delayed_extra_yields_norm)
+
+            # Copy the ejecta arrays from the SYGMA simulation
+            # and convert the mass into log(masses)
+            for i_step in range(len_dt_SSPs):
+                for i_iso in range(self.nb_isotopes):
+                    if sygma_inst.mdot[i_step][i_iso] > 0.0:
+                        self.ej_SSP[i_ras][i_step][i_iso] = \
+                            np.log10(sygma_inst.mdot[i_step][i_iso])
+                    else:
+                        self.ej_SSP[i_ras][i_step][i_iso] = -30.0
+
+            # If this is the last Z entry ..
+            if i_ras == self.nb_Z_table_SSP - 1:
+
+                # Keep in memory the number of timesteps in SYGMA
+                self.nb_steps_table = len(sygma_inst.history.timesteps)
+                self.dt_ssp = sygma_inst.history.timesteps
+
+                # Keep the time of ssp in memory
+                self.t_ssp = np.zeros(self.nb_steps_table)
+                self.t_ssp[0] = self.dt_ssp[0]
+                for i_ras in range(1,self.nb_steps_table):
+                    self.t_ssp[i_ras] = self.t_ssp[i_ras-1] + self.dt_ssp[i_ras]
+
+            # Clear the memory
+            del sygma_inst
+
+
+    ##############################################
+    #            Calculate Int. Coef.            #
+    ##############################################
+    def __calculate_int_coef(self):
+
+        '''
+        Calculate the interpolation coefficients of each isotope between the
+        different metallicities for every timestep considered in the SYGMA
+        simulations.  log(ejecta) = a * log(Z) + b
+
+        self.ej_x[Z][step][isotope][0 -> a, 1 -> b], where the Z index refers
+        to the lower metallicity boundary of the interpolation.
+
+        '''
+
+        # Declare the interpolation coefficients arrays
+        self.ej_SSP_coef = \
+            np.zeros((2,self.nb_Z_table_SSP,self.nb_steps_table,self.nb_isotopes))
+
+        # For each metallicity interval ...
+        for i_cic in range(0,self.nb_Z_table_SSP-1):
+
+          # If the metallicity is not zero ...
+          if not self.Z_table_SSP[i_cic] == 0.0:
+
+            # Calculate the log(Z) for the boundary metallicities
+            logZ_low = np.log10(self.Z_table_SSP[i_cic])
+            logZ_up = np.log10(self.Z_table_SSP[i_cic+1])
+            dif_logZ_inv = 1 / (logZ_up - logZ_low)
+
+            # For each step ...
+            for j_cic in range(0,self.nb_steps_table):
+
+              # For every isotope ...
+              for k_cic in range(0,self.nb_isotopes):
+
+                # Copy the isotope mass for the boundary metallicities
+                iso_low = self.ej_SSP[i_cic][j_cic][k_cic]
+                iso_up = self.ej_SSP[i_cic+1][j_cic][k_cic]
+               
+                # Calculate the "a" and "b" coefficients
+                self.ej_SSP_coef[0][i_cic][j_cic][k_cic] = \
+                    (iso_up- iso_low) * dif_logZ_inv 
+                self.ej_SSP_coef[1][i_cic][j_cic][k_cic] = iso_up - \
+                    self.ej_SSP_coef[0][i_cic][j_cic][k_cic] * logZ_up
+
+
+    ##############################################
+    #               Add SSP Ejecta               #
+    ##############################################
+    def __add_ssp_ejecta(self, i):
+
+        '''
+        Distribute the SSP ejecta.  The SSP that forms during this step
+        is treated by interpolating SYGMA results that were kept in memory.
+        The SSp still deposit its ejecta in the upcoming timesteps, as in the
+        original chem_evol.py class. 
+
+        Argument
+        ========
+
+          i : Index of the current timestep
+
+        '''
+
+        # Find the metallicity lower boundary for the interpolation
+        if self.zmetal < self.Z_trans:
+          i_Z_low = -1
+        elif self.zmetal >= self.Z_table_SSP[-1]:
+          i_Z_low = -2
+        else:
+          i_Z_low = 0
+          while self.zmetal >= self.Z_table_SSP[i_Z_low+1]:
+            i_Z_low += 1
+
+        # Interpolate the SSP ejecta
+        self.__interpolate_ssp_ej( i-1, i_Z_low )
+
+        # Copy the initial simulation step that will be increased
+        i_sim = i-1
+        if i_sim == 0:
+            t_form = 0.0
+        else:
+            t_form = self.t_ce[i_sim-1]
+
+        # For each SSP step ...
+        for i_ssp in range(0,self.nb_steps_table):
+
+            # Declare the array that contains the time covered by
+            # the SSP step on each simulation step
+            time_frac = []
+
+            # Keep the initial current simulation step in memory
+            i_sim_low = i_sim
+
+            # While all simulation steps covered by the SSP step 
+            # have not been treated ...
+            not_complete = True
+            while not_complete:
+
+                # Calculate the time lower-boundary of the SSP time bin
+                if i_ssp == 0:
+                    t_low_ssp = 0.0
+                else:
+                    t_low_ssp = self.t_ssp[i_ssp-1]
+                if i_sim == 0:
+                    t_low_ce = 0.0
+                else:
+                    t_low_ce = self.t_ce[i_sim-1]
+
+                #print self.nb_timesteps,len(self.t_ce),i_sim,len(self.t_ssp),i_ssp
+                # Calculate the time covered by the SSP step on 
+                # the considered simulation step
+                time_frac.append( \
+                  min((self.t_ce[i_sim]-t_form), self.t_ssp[i_ssp]) - \
+                  max((t_low_ce-t_form), t_low_ssp))
+
+                # If all the simulations steps has been covered ...
+                if (self.t_ce[i_sim]-t_form) >= self.t_ssp[i_ssp] or \
+                  (i_sim + 1) == self.nb_timesteps:
+
+                    # Stop the while loop
+                    not_complete = False
+
+                # If we still need to cover simulation steps ...
+                else:
+
+                    # Move to the next one
+                    i_sim += 1
+
+            # Convert the time into time fraction
+            dt_temp_inv = 1 / (self.t_ssp[i_ssp] - t_low_ssp)
+            for i_tf in range(0,len(time_frac)):
+                time_frac[i_tf] = time_frac[i_tf] * dt_temp_inv
+
+            # For each simulation step ...
+            for j_ase in range(0,len(time_frac)):
+
+                # Add the ejecta
+                self.mdot[i_sim_low+j_ase] += \
+                    self.ej_SSP_int[i_ssp] * time_frac[j_ase]
+
+            # Break is the end of the simulation is reached
+            if (i_sim + 1) == self.nb_timesteps:
+                break
+            
+
+    ##############################################
+    #             Interpolate SSP Ej.            #
+    ##############################################
+    def __interpolate_ssp_ej(self, i, i_Z_low):
+
+        '''
+        Interpolate all the isotope for each step to create a SSP with the
+        wanted metallicity.  The ejecta is scale to the mass of the SSP.
+
+        Arguments
+        =========
+
+          i : Index of the current timestep
+          i_Z_low : Lower metallicity boundary index of the interpolation
+
+        '''
+
+        # Use the lowest non-zero metallicity if no PopIII stars with i_Z = -1
+        if i_Z_low == -1 and not self.Z_table_SSP[0] == 0:
+            i_Z_low = 0
+
+        # If PopIII stars must be used ...
+        if i_Z_low == -1:
+
+            # Error message if lowest metallicity is not zero
+            if not self.Z_table_SSP[0] == 0.0:
+                print '!!Error - There is no PopIII star yields!!'
+
+            # Use the PopIII yields in the interpolation array
+            self.ej_SSP_int = 10**self.ej_SSP[0] * self.m_locked
+#            for j_ise in range(0,self.nb_steps_table):
+#              for k_ise in range(0,self.nb_isotopes):
+#                self.ej_massive_int[j_ise][k_ise] = \
+#                  10**self.ej_massive[0][j_ise][k_ise] * self.m_locked
+
+        # If the metallicity of the gas is higher that Z_max ...
+        elif i_Z_low == -2:
+
+            # Use the highest metallicity available
+            self.ej_SSP_int = 10**self.ej_SSP[-1] * self.m_locked
+
+        # If we need to use the lowest non-zero metallicity ...
+        elif i_Z_low == 0 and self.Z_table_SSP[0] == 0.0:
+
+            # Use the lowest non-zero metallicity available
+            self.ej_SSP_int = 10**self.ej_SSP[1] * self.m_locked
+
+        # If we need to interpolate the ejecta ...
+        else:
+
+            # Calculate the log of the current gas metallicity
+            log_Z_cur = np.log10(self.zmetal)
+
+            # Calculate the time left to the simulation
+            t_left_ce = self.t_ce[-1] - self.t_ce[i]
+
+            # For each step and each isotope ...
+            for j_ise in range(0,self.nb_steps_table):
+
+                # Interpolate the isotopes
+                self.ej_SSP_int[j_ise] = 10**(self.ej_SSP_coef[0][i_Z_low][j_ise] * \
+                    log_Z_cur + self.ej_SSP_coef[1][i_Z_low][j_ise]) * self.m_locked
+
+                # Break if the SSP time exceed the simulation time
+                if self.t_ssp[j_ise] > t_left_ce:
+                  break 
 
 
     ##############################################
