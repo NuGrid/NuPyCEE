@@ -275,7 +275,7 @@ class omega( chem_evol ):
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
-		 ytables_nsmerger_in=np.array([]), \
+		 ytables_nsmerger_in=np.array([]), SSPs_in=np.array([]),\
                  dt_in=np.array([]), dt_split_info=np.array([]),\
                  ej_massive=np.array([]), ej_agb=np.array([]),\
                  ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
@@ -335,7 +335,7 @@ class omega( chem_evol ):
                  ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
                  ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\
                  ej_sn1a_coef=ej_sn1a_coef,dt_ssp=dt_ssp,\
-		 yield_interp=yield_interp,\
+		 yield_interp=yield_interp, SSPs_in=SSPs_in,\
                  poly_fit_dtd_5th=poly_fit_dtd_5th,poly_fit_range=poly_fit_range,\
                  delayed_extra_dtd=delayed_extra_dtd,\
                  delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
