@@ -973,6 +973,7 @@ class chem_evol(object):
         # If a timestep needs to be added to be synchronized with
         # the external program managing merger trees ...
         if self.t_merge > 0.0:
+          if self.t_merge < (self.history.tend - 1.1):
 
             # Declare the new timestep array
             timesteps_new = []
@@ -1001,6 +1002,9 @@ class chem_evol(object):
 
             # Replace the timesteps array to be returned
             timesteps_gt = timesteps_new
+
+          else:
+            self.i_t_merger = len(timesteps_gt)-1
 
         # Return the duration of all timesteps
         return timesteps_gt
@@ -6278,6 +6282,7 @@ class chem_evol(object):
 
         # Copy the metallicities and put them in increasing order
         self.Z_table_SSP = copy.deepcopy(self.ytables.metallicities)
+        self.Z_table_first_nzero = min(self.Z_table_SSP)
         if self.popIII_on and self.iniZ <= 0.0 and self.Z_trans > 0.0:
             self.Z_table_SSP.append(0.0)
         self.Z_table_SSP = sorted(self.Z_table_SSP)
@@ -6353,14 +6358,7 @@ class chem_evol(object):
                  delayed_extra_yields_norm=self.delayed_extra_yields_norm)
 
               # Copy the ejecta arrays from the SYGMA simulation
-              # and convert the mass into log(masses)
-              for i_step in range(len_dt_SSPs):
-                  for i_iso in range(self.nb_isotopes):
-                      if sygma_inst.mdot[i_step][i_iso] > 0.0:
-                          self.ej_SSP[i_ras][i_step][i_iso] = \
-                              np.log10(sygma_inst.mdot[i_step][i_iso])
-                      else:
-                          self.ej_SSP[i_ras][i_step][i_iso] = -30.0
+              self.ej_SSP[i_ras] = sygma_inst.mdot
 
               # If this is the last Z entry ..
               if i_ras == self.nb_Z_table_SSP - 1:
@@ -6397,7 +6395,7 @@ class chem_evol(object):
         '''
         Calculate the interpolation coefficients of each isotope between the
         different metallicities for every timestep considered in the SYGMA
-        simulations.  log(ejecta) = a * log(Z) + b
+        simulations.  ejecta = a * log(Z) + b
 
         self.ej_x[Z][step][isotope][0 -> a, 1 -> b], where the Z index refers
         to the lower metallicity boundary of the interpolation.
@@ -6431,7 +6429,7 @@ class chem_evol(object):
                
                 # Calculate the "a" and "b" coefficients
                 self.ej_SSP_coef[0][i_cic][j_cic][k_cic] = \
-                    (iso_up- iso_low) * dif_logZ_inv 
+                    (iso_up - iso_low) * dif_logZ_inv 
                 self.ej_SSP_coef[1][i_cic][j_cic][k_cic] = iso_up - \
                     self.ej_SSP_coef[0][i_cic][j_cic][k_cic] * logZ_up
 
@@ -6454,18 +6452,8 @@ class chem_evol(object):
 
         '''
 
-        # Find the metallicity lower boundary for the interpolation
-        if self.zmetal < self.Z_trans:
-          i_Z_low = -1
-        elif self.zmetal >= self.Z_table_SSP[-1]:
-          i_Z_low = -2
-        else:
-          i_Z_low = 0
-          while self.zmetal >= self.Z_table_SSP[i_Z_low+1]:
-            i_Z_low += 1
-
         # Interpolate the SSP ejecta
-        self.__interpolate_ssp_ej( i-1, i_Z_low )
+        self.__interpolate_ssp_ej( i-1 )
 
         # Copy the initial simulation step that will be increased
         i_sim = i-1
@@ -6539,7 +6527,7 @@ class chem_evol(object):
     ##############################################
     #             Interpolate SSP Ej.            #
     ##############################################
-    def __interpolate_ssp_ej(self, i, i_Z_low):
+    def __interpolate_ssp_ej(self, i):
 
         '''
         Interpolate all the isotope for each step to create a SSP with the
@@ -6549,42 +6537,31 @@ class chem_evol(object):
         =========
 
           i : Index of the current timestep
-          i_Z_low : Lower metallicity boundary index of the interpolation
 
         '''
 
-        # Use the lowest non-zero metallicity if no PopIII stars with i_Z = -1
-        if i_Z_low == -1 and not self.Z_table_SSP[0] == 0:
-            i_Z_low = 0
+        # Use the lowest metallicity
+        if self.zmetal <= self.Z_trans:
+            self.ej_SSP_int = self.ej_SSP[0] * self.m_locked
 
-        # If PopIII stars must be used ...
-        if i_Z_low == -1:
+        # Use the highest metallicity
+        elif self.zmetal >= self.Z_table_SSP[-1]:
+            self.ej_SSP_int = self.ej_SSP[-1] * self.m_locked
 
-            # Error message if lowest metallicity is not zero
-            if not self.Z_table_SSP[0] == 0.0:
-                print '!!Error - There is no PopIII star yields!!'
-
-            # Use the PopIII yields in the interpolation array
-            self.ej_SSP_int = 10**self.ej_SSP[0] * self.m_locked
-#            for j_ise in range(0,self.nb_steps_table):
-#              for k_ise in range(0,self.nb_isotopes):
-#                self.ej_massive_int[j_ise][k_ise] = \
-#                  10**self.ej_massive[0][j_ise][k_ise] * self.m_locked
-
-        # If the metallicity of the gas is higher that Z_max ...
-        elif i_Z_low == -2:
-
-            # Use the highest metallicity available
-            self.ej_SSP_int = 10**self.ej_SSP[-1] * self.m_locked
-
-        # If we need to use the lowest non-zero metallicity ...
-        elif i_Z_low == 0 and self.Z_table_SSP[0] == 0.0:
-
-            # Use the lowest non-zero metallicity available
-            self.ej_SSP_int = 10**self.ej_SSP[1] * self.m_locked
+        # If the metallicity is between Z_trans and lowest non-zero Z_table ..
+        elif self.zmetal <= self.Z_table_first_nzero:
+            if self.Z_table_SSP[0] == self.Z_table_first_nzero:
+                self.ej_SSP_int = self.ej_SSP[0] * self.m_locked
+            else:
+                self.ej_SSP_int = self.ej_SSP[1] * self.m_locked
 
         # If we need to interpolate the ejecta ...
         else:
+
+            # Find the metallicity lower boundary
+            i_Z_low = 0
+            while self.zmetal >= self.Z_table_SSP[i_Z_low+1]:
+                i_Z_low += 1
 
             # Calculate the log of the current gas metallicity
             log_Z_cur = np.log10(self.zmetal)
@@ -6596,7 +6573,7 @@ class chem_evol(object):
             for j_ise in range(0,self.nb_steps_table):
 
                 # Interpolate the isotopes
-                self.ej_SSP_int[j_ise] = 10**(self.ej_SSP_coef[0][i_Z_low][j_ise] * \
+                self.ej_SSP_int[j_ise] = (self.ej_SSP_coef[0][i_Z_low][j_ise] * \
                     log_Z_cur + self.ej_SSP_coef[1][i_Z_low][j_ise]) * self.m_locked
 
                 # Break if the SSP time exceed the simulation time
