@@ -56,9 +56,7 @@ AGB + massive stars
 			Available is Z=0.02,0.01,0.006,0.001,Z=0.0001
 				agb_and_massive_stars_nugrid_FRUITY.txt
 			AGB yields are from FRUITY and massive star yields are from Kobayashi et al 2016 (see below.).
-					
-				agb_and_massive_stars_K06_FRUITY.txt
-				
+				agb_and_massive_stars_FRUITY_K06.txt				
 
 		References: 
 			
