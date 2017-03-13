@@ -35,7 +35,10 @@ AGB + massive stars
 			For uniform grid use 1, 1.65,2.0, 2.2, 2.5, 3.0, 3.5,4.0, 4.5, 5.0 and the closest available mass.
 				agb_and_massive_stars_portinari98_marigo01_gce2.txt
 
-	
+			Yield set ID M01P98 in Ritter et al.  2017.
+				agb_and_massive_stars_portinari98_marigo01_net_yields_all.txt
+
+
 		References: Marigo et al. 2001, http://ukads.nottingham.ac.uk/abs/2001A%26A...370..194M
 			    Portinari et al. 1998, http://ukads.nottingham.ac.uk/abs/1998A%26A...334..505P
 
@@ -56,6 +59,7 @@ AGB + massive stars
 			Available is Z=0.02,0.01,0.006,0.001,Z=0.0001
 				agb_and_massive_stars_nugrid_FRUITY.txt
 			AGB yields are from FRUITY and massive star yields are from Kobayashi et al 2016 (see below.).
+			Yield set ID C15K06 in Ritter et al. 2017.
 				agb_and_massive_stars_FRUITY_K06.txt				
 
 		References: 
@@ -76,7 +80,8 @@ AGB + massive stars
 				agb_and_massive_stars_nugrid_K10.txt
 			
 			AGB yields from Karaks and massive star yields from Kobayashi06.					
-			The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.		
+			The yields of supernova and hypernova are combined 50% to 50% when hypernova yields are available.	
+                        Yield set ID K10K06 in Ritter et al. 2017.	
 			agb_and_massive_stars_K10_K06.txt
 
 		References:
