@@ -114,7 +114,7 @@ class sygma( chem_evol ):
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
                  ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
-                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',sn1a_energy=1e51,\
+                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t03.txt',sn1a_energy=1e51,\
 		 ns_merger_on=False, bhns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
                  t_merger_max=1.0e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
                  m_ej_bhnsm=2.5e-02, \
