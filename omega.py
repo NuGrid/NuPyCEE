@@ -870,7 +870,7 @@ class omega( chem_evol ):
             self.stellar_mass_0 = self.stellar_mass_0 * (1-self.mass_frac_SSP)
 
             # Read deBoer et al. (2014) SFH
-            self.__copy_sfr_input('carina_data/sfh_deBoer14.txt')
+            self.__copy_sfr_input('stellab_data/carina_data/sfh_deBoer14.txt')
 
         # Interpolate the last timestep
         if len(self.sfr_input) > 3:  

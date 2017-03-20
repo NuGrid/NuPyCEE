@@ -1,5 +1,5 @@
 #set the path to your NUPYCEE dir
-cd ../
+cd ../../
 export SYGMADIR=`pwd`
 cd -
 echo 'set SYGMADIR to '$SYGMADIR
