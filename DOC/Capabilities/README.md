@@ -38,4 +38,9 @@ to access the ipython notebooks introduced below.
 
 	Timesteps_size_management.ipynb
 
+**Adding data to STELLAB**
+
+	You can add your own stellar abundance set to STELLAB.
+
+	AddingDataToStellab.ipynb	
 
