@@ -24,7 +24,12 @@ to access the ipython notebooks introduced below.
 	Pre-calculate simple stellar populations to make OMEGA runs faster.
 
 	Fast_chem_evol.ipynb
+	
+**Fitting Curves to STELLAB data**
+	
+	Calculate and plot polynomial fits to STELLAB data with R^2 analysis.
 
+	Fitting_curves_to_STELLAB_data.ipynb
 
 **Net Yields Input**
 
