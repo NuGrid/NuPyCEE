@@ -1434,4 +1434,40 @@ class stellab():
                             alpha=1)
 
 
+    def write_data_table(self,data,attr,filename):
+        '''
+        Write stellar data table for the stellab database. Format as for
+	files found in stellab_data and read in by stellab.
+
+        Parameters
+        ---------
+
+	data : list
+            List of stellar data such as abundances. Each list element
+	    contains list entries for a star.
+
+	attr : list
+	    List of types of stellar data such as [Fe/H] for each star.
+	filename : string
+	    Name of data file to be written
+        '''
+        out=''
+
+        #create header with types
+	for k in range(len(attr)):
+		sp = len(attr[k])
+		out = out + attr[k]+(10-sp)*' '
+        out = out + '\n'
+
+	#loop over stars
+	for k in range(len(data)):
+		for h in range(len(data[k])):
+		     out = out + '{:.3E}'.format(data[k][h]) + ' '
+		out = out + '\n'    
+
+	f1=open(filename,'w')
+	f1.write(out)
+	f1.close()
+        print 'file ',filename,' created.' 
+        
 
