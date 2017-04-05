@@ -1269,16 +1269,16 @@ class stellab():
     #                 Get star id                #
     ##############################################
 
-    def get_star_id(self,find_elements=['Sc'],obs='milky_way_data/Venn_et_al_2004_stellab'):
+    def get_star_id(self,find_elements=['Sc'],find_Fe_H_range=[],obs='milky_way_data/Venn_et_al_2004_stellab'):
 
         '''
-        Plots abundance distribution [Elements/Fe] vs Z
+        Gets index of stars with certain properties such as available elements or Fe/H range.
 
         Parameters
         ---------
 
         find_elements : array
-	    Find all stars
+	    Find index of all stars with elements
 	obs : string
 	    Star data set
         '''
@@ -1298,6 +1298,7 @@ class stellab():
         eles_found=[]
         num_stars=0
 	star_ids=[]
+	star_fe_h=[]
         for k in range(len(find_elements)):
             yaxis='['+find_elements[k]+'/'+'Fe]'
             ret_x, ret_y, ret_x_err, ret_y_err,ret_star_i=self.plot_spectro(fig=-1, galaxy='', xaxis='[Fe/H]', yaxis=yaxis, \
@@ -1307,15 +1308,34 @@ class stellab():
                    show_mean_err=False, stat=False, flat=False, show_legend=True, \
                    sub=1, sub_plot=False, alpha=1.0, lw=1.0,abundistr=True)
 
+
 	    if k==0:
 	      star_ids=ret_star_i
+	      star_fe_h=ret_x
             else:  
 	      star_ids_tmp=[]
+	      star_fe_h_tmp=[]
               for h in range(len(star_ids)):
 	           if star_ids[h] in ret_star_i:
 		      star_ids_tmp.append(star_ids[h])
+		      star_fe_h_tmp.append(star_fe_h[h])
 	      star_ids=star_ids_tmp	 
-	      
+	      star_fe_h=star_fe_h_tmp
+
+	#get [Fe/H] values
+	if len(find_Fe_H_range)>0:
+	    fe_h_max=find_Fe_H_range[1]
+	    if fe_h_max==0:
+		    fe_h_max=max(star_fe_h)
+	    fe_h_min=find_Fe_H_range[0]
+            if fe_h_min==0:
+		    fe_h_min=min(star_fe_h)
+            star_ids_tmp=[]
+	    print 'adjust to given metallicity range from ',fe_h_min,' to ',fe_h_max
+	    for k in range(len(star_ids)):
+		    if (star_fe_h[k]>fe_h_min) and (star_fe_h[k]<fe_h_max):
+			    star_ids_tmp.append(star_ids[k])
+	    star_ids=star_ids_tmp
         return star_ids		      
 
     ##############################################
