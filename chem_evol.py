@@ -5887,7 +5887,7 @@ class chem_evol(object):
 
         # if fit over metallicity not necessary or possible, get separate fit results
 	if len(metallicity)==1:
-                if iolevel>0:
+                if self.iolevel>0:
                         print 'Only 1 metallicity provided, no fit over lifetime' 
         	all_lifetimes=[]
         	for m in range(len(metallicity)):
