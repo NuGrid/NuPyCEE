@@ -288,6 +288,11 @@ class omega( chem_evol ):
                  delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
                  delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([])):
 
+        # Get the name of the instance
+        import traceback
+        (filename,line_number,function_name,text)=traceback.extract_stack()[-2]
+        self.inst_name = text[:text.find('=')].strip()
+
         # Announce the beginning of the simulation 
         print 'OMEGA run in progress..'
         start_time = t_module.time()
@@ -4803,4 +4808,99 @@ class omega( chem_evol ):
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
                rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize, markersize=markersize)
+
+
+    ##############################################
+    #             Create Log Folder              #
+    ##############################################
+    def create_log_folder(self, fsize=[10,4.5],fontsize=12,rspace=0.6,bspace=0.15,\
+            labelsize=15,legend_fontsize=10):
+
+        '''
+	This function calculates the basic galaxy properties and put the
+        relevant information in a folder
+
+        '''
+
+        # Create the folder
+        log_path = self.inst_name + '_log/'
+        if not os.path.exists(log_path):
+            os.makedirs(log_path)
+
+        # Save the age-metallicity relationship
+        xy = self.plot_spectro(return_x_y=True)
+        fig = plt.figure()
+        plt.plot(xy[0],xy[1])
+        plt.xlabel('Age [yr]', fontsize=fontsize)
+        plt.ylabel('[Fe/H]', fontsize=fontsize)
+        plt.ylim(max(xy[1])-5, max(xy[1])+0.5)
+        plt.savefig(log_path+'age_vs_FeH.pdf')
+        plt.close(fig)
+
+        # Save the log_age-metallicity relationship
+        xy = self.plot_spectro(return_x_y=True)
+        fig = plt.figure()
+        plt.plot(xy[0],xy[1])
+        plt.xlabel('Age [yr]', fontsize=fontsize)
+        plt.ylabel('[Fe/H]', fontsize=fontsize)
+        plt.ylim(max(xy[1])-5, max(xy[1])+0.5)
+        plt.xlim(1e7, 2*self.history.tend)
+        plt.xscale('log')
+        plt.savefig(log_path+'log10_age_vs_FeH.pdf')
+        plt.close(fig)
+
+        # Save the star formation history
+        fig = plt.figure()
+        plt.plot(self.history.age,self.history.sfr_abs)
+        plt.xlabel('Age [yr]', fontsize=fontsize)
+        plt.ylabel('Star formation rate [Msun/yr]', fontsize=fontsize)
+        plt.savefig(log_path+'star_formation_history.pdf')
+        plt.close(fig)
+
+        # Save the SN rates
+        fig = plt.figure()
+        y_cc = 100.0*np.array(self.history.sn2_numbers[1:])/ \
+                 np.array(self.history.timesteps)
+        plt.plot(self.history.age[1:],y_cc,linestyle='-',label='CC SNe')
+        plt.plot(self.history.age[1:], \
+                 100.0*np.array(self.history.sn1a_numbers[1:])/ \
+                 np.array(self.history.timesteps),linestyle='--',\
+                 label='SNe Ia')
+        plt.xlabel('Age [yr]', fontsize=fontsize)
+        plt.ylabel('Supernova rate [per century]', fontsize=fontsize)
+        plt.yscale('log')
+        plt.legend(fontsize=legend_fontsize)
+        plt.ylim(max(y_cc)/1e4, 5*max(y_cc))
+        plt.savefig(log_path+'sne_rate.pdf')
+        plt.close(fig)
+
+        # Open the output file
+        f = open(log_path+'z_info.txt', 'w')
+
+        # Write yields info
+        f.write('Yields (see YIELDS_LIBRARY.txt for references)\n')
+        f.write('==============================================\n')
+        f.write('AGB and massive: '+self.table+'\n')
+        f.write('SNe Ia: '+self.sn1a_table+'\n')
+        f.write('Neutron star merger: '+self.nsmerger_table+'\n')
+
+        # Write IMF info
+        f.write('\nInitial mass function\n')
+        f.write('=====================')
+        f.write('Type: '+self.imf_type+'\n')
+        f.write('Mass boundary: '+str(self.imf_bdys)+' [Msun]\n')
+        f.write('Yields mass range: '+str(self.imf_yields_range)+' [Msun]\n')
+
+        # Write galaxy properties
+        f.write('\nGalaxy properties\n')
+        f.write('=================\n')
+        f.write('Initial mass of gas: '+str("%.4g" % sum(self.ymgal[0]))+' [Msun]\n')
+        f.write('Final mass of gas: '+str("%.4g" % sum(self.ymgal[-1]))+' [Msun]\n')
+        f.write('Final CC/Ia SN ratio: '+\
+                 str("%.4g" % (self.history.sn2_numbers[-1]/\
+                 self.history.sn1a_numbers[-1])+'\n'))
+        f.write('Initial metallicity (Z): ' + str(self.history.metallicity[-1]) + '\n')
+
+        # Close the output file
+        f.close() 
 
