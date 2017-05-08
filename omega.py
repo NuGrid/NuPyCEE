@@ -4899,7 +4899,7 @@ class omega( chem_evol ):
         f.write('Final CC/Ia SN ratio: '+\
                  str("%.4g" % (self.history.sn2_numbers[-1]/\
                  self.history.sn1a_numbers[-1])+'\n'))
-        f.write('Initial metallicity (Z): ' + str(self.history.metallicity[-1]) + '\n')
+        f.write('Final metallicity (Z): ' + str(self.history.metallicity[-1]) + '\n')
 
         # Close the output file
         f.close() 
