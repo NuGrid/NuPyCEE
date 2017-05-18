@@ -2004,6 +2004,10 @@ class omega( chem_evol ):
 		    self.ymgal_nsm[i][k_op] = f_lost_2 * self.ymgal_nsm[i][k_op]
 		    self.ymgal_bhnsm[i][k_op] = f_lost_2 * self.ymgal_bhnsm[i][k_op]
                     self.ymgal_massive[i][k_op] = f_lost_2*self.ymgal_massive[i][k_op]
+                    for iiii in range(0,self.nb_delayed_extra):
+                      for k in range(self.len_ymgal):
+                          self.ymgal_delayed_extra[iiii][i][k] = \
+                              f_lost_2 * self.ymgal_delayed_extra[iiii][i][k]
 
             # If the open box scenario is used ...
             if self.open_box:
@@ -2048,6 +2052,8 @@ class omega( chem_evol ):
 		    self.ymgal_nsm[i][k_op] *= (1.0 - frac_rem)
 		    self.ymgal_bhnsm[i][k_op] *= (1.0 - frac_rem)
                     self.ymgal_massive[i][k_op] *= (1.0 - frac_rem)
+                    for iiii in range(0,self.nb_delayed_extra):
+                        self.ymgal_delayed_extra[iiii][i][k_op] *= (1.0 - frac_rem)
 
             # Get the new metallicity of the gas
             self.zmetal = self._getmetallicity(i)
