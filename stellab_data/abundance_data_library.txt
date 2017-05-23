@@ -9,6 +9,7 @@ milky_way_data/Andrievsky_et_al_2007_stellab && Andrievsky et al. (2007) && og
 milky_way_data/Andrievsky_et_al_2008_stellab && Andrievsky et al. (2008) && og
 milky_way_data/Andrievsky_et_al_2010_stellab && Andrievsky et al. (2010) && og
 milky_way_data/Bensby_et_al_2005_stellab && Bensby et al. (2005) && om
+milky_way_data/test && test && ob
 #milky_way_data/Bensby_Feltzing_2006_stellab && Bensby & Feltzing(2006) && ^g
 #        milky_way_data/Bergemann_Gehren_2008_stellab && ^g
 milky_way_data/Bihain_et_al_2004_stellab && Bihain et al. (2004) && og
@@ -49,6 +50,7 @@ H fornax
 fornax_data/Letarte_et_al_2010_stellab && Letarte et al. (2010) && oc
 fornax_data/Lemasle_et_al_2014_stellab && Lemasle et al. (2014) && ob
 H carina
+carina_data/Norris_et_al_2017_stellab && Norris et al. (2017) && Dm
 carina_data/Fabrizio_et_al_2015_stellab && Fabrizio et al. (2015) && og
 carina_data/Lemasle_et_al_2012_stellab && Lemasle et al. (2012) && ob
 carina_data/Venn_et_al_2012_stellab && Venn et al. (2012) && or
