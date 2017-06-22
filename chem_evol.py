@@ -1334,9 +1334,10 @@ class chem_evol(object):
             self.ymgal_nsm[i] = np.array(self.ymgal_nsm[i]) + np.array(self.mdot_nsm[i-1])
             self.ymgal_bhnsm[i] = np.array(self.ymgal_bhnsm[i]) + np.array(self.mdot_bhnsm[i-1])
             if self.nb_delayed_extra > 0:
-                self.ymgal_delayed_extra[iiii][i] = \
-                  np.array(self.ymgal_delayed_extra[iiii][i]) + \
-                    np.array(self.mdot_delayed_extra[iiii][i-1])
+                for iiii in range(0,self.nb_delayed_extra):
+                    self.ymgal_delayed_extra[iiii][i] = \
+                      np.array(self.ymgal_delayed_extra[iiii][i]) + \
+                        np.array(self.mdot_delayed_extra[iiii][i-1])
 
             # Convert the mass ejected by massive stars into rate
             if self.history.timesteps[i-1] == 0.0:
