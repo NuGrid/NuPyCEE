@@ -359,10 +359,22 @@ class stellab_sql():
 	    else:
 		return val
 
+	def remove_columns(self,columns,data,rcolumns):
+	    '''
+	    Function to remove columns with names in rcolumns. For internal use only.
+	    '''
+
+	    columns_update = [column for column in columns if not column in rcolumns]
+	    data_update=[] 
+	    for k in range(len(data)):
+		data_tmp=list(data[k])
+	    	data_update.append([data_tmp[i] for i in range(len(columns)) if not columns[i] in rcolumns])
+
+	    return columns_update,data_update #[tuple(data_update)]
 
 	# In[13]:
 
-	def get_solar_normalizations(self,norm_paper=[],data_x_y=False):
+	def get_solar_normalizations(self,norm_paper=[],data_x_y=False,extra_info=False):
 	    '''
 	    Access either specific solar normalization data, specified through norm_paper or all solar normalization
 	    data when norm_paper=[].
@@ -384,21 +396,31 @@ class stellab_sql():
 		data = [all_data[idx]]
 	    else:
 		data = all_data
+
+	    if not extra_info:
+		rcolumns=['normid','refid']
+		columns,data = self.remove_columns(columns,data,rcolumns)
+
 	    if data_x_y:
 		return columns,data        
 	    else:    
-		return pd.DataFrame(data=data,columns=columns).style.format(make_clickable)
+		return pd.DataFrame(data=data,columns=columns).style.format(self.make_clickable)
 
 
 	# In[14]:
 
-	def get_paper_refs(self):
+	def get_paper_refs(self,extra_info=False):
 	    '''
 	    Access all the paper references available in the database.
 	    '''
 	    data= self.db.execute('''SELECT * FROM refs''').fetchall()
 	    columns = self.get_column_names('refs')
-	    return pd.DataFrame(data=data,columns=columns).style.format(make_clickable)
+
+	    if not extra_info:
+		rcolumns=['refid']
+		columns,data = self.remove_columns(columns,data,rcolumns)
+
+	    return pd.DataFrame(data=data,columns=columns).style.format(self.make_clickable)
 
 
 	# In[15]:
@@ -415,23 +437,28 @@ class stellab_sql():
 
 	# In[16]:
 
-	def get_overview_abundance_tables(self,data_x_y=False):
+	def get_overview_abundance_tables(self,data_x_y=False,extra_info=False):
 	    '''
 	    Overview over all available abundance tables. 
 	    '''
 	    data= self.db.execute('''SELECT a.*,r.fauthor,r.year,r.nasads FROM abu_table_reg a INNER JOIN refs r ON a.refid = r.refid''').fetchall()
 	    columns = self.get_column_names('abu_table_reg')
 	    columns=columns + ['fauthor','year','nasaads']
+
+	    if not extra_info:
+		rcolumns=['normid','refid','abu_reg_id','galid','abutable']
+		columns,data = self.remove_columns(columns,data,rcolumns)
+
 	    if data_x_y:
 		return columns,data
 	    
 	    else:
-		return pd.DataFrame(data=data,columns=columns).style.format(make_clickable)
+		return pd.DataFrame(data=data,columns=columns).style.format(self.make_clickable)
 
 
 	# In[17]:
 
-	def get_abundance_data(self,abu_paper,data_x_y=False):
+	def get_abundance_data(self,abu_paper,data_x_y=False,extra_info=False):
 	    '''
 	    Access abundance data from specific paper abu_paper
 	    e.g. abu_paper=['Venn',2012,'Milky Way']   
@@ -445,7 +472,7 @@ class stellab_sql():
 	    if galid==-1: return 'galaxy name not available.'
 	    
 	    #check for availability, instead of sql query
-	    columns,all_data = self.get_overview_abundance_tables(data_x_y=True)
+	    columns,all_data = self.get_overview_abundance_tables(data_x_y=True,extra_info=True)
 	    
 	    idx=-1
 	    for k in range(len(all_data)):
@@ -461,6 +488,13 @@ class stellab_sql():
 	    data= self.db.execute('''SELECT * FROM %s ''' % tablename).fetchall()
 	    print data
 	    columns=self.get_column_names(tablename)
+
+	    if not extra_info:
+		rcolumns=['abuid']
+		columns,data = self.remove_columns(columns,data,rcolumns)
+
+
+
 	    if data_x_y:
 		return columns,data
 	    else:
