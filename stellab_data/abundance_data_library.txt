@@ -9,7 +9,6 @@ milky_way_data/Andrievsky_et_al_2007_stellab && Andrievsky et al. (2007) && og
 milky_way_data/Andrievsky_et_al_2008_stellab && Andrievsky et al. (2008) && og
 milky_way_data/Andrievsky_et_al_2010_stellab && Andrievsky et al. (2010) && og
 milky_way_data/Bensby_et_al_2005_stellab && Bensby et al. (2005) && om
-milky_way_data/test && test && ob
 #milky_way_data/Bensby_Feltzing_2006_stellab && Bensby & Feltzing(2006) && ^g
 #        milky_way_data/Bergemann_Gehren_2008_stellab && ^g
 milky_way_data/Bihain_et_al_2004_stellab && Bihain et al. (2004) && og
