@@ -6250,7 +6250,10 @@ class chem_evol(object):
                 elements.append(ele)
                 yields_ele.append(yields_iso[iso_list.index(iso)])
             else:
-                yields_ele[-1] += yields_iso[iso_list.index(iso)]
+		idx=elements.index(ele)
+                #yields_ele[-1] += yields_iso[iso_list.index(iso)]
+		yields_ele[idx] += yields_iso[iso_list.index(iso)]
+
 
         # Return the list of elements, and the associated yields
         return elements,yields_ele
