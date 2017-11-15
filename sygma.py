@@ -2452,9 +2452,9 @@ class sygma( chem_evol ):
 
 
 	if prodfac==True:
-        	p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label)
+        	p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label,ec='black')
 	else:
-		p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label)
+		p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label,ec='black')
         #'''
 	if len(label)>0:
 		plt.legend()
