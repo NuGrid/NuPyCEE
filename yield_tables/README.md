@@ -39,7 +39,7 @@
 - We excluded the 6.5 Msun model at Z = 0.02 in K10, since this model was not available for the other metallicities.
 - Xyyy at the end of the file name refers to the Set X with rotation velocity of yyy km/s.
 	- e.g., abg_and_massive_stars_K10_LCprep_F150.txt means Set F with V = 150 km/s.
-	- yyy = avg represents a mixture of rotation velocities as seen in Figure 4 of 
+	- yyy = avg represents a mixture of rotation velocities as seen in Figure 4 of Prantzos et al. (2018), <http://adsabs.harvard.edu/doi/10.1093/mnras/sty316>
 
 - - - - - - 
 
