@@ -3981,7 +3981,7 @@ class omega( chem_evol ):
     ###################################################
     #                  Plot Iso Ratio                 #
     ###################################################
-    def plot_iso_ratio(self,return_x_y=False,
+    def plot_iso_ratio(self,return_x_y=False, grain_notation=False,
         xaxis='age',yaxis='C-12/C-13',\
         solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
         solar_iso='stellab_data/solar_normalization/Asplund_et_al_2009_iso.txt',\
@@ -3999,8 +3999,10 @@ class omega( chem_evol ):
         ----------
 
 	return_x_y : boolean
-	     If False, show the plot.  If True, return two arrays containing
+	     If False (default), show the plot.  If True, return two arrays containing
 	     the X and Y axis data, respectively.
+        grain_notation : boolean
+             If False (default), show mass ratio.  If True, show ratio in the delta notation 
 	xaxis : string
 	     X axis, either 'age', an abundance ratio such as '[Fe/H]', or an
 	     isotopic ratio such as 'C-12/C-13'.
@@ -4079,7 +4081,7 @@ class omega( chem_evol ):
         # Verify the X-axis
         xaxis_ratio = False
         if xaxis == 'age':
-            x = self.history.age
+            x = self.history.age[1:]
         elif xaxis[0] == '[' and xaxis[-1] == ']':
             xaxis_elem1 =xaxis.split('/')[0][1:]
             xaxis_elem2 =xaxis.split('/')[1][:-1]
@@ -4172,25 +4174,35 @@ class omega( chem_evol ):
             elif source=='sn1a':
                 label=yaxis+', SNIa'
 
-        # Get the solar values
-        if xaxis_ratio:
-            x1_sol, x2_sol, y1_sol, y2_sol = \
-              self.__read_solar_iso(solar_iso, x_1, x_2, y_1, y_2)
-        else:
-            x1_sol, x2_sol, y1_sol, y2_sol = \
-                self.__read_solar_iso(solar_iso, '', '', y_1, y_2)
+        # If delta notation ..
+        if grain_notation:
 
-        # Calculate the isotope ratios (delta notation)
-        for k in range(0,len(yields_evol)):
+            # Get the solar values
             if xaxis_ratio:
-                ratio_sample = (yields_evol[k][idx_1]/yields_evol[k][idx_2])*\
-                               (x2_at_nb / x1_at_nb)
-                ratio_std = x1_sol / x2_sol
-                x.append( ((ratio_sample/ratio_std) - 1) * 1000)
-            ratio_sample = (yields_evol[k][idy_1]/yields_evol[k][idy_2])*\
-                           (y2_at_nb / y1_at_nb)
-            ratio_std = y1_sol / y2_sol
-            y.append( ((ratio_sample/ratio_std) - 1) * 1000)
+                x1_sol, x2_sol, y1_sol, y2_sol = \
+                    self.__read_solar_iso(solar_iso, x_1, x_2, y_1, y_2)
+            else:
+                x1_sol, x2_sol, y1_sol, y2_sol = \
+                    self.__read_solar_iso(solar_iso, '', '', y_1, y_2)
+
+            # Calculate the isotope ratios
+            for k in range(0,len(yields_evol)):
+                if xaxis_ratio:
+                    ratio_sample = (yields_evol[k][idx_1]/yields_evol[k][idx_2])*\
+                                   (x2_at_nb / x1_at_nb)
+                    ratio_std = x1_sol / x2_sol
+                    x.append( ((ratio_sample/ratio_std) - 1) * 1000)
+                ratio_sample = (yields_evol[k][idy_1]/yields_evol[k][idy_2])*\
+                               (y2_at_nb / y1_at_nb)
+                ratio_std = y1_sol / y2_sol
+                y.append( ((ratio_sample/ratio_std) - 1) * 1000)
+
+        # If simple mass ratio ..
+        else:
+            for k in range(0,len(yields_evol)):
+                if xaxis_ratio:
+                    x.append(yields_evol[k][idx_1]/yields_evol[k][idx_2])
+                y.append(yields_evol[k][idy_1]/yields_evol[k][idy_2])
   
         # Make sure the length of array are the same when xaxis = '[X/Y]'
         too_much = len(y)-len(x)
@@ -4206,8 +4218,13 @@ class omega( chem_evol ):
                #if xaxis == 'age':
                #plt.xscale('log')
            #plt.yscale('log')
-           plt.ylabel("$\delta$($^{"+str(int(y1_at_nb))+"}$"+y1_elem+"/$^{"+\
+           if grain_notation:
+               plt.ylabel("$\delta$($^{"+str(int(y1_at_nb))+"}$"+y1_elem+"/$^{"+\
                            str(int(y2_at_nb))+"}$"+y2_elem+")")
+           else:
+               plt.ylabel(str(int(y1_at_nb))+"-"+y1_elem+"/"+\
+                           str(int(y2_at_nb))+"-"+y2_elem)
+               plt.yscale('log')
            if xaxis == 'age':
                plt.xlabel('Age [yr]')
            elif xaxis_ratio:
