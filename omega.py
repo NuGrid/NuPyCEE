@@ -262,7 +262,7 @@ class omega( chem_evol ):
                  redshift_f=0.0,print_off=False,long_range_ref=False,\
                  f_s_enhance=1.0,m_gas_f=-1.0, cl_SF_law=False,\
                  external_control=False, calc_SSP_ej=False, tau_ferrini=False,\
-                 input_yields=False, popIII_on=True, t_sf_z_dep = 1.0,\
+                 input_yields=False, popIII_info_fast=True, t_sf_z_dep = 1.0,\
                  m_crit_on=False, norm_crit_m=8.0e+09, mass_frac_SSP=0.5,\
                  sfh_array_norm=-1.0, imf_rnd_sampling=False,\
                  out_follows_E_rate=False,\
@@ -324,7 +324,7 @@ class omega( chem_evol ):
                  netyields_on=netyields_on,wiersmamod=wiersmamod, \
                  input_yields=input_yields,\
                  tau_ferrini=tau_ferrini, t_dtd_poly_split=t_dtd_poly_split, \
-                 t_merge=t_merge,popIII_on=popIII_on,\
+                 t_merge=t_merge,popIII_info_fast=popIII_info_fast,\
                  out_follows_E_rate=out_follows_E_rate,\
 		 stellar_param_on=stellar_param_on,\
                  ism_ini=ism_ini,ytables_in=ytables_in,\

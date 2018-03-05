@@ -425,7 +425,7 @@ class chem_evol(object):
 	     total_ejecta_interp=True, tau_ferrini=False,\
              input_yields=False,t_merge=-1.0,stellar_param_on=True,\
              stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',\
-             popIII_on=True, out_follows_E_rate=False, \
+             popIII_info_fast=True, out_follows_E_rate=False, \
              t_dtd_poly_split=-1.0, delayed_extra_log=False, \
              ism_ini=np.array([]), nsmerger_dtd_array=np.array([]),\
              bhnsmerger_dtd_array=np.array([]),\
@@ -473,7 +473,7 @@ class chem_evol(object):
         self.iniZ = iniZ
 	self.imf_bdys=imf_bdys
 	self.nsmerger_bdys=nsmerger_bdys
-        self.popIII_on = popIII_on
+        self.popIII_info_fast = popIII_info_fast
 	self.imf_bdys_pop3=imf_bdys_pop3
 	self.imf_yields_range_pop3=imf_yields_range_pop3
 	self.extra_source_on = extra_source_on
@@ -6287,7 +6287,7 @@ class chem_evol(object):
         # Copy the metallicities and put them in increasing order
         self.Z_table_SSP = copy.deepcopy(self.ytables.metallicities)
         self.Z_table_first_nzero = min(self.Z_table_SSP)
-        if self.popIII_on and self.iniZ <= 0.0 and self.Z_trans > 0.0:
+        if self.popIII_info_fast and self.iniZ <= 0.0 and self.Z_trans > 0.0:
             self.Z_table_SSP.append(0.0)
         self.Z_table_SSP = sorted(self.Z_table_SSP)
         self.nb_Z_table_SSP = len(self.Z_table_SSP)
