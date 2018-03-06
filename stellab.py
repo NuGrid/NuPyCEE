@@ -1208,7 +1208,7 @@ class stellab():
                    sub=1, sub_plot=False, alpha=1.0, lw=1.0,abundistr=True)
 
             if star_idx in ret_star_i:
-                idx=ret_star_i.index(star_idx)  
+               idx=ret_star_i.index(star_idx)  
                #ret_x[idx]
                abunds_y.append(ret_y[idx])
                #ret_x_err[idx]
