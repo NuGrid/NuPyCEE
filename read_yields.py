@@ -61,7 +61,7 @@ class read_nugrid_parameter():
                         table_header[-1].append(line.strip())
                 else:
                     ignore=False
-                    #print line,'ignore',ignore
+                    #print (line,'ignore',ignore)
                     if ignore==True:
                         header_done=True
                         continue
@@ -89,12 +89,12 @@ class read_nugrid_parameter():
                 for t in title_line:
                     yield_data[-1].append([])
                     column_titles.append(t.strip())
-                #print column_titles
+                #print (column_titles)
                 continue
             #iso ,name and yields
             iso_name=line.split('&')[1].strip()
-            #print line
-            #print line.split('&')
+            #print (line)
+            #print (line.split('&'))
             yield_data[-1][0].append(float(line.split('&')[1].strip()))
             #if len(isotopes)>0:
             #        if not iso_name in isotopes:
@@ -135,7 +135,7 @@ class read_nugrid_parameter():
             i+=1
         #define  header
         self.header_attrs={}
-        #print 'header1: ',header1
+        #print ('header1: ',header1)
         for h in header1:
             self.header_attrs[h.split(':')[0][1:].strip()]=h.split(':')[1].strip()
         self.data_cols=column_titles #previous data_attrs
@@ -179,7 +179,7 @@ class read_nugrid_parameter():
                 quantity1=M
                 all_tattrs=True
             else:
-                print 'Error: Wrong input'
+                print ('Error: Wrong input')
                 return 0
             quantity=quantity1
 
@@ -251,11 +251,11 @@ class read_nugrid_parameter():
                 dcols_new=data_cols[:]
                 #add more data...
                 for h in range(len(dcols)):
-                        print 'h :',h
+                        print ('h :',h)
                         data_new.append(data[h])
                         dcols_new.append(dcols[h])
                 dcols_new=[dcols_new[0]]+dcols_new[2:]+[dcols_new[1]]
-                print 'dcols: ',dcols_new
+                print ('dcols: ',dcols_new)
                 special_header='Table: (M='+str(mass)+',Z='+str(metallicity)+')'
                 headers=[special_header]+attr_lines
                 ascii1.writeGCE_table_parameter(filename=filename,headers=headers,data=data_new,dcols=dcols_new)
@@ -311,9 +311,9 @@ class read_nugrid_yields():
                     for kk in range(len(excludemass)):
                         if float(excludemass[kk]) == float(line.split(',')[0].split('=')[1]):
                                 ignore=True
-                                #print 'ignore',float(line.split(',')[0].split('=')[1])
+                                #print ('ignore',float(line.split(',')[0].split('=')[1]))
                                 break
-                    #print line,'ignore',ignore
+                    #print (line,'ignore',ignore)
                     if ignore==True:
                         header_done=True
                         continue
@@ -352,12 +352,12 @@ class read_nugrid_yields():
                 for t in title_line:
                     yield_data[-1].append([])
                     column_titles.append(t.strip())
-                #print column_titles
+                #print (column_titles)
                 continue
             #iso ,name and yields
             iso_name=line.split('&')[1].strip()
-            #print line
-            #print line.split('&')
+            #print (line)
+            #print (line.split('&'))
             yield_data[-1][0].append(line.split('&')[1].strip())
             #if len(isotopes)>0:
             #        if not iso_name in isotopes:
@@ -375,20 +375,20 @@ class read_nugrid_yields():
         #In [43]: tablesN.col_attrs
         #Out[43]: ['Isotopes', 'Yields', 'X0', 'Z', 'A']
         if len(isotopes)>0:
-                #print 'correct for isotopes'
+                #print ('correct for isotopes')
                 data_new=[]
                 for k in range(len(yield_data)):
-                        #print 'k'
+                        #print ('k')
                         data_new.append([])
-                        #print 'len',len(yield_data[k])
-                        #print ([[]]*len(yield_data[k]))[0]
+                        #print ('len',len(yield_data[k]))
+                        #print (([[]]*len(yield_data[k]))[0])
                         for h in range(len(yield_data[k])):
                                 data_new[-1].append([])
-                        #print 'testaa',data_new[-1]
+                        #print ('testaa',data_new[-1])
                         data_all=yield_data[k]
                         for iso_name in isotopes:
                                 if iso_name in data_all[0]:
-                                        #print 'test',data_all[1][data_all[0].index(iso_name)]
+                                        #print ('test',data_all[1][data_all[0].index(iso_name)])
                                         for hh in range(1,len(data_all)):
                                                 data_new[-1][hh].append(data_all[hh][data_all[0].index(iso_name)])
                                         #data_new[-1][1].append(data_all[2][data_all[0].index(iso_name)])
@@ -397,11 +397,8 @@ class read_nugrid_yields():
                                         for hh in range(1,len(data_all)):
                                                 data_new[-1][hh].append(0)
                                         #data_new[-1][1].append(0)
-                                        #print 'GRID exclude',iso_name
+                                        #print ('GRID exclude',iso_name)
                                 data_new[-1][0].append(iso_name)
-                #print 'new list'
-                #print data_new[0][0]
-                #print data_new[0][1]
                 yield_data=data_new
         self.yield_data=yield_data
         #table header points to element in yield_data
@@ -433,7 +430,6 @@ class read_nugrid_yields():
             i+=1
         #define  header
         self.header_attrs={}
-        #print 'header1: ',header1
         for h in header1:
             self.header_attrs[h.split(':')[0][1:].strip()]=h.split(':')[1].strip()
         self.data_cols=column_titles #previous data_attrs
@@ -542,7 +538,7 @@ class read_nugrid_yields():
 
         for k in range(len(tables)):
                 if iolevel>0:
-                        print 'Write table ',tables[k]
+                        print ('Write table ',tables[k])
                 mass=float(self.table_mz[k].split(',')[0].split('=')[1])
                 metallicity=float(self.table_mz[k].split(',')[1].split('=')[1][:-1])
                 data=self.yield_data[k]
@@ -570,7 +566,7 @@ class read_nugrid_yields():
 
                 headers=[special_header]+attr_lines
                 write_single_table(filename=filename,headers=headers,data=data,dcols=dcols)
-        print 'Yields table ',filename,' created.'
+        print ('Yields table ',filename,' created.')
 
     def get(self,M=0.,Z=-1.,quantity='',specie=''):
 
@@ -619,7 +615,7 @@ class read_nugrid_yields():
 
         '''
         #scale down to Z=0.00001
-        #print 'get yields   ',Z
+        #print ('get yields   ',Z)
         #if float(Z) == 0.00001:
         #        #scale abundance
         #        if quantity=='Yields':
@@ -637,7 +633,7 @@ class read_nugrid_yields():
                 quantity1=M
                 all_tattrs=True
             else:
-                print 'Error: Wrong input'
+                print ('Error: Wrong input')
                 return 0
             quantity=quantity1
 
@@ -645,8 +641,8 @@ class read_nugrid_yields():
         if (all_tattrs==False) and (not M ==0):
             inp='(M='+str(float(M))+',Z='+str(float(Z))+')'
             idx=self.table_idx[inp]
-        #print 'len tableidx:',len(self.table_idx)
-        #print 'len age',len(self.age)
+        #print ('len tableidx:',len(self.table_idx))
+        #print ('len age',len(self.age))
         '''
         if quantity=='Lifetime':
             if all_tattrs==True:
@@ -731,8 +727,8 @@ class read_nugrid_yields():
         down to Z=1e-5 and Z=1e-6 (for Brian). The rest is set to zero.
         '''
 
-        #print '####################################'
-        #print 'Enter routine  get_scaled_Z'
+        #print ('####################################')
+        #print ('Enter routine  get_scaled_Z')
 
         elem_prim=['He','C', 'O', 'Mg', 'Ca', 'Ti', 'Fe', 'Co','Zn','H']
         elem_sec=['N']
@@ -761,7 +757,7 @@ class read_nugrid_yields():
         origin_yields=[]
         for k in range(len(table.table_mz)):
                 if 'Z=0.0001' in table.table_mz[k]:
-                        #print table.table_mz[k]
+                        #print (table.table_mz[k])
                         mini=float(table.table_mz[k].split('=')[1].split(',')[0])
                         grid_masses.append(mini)
                         #this is production factor (see file name)
@@ -771,7 +767,7 @@ class read_nugrid_yields():
                         yields=table_yields.get(M=mini,Z=0.0001,quantity='Yields')
                         mtot_eject=sum(yields)
                         origin_yields.append([])
-                        #print 'tot eject',mtot_eject
+                        #print ('tot eject',mtot_eject)
                         mout=[]
                         sumnonh=0
                         isotope_names.append([])
@@ -793,16 +789,16 @@ class read_nugrid_yields():
                                         mout1=(prodf-1.)*(inix_scale*mtot_eject) + (inix*mtot_eject)
                                         #check if amount destroyed was more than it was initial there
                                         if mout1<0:
-                                                #print 'Problem with ',isotopes[h]
-                                                #print 'Was more destroyed than evailable'
+                                                #print ('Problem with ',isotopes[h])
+                                                #print ('Was more destroyed than evailable')
                                                 #Then only what was there can be destroyed
                                                 mout1=0
                                         #if isotopes[h] == 'C-13':
-                                        #       print 'inix',inix
-                                        #       print 'inixscale',inix_scale
-                                        #       print 'prodf',prodf
-                                        #       print (prodf)*(inix_scale*mtot_eject)
-                                        #       print (inix*mtot_eject)
+                                        #       print ('inix',inix)
+                                        #       print ('inixscale',inix_scale)
+                                        #       print ('prodf',prodf)
+                                        #       print ((prodf)*(inix_scale*mtot_eject))
+                                        #       print ((inix*mtot_eject))
                                 else:
                                         #secondary
                                         mout1=(prodf-1.)*(inix*mtot_eject) + (inix*mtot_eject)
@@ -877,7 +873,7 @@ class read_yield_sn1a_tables():
                 l=line.replace('\n','').split('&')[1:]
                 self.col_attrs=l
                 metallicities=l[1:]
-                #print metallicities
+                #print (metallicities)
                 # metallicity dependent yields
                 #if len(l)>2:
                 #else:
@@ -886,7 +882,7 @@ class read_yield_sn1a_tables():
                 continue
             linesp=line.strip().split('&')[1:]
             iso.append(linesp[0].strip())
-            #print iso
+            #print (iso)
             for k in range(1,len(linesp)):
                 yields[k-1].append(float(linesp[k]))
 
@@ -909,7 +905,7 @@ class read_yield_sn1a_tables():
         for m in metallicities:
             self.metallicities.append(float(m.split('=')[1]))
         #self.metallicities=metallicities
-        #print yields1
+        #print (yields1)
         self.isotopes=iso
 
     def get(self,Z=0,quantity='Yields',specie=''):
@@ -931,7 +927,7 @@ class read_yield_sn1a_tables():
         if quantity=='Yields':
                 if Z not in self.metallicities:
                         idx = (np.abs(np.array(self.metallicities)-Z)).argmin()
-                        print 'use closest Z=',self.metallicities[idx]
+                        print ('use closest Z=',self.metallicities[idx])
                 else:
                         idx = self.metallicities.index(Z)
                 yields=self.yields[idx]
@@ -942,7 +938,7 @@ class read_yield_sn1a_tables():
                                 idx=self.isotopes.index(specie)
                                 return yields[idx]
                         else:
-                                print 'Specie not available'
+                                print ('Specie not available')
         elif quantity=='Isotopes':
                 return self.isotopes
 
@@ -986,7 +982,7 @@ class read_yield_rawd_tables():
                 l=line.replace('\n','').split('&')[1:]
                 self.col_attrs=l
                 metallicities=l[1:]
-                #print metallicities
+                #print (metallicities)
                 # metallicity dependent yields
                 #if len(l)>2:
                 #else:
@@ -995,7 +991,7 @@ class read_yield_rawd_tables():
                 continue
             linesp=line.strip().split('&')[1:]
             iso.append(linesp[0].strip())
-            #print iso
+            #print (iso)
             for k in range(1,len(linesp)):
                 yields[k-1].append(float(linesp[k]))
 
@@ -1015,7 +1011,7 @@ class read_yield_rawd_tables():
         for m in metallicities:
             self.metallicities.append(float(m.split('=')[1]))
         #self.metallicities=metallicities
-        #print yields1
+        #print (yields1)
 
     def get(self,Z=0,quantity='Yields',specie=''):
 
@@ -1116,12 +1112,12 @@ class iniabu():
             try:
                 mass_number[i]=int(names[i][2:5])
             except ValueError:
-                #print "WARNING:"
-                #print "This initial abundance file uses an element name that does"
-                #print "not contain the mass number in the 3rd to 5th position."
-                #print "It is assumed that this is the proton and we will change"
-                #print "the name to 'h   1' to be consistent with the notation used"
-                #print "in iniab.dat files"
+                #print ("WARNING:")
+                #print ("This initial abundance file uses an element name that does")
+                #print ("not contain the mass number in the 3rd to 5th position.")
+                #print ("It is assumed that this is the proton and we will change")
+                #print ("the name to 'h   1' to be consistent with the notation used")
+                #print ("in iniab.dat files")
                 names[i]='h   1'
             mass_number[i]=int(names[i][2:5])
         # now zip them together:
@@ -1262,7 +1258,7 @@ def write_single_table(filename,headers,data,dcols=['Isotopes','Yields','Z','A']
                 fake_iso=[]
                 for k in range(len(data[0])):
                         fake_iso.append(data[0][k]+'-99')
-                #print fake_iso
+                #print (fake_iso)
                 data.append([])
                 u.convert_specie_naming_from_h5_to_ppn(fake_iso)
                 Z=u.znum_int
@@ -1281,11 +1277,11 @@ def write_single_table(filename,headers,data,dcols=['Isotopes','Yields','Z','A']
                      # in each column
         #CR to surpress too much output
         #if os.path.exists(filename):
-                #print 'This method will add table to existing file '+ filename
+                #print ('This method will add table to existing file '+ filename)
 
         if len(data)!=len(dcols):
-                print 'The number of data columns does not equal the number of Data attributes'
-                print 'returning none'
+                print ('The number of data columns does not equal the number of Data attributes')
+                print ('returning none')
                 return None
         for i in xrange(len(headers)):
                 tmp.append(header_char+' '+headers[i]+'\n')
@@ -1406,7 +1402,7 @@ def write_tables(data,data_cols,Zs,Ms,isos,col_attrs,col_attrs_data,units='Msun,
 
                 for k in range(len(table_headers)):
                         if iolevel>0:
-                                print 'Write table ',table_headers[k]
+                                print ('Write table ',table_headers[k])
                         attr_lines=[]
                         for h in range(len(col_attrs)):
                                 line=col_attrs[h]+': '+'{:.3E}'.format(col_attrs_data[i][k][h])
@@ -1430,7 +1426,7 @@ def write_tables(data,data_cols,Zs,Ms,isos,col_attrs,col_attrs_data,units='Msun,
 
                         headers=[special_header]+attr_lines
                         write_single_table(filename=filename,headers=headers,data=data1,dcols=dcols)
-        print 'Yields table ',filename,' created.'
+        print ('Yields table ',filename,' created.')
 
 def get_z_from_el(element):
     '''

@@ -739,7 +739,7 @@ class chem_evol(object):
 
         # Output information
         if iolevel >= 1:
-             print 'Number of timesteps: ', '{:.1E}'.format(len(timesteps))
+             print ('Number of timesteps: ', '{:.1E}'.format(len(timesteps)))
 
         # Create empty arrays if on the fast mode
         if self.pre_calculate_SSPs:
@@ -830,8 +830,8 @@ class chem_evol(object):
 
         # Output information
         if iolevel > 0:
-            print '### Start with initial metallicity of ','{:.4E}'.format(zmetal)
-            print '###############################'
+            print ('### Start with initial metallicity of ','{:.4E}'.format(zmetal))
+            print ('###############################')
 
 
     ##############################################
@@ -848,31 +848,31 @@ class chem_evol(object):
         self.need_to_quit = False
         # Total duration of the simulation
         if self.history.tend > 1.5e10:
-            print 'Error - tend must be less than or equal to 1.5e10 years.'
+            print ('Error - tend must be less than or equal to 1.5e10 years.')
             self.need_to_quit = True
 
         # Timestep
         if self.history.dt > self.history.tend:
-            print 'Error - dt must be smaller or equal to tend.'
+            print ('Error - dt must be smaller or equal to tend.')
             self.need_to_quit = True
 
         # Transition mass between AGB and massive stars 
         #if #(self.transitionmass <= 7)or(self.transitionmass > 12):
-           # print 'Error - transitionmass must be between 7 and 12 Mo.'
+           # print ('Error - transitionmass must be between 7 and 12 Mo.')
            # self.need_to_quit = True
         if not self.transitionmass ==8:
-            print 'Warning: Non-default transitionmass chosen. Use in agreement '\
-            'with yield input!'
+            print ('Warning: Non-default transitionmass chosen. Use in agreement '\
+            'with yield input!')
 
         # IMF
         if not self.imf_type in ['salpeter','chabrier','kroupa','input', \
             'alphaimf','chabrieralpha','fpp', 'kroupa93']:
-            print 'Error - Selected imf_type is not available.'
+            print ('Error - Selected imf_type is not available.')
             self.need_to_quit = True
 
         # IMF yields range
         #if self.imf_yields_range[0] < 1:
-        #    print 'Error - imf_yields_range lower boundary must be >= 1.'
+        #    print ('Error - imf_yields_range lower boundary must be >= 1.')
             #self.need_to_quit = True
         
         #if (self.imf_yields_range[0] >= self.imf_bdys[1]) or \
@@ -880,27 +880,27 @@ class chem_evol(object):
          #  (self.imf_yields_range[1] >= self.imf_bdys[1]):
         if ((self.imf_yields_range[0] >  self.imf_bdys[1]) or \
             (self.imf_yields_range[1] < self.imf_bdys[0])):
-            print 'Error - part of imf_yields_range must be within imf_bdys.'
+            print ('Error - part of imf_yields_range must be within imf_bdys.')
             self.need_to_quit = True
         if (self.transitionmass<self.imf_yields_range[0])\
              or (self.transitionmass>self.imf_yields_range[1]):
-            print 'Error - Transitionmass outside imf yield range'
+            print ('Error - Transitionmass outside imf yield range')
             self.need_to_quit = True
         if self.ns_merger_on:
             if ((self.nsmerger_bdys[0] >  self.imf_bdys[1]) or \
                 (self.nsmerger_bdys[1] < self.imf_bdys[0])):
-                print 'Error - part of nsmerger_bdys must be within imf_bdys.'
+                print ('Error - part of nsmerger_bdys must be within imf_bdys.')
                 self.need_to_quit = True
 
         # SN Ia delay-time distribution function
         if not self.history.sn1a_rate in \
             ['exp','gauss','maoz','power_law']:
-            print 'Error - Selected sn1a_rate is not available.'
+            print ('Error - Selected sn1a_rate is not available.')
             self.need_to_quit = True
 
         # Initial metallicity for the gas
         #if not self.iniZ in [0.0, 0.0001, 0.001, 0.006, 0.01, 0.02]:
-        #    print 'Error - Selected iniZ is not available.'
+        #    print ('Error - Selected iniZ is not available.')
         #    self.need_to_quit = True
 
         # If popIII stars are used ...
@@ -908,23 +908,23 @@ class chem_evol(object):
 
             # IMF and yield boundary ranges
             if not self.imf_yields_range_pop3 == [10,30]:
-                print 'Error - Selected imf_yields_range_pop3 not included yet.'
+                print ('Error - Selected imf_yields_range_pop3 not included yet.')
                 self.need_to_quit = True
             if (self.imf_yields_range_pop3[0] >= self.imf_bdys_pop3[1]) or \
                (self.imf_yields_range_pop3[1] <= self.imf_bdys_pop3[0]):
-                print 'Error - imf_yields_range_pop3 must be within \
-                          imf_bdys_pop3.'
+                print ('Error - imf_yields_range_pop3 must be within \
+                          imf_bdys_pop3.')
                 self.need_to_quit = True
               
             if self.netyields_on == True and self.Z_trans > 0.0:
-                print 'Error - net yields setting not usable with PopIII at the moment.'
+                print ('Error - net yields setting not usable with PopIII at the moment.')
                 self.need_to_quit = True
 
         # If input poly fit DTD, the applicable range must be specified
         if len(self.poly_fit_dtd_5th) > 0:
             if not len(self.poly_fit_range) == 2:
-                print 'Error - poly_fit_range must be specified when ',\
-                      'using the poly_fit_dtd_5th parameter the SNe Ia DTD.'
+                print ('Error - poly_fit_range must be specified when ',\
+                      'using the poly_fit_dtd_5th parameter the SNe Ia DTD.')
                 self.need_to_quit = True
 
         if self.extra_source_on:
@@ -933,28 +933,28 @@ class chem_evol(object):
              lmr=len(self.extra_source_mass_range)
              leZ=len(self.extra_source_exclude_Z)
              if (not lt == lf):
-                 print 'Error - parameter extra_source_table and f_extra_source not of equal size'
+                 print ('Error - parameter extra_source_table and f_extra_source not of equal size')
                  self.need_to_quit = True
              if (not lt == lmr):
-                 print 'Error - parameter extra_source_table and  extra_source_mass_range not of equal size'    
+                 print ('Error - parameter extra_source_table and  extra_source_mass_range not of equal size')
                  self.need_to_quit = True    
              if  (not lt == leZ):
-                 print 'Error - parameter extra_source_table and extra_source_exclude_Z not of equal size'
+                 print ('Error - parameter extra_source_table and extra_source_exclude_Z not of equal size')
                  self.need_to_quit = True
 
         # Use of radioactive isotopes
         if self.len_decay_file > 0 and (len(self.table_radio) == 0 and \
            len(self.sn1a_table_radio) == 0 and len(self.bhnsmerger_table_radio) == 0 and \
            len(self.nsmerger_table_radio) == 0 and self.nb_delayed_extra_radio == 0):
-            print 'Error -  At least one radioactive yields table must '+\
-                  'be defined when using radioactive isotopes.'
+            print ('Error -  At least one radioactive yields table must '+\
+                  'be defined when using radioactive isotopes.')
             self.need_to_quit = True
         elif self.len_decay_file > 0:
             if self.yield_interp == 'wiersma':
-                print 'Error - Radioactive isotopes cannot be used with net yields .. for now.'
+                print ('Error - Radioactive isotopes cannot be used with net yields .. for now.')
                 self.need_to_quit = True
             if self.Z_trans > 0.0:
-                print 'Error - Radioactive isotopes cannot be used with PopIII stars .. for now.'
+                print ('Error - Radioactive isotopes cannot be used with PopIII stars .. for now.')
                 self.need_to_quit = True
 
 
@@ -1064,7 +1064,7 @@ class chem_evol(object):
             if len(self.iniabu_table) > 0:
                 iniabu=ry.iniabu(global_path + self.iniabu_table)
                 if self.iolevel >0:
-                    print 'Use initial abundance of ', self.iniabu_table
+                    print ('Use initial abundance of ', self.iniabu_table)
                 ymgal_gi = np.array(iniabu.iso_abundance(self.history.isotopes)) * \
                        self.mgal
 
@@ -1080,7 +1080,7 @@ class chem_evol(object):
 
                 # Output information
                 if self.iolevel > 0:
-                    print 'Use initial abundance of ', iniabu_table
+                    print ('Use initial abundance of ', iniabu_table)
 
         # Already enriched gas reservoir
         else:
@@ -1089,7 +1089,7 @@ class chem_evol(object):
             if len(self.iniabu_table) > 0:
                 iniabu=ry.iniabu(global_path + self.iniabu_table)
                 if self.iolevel > 0:
-                    print 'Use initial abundance of ', self.iniabu_table
+                    print ('Use initial abundance of ', self.iniabu_table)
 
             # If NuGrid's yields are used ...
             #else self.default_yields:
@@ -1109,14 +1109,14 @@ class chem_evol(object):
                         iniabu = ry.iniabu(global_path + \
                         'yield_tables/iniabu/' + ini_list[ini_Z.index(metal)])
                         if self.iolevel>0:
-                            print 'Use initial abundance of ', \
-                            ini_list[ini_Z.index(metal)]
+                            print ('Use initial abundance of ', \
+                            ini_list[ini_Z.index(metal)])
                         break
 
             # Input file for the initial composition ...
             #else:
             #    iniabu=ry.iniabu(global_path + iniabu_table)
-            #    print 'Use initial abundance of ', iniabu_table
+            #    print ('Use initial abundance of ', iniabu_table)
 
             # Assign the composition to the gas reservoir
             ymgal_gi = np.array(iniabu.iso_abundance(self.history.isotopes)) * \
@@ -1358,8 +1358,8 @@ class chem_evol(object):
             # If stable isotope is not in the main yields table ..
             else:
                 self.need_to_quit = True
-                print 'Error - Decayed product '+self.decay_info[i_dusi][1]+\
-                      ' is not in the list of considered stable isotopes.'
+                print ('Error - Decayed product '+self.decay_info[i_dusi][1]+\
+                      ' is not in the list of considered stable isotopes.')
 
 
     ##############################################
@@ -1405,8 +1405,8 @@ class chem_evol(object):
         '''
 
         # Get the number of masses per metallicity in the grid
-        nb_m_per_z = len(self.ytables.table_mz) / \
-                     len(self.ytables.metallicities)
+        nb_m_per_z = int(len(self.ytables.table_mz) / \
+                     len(self.ytables.metallicities))
 
         # Extract the masses of each metallicity
         m_per_z = []
@@ -1448,7 +1448,7 @@ class chem_evol(object):
             m_temp += dm_wd
 
         # Calculate the total number of progenitor stars
-        n_tot_prog_inv = 1 / self._imf(3.0,8.0,1)
+        n_tot_prog_inv = 1.0 / self._imf(3.0,8.0,1)
 
         # For each lifetime ...
         f_wd = []
@@ -1490,14 +1490,14 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel >= 1:
-            tenth = self.nb_timesteps / (10.)
+            tenth = self.nb_timesteps / (10.0)
             if i%tenth == 0:
-                print 'time and metallicity and total mass:'
-                print '{:.3E}'.format(self.t),'{:.4E}'.format(self.zmetal), \
-                      '{:.4E}'.format(sum(self.ymgal[i-1]))
-                print 'time and metallicity and total mass:'
-                print '{:.3E}'.format(self.t),'{:.4E}'.format(self.zmetal), \
-                      '{:.4E}'.format(sum(self.ymgal[i-1]))
+                print ('time and metallicity and total mass:')
+                print ('{:.3E}'.format(self.t),'{:.4E}'.format(self.zmetal), \
+                      '{:.4E}'.format(sum(self.ymgal[i-1])))
+                print ('time and metallicity and total mass:')
+                print ('{:.3E}'.format(self.t),'{:.4E}'.format(self.zmetal), \
+                      '{:.4E}'.format(sum(self.ymgal[i-1])))
 
         # Initialisation of the mass locked into stars
         self.m_locked = 0
@@ -1509,16 +1509,16 @@ class chem_evol(object):
 
             # Limit the SFR if there is not enough gas
             if self.sfrin > 1.0:
-                print 'Warning -- Not enough gas to sustain the SFH.', i
+                print ('Warning -- Not enough gas to sustain the SFH.', i)
                 self.sfrin = 1.0
                 self.not_enough_gas = True
                 self.not_enough_gas_count += 1
 
             # Output information
             if self.iolevel >= 1:
-                print '################## Star formation at ', \
+                print ('################## Star formation at ', \
                       '{:.3E}'.format(self.t), \
-                      '(Z='+'{:.4E}'.format(self.zmetal)+') of ',self.sfrin
+                      '(Z='+'{:.4E}'.format(self.zmetal)+') of ',self.sfrin)
 
             # Lock gas into stars
             f_lock = 1.0 - self.sfrin
@@ -1565,8 +1565,8 @@ class chem_evol(object):
 
             # Output information
             if self.iolevel >= 1:
-                print 'Mass locked away:','{:.3E}'.format(self.m_locked), \
-                      ', new ISM mass:','{:.3E}'.format(sum(self.ymgal[i]))
+                print ('Mass locked away:','{:.3E}'.format(self.m_locked), \
+                      ', new ISM mass:','{:.3E}'.format(sum(self.ymgal[i])))
 
             # Add the pre-calculated SSP ejecta .. if fast mode
             if self.pre_calculate_SSPs:
@@ -1612,7 +1612,7 @@ class chem_evol(object):
 
             # Output information
             if self.iolevel > 2:
-                print 'Finished getting mdot',self.gettime()
+                print ('Finished getting mdot',self.gettime())
 
             # Initialize array containing no CC SNe for the SSP_i-1
             if self.out_follows_E_rate:
@@ -1805,7 +1805,7 @@ class chem_evol(object):
         # Check compatibility between PopIII stars and NuGrid yields
 #        isotopes_pop3 = self.ytables_pop3.get(10,0.0,'Isotopes')
 #        if not isotopes_pop3 == isotopes:
-#            print 'Warning - Network not set correctly.'
+#            print ('Warning - Network not set correctly.')
 
         # Interpolate PopIII stellar lifetimes
         self.zm_lifetime_grid_pop3 = \
@@ -1855,8 +1855,8 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel >= 1:
-            print 'Warning - Use isotopes with care.'
-            print isotopes
+            print ('Warning - Use isotopes with care.')
+            print (isotopes)
 
 
     ##############################################
@@ -1882,8 +1882,8 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel >= 2:
-            print 'Entering sfrmdot routine'
-            print 'Getting yields',self.gettime()
+            print ('Entering sfrmdot routine')
+            print ('Getting yields',self.gettime())
 
         # Interpolate yields in the mass-metallicity plane
         mstars, yields_all, func_total_ejecta, yields_extra, yields_all_radio = \
@@ -1892,7 +1892,7 @@ class chem_evol(object):
         # Get the mass fraction of stars that contribute to the stellar ejecta
         # relative to the total stellar mass within imf_bdys.
         mfac = self.__get_mfac()
-        #print 'test ',yields_all[mstars.index(9.0)][3]  #N14 3
+        #print ('test ',yields_all[mstars.index(9.0)][3])  #N14 3
 
         # Get the mass boundaries on which each star yields will be applied.
         # Ex: 12 Mo model yields might be used for all stars from 8 to 12.5 Mo.
@@ -1900,25 +1900,19 @@ class chem_evol(object):
         # therefore we also have to create the yields variable
         mass_bdys, mstars, yields, yields_radio = \
             self.__get_mass_bdys(mstars, yields_all, yields_all_radio)
-        #print 'test ',yields[mstars.index(9.0)][3]  #N14 3
+        #print ('test ',yields[mstars.index(9.0)][3])  #N14 3
 
         # Apply the IMF on the mass boundaries
         mass_bdys, mstars, yields, yields_radio, massfac, mftot = \
             self.__apply_imf_mass_bdys(mass_bdys, mstars, yields, yields_radio)
 
-        #print 'test ',yields[mstars.index(9.0)][3]  #N14 3
-
         # Output information
         if self.iolevel >= 1:
-            print 'Stars under consideration', \
-                  '(take into account user-selected imf ends):'
+            print ('Stars under consideration', \
+                  '(take into account user-selected imf ends):')
             for kk in range(len(mass_bdys)-1):
-                print mass_bdys[kk],'|',mstars[kk],'|',mass_bdys[kk+1]
-            print 'lens: ',len(mass_bdys),len(mstars)
-            #print mstars
-            #print 'with (corrected) mass bdys:####'
-            #print mass_bdys
-            #print 'Scaling factor for gas mass (mfac)', mfac
+                print (mass_bdys[kk],'|',mstars[kk],'|',mass_bdys[kk+1])
+            print ('lens: ',len(mass_bdys),len(mstars))
 
         # Calculate the mass locked away from the old ejecta of massive and AGB stars
         massfac = self.__mlock_agb_massive(mstars,mfac,mftot,massfac,mass_bdys,i)
@@ -2004,10 +1998,10 @@ class chem_evol(object):
 
             # Output information
             if self.iolevel > 0:
-                print 'Taking POPIII yields from yield_tables/popIII_heger10.txt'
-                print 'Currently only PopIII massive stars between 10Msun and', \
-                      '100Msun with their yield contributions included'
-                print ' lower IMF minimum (imf_bdys) fixed to 10Msun for now'
+                print ('Taking POPIII yields from yield_tables/popIII_heger10.txt')
+                print ('Currently only PopIII massive stars between 10Msun and', \
+                      '100Msun with their yield contributions included')
+                print (' lower IMF minimum (imf_bdys) fixed to 10Msun for now')
 
             # Use PopIII stars yields
             mstars, yields_all, func_total_ejecta = \
@@ -2049,14 +2043,14 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel > 2:
-            print 'yields retrieved', self.gettime()
+            print ('yields retrieved', self.gettime())
         if self.iolevel > 1:
             for k in range(len(mstars)):
-                print 'test yield input in sfrmdot'
-                print 'test Mstars:',mstars[k]
+                print ('test yield input in sfrmdot')
+                print ('test Mstars:',mstars[k])
                 for h in range(len(yields_all[k])):
                     if yields_all[k][h] < 0:
-                        print 'yields', yields_all[k][h],'of isotope',isotope[h]
+                        print ('yields', yields_all[k][h],'of isotope',isotope[h])
 
         # Return the results of the interpolation
         return mstars, yields_all, func_total_ejecta, yields_extra, yields_all_radio
@@ -2163,7 +2157,7 @@ class chem_evol(object):
         m_stars=[]
         # For every stellar initial mass already in the old mass array ...
         for w in range(len(mstars1)):
-            #print w,mass_bdys
+            #print (w,mass_bdys)
             # Add the transition mass if we are at the right mass
             if (mstars1[w-1] < self.transitionmass) and \
                    (mstars1[w] > self.transitionmass):
@@ -2186,7 +2180,7 @@ class chem_evol(object):
                         m_stars.append(mstars1[w-1])
                     mass_bdys.append(yr_gmb[1])
                     break
-                #print newbdy,yr_gmb[0]
+                #print (newbdy,yr_gmb[0])
             if mstars1[w] == yr_gmb[0]:
                     if not mstars1[w] in m_stars:
                         m_stars.append(mstars1[w])
@@ -2222,8 +2216,8 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel >= 1:
-            print '__get_mass_bdys: mass_bdys: ',mass_bdys
-            print '__get_mass_bdys: m_stars',m_stars
+            print ('__get_mass_bdys: mass_bdys: ',mass_bdys)
+            print ('__get_mass_bdys: m_stars',m_stars)
 
         # Return the array containing the boundary masses for applying yields
         return mass_bdys, m_stars, yields1, yields1_radio
@@ -2364,10 +2358,10 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel >= 1:
-            print 'Total mass of the gas in stars:'
-            #print '{:.3E}'.format(mtest)
-            print 'AGB: ','{:.3E}'.format(self.m_locked_agb)
-            print 'Massive: ','{:.3E}'.format(self.m_locked_massive)
+            print ('Total mass of the gas in stars:')
+            #print ('{:.3E}'.format(mtest))
+            print ('AGB: ','{:.3E}'.format(self.m_locked_agb))
+            print ('Massive: ','{:.3E}'.format(self.m_locked_massive))
 
         # Return the modified massfac array
         return massfac
@@ -2412,7 +2406,7 @@ class chem_evol(object):
         # For every star having yields, from massive down to low-mass stars ...
         for w in range(len(mstars))[::-1]:
 
-            #print 'take star ',mstars[w]
+            #print ('take star ',mstars[w])
             # Copy the desired yields and mass boundary
             yields = yields_all[w]
             yields_radio = []
@@ -2429,17 +2423,17 @@ class chem_evol(object):
             if self.iolevel >= 2:
                 lifetime_gridmass = \
                     self.__find_lifetimes(round(self.zmetal,6), mstars[w])
-                print '###############################################'
-                print 'Mass range: Mass and lifetime for ', mstars[w], 'Msun:', \
-                      '(table age: ','{:.3E}'.format(lifetime_gridmass),'):'
-                print maxm,'{:.3E}'.format(lifetimemin)
-                print minm,'{:.3E}'.format(lifetimemax)
+                print ('###############################################')
+                print ('Mass range: Mass and lifetime for ', mstars[w], 'Msun:', \
+                      '(table age: ','{:.3E}'.format(lifetime_gridmass),'):')
+                print (maxm,'{:.3E}'.format(lifetimemin))
+                print (minm,'{:.3E}'.format(lifetimemax))
 
             # Move to the next bin if the lifetime is longer than the simulation
             if sum(self.history.timesteps) < lifetimemin:
                 if self.iolevel >= 2:
-                    print 'Ejection of ', mstars[w], ' mass range at ', \
-                          '{:.3E}'.format(lifetimemin),'excluded due to timelimit'
+                    print ('Ejection of ', mstars[w], ' mass range at ', \
+                          '{:.3E}'.format(lifetimemin),'excluded due to timelimit')
                 continue
 
             # Variable used for testing
@@ -2527,7 +2521,7 @@ class chem_evol(object):
             elif break_bol:
                 break
 
-            #print mstars[w],'i: ',i,' j: ',j
+            #print (mstars[w],'i: ',i,' j: ',j)
 
             self.history.t_m_bdys.append([minm1, maxm1])
 
@@ -2542,13 +2536,13 @@ class chem_evol(object):
             if text==False :
                 text = True
                 if self.iolevel >= 1:
-                    print mstars[w], 'Wind (if massive +SN2): of Z=', \
+                    print (mstars[w], 'Wind (if massive +SN2): of Z=', \
                     '{:.6E}'.format(self.zmetal),' at time ', \
                     '{:.3E}'.format(sum(self.history.timesteps[:j+1])),\
-                    'with lifetime: ','{:.3E}'.format(self.__find_lifetimes(round(self.zmetal,6), mstars[w]))
+                    'with lifetime: ','{:.3E}'.format(self.__find_lifetimes(round(self.zmetal,6), mstars[w])))
             if self.iolevel > 1:
                 if sum(yields) < 0:
-                    print 'Yields are negative', sum(yields)
+                    print ('Yields are negative', sum(yields))
 
             # Add the yields to mdot arrays
             break_bol = self.__add_yields_mdot(minm1, maxm1, yields, \
@@ -2597,8 +2591,8 @@ class chem_evol(object):
         if (lifetimemax > sum(self.history.timesteps) and \
                                             j == self.nb_timesteps-1):  
             if self.iolevel > 0:
-                print 'Ejection of mass at ','{:.3E}'.format(lifetimemax), \
-                      'excluded due to timelimit'
+                print ('Ejection of mass at ','{:.3E}'.format(lifetimemax), \
+                      'excluded due to timelimit')
             break_bol = True
             return firstmin, maxm1, minm1, continue_bol, break_bol, min_old
  
@@ -2619,8 +2613,8 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel >= 3:
-            print '(timestep:) ','{:.3E}'.format(lifetimemin1), maxm1, \
-                  'to','{:.3E}'.format(lifetimemax1),minm1
+            print ('(timestep:) ','{:.3E}'.format(lifetimemin1), maxm1, \
+                  'to','{:.3E}'.format(lifetimemax1),minm1)
 
         return firstmin, maxm1, minm1, continue_bol, break_bol, min_old
 
@@ -2668,7 +2662,7 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel > 1:
-            print 'Scalefactor:', scalefactor
+            print ('Scalefactor:', scalefactor)
 
         # Calculate the scaling factor if mass_sampled is provided
         if len(mass_sampled) > 0 and mstars[w] > self.transitionmass:
@@ -2712,7 +2706,7 @@ class chem_evol(object):
             #here extra source contributions are added
             if self.extra_source_on:
 
-                    #print self.Z_gridpoint,self.extra_source_exclude_Z
+                    #print (self.Z_gridpoint,self.extra_source_exclude_Z)
                     for ee in range(len(yields_extra)):
                       if not self.Z_gridpoint in self.extra_source_exclude_Z[ee]:
                         if ((minm1 >= self.extra_source_mass_range[ee][0]) and (maxm1 <= self.extra_source_mass_range[ee][1])):
@@ -2890,7 +2884,7 @@ class chem_evol(object):
         scalefactor_factor = 0.0
 
         # Calculate the width of the stellar mass bin
-        m_bin_width_inv = 1 / (maxm1 - minm1)
+        m_bin_width_inv = 1.0 / (maxm1 - minm1)
 
         # Cumulate the number of overlaped array bins
         nb_overlaps = 0
@@ -2921,7 +2915,7 @@ class chem_evol(object):
 
         # Warning is no overlap
         if nb_overlaps == 0:
-            print '!!Warning - No overlap with scale_cor!!'
+            print ('!!Warning - No overlap with scale_cor!!')
 
         # Return the scalefactor correction factor
         return scalefactor_factor
@@ -3025,14 +3019,11 @@ class chem_evol(object):
         for tz in tables_Z:
             if self.zmetal <= tables_Z[-1]:
                 yields1a = self.ytables_1a.get(Z=tables_Z[-1], quantity='Yields')    
-                #print 'at ',self.zmetal,' use ',tables_Z[-1]
                 break
             if self.zmetal >= tables_Z[0]:
                 yields1a = self.ytables_1a.get(Z=tables_Z[0], quantity='Yields')
-                #print 'at ',self.zmetal,' use ',tables_Z[0]
                 break
             if self.zmetal > tz:
-                #print 'at ',self.zmetal,' use ',tz
                 yields1a = self.ytables_1a.get(Z=tz, quantity='Yields')
                 break
 
@@ -3042,15 +3033,12 @@ class chem_evol(object):
                 if self.zmetal <= tables_Z_radio[-1]:
                     yields1a_radio = \
                         self.ytables_1a_radio.get(Z=tables_Z_radio[-1], quantity='Yields')    
-                    #print 'at ',self.zmetal,' use ',tables_Z[-1]
                     break
                 if self.zmetal >= tables_Z_radio[0]:
                     yields1a_radio = \
                         self.ytables_1a_radio.get(Z=tables_Z_radio[0], quantity='Yields')
-                    #print 'at ',self.zmetal,' use ',tables_Z[0]
                     break
                 if self.zmetal > tz:
-                    #print 'at ',self.zmetal,' use ',tz
                     yields1a_radio = self.ytables_1a_radio.get(Z=tz, quantity='Yields')
                     break
 
@@ -3175,8 +3163,8 @@ class chem_evol(object):
             # Output information
             if sn1a_output == 0 :
                 if self.iolevel >= 2:
-                    print 'SN1a (pop) start to contribute at time ', \
-                          '{:.3E}'.format((timemax))
+                    print ('SN1a (pop) start to contribute at time ', \
+                          '{:.3E}'.format((timemax)))
                 sn1a_output = 1
 
             # Add the contribution of SNe Ia to the timestep j
@@ -3337,9 +3325,9 @@ class chem_evol(object):
                 return self.A_nsmerger * \
                   (np.log(min(t_max_temp,timemax)) - np.log(max(t_min_temp,timemin)))
             else:
-                return self.A_nsmerger / (1+alpha_temp) * \
-                  (min(t_max_temp,timemax)**(1+alpha_temp) - \
-                    max(t_min_temp,timemin)**(1+alpha_temp))
+                return self.A_nsmerger / (1.0+alpha_temp) * \
+                  (min(t_max_temp,timemax)**(1.0+alpha_temp) - \
+                    max(t_min_temp,timemin)**(1.0+alpha_temp))
 
         # Values of bounds on the piecewise DTDs, in Myr
         lower = 10
@@ -3348,8 +3336,8 @@ class chem_evol(object):
         #upper = 10000
 
         # convert time bounds into Myr, since DTD is in units of Myr
-        timemin = timemin/1e6
-        timemax = timemax/1e6
+        timemin = timemin/1.0e6
+        timemax = timemax/1.0e6
 
         # initialise the number of neutron star mergers in the current time interval
         nns_m = 0.0
@@ -3693,8 +3681,8 @@ class chem_evol(object):
                 self.A_nsmerger = self.nb_nsm_per_m / \
                     ( np.log(t_max_temp) - np.log(t_min_temp) )
             else:
-                self.A_nsmerger = self.nb_nsm_per_m * (1+alpha_temp) / \
-                    ( t_max_temp**(1+alpha_temp) - t_min_temp**(1+alpha_temp) )
+                self.A_nsmerger = self.nb_nsm_per_m * (1.0+alpha_temp) / \
+                    ( t_max_temp**(1.0+alpha_temp) - t_min_temp**(1.0+alpha_temp) )
 
         # Ensure normalization only occurs once
         self.nsm_normalized = True
@@ -4212,8 +4200,8 @@ class chem_evol(object):
           if a_ided > -0.999999 or a_ided < -1.0000001:
 
               # Integrate
-              N_ided = (b_ided / (a_ided+1)) * \
-                  (t_max_temp**(a_ided+1) - t_min_temp**(a_ided+1))
+              N_ided = (b_ided / (a_ided+1.0)) * \
+                  (t_max_temp**(a_ided+1.0) - t_min_temp**(a_ided+1.0))
            
           # If a power law with an index of -1
           else:
@@ -4285,9 +4273,9 @@ class chem_evol(object):
 
         # Exit if the IMF boundary do not cover 3 - 8 Mo (SN Ia progenitors)
         if not ( (self.imf_bdys[0] < 3) and (self.imf_bdys[1] > 8)):
-            print '!!!!!IMPORTANT!!!!'
-            print 'With Vogelsberger SNIa implementation selected mass', \
-                  'range not possible.'
+            print ('!!!!!IMPORTANT!!!!')
+            print ('With Vogelsberger SNIa implementation selected mass', \
+                  'range not possible.')
             sys.exit('Choose mass range which either fully includes' + \
                      'range from 3 to 8Msun or fully excludes it'+ \
                      'or use other SNIa implementations')
@@ -4522,7 +4510,7 @@ class chem_evol(object):
                 n1a += temp_int
 
             # Add the right units 
-            n1a = n1a * self.A_maoz * 4.0e-13 / 10**(9*self.beta_pow)
+            n1a = n1a * self.A_maoz * 4.0e-13 / 10**(9.0*self.beta_pow)
 
         # Calculate the number of white dwarfs
         #number_wd = quad(self.__wd_number, spline1_timemax, maxm_prog1a, \
@@ -4660,8 +4648,8 @@ class chem_evol(object):
         sigma = self.gauss_dtd[1] #Wiersma09 defaults: 0.66e9
 
         # Return the SN Ia rate at time t coming from stars of mass m
-        return self.__wd_number(m,t) * 1.0 / np.sqrt(2 * np.pi * sigma**2) * \
-            np.exp(-(t - tau)**2 / (2 * sigma**2))
+        return self.__wd_number(m,t) * 1.0 / np.sqrt(2.0 * np.pi * sigma**2) * \
+            np.exp(-(t - tau)**2 / (2.0 * sigma**2))
 
 
     ##############################################
@@ -4790,7 +4778,7 @@ class chem_evol(object):
         # Calculate the normalisation constant
 #        self.A_maoz = self.nb_1a_per_m / quad(self.__maoz_sn_rate_int, \
 #            spline_min_time, ageofuniverse)[0]
-#        print self.A_maoz
+#        print (self.A_maoz)
 
         # Calculate the first part of the integral
         temp_8_0 = self.a_wd*self.t_8_0**(self.beta_pow+4.0)/(self.beta_pow+4.0)+\
@@ -4814,7 +4802,7 @@ class chem_evol(object):
                          self.t_3_0**(self.beta_pow+1.0)) / (self.beta_pow+1.0)
 
         # Calculate the normalization constant
-        self.A_maoz = self.nb_1a_per_m * 10**(9*self.beta_pow) / 4.0e-13 / \
+        self.A_maoz = self.nb_1a_per_m * 10**(9.0*self.beta_pow) / 4.0e-13 / \
                    (temp_3_0 - temp_8_0 + temp_13gys)
 
         # Avoid renormalizing during the next timesteps
@@ -4857,11 +4845,11 @@ class chem_evol(object):
               for i_npf in range(0,len(self.poly_fit_dtd_5th[0])):
 
                 # Cumulate with the upper and lower limits
-                exp_poly = len(self.poly_fit_dtd_5th[0]) - i_npf - 1
+                exp_poly = len(self.poly_fit_dtd_5th[0]) - i_npf - 1.0
                 int_poly_up += self.poly_fit_dtd_5th[0][i_npf] * \
-                    t_up_int**(exp_poly+1) / (exp_poly+1)
+                    t_up_int**(exp_poly+1.0) / (exp_poly+1.0)
                 int_poly_low += self.poly_fit_dtd_5th[0][i_npf] * \
-                    t_low_int**(exp_poly+1) / (exp_poly+1)
+                    t_low_int**(exp_poly+1.0) / (exp_poly+1.0)
 
             # If in the second section ...
             elif t_low_int >= self.t_dtd_poly_split:
@@ -4870,11 +4858,11 @@ class chem_evol(object):
               for i_npf in range(0,len(self.poly_fit_dtd_5th[1])):
 
                 # Cumulate with the upper and lower limits
-                exp_poly = len(self.poly_fit_dtd_5th[1]) - i_npf - 1
+                exp_poly = len(self.poly_fit_dtd_5th[1]) - i_npf - 1.0
                 int_poly_up += self.poly_fit_dtd_5th[1][i_npf] * \
-                    t_up_int**(exp_poly+1) / (exp_poly+1)
+                    t_up_int**(exp_poly+1.0) / (exp_poly+1.0)
                 int_poly_low += self.poly_fit_dtd_5th[1][i_npf] * \
-                    t_low_int**(exp_poly+1) / (exp_poly+1)
+                    t_low_int**(exp_poly+1.0) / (exp_poly+1.0)
 
             # If overlap ...
             else:
@@ -4883,16 +4871,16 @@ class chem_evol(object):
               for i_npf in range(0,len(self.poly_fit_dtd_5th[0])):
 
                 # Cumulate with the upper and lower limits
-                exp_poly = len(self.poly_fit_dtd_5th[0]) - i_npf - 1
+                exp_poly = len(self.poly_fit_dtd_5th[0]) - i_npf - 1.0
                 int_poly_up += self.poly_fit_dtd_5th[0][i_npf] * \
-                    self.t_dtd_poly_split**(exp_poly+1) / (exp_poly+1)
+                    self.t_dtd_poly_split**(exp_poly+1.0) / (exp_poly+1.0)
                 int_poly_low += self.poly_fit_dtd_5th[0][i_npf] * \
-                    t_low_int**(exp_poly+1) / (exp_poly+1)
-                exp_poly = len(self.poly_fit_dtd_5th[1]) - i_npf - 1
+                    t_low_int**(exp_poly+1.0) / (exp_poly+1.0)
+                exp_poly = len(self.poly_fit_dtd_5th[1]) - i_npf - 1.0
                 int_poly_up += self.poly_fit_dtd_5th[1][i_npf] * \
-                    t_up_int**(exp_poly+1) / (exp_poly+1)
+                    t_up_int**(exp_poly+1.0) / (exp_poly+1.0)
                 int_poly_low += self.poly_fit_dtd_5th[1][i_npf] * \
-                    self.t_dtd_poly_split**(exp_poly+1) / (exp_poly+1)
+                    self.t_dtd_poly_split**(exp_poly+1.0) / (exp_poly+1.0)
 
         # If this is not a split poly DTD ...
         else:
@@ -4901,11 +4889,11 @@ class chem_evol(object):
             for i_npf in range(0,len(self.poly_fit_dtd_5th)):
 
                 # Cumulate with the upper and lower limits
-                exp_poly = len(self.poly_fit_dtd_5th) - i_npf - 1
+                exp_poly = len(self.poly_fit_dtd_5th) - i_npf - 1.0
                 int_poly_up += self.poly_fit_dtd_5th[i_npf] * \
-                    t_up_int**(exp_poly+1) / (exp_poly+1)
+                    t_up_int**(exp_poly+1.0) / (exp_poly+1.0)
                 int_poly_low += self.poly_fit_dtd_5th[i_npf] * \
-                    t_low_int**(exp_poly+1) / (exp_poly+1)
+                    t_low_int**(exp_poly+1.0) / (exp_poly+1.0)
  
         # Return the number of SNe Ia n this time bin
         if (int_poly_up - int_poly_low) < 0.0: # can happen since it's a fit
@@ -4936,16 +4924,16 @@ class chem_evol(object):
           for i_npf in range(0,len(self.poly_fit_dtd_5th[0])):
 
               # Cumulate with the upper and lower limits
-              exp_poly = len(self.poly_fit_dtd_5th[0]) - i_npf - 1
+              exp_poly = len(self.poly_fit_dtd_5th[0]) - i_npf - 1.0
               int_poly_up += self.poly_fit_dtd_5th[0][i_npf] * \
-                  self.t_dtd_poly_split**(exp_poly+1) / (exp_poly+1)
+                  self.t_dtd_poly_split**(exp_poly+1.0) / (exp_poly+1.0)
               int_poly_low += self.poly_fit_dtd_5th[0][i_npf] * \
-                  self.poly_fit_range[0]**(exp_poly+1) / (exp_poly+1)
-              exp_poly = len(self.poly_fit_dtd_5th[1]) - i_npf - 1
+                  self.poly_fit_range[0]**(exp_poly+1.0) / (exp_poly+1.0)
+              exp_poly = len(self.poly_fit_dtd_5th[1]) - i_npf - 1.0
               int_poly_up += self.poly_fit_dtd_5th[1][i_npf] * \
-                  self.poly_fit_range[1]**(exp_poly+1) / (exp_poly+1)
+                  self.poly_fit_range[1]**(exp_poly+1.0) / (exp_poly+1.0)
               int_poly_low += self.poly_fit_dtd_5th[1][i_npf] * \
-                  self.t_dtd_poly_split**(exp_poly+1) / (exp_poly+1)
+                  self.t_dtd_poly_split**(exp_poly+1.0) / (exp_poly+1.0)
 
         # If it not is a split poly DTD ...
         else:
@@ -4954,11 +4942,11 @@ class chem_evol(object):
             for i_npf in range(0,len(self.poly_fit_dtd_5th)):
 
                 # Cumulate with the upper and lower limits
-                exp_poly = len(self.poly_fit_dtd_5th) - i_npf - 1
+                exp_poly = len(self.poly_fit_dtd_5th) - i_npf - 1.0
                 int_poly_up += self.poly_fit_dtd_5th[i_npf] * \
-                    self.poly_fit_range[1]**(exp_poly+1) / (exp_poly+1)
+                    self.poly_fit_range[1]**(exp_poly+1.0) / (exp_poly+1.0)
                 int_poly_low += self.poly_fit_dtd_5th[i_npf] * \
-                    self.poly_fit_range[0]**(exp_poly+1) / (exp_poly+1)
+                    self.poly_fit_range[0]**(exp_poly+1.0) / (exp_poly+1.0)
 
         # Calculate the normalization constant
         self.A_poly = self.nb_1a_per_m / (int_poly_up - int_poly_low)
@@ -4992,11 +4980,11 @@ class chem_evol(object):
         # Return zero if there is an error in the mass boundary
         if mmin>mmax:
             if self.iolevel > 1:
-                print 'Warning in _imf function'
-                print 'mmin:',mmin
-                print 'mmax',mmax
-                print 'mmin>mmax'
-                print 'Assume mmin == mmax'
+                print ('Warning in _imf function')
+                print ('mmin:',mmin)
+                print ('mmax',mmax)
+                print ('mmin>mmax')
+                print ('Assume mmin == mmax')
             return 0
 
         # Salpeter IMF or any power law
@@ -5027,7 +5015,7 @@ class chem_evol(object):
             if inte == 2:
                 return quad(self.__g2_costum, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm =1.0 / quad(self.__g2_costum, \
+                self.imfnorm = 1.0 / quad(self.__g2_costum, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         # Chabrier IMF
@@ -5098,7 +5086,7 @@ class chem_evol(object):
                 #return quad(self.__g2_fpp, mmin, mmax)[0]
  
                 #if mmin < 0.8:
-                #    print '!!Error - Ferrini IMF not fitted below 0.8 Msun!!'
+                #    print ('!!Error - Ferrini IMF not fitted below 0.8 Msun!!')
 
                 # Find the lower mass bin
                 i_fer = 0
@@ -5480,7 +5468,7 @@ class chem_evol(object):
         '''
         # Output information
         if self.iolevel >= 2:
-             print 'Start interpolating yields'
+             print ('Start interpolating yields')
 
         # Reduce the number of decimal places in the metallicity variable
         Z = round(Z, 6)
@@ -5523,7 +5511,6 @@ class chem_evol(object):
             m2 = ytables.get(Z=z2, quantity='masses')
             # Get the stellar masses and the interpolated yields at Z
             m_stars, yields = self.__lin_int_yields(z1, z2, m1, m2, ytables, Z)
-            #print m_stars
 
             #this step is to get a Z_gridpoint value for self.Z_gridpoint 
             if abs(Z-z1) > abs(Z-z2):
@@ -5536,7 +5523,7 @@ class chem_evol(object):
 
             # Get the closest available metallicity (favouring lower boundary)
             Z_gridpoint = self.__get_Z_wiersma(Z, Z_grid)
-            #print 'Take yields from Z closest to: ',Z,' found: ',Z_gridpoint
+            #print ('Take yields from Z closest to: ',Z,' found: ',Z_gridpoint)
             # Get all initial masses at the selected closest metallicity
             m_stars = ytables.get(Z=Z_gridpoint, quantity='masses')
             # Get the yields corrected for the different initial abundances
@@ -5549,12 +5536,12 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel >= 3:
-            print 'Finished interpolating yields'
-            print 'Interpolation test for ',round(Z,6)
-            print z1,z2,m_stars #,star_age
-            print 'Yields:'
+            print ('Finished interpolating yields')
+            print ('Interpolation test for ',round(Z,6))
+            print (z1,z2,m_stars) #,star_age
+            print ('Yields:')
             for k in range(len(m_stars)):
-                print m_stars[k], yields[k]
+                print (m_stars[k], yields[k])
 
         # Calculate the coefficients of the linear fit regarding the total mass
         # ejected as a function of the stellar initial mass
@@ -5568,18 +5555,18 @@ class chem_evol(object):
                 if (inimass >= m_stars[h]) and (inimass <= m_stars[h+1]):
                     massejected = slope[h] * inimass + intercept[h]
                     if massejected < 0:
-                        print slope[h],intercept[h]
-                        print 'inimass', inimass, \
-                              'problem wiht massejected', massejected
+                        print (slope[h],intercept[h])
+                        print ('inimass', inimass, \
+                              'problem wiht massejected', massejected)
                     return massejected
 
             # Use the last fit for stars more massive than the ones available
             if inimass > m_stars[-1]:
                 massejected = slope[-1] * inimass + intercept[-1]
                 if massejected < 0:
-                    print slope[h], intercept[h]
-                    print 'inimass', inimass, \
-                          'problem wiht massejected',massejected
+                    print (slope[h], intercept[h])
+                    print ('inimass', inimass, \
+                          'problem wiht massejected',massejected)
                 return massejected
 
         self.func_total_ejecta=func_total_ejecta
@@ -5622,8 +5609,8 @@ class chem_evol(object):
                                 self.stellar_param_attrs_y.append(table_y.col_attrs[k])
 
                 self.stellar_param_y=stellar_param_y
-                #print 'stellar_param_attrs_y',self.stellar_param_attrs_y
-                #print 'stellar_param_y',self.stellar_param_y 
+                #print ('stellar_param_attrs_y',self.stellar_param_attrs_y)
+                #print ('stellar_param_y',self.stellar_param_y)
 
                 data_cols1=table_p.data_cols
                 #to make sure that Mdot comes before Ekindot, if available (for factors)
@@ -5636,7 +5623,7 @@ class chem_evol(object):
                                 data_cols1[idx2]='Mdot_wind'
 
                 data_cols=data_cols1[1:]
-                #print 'data_cols',data_cols
+                #print ('data_cols',data_cols)
                 for h in range(len(data_cols)):
                         self.stellar_param_attrs.append(data_cols[h])
 
@@ -5665,14 +5652,14 @@ class chem_evol(object):
                         else:
                                 age_after=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh-1],quantity='Age')[-1]
                         ages=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh],quantity='Age')
-                        #print 'zgridpoint',Z_gridpoint
+                        #print ('zgridpoint',Z_gridpoint)
                         #get the parameter from tables
                         stellar_param_table_evol=[]
                         stellar_param_evol1=[]
                         for k in range(len(data_cols)):
-                                #print 'quantity ',k,self.Z_gridpoint,m_stars_grid[hh],data_cols[k]
+                                #print ('quantity ',k,self.Z_gridpoint,m_stars_grid[hh],data_cols[k])
                                 tdum=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh],quantity=data_cols[k])
-                                #print tdum
+                                #print (tdum)
                                 stellar_param_table_evol.append(tdum)
                                 stellar_param_evol1.append([0.]*len(dts))
                         if 'Mdot_wind' in data_cols and 'Ekindot_wind' in data_cols:
@@ -5680,7 +5667,7 @@ class chem_evol(object):
                                 stellar_param_table_evol1=stellar_param_table_evol[:]
                                 stellar_param_table_evol[3]=stellar_param_table_evol1[4]
                                 stellar_param_table_evol[4]=stellar_param_table_evol1[3]
-                        #print 'm star: ',m_stars_grid[hh],stellar_param_table_evol[3]
+                        #print ('m star: ',m_stars_grid[hh],stellar_param_table_evol[3])
                         #fill the time step bins with values
                         age_sim_last=0.
                         age_sim=0.
@@ -5719,7 +5706,7 @@ class chem_evol(object):
                                                 for p in range(stellar_param_evol_num):
                                                         stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac #* age_scale_f
                                         if frac<0:
-                                                print 'error frac!!!, t: ',t
+                                                print ('error frac!!!, t: ',t)
                                 age_sim_last=age_sim
 
                         stellar_param_evol11=[]
@@ -5743,7 +5730,7 @@ class chem_evol(object):
                                 #scale facgtor for time steps
                                 age_scale_f=age_sim_save[u]/ages[-1]
                                 scaled_dts= np.array(dts)*age_scale_f
-                                #print 'age scalf ',u,age_scale_f
+                                #print ('age scalf ',u,age_scale_f)
                                 #age for scaled timesteps
                                 age_sim1=[0.]
                                 adum=0.
@@ -5779,11 +5766,11 @@ class chem_evol(object):
                                                         frac = (age_sim1[t] - age_sim1[t-1])/dts[k]
                                                         for p in range(stellar_param_evol_num):
                                                                 stellar_param_evol11[u][p][k] += stellar_param_evol1[p][t-1] * frac
-                                                #print 'frac ',frac
+                                                #print ('frac ',frac)
                                                 #if frac>1e4:
-                                                #        print 'frac 1e4',frac
+                                                #        print ('frac 1e4',frac)
                                                 if frac<0:
-                                                        print ' negative frac!!!',frac,' t: ',t
+                                                        print (' negative frac!!!',frac,' t: ',t)
                                         age_sim_last=age_sim
 
                                 #plt.plot(age_sim_save[:],stellar_param_evol11[u][4],linestyle=':')
@@ -5827,7 +5814,7 @@ class chem_evol(object):
                 z1 = Z_grid[0]
                 z2 = Z_grid[0]
                 if self.iolevel >= 2:
-                    print 'Z > Zgrid'
+                    print ('Z > Zgrid')
                 break
 
             # If Z is below the grid range, use min available Z
@@ -5835,7 +5822,7 @@ class chem_evol(object):
                 z1 = Z_grid[-1]
                 z2 = Z_grid[-1]
                 if self.iolevel >= 2:
-                    print 'Z < Zgrid'
+                    print ('Z < Zgrid')
                 break
 
             # If Z is exactly one of the available Z, use no boundary
@@ -5843,7 +5830,7 @@ class chem_evol(object):
                 z1 = tz
                 z2 = tz
                 if self.iolevel >= 2:
-                    print 'Z = Zgrid'
+                    print ('Z = Zgrid')
                 break
 
             # If Z is above the grid point at index tz ...
@@ -5857,7 +5844,7 @@ class chem_evol(object):
 
                 # Output information
                 if self.iolevel >= 2:
-                    print 'interpolation necessary '
+                    print ('interpolation necessary')
                 break
 
         # Return the boundaries
@@ -5912,7 +5899,7 @@ class chem_evol(object):
             # to derive yields for the mass only available at Z_choice.
             for p in range(len(m_stars)):
                 if m_stars[p] not in m_negl:
-                                #print m_stars[p]
+                                #print (m_stars[p])
                                 m_missing.append(m_stars[p])
                                 m_bdy.append([0,0])
                                 for m in m_negl:
@@ -5927,8 +5914,8 @@ class chem_evol(object):
                                 #in case no upper boundary
                                 if m_bdy[-1][1] ==0:
                                         m_bdy[-1][1]=m_bdy[-1][0]
-                                #print 'found  boundary: ',m_bdy[-1]
-            #print 'missing masses: ',m_missing,zs_missing
+                                #print ('found  boundary: ',m_bdy[-1])
+            #print ('missing masses: ',m_missing,zs_missing)
             m_stars=np.sort(m_stars)
             # For each mass interpolate each isotope
             for m in m_stars:
@@ -5936,8 +5923,8 @@ class chem_evol(object):
                 if m in m_missing:
                         #when masses are missing do a interpolation of the yields using m_bdy
                         idx=m_missing.index(m)
-                        #print 'M=',m,'not available at Z=',Z_negl,': interpolate!'
-                        #print 'boundary : ',m_bdy[idx][0],m_bdy[idx][1],'for ',m
+                        #print ('M=',m,'not available at Z=',Z_negl,': interpolate!')
+                        #print ('boundary : ',m_bdy[idx][0],m_bdy[idx][1],'for ',m)
                         if m_bdy[idx][0] == m_bdy[idx][1]:
                                 #no interpolation possible, take at available mass
                                 y1 = ytables.get(Z=Z_negl, M=m_bdy[idx][0], quantity='Yields')
@@ -5949,7 +5936,7 @@ class chem_evol(object):
                                 for p in range(len(y_min_negl)):
                                         slope = (y_max_negl[p] - y_min_negl[p]) / (m_bdy[idx][1] - m_bdy[idx][0])
                                         b = y_max_negl[p] - slope * m_bdy[idx][1]
-                                        #print p,y_min_negl[p],y_max_negl[p],slope * m + b
+                                        #print (p,y_min_negl[p],y_max_negl[p],slope * m + b)
                                         y_interp_negl.append(slope * m + b)
                                 y1 = y_interp_negl
                 else:
@@ -6003,14 +5990,14 @@ class chem_evol(object):
             if Z >= Z_grid[0]:
                 Z_gridpoint = Z_grid[0]
                 if self.iolevel >= 2:
-                    print 'Z > Zgrid'
+                    print ('Z > Zgrid')
                 break
 
             # If Z is below the grid range, use min available Z
             if Z <= Z_grid[-1]:
                 Z_gridpoint = Z_grid[-1]
                 if self.iolevel >= 2:
-                    print 'Z < Zgrid'
+                    print ('Z < Zgrid')
                 break
 
             # If Z is exactly one of the available Z, use the given Z
@@ -6018,14 +6005,14 @@ class chem_evol(object):
             if round(Z,abs(decimal.Decimal(str(tz)).as_tuple().exponent)) == tz: #Z == tz:
                 Z_gridpoint = tz#Z
                 if self.iolevel >= 2:
-                    print 'Z = Zgrid'
+                    print ('Z = Zgrid')
                 break
 
             # If Z is above the grid point at index tz, use this last point
             if Z > tz:
                 Z_gridpoint = tz
                 if self.iolevel >= 2:
-                    print 'interpolation necessary'
+                    print ('interpolation necessary')
                 break
 
         # Return the closest metallicity grid point
@@ -6071,7 +6058,7 @@ class chem_evol(object):
 
             # Get its yields
             y = ytables.get(Z=Z_gridpoint, M=m, quantity='Yields')
-            #print 'test Z: ',Z_gridpoint,' M: ',m
+            #print ('test Z: ',Z_gridpoint,' M: ',m)
             mfinal = ytables.get(Z=Z_gridpoint, M=m, quantity='Mfinal')
             iso_name=ytables.get(Z=Z_gridpoint, M=m, quantity='Isotopes')
 
@@ -6085,24 +6072,20 @@ class chem_evol(object):
                             if (m>8) and (iso_name[p] in ['C-12','Mg-24','Fe-56']):
                                 yi = (X_ymgal_t[p]*(m-mfinal) + y[p]) #total yields, Eq. 4 in Wiersma09
                                 if iso_name[p] in ['C-12','Fe-56']:
-                                        #print 'M=',m,' Reduce ',iso_name[p],' by 0.5 ',yi,yi*0.5
+                                        #print ('M=',m,' Reduce ',iso_name[p],' by 0.5 ',yi,yi*0.5)
                                         yi = yi*0.5
                                 else:
-                                        #print 'M=',m,' Multiply ',iso_name[p],' by 2.'
+                                        #print ('M=',m,' Multiply ',iso_name[p],' by 2.')
                                         yi = yi*2.
                             else:
                                 yi = (X_ymgal_t[p]*(m-mfinal) + y[p])
-                                #if iso_name[p] in ['C-12','N-14']:
-                                        #print Z_gridpoint,'M=',m,X_ymgal_t[p],mfinal,y[p]
-                                        #' Reduce ',iso_name[p],' by 0.5'
-                                        #yi = yi*0.5
                     else:
                         yi = (X_ymgal_t[p]*(m-mfinal) + y[p])
-                    #print yi,(m-mfinal),y[p],X_ymgal_t[p]
+                    #print (yi,(m-mfinal),y[p],X_ymgal_t[p])
                 else:
                     #assume your yields are NOT net yields
                     #if iso_name[p] in ['C-12']:
-                        #print  'C12: Current gas fraction and X0: ',X_ymgal_t[p],X0[p]
+                        #print  ('C12: Current gas fraction and X0: ',X_ymgal_t[p],X0[p])
                         #introduce relative correction check of term X_ymgal_t[p] - X0[p]
                         #since small difference (e.g. due to lack of precision in X0) can
                         #lead to big differences in yi; yield table X0 has only limited digits
@@ -6114,8 +6097,8 @@ class chem_evol(object):
                 if yi < 0:
                     if self.iolevel>0:
                         if abs(yi/y[p])>0.1:
-                                print iso_name[p],'star ',m,' set ',yi,' to 0, ', \
-                                'netyields: ',y[p],'Xsim: ',X_ymgal_t[p],X0[p]
+                                print (iso_name[p],'star ',m,' set ',yi,' to 0, ', \
+                                'netyields: ',y[p],'Xsim: ',X_ymgal_t[p],X0[p])
                     yi = 0
                 yi_all.append(yi)
 
@@ -6127,7 +6110,7 @@ class chem_evol(object):
             self.history.netyields=yields           
             self.history.netyields_masses=m_stars
 
-            #print 'star ',m,(m-mfinal),sum(yields[-1])
+            #print ('star ',m,(m-mfinal),sum(yields[-1]))
         # Return the corrected yields
         return yields
 
@@ -6223,7 +6206,7 @@ class chem_evol(object):
         if self.yield_interp == 'wiersma': #self.netyields_on==True:
             # Get the yields corrected for the different initial abundances
             #yields = self.__correct_iniabu(ymgal_t, self.ytables_pop3, 0, m_stars)
-            print 'Net-yields approach is not applied for PopIII yield input fot time'
+            print ('Net-yields approach is not applied for PopIII yield input fot time')
 
         # Get the actual stellar masses and total mass ejected
         x_all = np.array(m_stars)
@@ -6247,16 +6230,16 @@ class chem_evol(object):
                 if (inimass >= m_stars[h]) and (inimass <= m_stars[h+1]):
                     massejected = slope[h] * inimass + intercept[h]
                     if massejected < 0:
-                        print slope[h], intercept[h]
-                        print 'inimass', inimass, \
-                              'problem wiht massejected',massejected
+                        print (slope[h], intercept[h])
+                        print ('inimass', inimass, \
+                              'problem wiht massejected',massejected)
                     return massejected
                 elif (inimass < m_stars[0] and inimass >= self.imf_yields_range_pop3[0]):
                     massejected = slope[0] * inimass + intercept[0]
                     if massejected < 0:
-                        print slope[h], intercept[h]
-                        print 'inimass', inimass, \
-                              'problem wiht massejected',massejected
+                        print (slope[h], intercept[h])
+                        print ('inimass', inimass, \
+                              'problem wiht massejected',massejected)
                     return massejected
 
         # Return the stellar masses, yields and ejecta function at Z = 0
@@ -6340,7 +6323,7 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel >= 2:
-            print 'Entering interpolate_lifetimes_grid routine'
+            print ('Entering interpolate_lifetimes_grid routine')
 
         # Read the lifetimes from the given yield tables
         lifetimes_all = tables.get('Lifetime')
@@ -6393,7 +6376,7 @@ class chem_evol(object):
         # if fit over metallicity not necessary or possible, get separate fit results
         if len(metallicity)==1:
                 if self.iolevel>0:
-                        print 'Only 1 metallicity provided, no fit over lifetime' 
+                        print ('Only 1 metallicity provided, no fit over lifetime')
                 all_lifetimes=[]
                 for m in range(len(metallicity)):
                     x=all_masses1
@@ -6441,7 +6424,7 @@ class chem_evol(object):
                 spline_degree1 = 1
                 smoothing1 = 3
                 if self.iolevel>0:
-                        print 'Only 2 metallicities provided, do linear fit over lifetime'
+                        print ('Only 2 metallicities provided, do linear fit over lifetime')
         else:
                 spline_degree1 = 1#4           # 1, 2
                 smoothing1 = len(metallicity)+spline_degree1 #3               # 0, 1, 2, 3
@@ -6476,10 +6459,10 @@ class chem_evol(object):
 
         # Output information
         if self.iolevel >= 2:
-            print 'Routine __interpolate_lifetimes_grid'
+            print ('Routine __interpolate_lifetimes_grid')
             idx = np.where(zm_lifetime_grid[0] ==0.0001)[0][0]
             masses = zm_lifetime_grid[1]
-            print 'masses',masses
+            print ('masses',masses)
             masses = all_masses1 #10**masses
             lifetimes = zm_lifetime_grid[2][idx]
             lifetimes = 10**lifetimes
@@ -6487,9 +6470,9 @@ class chem_evol(object):
             lifetimescheck = []
             for k in range(len(massescheck)):
                 idx = np.where(masses==massescheck[k])[0][0]
-                print 'mass',masses[idx]
-                print lifetimes[idx]
-            print 'end routine'
+                print ('mass',masses[idx])
+                print (lifetimes[idx])
+            print ('end routine')
         self.lifetime_yield_input = [mass_save,lifetimes_save,metallicity] 
         if self.iolevel >= 1:
             import matplotlib.pyplot as plt
@@ -6506,8 +6489,8 @@ class chem_evol(object):
                 if m == np.max(zm_lifetime_grid[1]):
                     for ltind, ltarray in enumerate(zm_lifetime_grid[2]):
                         if ltarray[ind] != np.min(ltarray):
-                            print 'Warning! Maximum mass does not correspond to minimum lifetime for Z=%.04f.' %zm_lifetime_grid[0][ltind]
-                            print 'Lifetime for max mass:', ltarray[ind], 'Minimum lifetime:', np.min(ltarray)
+                            print ('Warning! Maximum mass does not correspond to minimum lifetime for Z=%.04f.' %zm_lifetime_grid[0][ltind])
+                            print ('Lifetime for max mass:', ltarray[ind], 'Minimum lifetime:', np.min(ltarray))
 
         # Return array with M, t, Z (see function definition)
         return zm_lifetime_grid
@@ -6567,9 +6550,9 @@ class chem_evol(object):
         if metallicity == 0:
             if self.iolevel >= 2:
                 grid= zm_lifetime_grid
-                print 'zmetal',grid[0]
-                print 'masses',np.array(grid[1])
-                print 'lifetimes',grid[2]
+                print ('zmetal',grid[0])
+                print ('masses',np.array(grid[1]))
+                print ('lifetimes',grid[2])
 
         precision = 5
         if lifetime > 0:
@@ -6597,12 +6580,12 @@ class chem_evol(object):
                         if lifetime<lower_max:
                                 lifetime=lower_max
                 firsttest=False
-                #print 'lifetimes',lower,lifetime,upper
+                #print ('lifetimes',lower,lifetime,upper)
                 #if lifetime lies in lifetime interval
                 lower = min(lower,upper)
                 upper = max(lower,upper)
                 if (lower <= lifetime) and (lifetime <= upper):
-                    #print 'found range, lifetimes',lower,lifetime,upper
+                    #print ('found range, lifetimes',lower,lifetime,upper)
                     upper_t=upper
                     upper_t_idx=list(zm_lifetime_grid[2][idx_z]).index(upper_t)
                     lower_m=zm_lifetime_grid[1][upper_t_idx]
@@ -6610,29 +6593,26 @@ class chem_evol(object):
                     lower_t=lower
                     lower_t_idx=list(zm_lifetime_grid[2][idx_z]).index(lower_t)
                     upper_m=zm_lifetime_grid[1][lower_t_idx]
-                    #print lower_m,upper_m
+                    #print (lower_m,upper_m)
                     slope= (lower_m-upper_m)/(upper_t-lower_t)
                     b= upper_m - slope * lower_t
                     found_mass = round( slope*lifetime +b,precision)
-                    #nprint 'found mass',mrangemin,found_mass,mrangemax
                     if mrangemin <= found_mass <= mrangemax:
                         #lower_t=lower
                         #lower_t_idx=list(zm_lifetime_grid[2][idx_z]).index(lower_t)
                         #upper_m=zm_lifetime_grid[1][lower_t_idx]
-                        #print 'masss itnerval found', found_mass
+                        #print ('masss itnerval found', found_mass)
                         value_found=True
                         break
-                    #print 'but its not in right mass range ...continue search'
             if value_found==False:
-                print 'Mass for lifetime ',10**lifetime,', not found'
-                print 'Throwing error in the following...'
+                print ('Mass for lifetime ',10**lifetime,', not found')
+                print ('Throwing error in the following...')
                 #a=c
             return found_mass
         else:
             mass_solar=mass
             idx_z = (np.abs(zm_lifetime_grid[0]-metallicity)).argmin()
             idx=np.where(zm_lifetime_grid[1]==mass)[0]#[0]
-            #print 'Z',zm_lifetime_grid[0][idx_z]
             if len(idx)>0:
                     idxfound=idx[0]
                     #idxfound=list(zm_lifetime_grid[1]).index(np.log10(mass))
@@ -6641,21 +6621,15 @@ class chem_evol(object):
             else:
                     #mass=np.log10(mass)
                     mass=float(mass)
-                    for lower, upper in zip(zm_lifetime_grid[1][:-1], zm_lifetime_grid[1][1:]):                        #print lower,upper,mass
+                    for lower, upper in zip(zm_lifetime_grid[1][:-1], zm_lifetime_grid[1][1:]):
                         if (lower <= mass) and (mass <= upper):
                             upper_m=upper
                             lower_m=lower
-                            #print 'ower_m,upper_m',lower_m,upper_m
                             upper_m_idx=list(zm_lifetime_grid[1]).index(upper)
                             lower_m_idx=list(zm_lifetime_grid[1]).index(lower)
                             break
-                    #print  zm_lifetime_grid[1]
-                    #print 10**np.array(zm_lifetime_grid[2][idx_z])
-                    #linear fit
-                    #print 'do linear fit for',zm_lifetime_grid[0][idx_z]
                     upper_t=zm_lifetime_grid[2][idx_z][lower_m_idx]
                     lower_t=zm_lifetime_grid[2][idx_z][upper_m_idx]
-                    #print 'upper_t, lower_t',10**upper_t, 10**lower_t
                     slope=(lower_t-upper_t)/(upper_m-lower_m)
                     b= upper_t - slope * lower_m
                     found_lifetime = slope *mass +b
@@ -6717,8 +6691,8 @@ class chem_evol(object):
             error = 0
             for k in range(len(self.ymgal[i])):
                 if self.ymgal[i][k] < 0:
-                    print 'check current ymgal[i] ISM mass'
-                    print 'ymgal[i][k]<0',self.ymgal[i][k],self.history.isotopes[k]
+                    print ('check current ymgal[i] ISM mass')
+                    print ('ymgal[i][k]<0',self.ymgal[i][k],self.history.isotopes[k])
                     error = 1
                 if error == 1:
                     sys.exit('ERROR: zmetal<0 in getmetal routine')
@@ -6954,7 +6928,7 @@ class chem_evol(object):
             # Calculate the log(Z) for the boundary metallicities
             logZ_low = np.log10(self.Z_table_SSP[i_cic])
             logZ_up = np.log10(self.Z_table_SSP[i_cic+1])
-            dif_logZ_inv = 1 / (logZ_up - logZ_low)
+            dif_logZ_inv = 1.0 / (logZ_up - logZ_low)
 
             # For each step ...
             for j_cic in range(0,self.nb_steps_table):
@@ -7040,7 +7014,6 @@ class chem_evol(object):
                 else:
                     t_low_ce = self.t_ce[i_sim-1]
 
-                #print self.nb_timesteps,len(self.t_ce),i_sim,len(self.t_ssp),i_ssp
                 # Calculate the time covered by the SSP step on 
                 # the considered simulation step
                 time_frac.append( \
@@ -7061,7 +7034,7 @@ class chem_evol(object):
                     i_sim += 1
 
             # Convert the time into time fraction
-            dt_temp_inv = 1 / (self.t_ssp[i_ssp] - t_low_ssp)
+            dt_temp_inv = 1.0 / (self.t_ssp[i_ssp] - t_low_ssp)
             for i_tf in range(0,len(time_frac)):
                 time_frac[i_tf] = time_frac[i_tf] * dt_temp_inv
 

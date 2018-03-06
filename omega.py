@@ -317,7 +317,7 @@ class omega( chem_evol ):
         self.inst_name = text[:text.find('=')].strip()
 
         # Announce the beginning of the simulation 
-        print 'OMEGA run in progress..'
+        print ('OMEGA run in progress..')
         start_time = t_module.time()
         self.start_time = start_time
 
@@ -392,11 +392,11 @@ class omega( chem_evol ):
 
         # Calculate the number of CC SNe per Msun formed
         if out_follows_E_rate:
-            A_pop3 = 1 / self._imf(imf_bdys_pop3[0],imf_bdys_pop3[1],2)
+            A_pop3 = 1.0 / self._imf(imf_bdys_pop3[0],imf_bdys_pop3[1],2)
             self.nb_ccsne_per_m_pop3 = \
                 A_pop3 * self._imf(imf_yields_range_pop3[0], \
                               imf_yields_range_pop3[1],1)
-            A = 1 / self._imf(imf_bdys[0],imf_bdys[1],2)
+            A = 1.0 / self._imf(imf_bdys[0],imf_bdys[1],2)
             self.nb_ccsne_per_m = \
                 A * self._imf(transitionmass,imf_yields_range[1],1)
 
@@ -456,7 +456,7 @@ class omega( chem_evol ):
 
             # Print info about the IMF samplint
             self.m_pop_max = 1.0e4
-            print 'IMF random sampling for SSP with M < ',self.m_pop_max
+            print ('IMF random sampling for SSP with M < ',self.m_pop_max)
 
             # Calculate the stellar mass associated with the
             # highest IMF value (needed for Monte Carlo)
@@ -560,7 +560,7 @@ class omega( chem_evol ):
 
             # Calculate the average mass fraction returned
             self.mass_frac_SSP = self.mass_frac_SSP / len(Z)
-            print 'Average SSP mass fraction returned = ',self.mass_frac_SSP
+            print ('Average SSP mass fraction returned = ',self.mass_frac_SSP)
         else:
             self.mass_frac_SSP = mass_frac_SSP
 
@@ -622,51 +622,51 @@ class omega( chem_evol ):
         # Input galaxy
         if not self.galaxy in ['none', 'milky_way', 'milky_way_cte', \
                                'sculptor', 'fornax', 'carina']:
-            print 'Error - Selected galaxy not available.'
+            print ('Error - Selected galaxy not available.')
             return
 
         # Random SFH
         if self.rand_sfh > 0.0 and self.stellar_mass_0 < 0.0:
-            print 'Error - You need to choose a current stellar mass.'
+            print ('Error - You need to choose a current stellar mass.')
             return
 
         # Inflow control when non-available
         if self.in_out_control and (self.SF_law or self.DM_evolution):
-            print 'Error - Cannot control inflows and outflows when SF_law or'\
-                  'DM_evolution is equal to True.'
+            print ('Error - Cannot control inflows and outflows when SF_law or'\
+                  'DM_evolution is equal to True.')
             return
 
         # Defined initial dark matter halo mass when non-available
         #if self.m_DM_ini > 0.0 and not self.DM_evolution:
-        #    print 'Warning - Can\'t control m_DM_ini when the mass of', \
-        #          'the dark matter halo is not evolving.'
+        #    print ('Warning - Can\'t control m_DM_ini when the mass of', \
+        #          'the dark matter halo is not evolving.')
 
         # Inflow and outflow control when the dark matter mass if evolving
         if (self.outflow_rate >= 0.0 or self.inflow_rate >= 0.0) and \
             self.DM_evolution:
-            print 'Error - Cannot fix inflow and outflow rates when the mass'\
-                  'of the dark matter halo is evolving.'
+            print ('Error - Cannot fix inflow and outflow rates when the mass'\
+                  'of the dark matter halo is evolving.')
             return
 
         # Inflow array when input
         if self.len_m_inflow_array > 0:
             if not self.len_m_inflow_array == self.nb_timesteps:
-                print 'Error - len(m_inflow_array) needs to equal nb_timesteps.'
+                print ('Error - len(m_inflow_array) needs to equal nb_timesteps.')
                 return
 
         # Inflow X array when input
         if self.len_m_inflow_X_array > 0:
             if not self.len_m_inflow_X_array == self.nb_timesteps:
-                print 'Error - len(m_inflow_X_array) needs to equal nb_timesteps.'
+                print ('Error - len(m_inflow_X_array) needs to equal nb_timesteps.')
                 return
             if not len(self.m_inflow_X_array[0]) == self.nb_isotopes:
-                print 'Error - len(m_inflow_X_array[i]) needs to equal nb_isotopes.'
+                print ('Error - len(m_inflow_X_array[i]) needs to equal nb_isotopes.')
                 return
 
         # Mgas array when input
         if self.len_m_gas_array > 0:
             if not self.len_m_gas_array == (self.nb_timesteps+1):
-                print 'Error - len(m_gas_array) needs to equal nb_timesteps+1.'
+                print ('Error - len(m_gas_array) needs to equal nb_timesteps+1.')
                 return
 
 
@@ -683,7 +683,7 @@ class omega( chem_evol ):
 
         # Declaration of the new timestep array
         if not self.print_off:
-            print '..Time refinement..'
+            print ('..Time refinement..')
         new_dt = []
 
         # For every timestep ...
@@ -771,7 +771,7 @@ class omega( chem_evol ):
 
         # Declaration of the new timestep array
         if not self.print_off:
-            print '..Time refinement (long range)..'
+            print ('..Time refinement (long range)..')
         new_dt = []
 
         # For every timestep ...
@@ -1117,7 +1117,7 @@ class omega( chem_evol ):
         if self.m_gas_f < 0.0:
             self.not_enough_gas = True
             sfe_gcs = 1.0e-10
-            print '!!Error - Try to have a negative final gas mass!!'
+            print ('!!Error - Try to have a negative final gas mass!!')
 
         if not self.not_enough_gas:
 
@@ -1411,9 +1411,9 @@ class omega( chem_evol ):
         '''
 
         # Return the age of the Universe
-        temp_var = math.sqrt((self.lambda_0/self.omega_0)/(1+z_gttfz)**3)
-        x_var = math.log( temp_var + math.sqrt( temp_var**2 + 1 ) )
-        return 2 / ( 3 * self.H_0 * math.sqrt(self.lambda_0)) * \
+        temp_var = math.sqrt((self.lambda_0/self.omega_0)/(1.0+z_gttfz)**3)
+        x_var = math.log( temp_var + math.sqrt( temp_var**2 + 1.0 ) )
+        return 2.0 / ( 3.0 * self.H_0 * math.sqrt(self.lambda_0)) * \
                x_var * 9.77793067e11
 
 
@@ -1435,7 +1435,7 @@ class omega( chem_evol ):
         # Return the redshift
         temp_var = 1.5340669e-12 * self.lambda_0**0.5 * self.H_0 * t_gtzft
         return (self.lambda_0 / self.omega_0)**0.3333333 / \
-                math.sinh(temp_var)**0.66666667 - 1
+                math.sinh(temp_var)**0.66666667 - 1.0
 
 
     ##############################################
@@ -1695,8 +1695,8 @@ class omega( chem_evol ):
 
                 # Use the highest dark matter mass available
                 parts_2 = copy.copy(parts_1)
-                print 'Warning - Current dark matter mass too high for' \
-                      'the available fits.'
+                print ('Warning - Current dark matter mass too high for' \
+                      'the available fits.')
 
             # If the input dark matter mass is in the available range ...
             # Find the mass boundary for the interpolation.
@@ -2106,7 +2106,7 @@ class omega( chem_evol ):
         '''
 
 #        if self.len_decay_file > 0:
-#            print 'Warning, radioactive isotopes are missing in the outflows'
+#            print ('Warning, radioactive isotopes are missing in the outflows')
 
         # For every timestep i considered in the simulation ...
         for i in range(1, self.nb_timesteps+1):
@@ -2191,7 +2191,7 @@ class omega( chem_evol ):
                 if f_lost > 1.0:
                     f_lost = 1.0
                     if not self.print_off:
-                        print '!!Warning -- Remove more mass than available!!'
+                        print ('!!Warning -- Remove more mass than available!!')
                 
                 # Remove the mass for each isotope
                 f_lost_2 = (1.0 - f_lost)
@@ -2272,9 +2272,9 @@ class omega( chem_evol ):
                     frac_rem = 1.0
                     self.m_outflow_t[i-1] = m_tot_current + m_inflow_current
                     if not self.print_off:
-                        print 'Warning - '\
+                        print ('Warning - '\
                           'Outflows eject more mass than available.  ' \
-                          'It has been reduced to the amount of available gas.'
+                          'It has been reduced to the amount of available gas.')
 
                 # Remove mass from the ISM because of the outflow
                 self.ymgal[i] *= (1.0 - frac_rem)
@@ -2333,7 +2333,7 @@ class omega( chem_evol ):
                     self.m_stel_tot += self.history.sfr_abs[i_tot] * \
                         self.history.timesteps[i_tot]
                 if self.m_stel_tot > 0.0:            
-                    self.m_stel_tot = 1 / self.m_stel_tot
+                    self.m_stel_tot = 1.0 / self.m_stel_tot
                 self.f_m_stel_tot = []
                 m_temp = 0.0
                 for i_tot in range(0,len(self.history.timesteps)):
@@ -2343,11 +2343,11 @@ class omega( chem_evol ):
                 self.f_m_stel_tot.append(self.f_m_stel_tot[-1])
 
                 # Announce the end of the simulation
-                print '   OMEGA run completed -',self._gettime()
+                print ('   OMEGA run completed -',self._gettime())
 
         # Error message
         else:
-            print 'The simulation is already over.'
+            print ('The simulation is already over.')
 
 
     ##############################################
@@ -2465,9 +2465,9 @@ class omega( chem_evol ):
         if self.m_locked <= 0.0:
             nb_cc_sne_inv = 1.0e+30
         elif self.zmetal <= 0.0 and self.Z_trans > 0.0:
-            nb_cc_sne_inv = 1 / (self.nb_ccsne_per_m_pop3 * self.m_locked)
+            nb_cc_sne_inv = 1.0 / (self.nb_ccsne_per_m_pop3 * self.m_locked)
         else:
-            nb_cc_sne_inv = 1 / (self.nb_ccsne_per_m * self.m_locked)
+            nb_cc_sne_inv = 1.0 / (self.nb_ccsne_per_m * self.m_locked)
 
         # Calculate the fraction of CC SNe in each future timesteps
         len_ssp_nb_cc_sne = len(self.ssp_nb_cc_sne)
@@ -2482,7 +2482,7 @@ class omega( chem_evol ):
         for i_do in range(0,len_ssp_nb_cc_sne):
 
             # Add the delayed mass outflow
-            #print i, i_do, i+i_do, len(self.m_outflow_t)
+            #print (i, i_do, i+i_do, len(self.m_outflow_t))
             self.m_outflow_t[i-1+i_do] += m_out_inst * f_nb_cc[i_do]
 
 
@@ -2541,8 +2541,8 @@ class omega( chem_evol ):
                     if not self.skip_zero:
                         self.m_outflow_t[i-1] += (-1.0) * m_inflow_current
                         if not self.print_off:
-                            print 'Warning - Negative inflow.  ' \
-                              'The outflow rate has been increased.', i
+                            print ('Warning - Negative inflow.  ' \
+                              'The outflow rate has been increased.', i)
 
                     # Assume no inflow
                     m_inflow_current = 0.0
@@ -2642,7 +2642,7 @@ class omega( chem_evol ):
                 yields_evol=self.history.ism_iso_yield_massive
             idx=self.history.isotopes.index(yaxis)
         else:
-            print 'Isotope or element not available'
+            print ('Isotope or element not available')
             return 0
         for k in range(0,len(yields_evol)):
             if norm == False:
@@ -2784,7 +2784,7 @@ class omega( chem_evol ):
                     x.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
                 if norm=='ini':
                     x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
-                    print yields_evol[0][iso_idx]
+                    print (yields_evol[0][iso_idx])
 
             plt.xlabel('log-scaled X('+xaxis+')')
             plt.xscale('log')
@@ -2906,7 +2906,7 @@ class omega( chem_evol ):
 
         #Error message if there is the "subplot" has not been provided
         if sub_plot and sub == 1:
-            print '!! Error - You need to use the \'sub\' parameter and provide the frame for the plot !!'
+            print ('!! Error - You need to use the \'sub\' parameter and provide the frame for the plot !!')
             return
 
         #Operations associated with plot visual aspects
@@ -3014,7 +3014,7 @@ class omega( chem_evol ):
             xaxis_elem1=xaxis.split('/')[0][1:]
             xaxis_elem2=xaxis.split('/')[1][:-1]
 
-            #print xaxis_elem1, xaxis_elem2
+            #print (xaxis_elem1, xaxis_elem2)
 
             #X-axis ini values
             x_elem1_ini=x_ini[elements.index(xaxis_elem1)]
@@ -3064,7 +3064,7 @@ class omega( chem_evol ):
         #y=axis ini values
         x_elem1_ini=x_ini[elements.index(yaxis_elem1)]
         x_elem2_ini=x_ini[elements.index(yaxis_elem2)]
-        #print 'Fe_sol = ',x_elem1_ini,' , H_sol = ',x_elem2_ini
+        #print ('Fe_sol = ',x_elem1_ini,' , H_sol = ',x_elem2_ini)
 
         #Y-axis gce values
         elem_idx1=self.history.elements.index(yaxis_elem1)
@@ -3092,7 +3092,7 @@ class omega( chem_evol ):
             if x1 <= 0.0 or x2 <= 0.0:
                 spec = -30.0
             else:
-                #print 'Fe_sim = ',x1, ' , H_sim = ',x2
+                #print ('Fe_sim = ',x1, ' , H_sim = ',x2)
                 if len(solar_norm) > 0:
                     index_1 = el_norm.index(yaxis_elem1)
                     index_2 = el_norm.index(yaxis_elem2)
@@ -3108,7 +3108,7 @@ class omega( chem_evol ):
             if xaxis=='age':
                 x.append(x_age[k])
         if len(y)==0:
-            print 'Y values all zero'
+            print ('Y values all zero')
         #Operations associated with plot visual aspects
         if not return_x_y and not sub_plot:
             plt.ylabel(yaxis)
@@ -3403,7 +3403,7 @@ class omega( chem_evol ):
         sn1anumbers=self.history.sn1a_numbers#[:-1]
         sn2numbers=self.history.sn2_numbers
         if xaxis=='redshift':
-                print 'this features is not tested yet.'
+                print ('this features is not tested yet.')
                 return 0
                 age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
                 age=[0]+age
@@ -3619,10 +3619,10 @@ class omega( chem_evol ):
                         mean_age.append(1) #age[k+1]-age[k])
                 for k in range(len(age)):
                         age_bdy.append(age[k])
-                print 'age',len(mean_age)
-                print 'weights',len(sfr)
-                print 'bdy',len(age_bdy)
-                print sfr[:5]
+                print ('age',len(mean_age))
+                print ('weights',len(sfr))
+                print ('bdy',len(age_bdy))
+                print (sfr[:5])
                 p1 =plt.hist(mean_age, bins=age_bdy,weights=sfr,facecolor=color,color=color,alpha=0.5,label=label)
 
         #Plot the SFR in [Mo yr^-1]
@@ -3659,7 +3659,7 @@ class omega( chem_evol ):
                         sfr=np.array(sfr)*np.array(self.history.m_locked_massive)/np.array(self.history.m_locked)
                         label='Massive'
                 age=self.history.age[:-1]
-                print len(age),len(sfr)
+                print (len(age),len(sfr))
                 plt.xlabel('Age [yrs]')
                 plt.plot(age,sfr,label=label,marker=marker,linestyle=shape)
                 plt.ylabel('Fraction of current gas mass into stars')
@@ -3686,8 +3686,8 @@ class omega( chem_evol ):
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
-        #print 'Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:'
-        #print sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive)
+        #print ('Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:')
+        #print (sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive))
 
 
     def __time_to_z(self,time,Hubble_0,Omega_lambda,Omega_m):
@@ -3701,7 +3701,7 @@ class omega( chem_evol ):
         firstidx=True
         for k in range(len(time)):
                 if time[k]>=8e8:
-                        time_new.append(time[k]/1e9)
+                        time_new.append(time[k]/1.0e9)
                         if firstidx:
                                 index=k
                                 firstidx=False
@@ -3753,6 +3753,9 @@ class omega( chem_evol ):
         It is used in the plotting functions.
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         plt.legend(loc=2,prop={'size':legend_fontsize})
         plt.rcParams.update({'font.size': fontsize})
@@ -3852,7 +3855,7 @@ class omega( chem_evol ):
                 rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
         else:
-            print 'Not available with a closed box.'
+            print ('Not available with a closed box.')
 
 
     ##############################################
@@ -3936,7 +3939,7 @@ class omega( chem_evol ):
                 rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
         else:
-            print 'Not available with a closed box.'
+            print ('Not available with a closed box.')
 
 
     ##############################################
@@ -4019,7 +4022,7 @@ class omega( chem_evol ):
                 rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
         else:
-            print 'Not available with a closed box.'
+            print ('Not available with a closed box.')
 
 
     ##############################################
@@ -4100,7 +4103,7 @@ class omega( chem_evol ):
                 rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
         else:
-            print 'Not available with a closed box.'
+            print ('Not available with a closed box.')
 
 
     ##############################################
@@ -4164,8 +4167,8 @@ class omega( chem_evol ):
             plt.xlabel('Age [yrs]')
             plt.ylabel('Star formation timescale [yr]')
 
-            #print len(self.history.age)
-            #print len(self.history.t_SF_t)
+            #print (len(self.history.age))
+            #print (len(self.history.t_SF_t))
 
             #Copy data for x and y axis
             age = self.history.age
@@ -4184,7 +4187,7 @@ class omega( chem_evol ):
                 rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
         else:
-            print 'Not available with a closed box.'
+            print ('Not available with a closed box.')
 
 
     ##############################################
@@ -4263,7 +4266,7 @@ class omega( chem_evol ):
                 rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
         else:
-            print 'Not available with a closed box.'
+            print ('Not available with a closed box.')
 
 
     ###################################################
@@ -4365,7 +4368,7 @@ class omega( chem_evol ):
             yields_evol=self.history.ism_iso_yield_massive
             yields_evol_el=self.history.ism_elem_yield_massive
         else:
-            print '!! Source not valid !!'
+            print ('!! Source not valid !!')
             return
 
         # Verify the X-axis
@@ -4377,7 +4380,7 @@ class omega( chem_evol ):
             xaxis_elem2 =xaxis.split('/')[1][:-1]
             if not xaxis_elem1 in self.history.elements and \
                not xaxis_elem2 in self.history.elements:
-                 print '!! Elements in xaxis are not valid !!'
+                 print ('!! Elements in xaxis are not valid !!')
                  return
 
             #X-axis ini values
@@ -4410,7 +4413,7 @@ class omega( chem_evol ):
                     else:
                         x_2 += xaxis[ix]
             if len(x_2) == 0:
-                print '!! xaxis not valid.  Need to be \'age\' or a ratio !!'
+                print ('!! xaxis not valid.  Need to be \'age\' or a ratio !!')
                 return
 
         # Verify the Y-axis
@@ -4426,7 +4429,7 @@ class omega( chem_evol ):
                 else:
                     y_2 += yaxis[iy]
         if len(y_2) == 0:
-            print '!! yaxis not valid.  Need to be a ratio !!'
+            print ('!! yaxis not valid.  Need to be a ratio !!')
             return
 
         # Get the isotopes for X-axis
@@ -4439,7 +4442,7 @@ class omega( chem_evol ):
             x1_at_nb = float(x_1.split('-')[1])
             x2_at_nb = float(x_2.split('-')[1])
           else:
-            print '!! Isotopes in xaxis are not valid !!'
+            print ('!! Isotopes in xaxis are not valid !!')
             return
 
         # Get the isotopes for Y-axis
@@ -4451,7 +4454,7 @@ class omega( chem_evol ):
             y1_at_nb = float(y_1.split('-')[1])
             y2_at_nb = float(y_2.split('-')[1])
         else:
-            print '!! Isotopes in yaxis are not valid !!'
+            print ('!! Isotopes in yaxis are not valid !!')
             return
 
         # Set the default label .. if not defined
@@ -4481,11 +4484,11 @@ class omega( chem_evol ):
                     ratio_sample = (yields_evol[k][idx_1]/yields_evol[k][idx_2])*\
                                    (x2_at_nb / x1_at_nb)
                     ratio_std = x1_sol / x2_sol
-                    x.append( ((ratio_sample/ratio_std) - 1) * 1000)
+                    x.append( ((ratio_sample/ratio_std) - 1.0) * 1000.0)
                 ratio_sample = (yields_evol[k][idy_1]/yields_evol[k][idy_2])*\
                                (y2_at_nb / y1_at_nb)
                 ratio_std = y1_sol / y2_sol
-                y.append( ((ratio_sample/ratio_std) - 1) * 1000)
+                y.append( ((ratio_sample/ratio_std) - 1.0) * 1000.0)
 
         # If simple mass ratio ..
         else:
@@ -4932,7 +4935,7 @@ class omega( chem_evol ):
         # Make sure the wanted isotopes are available
         for i_iso in range(0, len(iso_list)):
             if iso_list[i_iso] not in self.history.isotopes:
-                print iso_list[i_iso], ' is not available..'
+                print (iso_list[i_iso], ' is not available..')
                 return
 
         # Recover the solar isotopes mass fractions
@@ -4945,7 +4948,7 @@ class omega( chem_evol ):
 
         # Copy the list of selected elements
         if len(list_elem) > 0 and len(list_iso) == 0:
-             print 'The list_elem option is not implemented yet..'
+             print ('The list_elem option is not implemented yet..')
         #    if elements are selected 
         if True:  # Shoul be else once the list_elem is implemented..
             elem_sol_temp = self._iso_abu_to_elem(iso_sol, iso_list=iso_list)
@@ -5001,8 +5004,8 @@ class omega( chem_evol ):
         timesteps=self.history.timesteps
         i_sim = min(range(len(ages)), key=lambda i: abs(ages[i]-age))
 
-        print 'Extract abundance from closest available time ','{:.3E}'.format(ages[i_sim]),' yrs'
-        print self.history.metallicity[i_sim]
+        print ('Extract abundance from closest available time ','{:.3E}'.format(ages[i_sim]),' yrs')
+        print (self.history.metallicity[i_sim])
     
 
         # Get the mass of elements and isotopes at the desired time
@@ -5086,7 +5089,7 @@ class omega( chem_evol ):
 
                 if species_labels:
                      for i_Z in range(len(iso_array_sol)):
-                          #print 'iso ',iso_array_sol[i_Z][2]
+                          #print ('iso ',iso_array_sol[i_Z][2])
                           #for h in range(len(iso_array_sol[i_Z][2])):
                           plt.annotate(iso_array_sol[i_Z][2][0].split('-')[0],(iso_array_sol[i_Z][0][0], iso_m_frac_sim[i_Z][0]), \
                                 xytext=(-2,0),textcoords='offset points',horizontalalignment='right', verticalalignment='top')
@@ -5095,12 +5098,12 @@ class omega( chem_evol ):
                 #ylimm = np.array(plt.gca().get_ylim())
                 #if ylimm[0] == 0.0:
                 #    ylimm[0] = 1.0e-15
-                #print ylimm
+                #print (ylimm)
                 #yrange = np.log10(ylimm[1]) - np.log10(ylimm[0])
                 #y_an = 10**(ylimm[1] - yrange * (1 - f_y_annotate))
                 #for i_Z in range(len(iso_array_sol)):
                 #    plt.annotate(iso_array_sol[i_Z][3][0], xy=(iso_array_sol[i_Z][0][0],y_an))
-                #    print iso_array_sol[i_Z][3][0], iso_array_sol[i_Z][0][0],y_an
+                #    print (iso_array_sol[i_Z][3][0], iso_array_sol[i_Z][0][0],y_an)
 
             # If elemental abundances ..
             else:
@@ -5190,7 +5193,7 @@ class omega( chem_evol ):
         plt.ylabel('Supernova rate [per century]', fontsize=fontsize)
         plt.yscale('log')
         plt.legend(fontsize=legend_fontsize)
-        plt.ylim(max(y_cc)/1e4, 5*max(y_cc))
+        plt.ylim(max(y_cc)/1.0e4, 5.0*max(y_cc))
         plt.savefig(log_path+'sne_rate.pdf')
         plt.close(fig)
 

@@ -160,18 +160,18 @@ class stellab():
             if line[0] == 'H':
                 galaxy=line[1:].strip()
                 self.galaxy_name.append(galaxy)
-                #print 'found galaxy ',galaxy
+                #print ('found galaxy ',galaxy)
             # read data set
             else:
-                #print line
+                #print (line)
                 path = 'stellab_data/'+line.split('&&')[0].strip()
                 leg = line.split('&&')[1].strip()
                 cs = line.split('&&')[2].strip()
                 self.paths.append(path)
                 self.leg.append(leg)
                 self.cs.append(cs)
-                #print 'path : ',path
-                #print 'leg : ',leg
+                #print ('path : ',path)
+                #print ('leg : ',leg)
 
         self.paths_s   = []  # Path to the solar values
 
@@ -502,7 +502,7 @@ class stellab():
 
             # Warning message if the reference is not valid
             else:
-                print '!! Warning - The solar normalization is not valid !!'
+                print ('!! Warning - The solar normalization is not valid !!')
 
         # Return the list of index of the wanted data set
         # If a specif set of references is choosen ...
@@ -647,15 +647,15 @@ class stellab():
                           warn_ratio = yaxis
                       if eps_x == -30.0 and eps_y == -30.0:
                           warn_el = elem_in[i_x_y][0]+' and '+elem_in[i_x_y][1]
-                          print 'Solar values for '+warn_el+' not found in ' + \
-                          self.leg[i_ds]+'.  '+warn_ratio+ ' was not modified.'
+                          print ('Solar values for '+warn_el+' not found in ' + \
+                          self.leg[i_ds]+'.  '+warn_ratio+ ' was not modified.')
                       else:
                           if eps_x == -30.0:
                               warn_el = elem_in[i_x_y][0]
                           else:
                               warn_el = elem_in[i_x_y][1]
-                          print 'Solar value for '+warn_el+' not found in ' + \
-                          self.leg[i_ds]+'.  '+warn_ratio + ' was not modified.'
+                          print ('Solar value for '+warn_el+' not found in ' + \
+                          self.leg[i_ds]+'.  '+warn_ratio + ' was not modified.')
                       self.leg[i_ds]
 
             #####################################################
@@ -763,8 +763,8 @@ class stellab():
         # Calculate the average error
         if show_mean_err and not return_xy:
             if sum_count > 0:
-                print 'Mean',xaxis,'error =',sum_x/sum_count
-                print 'Mean',yaxis,'error =',sum_y/sum_count
+                print ('Mean',xaxis,'error =',sum_x/sum_count)
+                print ('Mean',yaxis,'error =',sum_y/sum_count)
 
         # Provide a standard plot
         if not return_xy:
@@ -884,7 +884,7 @@ class stellab():
 
             # Warning message if the data set is not available
             if i_search == -1:
-                print '!! Warning - '+obs[i_gids]+' not available !!'
+                print ('!! Warning - '+obs[i_gids]+' not available !!')
 
         # Return a bad index if the wanted normalization is not available
         return i_return
@@ -900,7 +900,7 @@ class stellab():
 
         # Verify is the galaxy is available
         if not galaxy in self.galaxy_name:
-            print '!! Warning - '+galaxy+' not available !!'
+            print ('!! Warning - '+galaxy+' not available !!')
         else:
 
             # Keep the number of characters in the name of the galaxy
@@ -981,7 +981,7 @@ class stellab():
                 return temp_solar[i_get_eps][1]
 
         # Print a warning message if the element is not found
-        print 'Error - Element not found in __get_eps function.'
+        print ('Error - Element not found in __get_eps function.')
         return -30.0
 
 
@@ -1051,7 +1051,7 @@ class stellab():
 
         # Print every available solar abundances
         for i_lsn in range(0,len(self.paths_norm)):
-            print self.paths_norm[i_lsn] 
+            print (self.paths_norm[i_lsn])
 
 
     ##############################################
@@ -1079,11 +1079,11 @@ class stellab():
         if len(galaxy)==0:
            # Print every available observational reference papers
            for i_lsn in range(0,len(self.paths)):
-              print self.paths[i_lsn] 
+              print (self.paths[i_lsn])
         else:
            i_obs = self.__get_i_data_galaxy(galaxy)
            for i_ref in i_obs:
-               print self.paths[i_ref] 
+               print (self.paths[i_ref])
 
     ##############################################
     #                 Get star id                #
@@ -1111,7 +1111,7 @@ class stellab():
         i_obs = self.__get_i_data_set([obs])
         i_ds=i_obs[0]
         elements = self.elem_list[i_ds]    
-        print 'Number of elements available in dataset: ',elements
+        print ('Number of elements available in dataset: ',elements)
         # get [X/Fe] for each element
         abunds_y=[]
         abunds_y_err=[] 
@@ -1151,7 +1151,7 @@ class stellab():
             if fe_h_min==0:
                 fe_h_min=min(star_fe_h)
             star_ids_tmp=[]
-            print 'adjust to given metallicity range from ',fe_h_min,' to ',fe_h_max
+            print ('adjust to given metallicity range from ',fe_h_min,' to ',fe_h_max)
             for k in range(len(star_ids)):
                 if (star_fe_h[k]>fe_h_min) and (star_fe_h[k]<fe_h_max):
                     star_ids_tmp.append(star_ids[k])
@@ -1192,7 +1192,7 @@ class stellab():
         i_ds=i_obs[0]
         elements = self.elem_list[i_ds]   
         if iolevel>0:
-            print 'Number of elements available in dataset: ',elements
+            print ('Number of elements available in dataset: ',elements)
         # get [X/Fe] for each element
         abunds_y=[]
         abunds_y_err=[] 
@@ -1214,11 +1214,11 @@ class stellab():
                #ret_x_err[idx]
                abunds_y_err.append(ret_y_err[idx])
                eles_found.append(elements[k])
-               #print 'get value: ',ret_y[idx]
+               #print ('get value: ',ret_y[idx])
             if len(ret_star_i)>num_stars:
                num_stars=len(ret_star_i)
         if iolevel>0:
-            print 'Number of stars available in dataset: ',num_stars
+            print ('Number of stars available in dataset: ',num_stars)
         err_on = show_err                
         self.__plot_distr(fig,eles_found,abunds_y,abunds_y_err,err_on,elem_label_on,shape,color,label,marker,markersize,fsize) 
 
@@ -1310,6 +1310,6 @@ class stellab():
         f1=open(filename,'w')
         f1.write(out)
         f1.close()
-        print 'file ',filename,' created.' 
+        print ('file ',filename,' created.')
         
 

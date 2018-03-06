@@ -221,7 +221,7 @@ class sygma( chem_evol ):
             return
 
         # Announce the beginning of the simulation 
-        print 'SYGMA run in progress..'
+        print ('SYGMA run in progress..')
         start_time = t_module.time()
         self.start_time = start_time
 
@@ -240,7 +240,7 @@ class sygma( chem_evol ):
         self._update_history_final()
 
         # Announce the end of the simulation
-        print '   SYGMA run completed -',self._gettime()
+        print ('   SYGMA run completed -',self._gettime())
 
 
     ##############################################
@@ -291,7 +291,7 @@ class sygma( chem_evol ):
 
         # Output information
         if self.iolevel >= 3:
-            print 'Entering sfr routine'
+            print ('Entering sfr routine')
 
         # For every timestep i considered in the simulation ...
         for i in range(1, self.nb_timesteps+1):
@@ -315,8 +315,8 @@ class sygma( chem_evol ):
                 # The number of lines needs to be at least equal to the
                 # number of timesteps
                 if self.nb_timesteps > (len(lines)):
-                    print 'Error - SFR input file does not' \
-                          'provide enough timesteps'
+                    print ('Error - SFR input file does not' \
+                          'provide enough timesteps')
                     return
 
                 # Copy the SFR (mass fraction) of every timestep
@@ -412,13 +412,12 @@ class sygma( chem_evol ):
                 f1=open(name,'w')
                 f1.write(out)
                 f1.close()
-                print 'Created table '+name+'.'
-                print 'Download the table using the following link:'
+                print ('Created table '+name+'.')
+                print ('Download the table using the following link:')
                 #from IPython.display import HTML
                 #from IPython import display
                 from IPython.core.display import HTML
                 import IPython.display as display
-                #print help(HTML)
                 #return HTML("""<a href="evol_tables/download.php?file="""+name+"""">Download</a>""")
                 #test=
                 #return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
@@ -428,7 +427,7 @@ class sygma( chem_evol ):
                 #else:
                 #        return name
         else:
-                print 'file '+table_name+' saved in subdirectory evol_tables.'
+                print ('file '+table_name+' saved in subdirectory evol_tables.')
                 f1=open(path+'/'+table_name,'w')
                 f1.write(out)
                 f1.close()
@@ -459,11 +458,11 @@ class sygma( chem_evol ):
         import matplotlib.pyplot as plt
         #in case stellar parameter are not used.
         if self.stellar_param_on==False:
-                print 'Set stellar_param_on to true to use this function.'
+                print ('Set stellar_param_on to true to use this function.')
                 return
 
         if not quantity in self.stellar_param_attrs:
-                print 'Quantity ',quantity,' not provided in yield table'
+                print ('Quantity ',quantity,' not provided in yield table')
                 return
         idx=self.stellar_param_attrs.index(quantity)
         quantity_evol=self.stellar_param[idx]
@@ -585,7 +584,6 @@ class sygma( chem_evol ):
                         if str(iniZ) in allheader[k]:
                                 mfound=float(allheader[k].split(',')[0].split('=')[1])
                                 masses.append(mfound)
-                #print 'Found masses: ',masses
 
         if xaxis=='mini':
                 x=masses
@@ -647,7 +645,6 @@ class sygma( chem_evol ):
                         if str(iniZ) in allheader[k]:
                                 mfound=float(allheader[k].split(',')[0].split('=')[1])
                                 masses.append(mfound)
-                #print 'Found masses: ',masses
 
         mfinals=[]
         for k in range(len(masses)):
@@ -736,7 +733,6 @@ class sygma( chem_evol ):
                         if str(iniZ) in allheader[k]:
                                 mfound=float(allheader[k].split(',')[0].split('=')[1])
                                 masses.append(mfound)
-                #print 'Found masses: ',masses
         if True:
                 x=[]
                 y=[]
@@ -813,7 +809,7 @@ class sygma( chem_evol ):
             x1=self.history.netyields[k][idx1]/sum(self.history.netyields[k])
             x2=self.history.netyields[k][idx2]/sum(self.history.netyields[k])
             y.append(np.log10(x1/x2 / (x1sol/x2sol)))
-        print 'create figure'
+        print ('create figure')
         plt.figure(fig)
         plt.plot(x,y,marker='o')
         plt.ylabel(species)
@@ -939,7 +935,6 @@ class sygma( chem_evol ):
                         if str(iniZ) in allheader[k]:
                                 mfound=float(allheader[k].split(',')[0].split('=')[1])
                                 masses.append(mfound)
-                #print 'Available masses: ',masses
 
         # calculate and collect values to plot
         idx1=-1
@@ -1010,7 +1005,7 @@ class sygma( chem_evol ):
                                         yx1_frac=yx1 #/totmass
                                 if specx:
                                         if yx2_frac==0:
-                                                print 'mini: ',mini,x2,' 0 value: yx2_frac',yx2_frac
+                                                print ('mini: ',mini,x2,' 0 value: yx2_frac',yx2_frac)
                                         else:
                                                 x.append( np.log10( yx1_frac/yx2_frac * x2_ini_sol/x1_ini_sol) )
                                         plt.xlabel(xaxis)
@@ -1041,7 +1036,6 @@ class sygma( chem_evol ):
                                         if specy:
                                                 yy2=y_delay.get(M=mini,Z=Z,specie=y2)
                                         yy1=y_delay.get(M=mini,Z=Z,specie=y1)
-                                        #print 'get',yy1,mini,Z,y1
                                         if netyields:
                                                 ini_species=ini_isos
                                                 ini_species_frac=ini_isos_frac
@@ -1065,7 +1059,6 @@ class sygma( chem_evol ):
                                                 ini_species_frac=ini_elems_frac
                                         if specy:
                                                 ini_species_frac_sol=ini_elems_frac_sol
-                                                #print 'so true',ini_elems_frac_sol
                                                 ini_species_sol = ini_elems_sol 
                                 if specy:
                                         y1_ini_sol=ini_species_frac_sol[ini_species_sol.index(y1)]
@@ -1085,7 +1078,7 @@ class sygma( chem_evol ):
                                         yy1_frac=yy1 #/totmass
                                 if specy:
                                         if yy2_frac==0:
-                                                print 'mini: ',mini,y2,' 0 value: yy2_frac',yy2_frac
+                                                print ('mini: ',mini,y2,' 0 value: yy2_frac',yy2_frac)
                                         else:
                                                 y.append( np.log10( yy1_frac/yy2_frac * y2_ini_sol/y1_ini_sol) )
                                         plt.ylabel(yaxis)
@@ -1096,8 +1089,6 @@ class sygma( chem_evol ):
                                         headery='yields/Msun'
                                         plt.yscale('log')
                 #plot results for specific mass
-                #print 'x: ',x
-                #print 'y: ',y
                 if len(label)==0:
                         plt.plot(x,y,label='Z='+str(Z),marker=marker,color=color,linestyle=shape)
                 else:
@@ -1305,7 +1296,7 @@ class sygma( chem_evol ):
                 yields_evol=self.history.ism_iso_yield_massive
             idx=self.history.isotopes.index(yaxis)
         else:
-            print 'Isotope or element not available'
+            print ('Isotope or element not available')
             return 0
 
         for k in range(0,len(yields_evol)):
@@ -1314,7 +1305,7 @@ class sygma( chem_evol ):
             elif norm == 'current':
                 y.append( yields_evol[k][idx]/yields_evol_all[k][idx])
             else:
-                print 'wrong specification of norm parameter'
+                print ('wrong specification of norm parameter')
 
         x=x[1:]
         y=y[1:]
@@ -1433,7 +1424,6 @@ class sygma( chem_evol ):
                 fig.text(0.01, 0.5, '(IMF-weighted) fraction of ejecta', ha='center', va='center', rotation='vertical')
 
         #set lim here
-        #print limits
         #for k in range(len(ax_plots)):
         #        ax_plots[k].set_ylim(limits[k][0],limits[k][1])
 
@@ -1541,7 +1531,7 @@ class sygma( chem_evol ):
                     x.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
                 if norm=='ini':
                     x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
-                    print yields_evol[0][iso_idx]
+                    print (yields_evol[0][iso_idx])
 
             plt.xlabel('X('+xaxis+')')
             plt.xscale('log')
@@ -1662,7 +1652,7 @@ class sygma( chem_evol ):
 
         #Error message if there is the "subplot" has not been provided
         if sub_plot and sub == 1:
-            print '!! Error - You need to use the \'sub\' parameter and provide the frame for the plot !!'
+            print ('!! Error - You need to use the \'sub\' parameter and provide the frame for the plot !!')
             return
 
         #Operations associated with plot visual aspects
@@ -1722,8 +1712,6 @@ class sygma( chem_evol ):
             xaxis_elem1=xaxis.split('/')[0][1:]
             xaxis_elem2=xaxis.split('/')[1][:-1]
 
-            #print xaxis_elem1, xaxis_elem2
-
             #X-axis ini values
             x_elem1_ini=x_ini[elements.index(xaxis_elem1)]
             x_elem2_ini=x_ini[elements.index(xaxis_elem2)]
@@ -1774,7 +1762,7 @@ class sygma( chem_evol ):
             if xaxis=='age':
                 x.append(x_age[k])
         if len(y)==0:
-            print 'Y values all zero'
+            print ('Y values all zero')
         #Operations associated with plot visual aspects
         if not return_x_y and not sub_plot:
             plt.ylabel(yaxis)
@@ -1889,7 +1877,7 @@ class sygma( chem_evol ):
 
         if t==-1:
             t=self.history.tend
-        idx=int(t/self.history.dt) -1
+        idx=int(t/self.history.dt) - 1
         isotopes1=self.history.isotopes
         yields_iso1=self.history.ism_iso_yield[idx]
         isotopes=[]
@@ -1917,21 +1905,21 @@ class sygma( chem_evol ):
                 if elem_name==ele:
                     elem_array.append(isotopes[k].split('-')[1] )
                     y_array.append(yields_norm )
-                    print 'new iso',isotopes[k]
+                    print ('new iso',isotopes[k])
                     #i+=1
                     if not k==(len(isotopes)-1):
                         continue
-                print k
+                print (k)
                 plt.plot(elem_array,y_array,marker=marker_type[marker1],markersize=8,linestyle=line_style[linest])
-                print elem_array
-                print y_array[0]
+                print (elem_array)
+                print (y_array[0])
                 i+=1
                 if (i%2) ==0:
                     high=6
                 else:
                     high=4
-                print 'i',i
-                print 'high',high
+                print ('i',i)
+                print ('high',high)
                 y_pos=(max(y_array))
                 x_pos=  elem_array[y_array.index(max(y_array))]
                 ax.annotate(iso_name, xy=(x_pos, y_pos), xytext=(elem_array[0],high))
@@ -2179,7 +2167,7 @@ class sygma( chem_evol ):
         sn1anumbers=self.history.sn1a_numbers#[:-1]
         sn2numbers=self.history.sn2_numbers
         if xaxis=='redshift':
-                print 'this features is not tested yet.'
+                print ('this features is not tested yet.')
                 return 0
                 age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
                 age=[0]+age
@@ -2362,10 +2350,10 @@ class sygma( chem_evol ):
                         mean_age.append(1) #age[k+1]-age[k])
                 for k in range(len(age)):
                         age_bdy.append(age[k])
-                print 'age',len(mean_age)
-                print 'weights',len(sfr)
-                print 'bdy',len(age_bdy)
-                print sfr[:5]
+                print ('age',len(mean_age))
+                print ('weights',len(sfr))
+                print ('bdy',len(age_bdy))
+                print (sfr[:5])
                 p1 =plt.hist(mean_age, bins=age_bdy,weights=sfr,facecolor=color,color=color,alpha=0.5,label=label)
 
         #Plot the mass fraction of gas available converted into stars
@@ -2381,7 +2369,7 @@ class sygma( chem_evol ):
                         sfr=np.array(sfr)*np.array(self.history.m_locked_massive)/np.array(self.history.m_locked)
                         label='Massive'
                 age=self.history.age[:-1]
-                print len(age),len(sfr)
+                print (len(age),len(sfr))
                 plt.xlabel('age [yr]')
                 plt.plot(age,sfr,label=label,marker=marker,linestyle=shape)
                 plt.ylabel('fraction of current gas mass into stars')
@@ -2408,8 +2396,8 @@ class sygma( chem_evol ):
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
-        #print 'Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:'
-        #print sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive)
+        #print ('Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:')
+        #print (sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive))
 
     def plot_mass_range_contributions(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
@@ -2528,7 +2516,6 @@ class sygma( chem_evol ):
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
 
-        #print [mean_val,bin_bdys,y]
         return
 
 
@@ -2551,7 +2538,7 @@ class sygma( chem_evol ):
                         age_idx=age1.index(time)
                 else:
                         age_idx=min(range(len(age1)), key=lambda i: abs(age1[i]-time))
-                        print 'Age not found, choose closest age',age1[age_idx]
+                        print ('Age not found, choose closest age',age1[age_idx])
                 mass_ranges=self.history.imf_mass_ranges[age_idx]
                 contribution=self.history.imf_mass_ranges_contribution[age_idx]
                 mtots=self.history.imf_mass_ranges_mtot[age_idx]
@@ -2567,8 +2554,8 @@ class sygma( chem_evol ):
                                 mtots=self.history.imf_mass_ranges_mtot[k]
                                 firstTime=False
                         elif len(mass_ranges1)>0 and (not len(self.history.imf_mass_ranges[k]) == len(mass_ranges)):
-                                print 'Error: Different mass range intervalls used: cannot combine them'
-                                print 'Choose a specific staburst via time'
+                                print ('Error: Different mass range intervalls used: cannot combine them')
+                                print ('Choose a specific staburst via time')
                                 return 0
                         elif len(mass_ranges1)>0:
                                 mtots=np.array(mtots)+np.array(self.history.imf_mass_ranges_mtot[k])
@@ -2596,23 +2583,18 @@ class sygma( chem_evol ):
                 x_ini+=x_iso_ism_ini[iso_idx]
             if prodfac==True:
                 if x_ini ==0:
-                        print 'Initial abundance not available!'
-                        print 'Cannot plot production factor.'
+                        print ('Initial abundance not available!')
+                        print ('Cannot plot production factor.')
                         return 0
                 y[k]=np.array(yields)/(mtots[k]*x_ini)
             else:
                 y[k]=yields
-
-        #print mass_ranges
-        #print 'contribution'
-        #print y
 
         #masses1=[]
         #for m in range(len(mass_ranges)):
         #    masses1.append( (mass_ranges[m][0]+mass_ranges[m][1])/2.)
         #masses_idx= sorted(range(len(masses1)),key=lambda x:masses1[x])
 
-        #print 'len same: ',len(mass_ranges),len(masses)
         #for idx in masses_idx:
         #    masses.append(masses1[idx])
         #    yields.append(yields1[idx])
@@ -2623,11 +2605,7 @@ class sygma( chem_evol ):
         #bin_bdys.append(1)
         bin_values=[]
         #rebin the plot using the bin size rebin
-        #print mass_ranges
         if rebin >0:
-                #print mass_ranges
-                #print y
-                #nprint '-------------------'
                 #_imf(self,mmin,mmax,inte,mass=0,iolevel=0)
                 mass=mass_ranges[0][0]
                 mmax=mass_ranges[-1][1]
@@ -2644,15 +2622,13 @@ class sygma( chem_evol ):
                                 mmax=0
                         bin_bdys1.append([bin_min,bin_max])
                         bin_values.append(0)
-                        #print 'Bin :',bin_bdys1[-1]
                         for k in range(len(mass_ranges)):
                                 if (mass_ranges[k][1]<=bin_min) or (mass_ranges[k][0]>=bin_max):
                                         continue
-                                #print 'interval ',mass_ranges[k]
                                 #if mass range inside bin
                                 elif (mass_ranges[k][0]>=bin_min) and (mass_ranges[k][1]<=bin_max):
                                         bin_values[-1]+=y[k]
-                                        #print 'bin includes mass range',y[k]
+                                        #print ('bin includes mass range',y[k])
                                         continue
                                 #if mass range includes bin:
                                 elif (mass_ranges[k][0]<=bin_min) and (mass_ranges[k][1]>=bin_max):
@@ -2660,7 +2636,7 @@ class sygma( chem_evol ):
                                         h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
                                         y1=h*self._imf(bin_min,bin_max,inte=2)
                                         bin_values[-1]+=y1
-                                        #print 'mass range inlcudes bin ',bin_min,bin_max,y1
+                                        #print ('mass range inlcudes bin ',bin_min,bin_max,y1)
 
                                 #if upper part of bin is not in mass range
                                 elif (mass_ranges[k][1]<bin_max):
@@ -2668,21 +2644,21 @@ class sygma( chem_evol ):
                                         h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
                                         y1=h*self._imf(bin_min,mass_ranges[k][1],inte=2)
                                         bin_values[-1]+=y1
-                                        #print 'add upper half from ',bin_min,mass_ranges[k][1],y1
+                                        #print ('add upper half from ',bin_min,mass_ranges[k][1],y1)
                                 #if lower part of bin is not in mass range
                                 elif mass_ranges[k][0]>bin_min:
                                         #normalization to bin mass
                                         h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
                                         y1=h*self._imf(mass_ranges[k][0],bin_max,inte=2)
-                                        #print 'add lower half from ',mass_ranges[k][0],bin_max,y1
+                                        #print ('add lower half from ',mass_ranges[k][0],bin_max,y1)
                                         bin_values[-1]+=y1
                         #if bin_values[-1]==0:
-                        #        print 'Note that no values are found in bin range:',bin_min,'-',bin_max
+                        #        print ('Note that no values are found in bin range:',bin_min,'-',bin_max)
                                 #return 0
                         if mmax==bin_max:
                                 break
-        #        print bin_bdys1
-#                print bin_values
+        #        print (bin_bdys1)
+#                print (bin_values)
                 mass_ranges=bin_bdys1
                 y=bin_values
 
@@ -2693,10 +2669,6 @@ class sygma( chem_evol ):
                         bin_bdys.append(mass_ranges[k][0])
                 bin_bdys.append(mass_ranges[k][1])
                 mean_val.append( (mass_ranges[k][0] + mass_ranges[k][1])/2.)
-        #print 'test'
-        #print yields
-        #print bin_bdys
-        #print mean_val
 
         return mean_val,bin_bdys,y,color,label
 
@@ -2894,10 +2866,10 @@ class sygma( chem_evol ):
                 specie=isotopes
 
         else:
-                print 'Specify either isotopes or elements'
+                print ('Specify either isotopes or elements')
                 return
         if len(idx)==0:
-                print 'Please choose the right isotope names'
+                print ('Please choose the right isotope names')
                 return 0
 
 
@@ -2933,13 +2905,12 @@ class sygma( chem_evol ):
                 f1=open(name,'w')
                 f1.write(out)
                 f1.close()
-                print 'Created table '+name+'.'
-                print 'Download the table using the following link:'
+                print ('Created table '+name+'.')
+                print ('Download the table using the following link:')
                 #from IPython.display import HTML
                 #from IPython import display
                 from IPython.core.display import HTML
                 import IPython.display as display
-                #print help(HTML)
                 #return HTML("""<a href="evol_tables/download.php?file="""+name+"""">Download</a>""")
                 #test=
                 #return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
@@ -2949,7 +2920,7 @@ class sygma( chem_evol ):
                 #else:
                 #        return name
         else:
-                print 'file '+table_name+' saved in subdirectory evol_tables.'
+                print ('file '+table_name+' saved in subdirectory evol_tables.')
                 f1=open(path+table_name,'w')
                 f1.write(out)
                 f1.close()
@@ -2966,7 +2937,7 @@ class sygma( chem_evol ):
         firstidx=True
         for k in range(len(time)):
                 if time[k]>=8e8:
-                        time_new.append(time[k]/1e9)
+                        time_new.append(time[k]/1.0e9)
                         if firstidx:
                                 index=k
                                 firstidx=False
