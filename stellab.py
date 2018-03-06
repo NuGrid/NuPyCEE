@@ -68,9 +68,9 @@ class stellab():
     def __init__(self):
 
 
-	# read abundance data library via 
-	# index file abundance_data_library.txt
-	# creates self.paths, self.paths_s, self.cs, self.leg
+        # read abundance data library via 
+        # index file abundance_data_library.txt
+        # creates self.paths, self.paths_s, self.cs, self.leg
         self.read_abundance_data_library(global_path+'/stellab_data/abundance_data_library.txt')
 
         # Declaration of the name of available galaxies
@@ -91,188 +91,9 @@ class stellab():
         #self.cs        = []  # Color and symbol
         #self.leg       = []  # Legend
 
-        '''
-        # List of all the data sets (path)
-        self.paths.append('milky_way_data/APOGEE_R13_stellab')
-        self.paths.append('milky_way_data/Frebel_2010_Milky_Way_stellab')
-        self.paths.append('milky_way_data/Venn_et_al_2004_stellab')
-        self.paths.append('milky_way_data/Hinkel_et_al_2014_stellab')
-        self.paths.append('milky_way_data/Akerman_et_al_2004_stellab')
-        self.paths.append('milky_way_data/Andrievsky_et_al_2007_stellab')
-        self.paths.append('milky_way_data/Andrievsky_et_al_2008_stellab')
-        self.paths.append('milky_way_data/Andrievsky_et_al_2010_stellab')
-        self.paths.append('milky_way_data/Bensby_et_al_2005_stellab')
-        #        self.paths.append('milky_way_data/Bensby_Feltzing_2006_stellab')
-        #        self.paths.append('milky_way_data/Bergemann_Gehren_2008_stellab')
-        self.paths.append('milky_way_data/Bihain_et_al_2004_stellab')
-        self.paths.append('milky_way_data/Bonifacio_et_al_2009_stellab')
-        self.paths.append('milky_way_data/Caffau_et_al_2005_stellab')
-        self.paths.append('milky_way_data/Cayrel_et_al_2004_stellab')
-        self.paths.append('milky_way_data/Fabbian_et_al_2009_stellab')
-        #        self.paths.append('milky_way_data/Gehren_et_al_2006_stellab')
-        self.paths.append('milky_way_data/Gratton_et_al_2003_stellab')
-        self.paths.append('milky_way_data/Israelian_et_al_2004_stellab')
-        self.paths.append('milky_way_data/Lai_et_al_2008_stellab')
-        self.paths.append('milky_way_data/Nissen_et_al_2007_stellab')
-        self.paths.append('milky_way_data/Reddy_et_al_2006_stellab')
-        self.paths.append('milky_way_data/Reddy_et_al_2003_stellab')
-        self.paths.append('milky_way_data/Spite_et_al_2005_stellab')
-        self.paths.append('milky_way_data/Battistini_Bensby_2016_stellab')
-        self.paths.append('milky_way_data/Nissen_et_al_2014_stellab')
-        self.paths.append('milky_way_data/Ramirez_et_al_2013_stellab')
-        self.paths.append('milky_way_data/Bensby_et_al_2014_stellab')
-        self.paths.append('milky_way_data/Battistini_Bensby_2015_stellab')
-        self.paths.append('milky_way_data/Yong_et_al_2013_stellab')
-        self.paths.append('milky_way_data/Jacobson_et_al_2015_stellab')
-        self.paths.append('milky_way_data/Cohen_et_al_2013_stellab')
-        self.paths.append('milky_way_data/Cohen_et_al_2013_noCEMPs_stellab')
-        self.paths.append('milky_way_data/Adibekyan_et_al_2012_stellab')
-        self.paths.append('milky_way_data/Aoki_Honda_2008_stellab')
-        self.paths.append('milky_way_data/Hansen_et_al_2012_pecu_excluded_stellab')
-        self.paths.append('milky_way_data/Ishigaki_et_al_2012_2013_stellab')
-        self.paths.append('milky_way_data/Roederer_et_al_2009_stellab')
-        self.paths.append('milky_way_data/Roederer_et_al_2014_pecu_excluded_stellab')
-
-        self.paths.append('sculptor_data/Kirby_et_al_2010_Sculptor_stellab')
-        self.paths.append('sculptor_data/Frebel_2010_Sculptor_stellab')
-        self.paths.append('sculptor_data/Starkenburg_et_al_2013_stellab')
-        self.paths.append('sculptor_data/Jablonka_et_al_2015_stellab')
-#        self.paths.append('fornax_data/Kirby_et_al_2010_Fornax_stellab')
-        self.paths.append('fornax_data/Letarte_et_al_2010_stellab')
-        self.paths.append('fornax_data/Lemasle_et_al_2014_stellab')
-        self.paths.append('carina_data/Fabrizio_et_al_2015_stellab')
-        self.paths.append('carina_data/Lemasle_et_al_2012_stellab')
-        self.paths.append('carina_data/Venn_et_al_2012_stellab')
-        self.paths.append('lmc_data/Lapenna_et_al_2012_stellab')
-        self.paths.append('lmc_data/Pompeia_et_al_2008_stellab')
-        '''
-
         ## List of all the solar values used in the data sets
         #for i_path in range(0,len(self.paths)):
         #    self.paths_s.append(self.paths[i_path]+'_s')
-
-	'''
-        # List of colors and symbols associated to data sets
-        self.cs.append('ob') # APOGEE R13 - Milky Way
-        self.cs.append('xg') # Frebel (2010) - Milky Way
-        self.cs.append('xr') # Venn et al. (2004)
-        self.cs.append('xb') # Hinkel et al. (2014)
-        self.cs.append('sr') # Akerman et al. (2004)
-        self.cs.append('og') # Andrievsky et al. (2007)
-        self.cs.append('og') # Andrievsky et al. (2008)
-        self.cs.append('og') # Andrievsky et al. (2010)
-        self.cs.append('om') # Bensby et al. (2005)
-        #        self.cs.append('^g') # Bensby & Feltzing (2006)
-        #        self.cs.append('og') # Bergemann & Gehren (2008)
-        self.cs.append('og') # Bihain et al. (2004)
-        self.cs.append('^m') # Bonifacio et al. (2009)
-        self.cs.append('xm') # Caffau et al. (2005)
-        self.cs.append('^r') # Cayrel et al. (2004)
-        self.cs.append('^c') # Fabbian et al. (2009)
-        #        self.cs.append('^g') # Gehren et al. (2006)
-        self.cs.append('sc') # Gratton et al. (2003)
-        self.cs.append('oc') # Israelian et al. (2004)
-        self.cs.append('or') # Lai et al. (2008)
-        self.cs.append('^g') # Nissen et al. (2007)
-        self.cs.append('^r') # Reddy et al. (2006)
-        self.cs.append('sb') # Reddy et al. (2003)
-        self.cs.append('ob') # Spite et al. (2005)
-        self.cs.append('oc') # Battistini & Bensby (2016)
-        self.cs.append('xc') # Nissen et al. (2014)
-        self.cs.append('xb') # Ramirez et al. (2013)
-        self.cs.append('xm') # Bensby et al. (2014)
-        self.cs.append('xr') # Battistini & Bensby (2015)
-        self.cs.append('xk') # Yong et al. (2013)
-        self.cs.append('xg') # Jacobson et al. (2015)
-        self.cs.append('xb') # Cohen et al. (2013)
-        self.cs.append('xb') # Cohen et al. noCEMPs (2013)
-        self.cs.append('xg') # Adibekyan et al. (2012)
-        self.cs.append('xb') # Aoki & Honda (2008)
-        self.cs.append('ob') # Hansen et al. (2012)
-        self.cs.append('xm') # Ishigaki et al. (2012-2013)
-        self.cs.append('om') # Roederer et al. (2009)
-        self.cs.append('xr') # Roederer et al. (2014)
-
-        # Sculptor
-        ##########
-        self.cs.append('xc') # Kirby et al. (2010) - Sculptor
-        self.cs.append('xb') # Frebel (2010) - Sculptor
-        self.cs.append('om') # Starkenburg et al. (2013)
-        self.cs.append('og') # Jablonka et al. (2015)
-
-        # Fornax
-        ########
-#        self.cs.append('xg') # Kirby et al. (2010) - Fornax
-        self.cs.append('oc') # Letarte et al. (2010)
-        self.cs.append('ob') # Lemasle et al. (2014)
-
-        # Carina
-        ########
-        self.cs.append('og') # Fabrizio et al. (2015)
-        self.cs.append('ob') # Lemasle et al. (2012)
-        self.cs.append('or') # Venn et al. (2012)
-
-        # LMC
-        #####
-        self.cs.append('ob') # Lapenna et al. (2012)
-        self.cs.append('or') # Pompeia et al. (2008)
-
-        # List of legends associated to data sets
-        self.leg.append('APOGEE (R13)')
-        self.leg.append('Frebel (2010)')
-        self.leg.append('Venn et al. (2004)')
-        self.leg.append('Hinkel et al. (2014)')
-        self.leg.append('Akerman et al. (2004)')
-        self.leg.append('Andrievsky et al. (2007)')
-        self.leg.append('Andrievsky et al. (2008)')
-        self.leg.append('Andrievsky et al. (2010)')
-        self.leg.append('Bensby et al. (2005)')
-        #        self.leg.append('Bensby & Feltzing (2006)')
-        #        self.leg.append('Bergemann & Gehren (2008)')
-        self.leg.append('Bihain et al. (2004)')
-        self.leg.append('Bonifacio et al. (2009)')
-        self.leg.append('Caffau et al. (2005)')
-        self.leg.append('Cayrel et al. (2004)')
-        self.leg.append('Fabbian et al. (2009)')
-        #        self.leg.append('Gehren et al. (2006)')
-        self.leg.append('Gratton et al. (2003)')
-        self.leg.append('Israelian et al. (2004)')
-        self.leg.append('Lai et al. (2008)')
-        self.leg.append('Nissen et al. (2007)')
-        self.leg.append('Reddy et al. (2006)')
-        self.leg.append('Reddy et al. (2003)')
-        self.leg.append('Spite et al. (2005)')
-        self.leg.append('Battistini & Bensby (2016)')
-        self.leg.append('Nissen et al. (2014)')
-        self.leg.append('Ramirez et al. (2013)')
-        self.leg.append('Bensby et al. (2014)')
-        self.leg.append('Battistini & Bensby (2015)')
-        self.leg.append('Yong et al. (2013)')
-        self.leg.append('Jacobson et al. (2015)')
-        self.leg.append('Cohen et al. (2013)')
-        self.leg.append('Cohen et al. noCEMPs (2013)')
-        self.leg.append('Adibekyan et al. (2012)')
-        self.leg.append('Aoki & Honda (2008)')
-        self.leg.append('Hansen et al. (2012)')
-        self.leg.append('Ishigaki et al. (2012-13)')
-        self.leg.append('Roederer et al. (2009)')
-#        self.leg.append('Roederer et al. pecul. excluded (2014)')
-        self.leg.append('Roederer et al. (2014)')
-
-        self.leg.append('Kirby et al. (2010)')
-        self.leg.append('Frebel (2010)')
-        self.leg.append('Starkenburg et al. (2013)')
-        self.leg.append('Jablonka et al. (2015)')
-#        self.leg.append('Kirby et al. (2010)')
-        self.leg.append('Letarte et al. (2010)')
-        self.leg.append('Lemasle et al. (2014)')
-        self.leg.append('Fabrizio et al. (2015)')
-        self.leg.append('Lemasle et al. (2012)')
-        self.leg.append('Venn et al. (2012)')
-        self.leg.append('Lapenna et al. (2012)')
-        self.leg.append('Pompeia et al. (2008)')
-        '''
-
 
         # For every data set ...
         for i_entry in range(0,len(self.paths)):
@@ -310,54 +131,53 @@ class stellab():
     ##############################################
     #        Read abundance data library         #
     ##############################################
-
     def read_abundance_data_library(self,filename):
 
         # open index file
-	f=open(filename)
+        f=open(filename)
         lines=f.readlines()  
-	f.close()
+        f.close()
 
-	# Declaration of the name of available galaxies
+        # Declaration of the name of available galaxies
        
         # name of galaxy
-	self.galaxy_name = []
-	# color + symbol
+        self.galaxy_name = []
+        # color + symbol
         self.cs=[]
-	# legend
+        # legend
         self.leg=[] 
         # path to the stellar abundances file
         self.paths = []
         for k in range(len(lines)):
-		line = lines[k]
-		#ignore header
-		if k == 0:
-			continue
-		#if commented line
-		if line[0] == '#':
-			continue
-                # Declaration of the name of available galaxies
-		if  line[0] == 'H':
-			galaxy=line[1:].strip()
-			self.galaxy_name.append(galaxy)
-			#print 'found galaxy ',galaxy
-		# read data set
-		else:
-			#print line
-			path = 'stellab_data/'+line.split('&&')[0].strip()
-			leg = line.split('&&')[1].strip()
-			cs = line.split('&&')[2].strip()
-			self.paths.append(path)
-			self.leg.append(leg)
-			self.cs.append(cs)
-			#print 'path : ',path
-			#print 'leg : ',leg
+            line = lines[k]
+            #ignore header
+            if k == 0:
+                continue
+            #if commented line
+            if line[0] == '#':
+                continue
+            # Declaration of the name of available galaxies
+            if line[0] == 'H':
+                galaxy=line[1:].strip()
+                self.galaxy_name.append(galaxy)
+                #print 'found galaxy ',galaxy
+            # read data set
+            else:
+                #print line
+                path = 'stellab_data/'+line.split('&&')[0].strip()
+                leg = line.split('&&')[1].strip()
+                cs = line.split('&&')[2].strip()
+                self.paths.append(path)
+                self.leg.append(leg)
+                self.cs.append(cs)
+                #print 'path : ',path
+                #print 'leg : ',leg
 
         self.paths_s   = []  # Path to the solar values
 
         # List of all the solar values used in the data sets
-	for i_path in range(0,len(self.paths)):
-	        self.paths_s.append(self.paths[i_path]+'_s')
+        for i_path in range(0,len(self.paths)):
+            self.paths_s.append(self.paths[i_path]+'_s')
 
 
     ##############################################
@@ -613,32 +433,32 @@ class stellab():
 
         fsize : 2D float array
 
-	     Figure dimension/size.
+            Figure dimension/size.
 
-	fontsize : integer
+        fontsize : integer
 
-	     Font size of the numbers on the X and Y axis.
+            Font size of the numbers on the X and Y axis.
 
-	rspace : float
+        rspace : float
 
-	     Extra space on the right for the legend.
+            Extra space on the right for the legend.
 
-	bspace : float
+        bspace : float
 
-	     Extra space at the bottom for the Y axis label.
+            Extra space at the bottom for the Y axis label.
 
-	labelsize : integer
+        labelsize : integer
 
-	     Font size of the X and Y axis labels.
+            Font size of the X and Y axis labels.
 
-	legend_fontsize : integer
+        legend_fontsize : integer
 
- 	     Font size of the legend.
+            Font size of the legend.
 
         Examples
-	----------
+        ----------
 
-	>>> stellab.plot_spectro(yaxis='[Ti/H]',xaxis='[Mg/H]',galaxy='sculptor',norm='Anders_Grevesse_1989',show_err=True)
+        >>> stellab.plot_spectro(yaxis='[Ti/H]',xaxis='[Mg/H]',galaxy='sculptor',norm='Anders_Grevesse_1989',show_err=True)
 
         '''
 
@@ -664,10 +484,10 @@ class stellab():
 
         # Show the frame of the plot
         if not overplot and not return_xy and not sub_plot:
-	    if fig>=0:
-            	plt.figure(fig,figsize=(fsize[0],fsize[1]))
-	    else:
-		plt.figure(fig,figsize=(fsize[0],fsize[1]))		
+            if fig>=0:
+                plt.figure(fig,figsize=(fsize[0],fsize[1]))
+            else:
+                plt.figure(fig,figsize=(fsize[0],fsize[1]))
 
         # If data need to be re-normalized ...
         re_norm = False
@@ -1199,21 +1019,21 @@ class stellab():
                        legend_fontsize=14):
 
         '''
-	Internal function in order to get standardized figure font sizes.
-	It is used in the plotting functions.
+        Internal function in order to get standardized figure font sizes.
+        It is used in the plotting functions.
 
         '''
 
         plt.legend(loc=2,prop={'size':legend_fontsize})
         plt.rcParams.update({'font.size': fontsize})
         ax.yaxis.label.set_size(labelsize)
-        ax.xaxis.label.set_size(labelsize)	
-	ax.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
-	ax.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
-#	if len(ax.lines)>0:
-#		for h in range(len(ax.lines)):
-#			ax.lines[h].set_markersize(markersize)
-	ax.legend(loc='center left', bbox_to_anchor=(1.01, 0.5), \
+        ax.xaxis.label.set_size(labelsize)
+        ax.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
+        ax.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
+#        if len(ax.lines)>0:
+#            for h in range(len(ax.lines)):
+#                ax.lines[h].set_markersize(markersize)
+        ax.legend(loc='center left', bbox_to_anchor=(1.01, 0.5), \
              markerscale=0.8,fontsize=legend_fontsize)
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
@@ -1262,8 +1082,8 @@ class stellab():
               print self.paths[i_lsn] 
         else:
            i_obs = self.__get_i_data_galaxy(galaxy)
-	   for i_ref in i_obs:
-	      print self.paths[i_ref]	 
+           for i_ref in i_obs:
+               print self.paths[i_ref] 
 
     ##############################################
     #                 Get star id                #
@@ -1278,11 +1098,11 @@ class stellab():
         ---------
 
         find_elements : array
-	    Find index of all stars with elements
-	obs : string
-	    Star data set
+            Find index of all stars with elements
+        obs : string
+            Star data set
         '''
-		    
+    
         overplot=False
         
         # get the elements available
@@ -1297,8 +1117,8 @@ class stellab():
         abunds_y_err=[] 
         eles_found=[]
         num_stars=0
-	star_ids=[]
-	star_fe_h=[]
+        star_ids=[]
+        star_fe_h=[]
         for k in range(len(find_elements)):
             yaxis='['+find_elements[k]+'/'+'Fe]'
             ret_x, ret_y, ret_x_err, ret_y_err,ret_star_i=self.plot_spectro(fig=-1, galaxy='', xaxis='[Fe/H]', yaxis=yaxis, \
@@ -1309,41 +1129,43 @@ class stellab():
                    sub=1, sub_plot=False, alpha=1.0, lw=1.0,abundistr=True)
 
 
-	    if k==0:
-	      star_ids=ret_star_i
-	      star_fe_h=ret_x
+            if k==0:
+                star_ids=ret_star_i
+                star_fe_h=ret_x
             else:  
-	      star_ids_tmp=[]
-	      star_fe_h_tmp=[]
-              for h in range(len(star_ids)):
-	           if star_ids[h] in ret_star_i:
-		      star_ids_tmp.append(star_ids[h])
-		      star_fe_h_tmp.append(star_fe_h[h])
-	      star_ids=star_ids_tmp	 
-	      star_fe_h=star_fe_h_tmp
+                star_ids_tmp=[]
+                star_fe_h_tmp=[]
+                for h in range(len(star_ids)):
+                    if star_ids[h] in ret_star_i:
+                        star_ids_tmp.append(star_ids[h])
+                        star_fe_h_tmp.append(star_fe_h[h])
+                star_ids=star_ids_tmp 
+                star_fe_h=star_fe_h_tmp
 
-	#get [Fe/H] values
-	if len(find_Fe_H_range)>0:
-	    fe_h_max=find_Fe_H_range[1]
-	    if fe_h_max==0:
-		    fe_h_max=max(star_fe_h)
-	    fe_h_min=find_Fe_H_range[0]
+        # get [Fe/H] values
+        if len(find_Fe_H_range)>0:
+            fe_h_max=find_Fe_H_range[1]
+            if fe_h_max==0:
+                fe_h_max=max(star_fe_h)
+            fe_h_min=find_Fe_H_range[0]
             if fe_h_min==0:
-		    fe_h_min=min(star_fe_h)
+                fe_h_min=min(star_fe_h)
             star_ids_tmp=[]
-	    print 'adjust to given metallicity range from ',fe_h_min,' to ',fe_h_max
-	    for k in range(len(star_ids)):
-		    if (star_fe_h[k]>fe_h_min) and (star_fe_h[k]<fe_h_max):
-			    star_ids_tmp.append(star_ids[k])
-	    star_ids=star_ids_tmp
-        return star_ids		      
+            print 'adjust to given metallicity range from ',fe_h_min,' to ',fe_h_max
+            for k in range(len(star_ids)):
+                if (star_fe_h[k]>fe_h_min) and (star_fe_h[k]<fe_h_max):
+                    star_ids_tmp.append(star_ids[k])
+            star_ids=star_ids_tmp
+        return star_ids
+
 
     ##############################################
     #                 Plot Abun                  #
     ##############################################
 
     def plot_abun(self,fig=-1,obs='milky_way_data/Venn_et_al_2004_stellab',\
-		    star_idx=0,find_elements=[],fsize=[10,4.5],label='Star 1',elem_label_on=True,fontsize=14,shape='-',color='k', rspace=0.6, bspace=0.15,\
+                   star_idx=0,find_elements=[],fsize=[10,4.5],label='Star 1',elem_label_on=True,\
+                   fontsize=14,shape='-',color='k', rspace=0.6, bspace=0.15,\
                    labelsize=15, legend_fontsize=14, ms=6.0, norm='',\
                    marker='o',markersize=3,return_xy=False,show_err=True, \
                    show_mean_err=False, stat=False, flat=False, show_legend=True, \
@@ -1357,9 +1179,9 @@ class stellab():
         ---------
 
         elements : array
-	find_elements : array
-	    Plot only  
-	'''
+        find_elements : array
+            Plot only  
+        '''
         
         overplot=False
         
@@ -1369,7 +1191,7 @@ class stellab():
         i_obs = self.__get_i_data_set([obs])
         i_ds=i_obs[0]
         elements = self.elem_list[i_ds]   
-	if iolevel>0:
+        if iolevel>0:
             print 'Number of elements available in dataset: ',elements
         # get [X/Fe] for each element
         abunds_y=[]
@@ -1384,9 +1206,9 @@ class stellab():
                    overplot=False, return_xy=True, show_err=True, \
                    show_mean_err=False, stat=False, flat=False, show_legend=True, \
                    sub=1, sub_plot=False, alpha=1.0, lw=1.0,abundistr=True)
-	       	    
-	    if star_idx in ret_star_i:
-	       idx=ret_star_i.index(star_idx)  
+
+            if star_idx in ret_star_i:
+                idx=ret_star_i.index(star_idx)  
                #ret_x[idx]
                abunds_y.append(ret_y[idx])
                #ret_x_err[idx]
@@ -1395,7 +1217,7 @@ class stellab():
                #print 'get value: ',ret_y[idx]
             if len(ret_star_i)>num_stars:
                num_stars=len(ret_star_i)
-	if iolevel>0:
+        if iolevel>0:
             print 'Number of stars available in dataset: ',num_stars
         err_on = show_err                
         self.__plot_distr(fig,eles_found,abunds_y,abunds_y_err,err_on,elem_label_on,shape,color,label,marker,markersize,fsize) 
@@ -1410,84 +1232,84 @@ class stellab():
         ---------
 
         elements : array
-	  list of elements to be plotted
-	abunds : array 
-	       abundances as [X/Fe] 
+            list of elements to be plotted
+        abunds : array 
+            abundances as [X/Fe] 
         label_on : boolean
-	       if true plots the element label for each element
+            if true plots the element label for each element
 
         '''
         plt.figure(fig,figsize=(fsize[0],fsize[1]))
 
-	Z_numbers=[]
+        Z_numbers=[]
         for i_ele in range(len(elements)):
-	  # get name of element
-	  Z=ry.get_z_from_el(elements[i_ele])
-	  Z_numbers.append(Z)
+          # get name of element
+          Z=ry.get_z_from_el(elements[i_ele])
+          Z_numbers.append(Z)
 
         Z_numbers_sort=[]
         abunds_sort=[]
-	idx_sorted=sorted(range(len(Z_numbers)),key=lambda x:Z_numbers[x])		
+        idx_sorted=sorted(range(len(Z_numbers)),key=lambda x:Z_numbers[x])
         for k in range(len(idx_sorted)):
-	   Z_numbers_sort.append(Z_numbers[idx_sorted[k]])
-	   abunds_sort.append(abunds[idx_sorted[k]])	 
+           Z_numbers_sort.append(Z_numbers[idx_sorted[k]])
+           abunds_sort.append(abunds[idx_sorted[k]]) 
 
-	plt.ylabel('[X/Fe]')
+        plt.ylabel('[X/Fe]')
         plt.xlabel('charge number Z')
         plt.plot(Z_numbers_sort, abunds_sort, linestyle=shape,\
                          color=color,label=label,marker=marker,markersize=markersize)
 
-	## plot element labels 
-	if label_on:
-	  for i_ele in range(len(elements)):    	
-       	      plt.annotate(elements[i_ele],(Z_numbers[i_ele],abunds[i_ele]), \
-		    xytext=(-2,0),textcoords='offset points',horizontalalignment='right', verticalalignment='top') 		  
+        ## plot element labels 
+        if label_on:
+            for i_ele in range(len(elements)):
+                plt.annotate(elements[i_ele],(Z_numbers[i_ele],abunds[i_ele]), \
+                    xytext=(-2,0),textcoords='offset points',horizontalalignment='right', verticalalignment='top') 
 
 
         #err on
         if err_on:
-	   for i_ele in range(len(elements)):	
-              plt.errorbar(Z_numbers[i_ele],abunds[i_ele], \
-		    xerr=0, yerr=abunds_err[i_ele],
-		    color=color,marker=marker, ecolor=color, \
-		    label=label, markersize=markersize, \
-                            alpha=1)
+            for i_ele in range(len(elements)):
+                plt.errorbar(Z_numbers[i_ele],abunds[i_ele], \
+                    xerr=0, yerr=abunds_err[i_ele],
+                    color=color,marker=marker, ecolor=color, \
+                    label=label, markersize=markersize, alpha=1)
 
 
     def write_data_table(self,data,attr,filename):
+
         '''
         Write stellar data table for the stellab database. Format as for
-	files found in stellab_data and read in by stellab.
+        files found in stellab_data and read in by stellab.
 
         Parameters
         ---------
 
-	data : list
+        data : list
             List of stellar data such as abundances. Each list element
-	    contains list entries for a star.
+            contains list entries for a star.
 
-	attr : list
-	    List of types of stellar data such as [Fe/H] for each star.
-	filename : string
-	    Name of data file to be written
+        attr : list
+            List of types of stellar data such as [Fe/H] for each star.
+        filename : string
+            Name of data file to be written
         '''
         out=''
 
         #create header with types
-	for k in range(len(attr)):
-		sp = len(attr[k])
-		out = out + attr[k]+(10-sp)*' '
+        for k in range(len(attr)):
+            sp = len(attr[k])
+            out = out + attr[k]+(10-sp)*' '
         out = out + '\n'
 
-	#loop over stars
-	for k in range(len(data)):
-		for h in range(len(data[k])):
-		     out = out + '{:.3E}'.format(data[k][h]) + ' '
-		out = out + '\n'    
+        #loop over stars
+        for k in range(len(data)):
+            for h in range(len(data[k])):
+                out = out + '{:.3E}'.format(data[k][h]) + ' '
+            out = out + '\n'    
 
-	f1=open(filename,'w')
-	f1.write(out)
-	f1.close()
+        f1=open(filename,'w')
+        f1.write(out)
+        f1.close()
         print 'file ',filename,' created.' 
         
 
