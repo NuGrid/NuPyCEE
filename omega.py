@@ -35,6 +35,17 @@ v0.5 MAR2015: B. Cote
 
 v0.6 OCT2016: B. Cote
 
+Stop keeking track of version from now on.
+
+MARCH2018: B. Cote
+- Switched to Python 3
+- Capability to include radioactive isotopes
+
+
+Note
+====
+Please do not use "tabs" when introducing new lines of code.
+
 
 Usage
 =====
@@ -64,7 +75,6 @@ Analysis functions: See the Sphinx documentation
 '''
 
 #standard packages
-import matplotlib.pyplot as plt
 import copy
 import math
 import random
@@ -239,54 +249,67 @@ class omega( chem_evol ):
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  tend=13e9, mgal=1.0e10, transitionmass=8, iolevel=0, \
-                 ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0,\
+                 ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=30.0e6,\
                  table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
+                 table_radio='', decay_file='', sn1a_table_radio='',\
+                 bhnsmerger_table_radio='', nsmerger_table_radio='',\
                  hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[],\
                  sn1a_table='yield_tables/sn1a_t86.txt',\
                  ns_merger_on=False, f_binary=1.0, f_merger=0.0008,\
-                 t_merger_max=1.0e10, m_ej_nsm = 2.5e-02, \
-                 nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', \
+                 t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, \
+                 nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
                  bhns_merger_on=False, m_ej_bhnsm=2.5e-02, \
-                 bhnsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', \
+                 bhnsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
                  iniabu_table='', extra_source_on=False, \
                  extra_source_table=['yield_tables/extra_source.txt'], \
- 		 f_extra_source=[1.0], pre_calculate_SSPs=False, \
-     	         extra_source_mass_range=[[8,30]], \
-		 extra_source_exclude_Z=[[]], \
+                 f_extra_source=[1.0], pre_calculate_SSPs=False, \
+                 extra_source_mass_range=[[8,30]], \
+                 total_ejecta_interp=True, radio_refinement=100, \
+                 extra_source_exclude_Z=[[]], beta_crit=1.0, \
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0, gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
                  nb_1a_per_m=1.0e-3, f_arfo=1, t_merge=-1.0,\
                  imf_yields_range=[1,30],exclude_masses=[], \
-		 netyields_on=False,wiersmamod=False,skip_zero=False,\
+                 netyields_on=False,wiersmamod=False,skip_zero=False,\
                  redshift_f=0.0,print_off=False,long_range_ref=False,\
                  f_s_enhance=1.0,m_gas_f=-1.0, cl_SF_law=False,\
                  external_control=False, calc_SSP_ej=False, tau_ferrini=False,\
                  input_yields=False, popIII_info_fast=True, t_sf_z_dep = 1.0,\
                  m_crit_on=False, norm_crit_m=8.0e+09, mass_frac_SSP=0.5,\
                  sfh_array_norm=-1.0, imf_rnd_sampling=False,\
-                 out_follows_E_rate=False,\
+                 out_follows_E_rate=False, yield_interp='lin',\
                  r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
-		 stellar_param_on=False, delayed_extra_log=False,\
+                 stellar_param_on=False, delayed_extra_log=False,\
+                 delayed_extra_yields_log_int=False,\
+                 delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
                  bhnsmerger_dtd_array=np.array([]), dt_in_SSPs=np.array([]), \
                  DM_array=np.array([]), nsmerger_dtd_array=np.array([]),\
                  sfh_array=np.array([]),ism_ini=np.array([]),\
+                 ism_ini_radio=np.array([]),\
+                 m_inflow_array=np.array([]), m_gas_array=np.array([]),\
                  mdot_ini=np.array([]), mdot_ini_t=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
-		 ytables_nsmerger_in=np.array([]), SSPs_in=np.array([]),\
+                 ytables_nsmerger_in=np.array([]), SSPs_in=np.array([]),\
                  dt_in=np.array([]), dt_split_info=np.array([]),\
                  ej_massive=np.array([]), ej_agb=np.array([]),\
                  ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
                  ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
-                 dt_ssp=np.array([]),yield_interp='lin',\
+                 dt_ssp=np.array([]), r_vir_array=np.array([]),\
                  mass_sampled=np.array([]), scale_cor=np.array([]),\
                  mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
                  poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
-                 m_tot_ISM_t_in=np.array([]),\
+                 m_tot_ISM_t_in=np.array([]), m_inflow_X_array=np.array([]),\
                  delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
-                 delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([])):
+                 delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]),\
+                 delayed_extra_dtd_radio=np.array([]), delayed_extra_dtd_norm_radio=np.array([]), \
+                 delayed_extra_yields_radio=np.array([]), \
+                 delayed_extra_yields_norm_radio=np.array([]), \
+                 ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
+                 ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
+                 test_clayton=np.array([])):
 
         # Get the name of the instance
         import traceback
@@ -296,7 +319,7 @@ class omega( chem_evol ):
         # Announce the beginning of the simulation 
         print 'OMEGA run in progress..'
         start_time = t_module.time()
-	self.start_time = start_time
+        self.start_time = start_time
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
@@ -305,29 +328,37 @@ class omega( chem_evol ):
                  transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, nsm_dtd_power=nsm_dtd_power,\
-		 ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
+                 ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
                  nsmerger_table=nsmerger_table, t_merger_max=t_merger_max,\
                  m_ej_nsm = m_ej_nsm, nb_nsm_per_m=nb_nsm_per_m, t_nsm_coal=t_nsm_coal, \
                  bhns_merger_on=bhns_merger_on, m_ej_bhnsm=m_ej_bhnsm, \
                  bhnsmerger_table=bhnsmerger_table, \
+                 table_radio=table_radio, decay_file=decay_file,\
+                 sn1a_table_radio=sn1a_table_radio, \
+                 bhnsmerger_table_radio=bhnsmerger_table_radio,\
+                 nsmerger_table_radio=nsmerger_table_radio,\
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
                  extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
-		 extra_source_mass_range=extra_source_mass_range, \
-		 extra_source_exclude_Z=extra_source_exclude_Z,\
- 		 pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
+                 extra_source_mass_range=extra_source_mass_range, \
+                 extra_source_exclude_Z=extra_source_exclude_Z,\
+                 pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
                  imf_bdys_pop3=imf_bdys_pop3, \
+                 total_ejecta_interp=total_ejecta_interp, \
                  imf_yields_range_pop3=imf_yields_range_pop3, \
                  starbursts=starbursts, beta_pow=beta_pow, \
                  gauss_dtd = gauss_dtd, exp_dtd = exp_dtd, \
                  nb_1a_per_m=nb_1a_per_m, Z_trans=Z_trans, f_arfo=f_arfo, \
                  imf_yields_range=imf_yields_range,exclude_masses=exclude_masses, \
                  netyields_on=netyields_on,wiersmamod=wiersmamod, \
-                 input_yields=input_yields,\
+                 input_yields=input_yields, ism_ini_radio=ism_ini_radio,\
                  tau_ferrini=tau_ferrini, t_dtd_poly_split=t_dtd_poly_split, \
                  t_merge=t_merge,popIII_info_fast=popIII_info_fast,\
                  out_follows_E_rate=out_follows_E_rate,\
-		 stellar_param_on=stellar_param_on,\
+                 stellar_param_on=stellar_param_on,\
                  ism_ini=ism_ini,ytables_in=ytables_in,\
+                 delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
+                 delayed_extra_log_radio=delayed_extra_log_radio,\
+                 delayed_extra_yields_log_int_radio=delayed_extra_yields_log_int_radio,\
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
@@ -335,17 +366,25 @@ class omega( chem_evol ):
                  delayed_extra_log=delayed_extra_log, \
                  nsmerger_dtd_array=nsmerger_dtd_array,\
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
-		 ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
+                 ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
                  dt_split_info=dt_split_info,ej_massive=ej_massive,\
                  ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
                  ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\
                  ej_sn1a_coef=ej_sn1a_coef,dt_ssp=dt_ssp,\
-		 yield_interp=yield_interp, SSPs_in=SSPs_in,\
+                 yield_interp=yield_interp, SSPs_in=SSPs_in,\
                  poly_fit_dtd_5th=poly_fit_dtd_5th,poly_fit_range=poly_fit_range,\
                  delayed_extra_dtd=delayed_extra_dtd,\
                  delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
                  delayed_extra_yields=delayed_extra_yields,\
-                 delayed_extra_yields_norm=delayed_extra_yields_norm)
+                 delayed_extra_yields_norm=delayed_extra_yields_norm,\
+                 delayed_extra_dtd_radio=delayed_extra_dtd_radio,\
+                 delayed_extra_dtd_norm_radio=delayed_extra_dtd_norm_radio,\
+                 delayed_extra_yields_radio=delayed_extra_yields_radio,\
+                 delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
+                 ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
+                 ytables_1a_radio_in=ytables_1a_radio_in,\
+                 ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
+                 test_clayton=test_clayton, radio_refinement=radio_refinement)
 
         # Quit if something bad happened in chem_evol ..
         if self.need_to_quit:
@@ -403,6 +442,14 @@ class omega( chem_evol ):
         self.t_sf_z_dep = t_sf_z_dep
         self.out_follows_E_rate = out_follows_E_rate
         self.m_tot_ISM_t_in = m_tot_ISM_t_in
+        self.m_inflow_array = m_inflow_array
+        self.len_m_inflow_array = len(m_inflow_array)
+        self.m_inflow_X_array = m_inflow_X_array
+        self.len_m_inflow_X_array = len(m_inflow_X_array)
+        self.m_gas_array = m_gas_array
+        self.len_m_gas_array = len(m_gas_array)
+        self.beta_crit = beta_crit
+        self.r_vir_array = r_vir_array
 
         # If the IMF will randomly be sampled ...
         if self.imf_rnd_sampling:
@@ -413,21 +460,35 @@ class omega( chem_evol ):
 
             # Calculate the stellar mass associated with the
             # highest IMF value (needed for Monte Carlo)
-            self.imf_norm_sampled = 10.0
-            self.imfnorm = self.imf_norm_sampled
-            imf_temp = []
-            m_temp = self.imf_bdys[0]
-            dm = 0.02
-            while m_temp <= (self.imf_bdys[1]):
-                imf_temp.append(self._imf(1.0,2.0,0,mass=m_temp))
-                m_temp += dm
-            self.imf_max = max(imf_temp)
+            # ONLY SAMPLING MASSIVE STARS
+            self.A_rdm = 1.0 / self.transitionmass**(-2.3)
+            self.m_frac_massive_rdm = self.A_rdm * \
+                self._imf(self.transitionmass, self.imf_bdys[1], 2)
+
+            # Calculate the stellar mass associated with the
+            # highest IMF value (needed for Monte Carlo)
+            # SAMPLING ALL STARS (warning! --> Need to modify the code for this)
+            #self.imf_norm_sampled = 10.0
+            #self.imfnorm = self.imf_norm_sampled
+            #imf_temp = []
+            #m_temp = self.imf_bdys[0]
+            #dm = 0.02
+            #while m_temp <= (self.imf_bdys[1]):
+            #    imf_temp.append(self._imf(1.0,2.0,0,mass=m_temp))
+            #    m_temp += dm
+            #self.imf_max = max(imf_temp)
 
         # Set cosmological parameters - Dunkley et al. (2009)
-        self.omega_0   = 0.257   # Current mass density parameter
-        self.omega_b_0 = 0.044   # Current baryonic mass density parameter
-        self.lambda_0  = 0.742   # Current dark energy density parameter
-        self.H_0       = 71.9    # Hubble constant [km s^-1 Mpc^-1]
+        #self.omega_0   = 0.257   # Current mass density parameter
+        #self.omega_b_0 = 0.044   # Current baryonic mass density parameter
+        #self.lambda_0  = 0.742   # Current dark energy density parameter
+        #self.H_0       = 71.9    # Hubble constant [km s^-1 Mpc^-1]
+
+        # Set cosmological parameters - as in Wise et al. 2012
+        self.omega_0   = 0.266   # Current mass density parameter
+        self.omega_b_0 = 0.0449  # Current baryonic mass density parameter
+        self.lambda_0  = 0.734   # Current dark energy density parameter
+        self.H_0       = 71.0    # Hubble constant [km s^-1 Mpc^-1]
 
         # Look for errors in the input parameters
         self.__check_inputs_omega()
@@ -447,7 +508,7 @@ class omega( chem_evol ):
                 self.redshift_t.append(0.0)
             self.t_SF_t.append(0.0)
             self.redshift_t.append(0.0)
-            self.__calculate_redshift_t()
+            self.calculate_redshift_t()
             self.__calculate_t_SF_t()
             need_t_raf = False
             for i_raf in range(self.nb_timesteps):
@@ -512,7 +573,7 @@ class omega( chem_evol ):
         # Read the primordial composition of the inflow gas
         if self.in_out_control or self.SF_law or self.DM_evolution:
             prim_comp_table = 'yield_tables/iniabu/iniab_bb_walker91.txt'
-	    self.prim_comp = ry.read_yield_sn1a_tables(global_path + \
+            self.prim_comp = ry.read_yield_sn1a_tables(global_path + \
                 prim_comp_table, self.history.isotopes)
 
         # In construction .. need to avoid altering default setups ..
@@ -587,6 +648,27 @@ class omega( chem_evol ):
                   'of the dark matter halo is evolving.'
             return
 
+        # Inflow array when input
+        if self.len_m_inflow_array > 0:
+            if not self.len_m_inflow_array == self.nb_timesteps:
+                print 'Error - len(m_inflow_array) needs to equal nb_timesteps.'
+                return
+
+        # Inflow X array when input
+        if self.len_m_inflow_X_array > 0:
+            if not self.len_m_inflow_X_array == self.nb_timesteps:
+                print 'Error - len(m_inflow_X_array) needs to equal nb_timesteps.'
+                return
+            if not len(self.m_inflow_X_array[0]) == self.nb_isotopes:
+                print 'Error - len(m_inflow_X_array[i]) needs to equal nb_isotopes.'
+                return
+
+        # Mgas array when input
+        if self.len_m_gas_array > 0:
+            if not self.len_m_gas_array == (self.nb_timesteps+1):
+                print 'Error - len(m_gas_array) needs to equal nb_timesteps+1.'
+                return
+
 
     ##############################################
     #                Refine Steps                #
@@ -642,7 +724,7 @@ class omega( chem_evol ):
             # Keep the t_merger index in memory
             self.i_t_merger = i_temp
 
-        # Update/redeclare all the arrays
+        # Update/redeclare all the arrays (stable isotopes)
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
@@ -651,9 +733,23 @@ class omega( chem_evol ):
         self.mdot_agb, self.mdot_1a, self.mdot_nsm, self.mdot_bhnsm, \
         self.mdot_delayed_extra, \
         self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, self.bhnsm_numbers,\
- 	self.delayed_extra_numbers, self.imf_mass_ranges, \
+        self.delayed_extra_numbers, self.imf_mass_ranges, \
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
-        self._get_storing_arrays(ymgal)
+        self._get_storing_arrays(ymgal, len(self.history.isotopes))
+
+        # Update/redeclare all the arrays (unstable isotopes)
+        if self.len_decay_file > 0:
+            ymgal_radio = np.zeros(self.nb_radio_iso)
+
+            # Initialisation of the storing arrays for radioactive isotopes
+            self.mdot_radio, self.ymgal_radio, self.ymgal_massive_radio, \
+            self.ymgal_agb_radio, self.ymgal_1a_radio, self.ymgal_nsm_radio, \
+            self.ymgal_bhnsm_radio, self.ymgal_delayed_extra_radio, \
+            self.mdot_massive_radio, self.mdot_agb_radio, self.mdot_1a_radio, \
+            self.mdot_nsm_radio, self.mdot_bhnsm_radio,\
+            self.mdot_delayed_extra_radio, dummy, dummy, dummy, dummy, dummy, \
+            dummy, dummy, dummy = \
+            self._get_storing_arrays(ymgal_radio, self.nb_radio_iso)
 
         # Recalculate the simulation time (used in chem_evol)
         self.t_ce = []
@@ -725,7 +821,7 @@ class omega( chem_evol ):
             # Keep the t_merger index in memory
             self.i_t_merger = i_temp
 
-        # Update/redeclare all the arrays
+        # Update/redeclare all the arrays (stable isotopes)
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
@@ -734,9 +830,23 @@ class omega( chem_evol ):
         self.mdot_agb, self.mdot_1a, self.mdot_nsm, self.mdot_bhnsm, \
         self.mdot_delayed_extra, \
         self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, self.bhnsm_numbers,\
- 	self.delayed_extra_numbers, self.imf_mass_ranges, \
+        self.delayed_extra_numbers, self.imf_mass_ranges, \
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
-        self._get_storing_arrays(ymgal)
+        self._get_storing_arrays(ymgal, len(self.history.isotopes))
+
+        # Update/redeclare all the arrays (unstable isotopes)
+        if self.len_decay_file > 0:
+            ymgal_radio = np.zeros(self.nb_radio_iso)
+
+            # Initialisation of the storing arrays for radioactive isotopes
+            self.mdot_radio, self.ymgal_radio, self.ymgal_massive_radio, \
+            self.ymgal_agb_radio, self.ymgal_1a_radio, self.ymgal_nsm_radio, \
+            self.ymgal_bhnsm_radio, self.ymgal_delayed_extra_radio, \
+            self.mdot_massive_radio, self.mdot_agb_radio, self.mdot_1a_radio, \
+            self.mdot_nsm_radio, self.mdot_bhnsm_radio,\
+            self.mdot_delayed_extra_radio, dummy, dummy, dummy, dummy, dummy, \
+            dummy, dummy, dummy = \
+            self._get_storing_arrays(ymgal_radio, self.nb_radio_iso)
 
         # Recalculate the simulation time (used in chem_evol)
         self.t_ce = []
@@ -1264,13 +1374,13 @@ class omega( chem_evol ):
         if self.in_out_control or self.SF_law or self.DM_evolution:
 
             # Calculate the redshift for every timestep, if needed
-            self.__calculate_redshift_t()
+            self.calculate_redshift_t()
 
             # Calculate the mass of the dark matter halo at every timestep
             self.__calculate_m_DM_t()
 
             # Calculate the virial radius and velocity at every timestep
-            self.__calculate_virial()
+            self.calculate_virial()
 
             # Calculate the critical, mass below which no SFR, at every dt
             self.__calculate_m_crit_t()
@@ -1331,42 +1441,39 @@ class omega( chem_evol ):
     ##############################################
     #           Calculate redshift(t)            #
     ##############################################
-    def __calculate_redshift_t(self):
+    def calculate_redshift_t(self):
 
         '''
         This function calculates the redshift associated to every timestep
         assuming that 'tend' represents redshift zero.
 
         '''
- 
-        # Execute the function only if needed
-        if self.DM_evolution:
 
-            # Calculate the current age of the Universe (LambdaCDM - z = 0)
-            current_age_czt = self.__get_t_from_z(self.redshift_f)
+        # Calculate the current age of the Universe (LambdaCDM - z = 0)
+        current_age_czt = self.__get_t_from_z(self.redshift_f)
 
-            # Calculate the age of the Universe when the galaxy forms
-            age_formation_czt = current_age_czt - self.history.tend
+        # Calculate the age of the Universe when the galaxy forms
+        age_formation_czt = current_age_czt - self.history.tend
 
-            # Initiate the age of the galaxy
-            t_czt = 0.0
+        # Initiate the age of the galaxy
+        t_czt = 0.0
 
-            #For each timestep
-            for i_czt in range(0, self.nb_timesteps+1):
+        #For each timestep
+        for i_czt in range(0, self.nb_timesteps+1):
 
-                #Calculate the age of the Universe at that time [yr]
-                age_universe_czt = age_formation_czt + t_czt
+            #Calculate the age of the Universe at that time [yr]
+            age_universe_czt = age_formation_czt + t_czt
 
-                #Calculate the redshift at that time
-                self.redshift_t[i_czt] = self.__get_z_from_t(age_universe_czt)
+            #Calculate the redshift at that time
+            self.redshift_t[i_czt] = self.__get_z_from_t(age_universe_czt)
 
-                #Udpate the age of the galaxy [yr]
-                if i_czt < self.nb_timesteps:
-                    t_czt += self.history.timesteps[i_czt]
+            #Udpate the age of the galaxy [yr]
+            if i_czt < self.nb_timesteps:
+                t_czt += self.history.timesteps[i_czt]
 
-            #Correction for last digit error (e.g. z = -2.124325345e-8)
-            if self.redshift_t[-1] < 0.0:
-                self.redshift_t[-1] = 0.0
+        #Correction for last digit error (e.g. z = -2.124325345e-8)
+        if self.redshift_t[-1] < 0.0:
+            self.redshift_t[-1] = 0.0
 
 
     ##############################################
@@ -1383,9 +1490,16 @@ class omega( chem_evol ):
         # If the mass of the dark matter halo is kept at a constant value ...
         if not self.DM_evolution:
 
+            # If the dark matter evolution is an input array ...
+            if len(self.DM_array) > 0:
+
+                # Copy the input values
+                self.copy_DM_input()
+
             # Use the current value for every timestep
-            for i_cmdt in range(0, self.nb_timesteps+1):
-                self.m_DM_t[i_cmdt] = self.m_DM_0
+            else:
+                for i_cmdt in range(0, self.nb_timesteps+1):
+                    self.m_DM_t[i_cmdt] = self.m_DM_0
 
         # If the mass of the dark matter halo evolves with time ...
         else:
@@ -1394,7 +1508,7 @@ class omega( chem_evol ):
           if len(self.DM_array) > 0:
 
             # Copy the input values
-            self.__copy_DM_input()
+            self.copy_DM_input()
 
           # If the dark matter evolution is taken from Millenium simulations ...
           else:
@@ -1442,7 +1556,7 @@ class omega( chem_evol ):
     ##############################################
     #               Copy DM Input                #
     ##############################################
-    def __copy_DM_input(self):
+    def copy_DM_input(self):
 
         '''
         This function interpolates the DM masses from an input array
@@ -1490,9 +1604,68 @@ class omega( chem_evol ):
                 break
 
         # If the array has been read completely, but the DM array is
-        # not full, fil the rest of the array with the last read value
+        # not full, fil the rest of the array with the last input value
         while i_dt_csa < nb_dt_csa+1:
             self.m_DM_t[i_dt_csa] = self.DM_array[-1][1]
+            #self.m_DM_t[i_dt_csa] = self.m_DM_t[i_dt_csa-1]
+            i_dt_csa += 1
+
+
+    ##############################################
+    #              Copy R_vir Input              #
+    ##############################################
+    def copy_r_vir_input(self):
+
+        '''
+        This function interpolates the R_vir from an input array
+        and add the radius to the corresponding OMEGA step
+
+        '''
+
+        # Variable to keep track of the OMEGA's timestep
+        i_dt_csa = 0
+        t_csa = 0.0
+        nb_dt_csa = self.nb_timesteps
+
+        # If just one entry ...
+        if len(self.r_vir_array) == 1:
+            self.r_vir_DM_t[i_dt_csa] = self.r_vir_array[0][1]
+            i_dt_csa += 1
+
+        # If r_vir values need to be interpolated ...
+        else:
+
+          # For every timestep given in the array (starting at the second step)
+          for i_csa in range(1,len(self.r_vir_array)):
+
+            # Calculate the DM interpolation coefficient
+            a_r_vir = (self.r_vir_array[i_csa][1] - self.r_vir_array[i_csa-1][1]) / \
+                    (self.r_vir_array[i_csa][0] - self.r_vir_array[i_csa-1][0])
+            b_r_vir = self.r_vir_array[i_csa][1] - a_r_vir * self.r_vir_array[i_csa][0]
+
+            # While we stay in the same time bin ...
+            while t_csa <= self.r_vir_array[i_csa][0]:
+
+                # Interpolate r_vir
+                self.r_vir_DM_t[i_dt_csa] = a_r_vir * t_csa + b_r_vir
+
+                # Exit the loop if the array is full
+                if i_dt_csa >= nb_dt_csa:
+                    break
+
+                # Calculate the new time
+                t_csa += self.history.timesteps[i_dt_csa]
+                i_dt_csa += 1
+
+            # Exit the loop if the array is full
+            if i_dt_csa >= nb_dt_csa:
+                break
+
+        # If the array has been read completely, but the r_vir array is
+        # not full, fil the rest of the array with the last input value
+        while i_dt_csa < nb_dt_csa+1:
+            self.r_vir_DM_t[i_dt_csa] = self.r_vir_array[-1][1]
+            #self.r_vir_DM_t[i_dt_csa] = self.r_vir_DM_t[i_dt_csa-1]
             i_dt_csa += 1
 
 
@@ -1556,18 +1729,30 @@ class omega( chem_evol ):
     ##############################################
     #              Calculate Virial              #
     ##############################################
-    def __calculate_virial(self):
+    def calculate_virial(self):
 
-        # Average current mass density of the Universe [Mo Mpc^-3]
-        rho_0_uni = 3.7765e10
+        # If R_vir needs to be calculated ..
+        if len(self.r_vir_array) == 0:
+
+            # Average current mass density of the Universe [Mo Mpc^-3]
+            rho_0_uni = 3.7765e10
+
+            # For each timestep ...
+            for i_cv in range(0,len(self.history.timesteps)+1):
+
+                # Calculate the virial radius of the dark matter halo [kpc]
+                self.r_vir_DM_t[i_cv] = 1.0e3 * 0.106078 * \
+                    (self.m_DM_t[i_cv] / rho_0_uni)**0.3333333 / \
+                    (1 + self.redshift_t[i_cv])
+
+        # If R_vir is provided as an input ..
+        else:
+
+            # Use the input array and synchronize the timesteps
+            self.copy_r_vir_input()
 
         # For each timestep ...
         for i_cv in range(0,len(self.history.timesteps)+1):
-
-            # Calculate the virial radius of the dark matter halo [kpc]
-            self.r_vir_DM_t[i_cv] = 1.0e3 * 0.106078 * \
-                (self.m_DM_t[i_cv] / rho_0_uni)**0.3333333 / \
-                (1 + self.redshift_t[i_cv])
 
             #Calculate the virial velocity of the dark matter "particles" [km/s]
             self.v_vir_DM_t[i_cv] = ( 4.302e-6 * self.m_DM_t[i_cv] / \
@@ -1579,17 +1764,23 @@ class omega( chem_evol ):
     ##############################################
     def __calculate_m_crit_t(self):
 
+        # Calculate the real constant
+#        m_crit_final = self.norm_crit_m * (0.1/2000.0) * \
+#            (self.v_vir_DM_t[-1] * self.r_vir_DM_t[-1])
+#        the_constant = m_crit_final / ((0.1/2000.0) * \
+#            (self.v_vir_DM_t[-1] * self.r_vir_DM_t[-1])**self.beta_crit)
+        the_constant = self.norm_crit_m
+
         #For each timestep ...
         for i_ctst in range(0,len(self.history.timesteps)+1):
 
             # If m_crit_t is wanted ...
             if self.m_crit_on:
-
-                # Calculate the critical mass (Croton et al. 2006)
-                self.m_crit_t[i_ctst] = self.norm_crit_m * \
-                    self.v_vir_DM_t[i_ctst] * 0.1 * \
-                    self.r_vir_DM_t[i_ctst] / 2000.0
-
+                
+                # Calculate the critical mass (Croton et al. 2006 .. modified)
+                self.m_crit_t[i_ctst] = the_constant * (0.1/2000.0) * \
+                    (self.v_vir_DM_t[i_ctst] * self.r_vir_DM_t[i_ctst])**self.beta_crit
+                     
             # If m_crit_t is not wanted ...
             else:
 
@@ -1914,7 +2105,8 @@ class omega( chem_evol ):
          
         '''
 
-        self.test = []
+#        if self.len_decay_file > 0:
+#            print 'Warning, radioactive isotopes are missing in the outflows'
 
         # For every timestep i considered in the simulation ...
         for i in range(1, self.nb_timesteps+1):
@@ -1926,8 +2118,6 @@ class omega( chem_evol ):
                 # Get the sampled masses
                 mass_sampled = self._get_mass_sampled(\
                     self.sfr_input[i-1] * self.history.timesteps[i-1])
-
-                self.test.append(mass_sampled)
 
             # No mass sampled if using the full IMF ...
             else:
@@ -1946,7 +2136,8 @@ class omega( chem_evol ):
     #                   Run Step                 #
     ##############################################
     def run_step(self, i, sfr_rs, m_added = np.array([]), m_lost = 0.0, \
-                 mass_sampled=np.array([]), scale_cor=np.array([])):
+                 no_in_out = False, f_esc_yields=0.0, mass_sampled=np.array([]),
+                 scale_cor=np.array([])):
 
         '''
         This function calculates the evolution of one single step in the
@@ -1959,6 +2150,8 @@ class omega( chem_evol ):
           sfr_rs : Input star formation rate [Mo/yr] for the step i.
           m_added : Mass (and composition) added for the step i.
           m_lost : Mass lost for the step i.
+          no_in_out : Cancel the open box "if" statement if True
+          f_esc_yields: Fraction of non-contributing stellar ejecta
           mass_sampled : Stars sampled in the IMF by an external program.
           scale_cor : Envelope correction for the IMF.
          
@@ -1975,7 +2168,11 @@ class omega( chem_evol ):
             self.__cal_m_frac_stars(i, sfr_rs)
 
             # Run the timestep i (!need to be right after __cal_m_frac_stars!)
-            self._evol_stars(i, mass_sampled, scale_cor)
+            self._evol_stars(i, f_esc_yields, mass_sampled, scale_cor)
+
+            # Decay radioactive isotopes
+            if self.len_decay_file > 0:
+                self._decay_radio(i)
 
             # Delay outflow is needed (following SNe rather than SFR) ...
             if self.out_follows_E_rate:
@@ -1993,24 +2190,40 @@ class omega( chem_evol ):
                 f_lost = m_lost / sum(self.ymgal[i])
                 if f_lost > 1.0:
                     f_lost = 1.0
-                    print '!!Warning -- Remove more mass than available!!'
+                    if not self.print_off:
+                        print '!!Warning -- Remove more mass than available!!'
                 
                 # Remove the mass for each isotope
                 f_lost_2 = (1.0 - f_lost)
-                for k_op in range(0, self.nb_isotopes):
-                    self.ymgal[i][k_op] = f_lost_2 * self.ymgal[i][k_op]
-                    self.ymgal_agb[i][k_op] = f_lost_2 * self.ymgal_agb[i][k_op]
-                    self.ymgal_1a[i][k_op] = f_lost_2 * self.ymgal_1a[i][k_op]
-		    self.ymgal_nsm[i][k_op] = f_lost_2 * self.ymgal_nsm[i][k_op]
-		    self.ymgal_bhnsm[i][k_op] = f_lost_2 * self.ymgal_bhnsm[i][k_op]
-                    self.ymgal_massive[i][k_op] = f_lost_2*self.ymgal_massive[i][k_op]
+                self.ymgal[i] = f_lost_2 * self.ymgal[i]
+                if self.len_decay_file > 0:
+                    self.ymgal_radio[i] = f_lost_2 * self.ymgal_radio[i]
+                if not self.pre_calculate_SSPs:
+                    self.ymgal_agb[i] = f_lost_2 * self.ymgal_agb[i]
+                    self.ymgal_1a[i] = f_lost_2 * self.ymgal_1a[i]
+                    self.ymgal_nsm[i] = f_lost_2 * self.ymgal_nsm[i]
+                    self.ymgal_bhnsm[i] = f_lost_2 * self.ymgal_bhnsm[i]
+                    self.ymgal_massive[i] = f_lost_2 * self.ymgal_massive[i]
                     for iiii in range(0,self.nb_delayed_extra):
-                      for k in range(self.len_ymgal):
-                          self.ymgal_delayed_extra[iiii][i][k] = \
-                              f_lost_2 * self.ymgal_delayed_extra[iiii][i][k]
+                        self.ymgal_delayed_extra[iiii][i] = \
+                            f_lost_2 * self.ymgal_delayed_extra[iiii][i]
+                    # Radioactive isotopes lost
+                    if self.len_decay_file > 0:
+                        if self.radio_massive_agb_on:
+                            self.ymgal_massive_radio[i] = f_lost_2 * self.ymgal_massive_radio[i]
+                            self.ymgal_agb_radio[i] = f_lost_2 * self.ymgal_agb_radio[i]
+                        if self.radio_sn1a_on:
+                            self.ymgal_1a_radio[i] = f_lost_2 * self.ymgal_1a_radio[i]
+                        if self.radio_nsmerger_on:
+                            self.ymgal_nsm_radio[i] = f_lost_2 * self.ymgal_nsm_radio[i]
+                        if self.radio_bhnsmerger_on:
+                            self.ymgal_bhnsm_radio[i] = f_lost_2 * self.ymgal_bhnsm_radio[i]
+                        for iiii in range(0,self.nb_delayed_extra_radio):
+                            self.ymgal_delayed_extra_radio[iiii][i] = \
+                                f_lost_2 * self.ymgal_delayed_extra_radio[iiii][i]
 
-            # If the open box scenario is used ...
-            if self.open_box:
+            # If the open box scenario is used (and it is not skipped) ...
+            if self.open_box and (not no_in_out):
 
                 # Calculate the total mass of the gas reservoir at timstep i
                 # after the star formation and the stellar ejecta
@@ -2018,20 +2231,39 @@ class omega( chem_evol ):
                 for k_op in range(0, self.nb_isotopes):
                     m_tot_current += self.ymgal[i][k_op]
 
-                # Get the current mass of inflow
-                m_inflow_current = self.__get_m_inflow(i, m_tot_current)
+                # Add inflows
+                if self.len_m_inflow_X_array > 0.0:
+                    self.ymgal[i] += self.m_inflow_X_array[i-1]
+                    m_inflow_current = self.m_inflow_array[i-1]
+                    self.m_inflow_t[i-1] = float(m_inflow_current)
+                else:
 
-                # Add primordial gas coming with the inflow
-                if m_inflow_current > 0.0:
-                    ym_inflow = self.prim_comp.get(quantity='Yields') * \
-                                m_inflow_current
-                    for k_op in range(0, self.nb_isotopes):
-                        self.ymgal[i][k_op] += ym_inflow[k_op]
+                    # Get the current mass of inflow
+                    m_inflow_current = self.__get_m_inflow(i, m_tot_current)
+
+                    # Add primordial gas coming with the inflow
+                    if m_inflow_current > 0.0:
+                        ym_inflow = self.prim_comp.get(quantity='Yields') * \
+                                    m_inflow_current
+                        for k_op in range(0, self.nb_isotopes):
+                            self.ymgal[i][k_op] += ym_inflow[k_op]
                 
-                #Calculate the fraction of gas removed by the outflow
+                # Calculate the fraction of gas removed by the outflow
                 if not (m_tot_current + m_inflow_current) == 0.0:
-                    frac_rem = self.m_outflow_t[i-1] / \
-                        (m_tot_current + m_inflow_current)
+                    if self.len_m_gas_array > 0:
+                        self.m_outflow_t[i-1] = (m_tot_current + m_inflow_current) - self.m_gas_array[i]
+                        frac_rem = self.m_outflow_t[i-1] / (m_tot_current + m_inflow_current)
+                        if frac_rem < 0.0:
+                            frac_rem = 0.0
+                            # Add primordial gas coming with the inflow
+                            self.m_outflow_t[i-1] = 0.0
+                            ym_inflow = self.prim_comp.get(quantity='Yields') * \
+                                        (-1.0) * self.m_outflow_t[i-1]
+                            for k_op in range(0, self.nb_isotopes):
+                                self.ymgal[i][k_op] += ym_inflow[k_op]
+                    else:
+                        frac_rem = self.m_outflow_t[i-1] / \
+                            (m_tot_current + m_inflow_current)
                 else:
                     frac_rem = 0.0
 
@@ -2045,15 +2277,30 @@ class omega( chem_evol ):
                           'It has been reduced to the amount of available gas.'
 
                 # Remove mass from the ISM because of the outflow
-                for k_op in range(0, self.nb_isotopes):
-                    self.ymgal[i][k_op] *= (1.0 - frac_rem)
-                    self.ymgal_agb[i][k_op] *= (1.0 - frac_rem)
-                    self.ymgal_1a[i][k_op] *= (1.0 - frac_rem)
-		    self.ymgal_nsm[i][k_op] *= (1.0 - frac_rem)
-		    self.ymgal_bhnsm[i][k_op] *= (1.0 - frac_rem)
-                    self.ymgal_massive[i][k_op] *= (1.0 - frac_rem)
+                self.ymgal[i] *= (1.0 - frac_rem)
+                if self.len_decay_file > 0:
+                    self.ymgal_radio[i]  *= (1.0 - frac_rem)
+                if not self.pre_calculate_SSPs:
+                    self.ymgal_agb[i] *= (1.0 - frac_rem)
+                    self.ymgal_1a[i] *= (1.0 - frac_rem)
+                    self.ymgal_nsm[i] *= (1.0 - frac_rem)
+                    self.ymgal_bhnsm[i] *= (1.0 - frac_rem)
+                    self.ymgal_massive[i] *= (1.0 - frac_rem)
                     for iiii in range(0,self.nb_delayed_extra):
-                        self.ymgal_delayed_extra[iiii][i][k_op] *= (1.0 - frac_rem)
+                        self.ymgal_delayed_extra[iiii][i] *= (1.0 - frac_rem)
+                    # Radioactive isotopes lost
+                    if self.len_decay_file > 0:
+                        if self.radio_massive_agb_on:
+                            self.ymgal_massive_radio[i] *= (1.0 - frac_rem)
+                            self.ymgal_agb_radio[i] *= (1.0 - frac_rem)
+                        if self.radio_sn1a_on:
+                            self.ymgal_1a_radio[i] *= (1.0 - frac_rem)
+                        if self.radio_nsmerger_on:
+                            self.ymgal_nsm_radio[i] *= (1.0 - frac_rem)
+                        if self.radio_bhnsmerger_on:
+                            self.ymgal_bhnsm_radio[i] *= (1.0 - frac_rem)
+                        for iiii in range(0,self.nb_delayed_extra_radio):
+                            self.ymgal_delayed_extra_radio[iiii][i] *= (1.0 - frac_rem)
 
             # Get the new metallicity of the gas
             self.zmetal = self._getmetallicity(i)
@@ -2085,7 +2332,8 @@ class omega( chem_evol ):
                 for i_tot in range(0,len(self.history.timesteps)):
                     self.m_stel_tot += self.history.sfr_abs[i_tot] * \
                         self.history.timesteps[i_tot]
-                self.m_stel_tot = 1 / self.m_stel_tot
+                if self.m_stel_tot > 0.0:            
+                    self.m_stel_tot = 1 / self.m_stel_tot
                 self.f_m_stel_tot = []
                 m_temp = 0.0
                 for i_tot in range(0,len(self.history.timesteps)):
@@ -2124,30 +2372,32 @@ class omega( chem_evol ):
         m_tot_temp = 0.0
     
         # Define the sampling precision in Msun
-        precision = 0.5
+        precision = 0.01 * m_pop * self.m_frac_massive_rdm
 
         # Copy the lower and upper mass limit of the IMF
-        m_low_imf = self.imf_bdys[0]
+        m_low_imf = self.transitionmass
         m_up_imf  = self.imf_bdys[1]
-
-        # Normalize the IMF as in the initialization function
-        self.imfnorm = self.imf_norm_sampled
+        dm_temp = m_up_imf - m_low_imf
     
         # While the total stellar mass is not formed ...
         while abs(m_tot_temp - m_pop) > precision:
  
             # Choose randomly a (m,nb) coordinate
-            rand_m = random.uniform(m_low_imf, m_up_imf)
-            rand_y = random.uniform(0,self.imf_max)
+            rand_m = m_low_imf + np.random.random_sample()*dm_temp
+            rand_y = np.random.random_sample()
         
             # If the coordinate is below the IMF curve
-            if rand_y <= self._imf(1.0,2.0,0,mass=rand_m):
+            if rand_y <= (self.A_rdm * rand_m**(-2.3)):
             
                 # Add the stellar mass only if it doesn't
                 # form to much mass compared to m_pop
                 if (m_tot_temp + rand_m) - m_pop <= precision:
                     mass_sampled_gms.append(rand_m)
                     m_tot_temp += rand_m
+
+            # Stop if cannot fit a massive star
+            if abs(m_tot_temp - m_pop) < self.transitionmass:
+                break
 
         # Return the stellar masses sampled using Monte Carlo
         return mass_sampled_gms
@@ -2184,7 +2434,10 @@ class omega( chem_evol ):
         mgal_tot = 0.0
         for k_ml in range(0, self.nb_isotopes):
             mgal_tot += self.ymgal[i-1][k_ml]
-        self.sfrin = self.sfrin / mgal_tot
+        if mgal_tot <= 0.0:
+            self.sfrin = 0.0
+        else:
+            self.sfrin = self.sfrin / mgal_tot
 
         # Modify the history of SFR if there is not enough gas
         if self.sfrin > 1.0:
@@ -2249,8 +2502,12 @@ class omega( chem_evol ):
 
         '''
 
+        # If an inflow mass in given at each timestep as an input ...
+        if self.len_m_inflow_array > 0:
+            m_inflow_current = self.m_inflow_array[i-1]
+
         # If the constant inflow rate is kept constant ...
-        if self.inflow_rate >= 0.0:
+        elif self.inflow_rate >= 0.0:
 
             # Use the input rate to calculate the inflow mass
             # Note : i-1 --> current timestep, see __copy_sfr_input()
@@ -2304,53 +2561,57 @@ class omega( chem_evol ):
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,show_legend=True):
     
         '''
-	 mass evolution (in Msun) of an element or isotope vs time.
-	
+        mass evolution (in Msun) of an element or isotope vs time.
+
 
         Parameters
         ----------
 
 
-	specie : string
+        specie : string
              isotope or element name, in the form 'C' or 'C-12'
-	source : string
+        source : string
              Specifies if yields come from
-	     all sources ('all'), including
-	     AGB+SN1a, massive stars. Or from
-	     distinctive sources:
-	     only agb stars ('agb'), only
-	     SN1a ('SN1a'), or only massive stars
+             all sources ('all'), including
+             AGB+SN1a, massive stars. Or from
+             distinctive sources:
+             only agb stars ('agb'), only
+             SN1a ('SN1a'), or only massive stars
              ('massive')
         norm : boolean
              If True, normalize to current total ISM mass
-	label : string
-	     figure label
-	marker : string
-	     figure marker
-	shape : string
-	     line style	
-	color : string
-	     color of line
+        label : string
+             figure label
+        marker : string
+             figure marker
+        shape : string
+             line style
+        color : string
+             color of line
         fig : string,float
-	     to name the plot figure    
+             to name the plot figure    
         show_legend : boolean
              Default True. Show or not the legend   
- 	       
-        Examples
-	----------
 
-	>>> s.plot('C-12')
+        Examples
+        ----------
+
+        >>> s.plot('C-12')
 
         '''
-	yaxis=specie
-	if len(label)<1:
-		label=yaxis
-		if source=='agb':
-			label=yaxis+', AGB'
-		if source=='massive':
-			label=yaxis+', Massive'
-		if source=='sn1a':
-			label=yaxis+', SNIa'
+
+        import matplotlib
+        import matplotlib.pyplot as plt
+
+        yaxis=specie
+        if len(label)<1:
+            label=yaxis
+            if source=='agb':
+                label=yaxis+', AGB'
+            if source=='massive':
+                label=yaxis+', Massive'
+            if source=='sn1a':
+                label=yaxis+', SNIa'
 
         #Reserved for plotting
         if not return_x_y:
@@ -2419,32 +2680,32 @@ class omega( chem_evol ):
                 plt.plot(x,y,linestyle=shape,marker=marker,color=color,markevery=markevery)
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    plt.xlim(self.history.dt,self.history.tend)	
-	    #return x,y
-	    self.save_data(header=['Age[yrs]',specie],data=[x,y])
+            plt.xlim(self.history.dt,self.history.tend)
+            #return x,y
+            #self.save_data(header=['Age[yrs]',specie],data=[x,y])
 
 
     def plot_massfrac(self,fig=2,xaxis='age',yaxis='O-16',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	Plots mass fraction of isotope or element
-	vs either time or other isotope or element.
+        Plots mass fraction of isotope or element
+        vs either time or other isotope or element.
 
         Parameters
         ----------
-	xaxis : string 
+        xaxis : string 
             either 'age' for time
-	    or isotope name, in the form e.g. 'C-12'
-	yaxis : string
+            or isotope name, in the form e.g. 'C-12'
+        yaxis : string
             isotope name, in the same form as for xaxis
 
-	source : string
+        source : string
             Specifies if yields come from
-	    all sources ('all'), including
-	    AGB+SN1a, massive stars. Or from
-	    distinctive sources:
-	    only agb stars ('agb'), only
-	    SN1a ('SN1a'), or only massive stars
+            all sources ('all'), including
+            AGB+SN1a, massive stars. Or from
+            distinctive sources:
+            only agb stars ('agb'), only
+            SN1a ('SN1a'), or only massive stars
             ('massive')
 
         norm : string
@@ -2465,40 +2726,38 @@ class omega( chem_evol ):
         Examples
         ----------
 
-	>>> s.plot_massfrac('age','C-12')
+        >>> s.plot_massfrac('age','C-12')
 
         '''
 
+        import matplotlib
         import matplotlib.pyplot as plt
 
         if len(label)<1:
                 label=yaxis
 
-	shape,marker,color=self.__msc(source,shape,marker,color)
-
-
+        shape,marker,color=self.__msc(source,shape,marker,color)
 
         plt.figure(fig, figsize=(fsize[0],fsize[1]))
-
  
         #Input X-axis
         if '-' in xaxis:
         #to test the different contributions
-	    if source == 'all':
-	       yields_evol=self.history.ism_iso_yield
-	    elif source =='agb':
-	      yields_evol=self.history.ism_iso_yield_agb
-	    elif source == 'sn1a':
-	      yields_evol=self.history.ism_iso_yield_1a
-	    elif source == 'massive':
-	     yields_evol=self.history.ism_iso_yield_massive
-	     iso_idx=self.history.isotopes.index(xaxis)
+            if source == 'all':
+               yields_evol=self.history.ism_iso_yield
+            elif source =='agb':
+               yields_evol=self.history.ism_iso_yield_agb
+            elif source == 'sn1a':
+               yields_evol=self.history.ism_iso_yield_1a
+            elif source == 'massive':
+               yields_evol=self.history.ism_iso_yield_massive
+               iso_idx=self.history.isotopes.index(xaxis)
             x=[]
-	    for k in range(1,len(yields_evol)):
-	       if norm=='no':
-	           x.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
-	       if norm=='ini':
-	           x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
+            for k in range(1,len(yields_evol)):
+               if norm=='no':
+                   x.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
+               if norm=='ini':
+                   x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
             plt.xlabel('log-scaled X('+xaxis+')')
             plt.xscale('log')
         elif 'age' == xaxis:
@@ -2596,12 +2855,12 @@ class omega( chem_evol ):
         if 'age' == xaxis:
                 x=x[1:]
                 y=y[1:]
-		plt.xlim(self.history.dt,self.history.tend)
+                plt.xlim(self.history.dt,self.history.tend)
         plt.plot(x,y,label=label,linestyle=shape,marker=marker,color=color,markevery=markevery)
         plt.legend()
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	self.save_data(header=[xaxis,yaxis],data=[x,y])
+        self.save_data(header=[xaxis,yaxis],data=[x,y])
 
     def plot_spectro(self,fig=3,xaxis='age',yaxis='[Fe/H]',source='all',label='',shape='-',marker='o',color='k',markevery=100,show_data=False,show_sculptor=False,show_legend=True,return_x_y=False,sub_plot=False,linewidth=3,sub=1,plot_data=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,only_one_iso=False,solar_ab='',sfr_thresh=0.0,m_formed_thresh=1.0,solar_norm=''):
         '''
@@ -2610,20 +2869,20 @@ class omega( chem_evol ):
         Parameters
         ----------
 
-	xaxis : string
+        xaxis : string
             Elements spectroscopic notation e.g. [Fe/H]
-	    if 'age': time evolution in years
-	yaxis : string
+            if 'age': time evolution in years
+        yaxis : string
                 Elements in spectroscopic notation, e.g. [C/Fe]
-	source : string
+        source : string
                 If yields come from
-		all sources use 'all' (include
-		AGB+SN1a, massive stars.)
+                all sources use 'all' (include
+                AGB+SN1a, massive stars.)
 
-		If yields come from distinctive source:
-		only agb stars use 'agb', only
-		SN1a ('SN1a'), or only massive stars
-		('massive')
+                If yields come from distinctive source:
+                only agb stars use 'agb', only
+                SN1a ('SN1a'), or only massive stars
+                ('massive')
 
         label : string
              figure label
@@ -2638,9 +2897,12 @@ class omega( chem_evol ):
 
         Examples
         ----------
-	>>> plt.plot_spectro('[Fe/H]','[C/Fe]')
+        >>> plt.plot_spectro('[Fe/H]','[C/Fe]')
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         #Error message if there is the "subplot" has not been provided
         if sub_plot and sub == 1:
@@ -2851,13 +3113,13 @@ class omega( chem_evol ):
         if not return_x_y and not sub_plot:
             plt.ylabel(yaxis)
         self.y=y
-	#To prevent 0 +log scale
-	if 'age' == xaxis:
-		x=x[1:]
-		y=y[1:]
-                #Operations associated with plot visual aspects
-                if not return_x_y and not sub_plot:
-                    plt.xlim(self.history.dt,self.history.tend)
+        #To prevent 0 +log scale
+        if 'age' == xaxis:
+            x=x[1:]
+            y=y[1:]
+            #Operations associated with plot visual aspects
+            if not return_x_y and not sub_plot:
+                plt.xlim(self.history.dt,self.history.tend)
 
         #Remove values when SFR is zero, that is when no element is locked into stars
         i_rem = len(y) - 1
@@ -2922,40 +3184,42 @@ class omega( chem_evol ):
 
             #plt.plot([1.93,2.123123,3.23421321321],[4.123123132,5.214124142,6.11111],linestyle='--')
             #plt.plot([1.93,2.123123,3.23421321321],[4.123123132,5.214124142,6.11111],linestyle='--')
-	    if len(label)>0:
-	            plt.legend()
+            if len(label)>0:
+                plt.legend()
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    self.save_data(header=[xaxis,yaxis],data=[x,y])
+            #self.save_data(header=[xaxis,yaxis],data=[x,y])
 
 
-    def plot_totmasses(self,fig=4, source='all',norm='no',label='',shape='',marker='',color='',markevery=20,log=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_totmasses(self,fig=4,mass='gas',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,log=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
         '''
-	Plots the total mass of the gas reservoir 
-	vs time.
+        Plots either gas or star mass in fraction of total mass
+        vs time.
         
         Parameters
         ----------
 
+        mass : string
+            either 'gas' for ISM gas mass
+            or 'stars' for gas locked away in stars (totalgas - ISM gas)
 
         norm : string
             normalization, either 'no' for no normalization (total gass mass in solar masses),
 
-	    for normalization to the initial gas mass (mgal) with 'ini',
-
-	    for normalization to the current total gas mass 'current'.
-	    The latter case makes sense when comparing different
-	    sources (see below)
+            for normalization to the initial gas mass (mgal) with 'ini',
+            for normalization to the current total gas mass 'current'.
+            The latter case makes sense when comparing different
+            sources (see below)
 
         source : string
             specificies if yields come from
-	    all sources ('all'), including
-	    AGB+SN1a, massive stars. Or from
-	    distinctive sources:
-	    only agb stars ('agb'), only
-	    SN1a ('sn1a'), or only massive stars
-	    ('massive')
-	log : boolean
+            all sources ('all'), including
+            AGB+SN1a, massive stars. Or from
+            distinctive sources:
+            only agb stars ('agb'), only
+            SN1a ('sn1a'), or only massive stars
+            ('massive')
+        log : boolean
             if true plot logarithmic y axis
         label : string
              figure label
@@ -2975,6 +3239,7 @@ class omega( chem_evol ):
 
         '''
 
+        import matplotlib
         import matplotlib.pyplot as plt
 
         #if len(label)<1:
@@ -2985,76 +3250,76 @@ class omega( chem_evol ):
 
         #Assume isotope input
 
-	xaxis='age'
-	if source =='all':
-		if len(label)==0:
-			label='All'
-	if source == 'agb':
-		if len(label)==0:
-			label='AGB'
-	if source =='massive':
-		if len(label)==0:
-			label='Massive'
-	if source =='sn1a':
-		if len(label)==0:
-			label='SNIa'
-	
-	shape,marker,color=self.__msc(source,shape,marker,color)
+        xaxis='age'
+        if source =='all':
+            if len(label)==0:
+                        label='All'
+        if source == 'agb':
+            if len(label)==0:
+                        label='AGB'
+        if source =='massive':
+            if len(label)==0:
+                        label='Massive'
+        if source =='sn1a':
+            if len(label)==0:
+                label='SNIa'
 
-	if 'age' == xaxis:
-	    x_all=self.history.age#[1:]
-	    plt.xscale('log')
-	    plt.xlabel('log-scaled '+xaxis+' [yrs]')
-	    #self.x=x
+        shape,marker,color=self.__msc(source,shape,marker,color)
 
-	gas_mass=self.history.gas_mass
+        if 'age' == xaxis:
+            x_all=self.history.age#[1:]
+            plt.xscale('log')
+            plt.xlabel('log-scaled '+xaxis+' [yrs]')
+            #self.x=x
 
-	#to test the different contributions
-	if source == 'all':
+        gas_mass=self.history.gas_mass
+
+        #to test the different contributions
+        if source == 'all':
             gas_evol=self.history.gas_mass
         else:
             if source =='agb':
-	        yields_evol=self.history.ism_elem_yield_agb
+                yields_evol=self.history.ism_elem_yield_agb
             elif source == 'sn1a':
-	        yields_evol=self.history.ism_elem_yield_1a
+                yields_evol=self.history.ism_elem_yield_1a
             elif source == 'massive':
-	        yields_evol=self.history.ism_elem_yield_massive
+                yields_evol=self.history.ism_elem_yield_massive
             gas_evol=[]
             for k in range(len(yields_evol)):
-	        gas_evol.append(sum(yields_evol[k]))
+                gas_evol.append(sum(yields_evol[k]))
 
-	ism_gasm=[]
-	star_m=[]
-	x=[]
+        ism_gasm=[]
+        star_m=[]
+        x=[]
         #To prevent 0 +log scale
         if 'age' == xaxis:
                 x_all=x_all[1:]
                 gas_evol=gas_evol[1:]
-		gas_mass=gas_mass[1:]
-	for k in range(0,len(gas_evol)):
-	    if (gas_evol[k]==0) or (gas_mass[k]==0):
-		continue
-	    x.append(x_all[k])
+                gas_mass=gas_mass[1:]
+        for k in range(0,len(gas_evol)):
+            if (gas_evol[k]==0) or (gas_mass[k]==0):
+                continue
+            x.append(x_all[k])
             if norm=='ini':
-	        ism_gasm.append(gas_evol[k]/self.history.mgal)
-	        star_m.append((self.history.mgal-gas_evol[k])/self.history.mgal)
+                ism_gasm.append(gas_evol[k]/self.history.mgal)
+                star_m.append((self.history.mgal-gas_evol[k])/self.history.mgal)
             if norm == 'current':
-	        if not self.history.gas_mass[k] ==0.:
-	              ism_gasm.append(gas_evol[k]/gas_mass[k])
-	              star_m.append((self.history.mgal-gas_evol[k])/gas_mass[k])
-	    #else:
-	     #   ism_gasm.append(0.)
-	      #  star_m.append(0.)
+                if not self.history.gas_mass[k] ==0.:
+                      ism_gasm.append(gas_evol[k]/gas_mass[k])
+                      star_m.append((self.history.mgal-gas_evol[k])/gas_mass[k])
+            #else:
+             #   ism_gasm.append(0.)
+              #  star_m.append(0.)
             elif norm == 'no':
-	        ism_gasm.append(gas_evol[k])
-	        star_m.append(self.history.mgal-gas_evol[k])
+                ism_gasm.append(gas_evol[k])
+                star_m.append(self.history.mgal-gas_evol[k])
         if mass == 'gas':
-	    y=ism_gasm
+            y=ism_gasm
         if mass == 'stars':
-	    y=star_m
-	plt.plot(x,y,linestyle=shape,marker=marker,markevery=markevery,color=color,label=label)	
+            y=star_m
+        plt.plot(x,y,linestyle=shape,marker=marker,markevery=markevery,color=color,label=label)
         if len(label)>0:
-		plt.legend()
+            plt.legend()
         if norm=='current':
             plt.ylim(0,1.2)
         if not norm=='no':
@@ -3077,37 +3342,37 @@ class omega( chem_evol ):
 
         if log==True:
             plt.yscale('log')
-	    if not norm=='no':
-            	plt.ylim(1e-4,1.2)
+            if not norm=='no':
+                plt.ylim(1e-4,1.2)
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	plt.xlim(self.history.dt,self.history.tend)
-	self.save_data(header=['age','mass'],data=[x,y])
+        plt.xlim(self.history.dt,self.history.tend)
+        #self.save_data(header=['age','mass'],data=[x,y])
 
 
     def plot_sn_distr(self,fig=5,rate=True,rate_only='',xaxis='time',fraction=False,label1='SNIa',label2='SN2',shape1=':',shape2='--',marker1='o',marker2='s',color1='k',color2='b',markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	Plots the SN1a distribution:
-	The evolution of the number of SN1a and SN2
-	#Add numbers/dt numbers/year...
+        Plots the SN1a distribution:
+        The evolution of the number of SN1a and SN2
+        #Add numbers/dt numbers/year...
 
         Parameters
         ----------
-	rate : boolean
+        rate : boolean
             if true, calculate rate [1/century] 
             else calculate numbers
-	fraction ; boolean
-	    if true, ignorate rate and calculate number fraction of SNIa per WD
+        fraction ; boolean
+            if true, ignorate rate and calculate number fraction of SNIa per WD
         rate_only : string
-	    if empty string, plot both rates (default)
+            if empty string, plot both rates (default)
 
             if 'sn1a', plot only SN1a rate
 
             if 'sn2', plot only SN2 rate
-	xaxis: string
-	    if 'time' : time evolution
-	    if 'redshift': experimental! use with caution; redshift evolution
+        xaxis: string
+            if 'time' : time evolution
+            if 'redshift': experimental! use with caution; redshift evolution
         label : string
              figure label
         marker : string
@@ -3122,238 +3387,243 @@ class omega( chem_evol ):
         Examples
         ----------
         >>> s.plot_sn_distr()
+
         '''
-	#For Wiersma09
-	Hubble_0=73.
-	Omega_lambda=0.762
-	Omega_m=0.238
+
+        import matplotlib
+        import matplotlib.pyplot as plt
+
+        #For Wiersma09
+        Hubble_0=73.
+        Omega_lambda=0.762
+        Omega_m=0.238
 
         figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
         age=self.history.age
         sn1anumbers=self.history.sn1a_numbers#[:-1]
         sn2numbers=self.history.sn2_numbers
-	if xaxis=='redshift':
-		print 'this features is not tested yet.'
-		return 0
-		age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
-		age=[0]+age
-		plt.xlabel('Redshift z')
-		timesteps=self.history.timesteps[idx-1:]
-		sn2numbers=sn2numbers[idx:]
-		sn1anumbers=sn1anumbers[idx:]
-	else:
-		plt.xlabel('Log-scaled age [yrs]')
-		#plt.xscale('log')
+        if xaxis=='redshift':
+                print 'this features is not tested yet.'
+                return 0
+                age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
+                age=[0]+age
+                plt.xlabel('Redshift z')
+                timesteps=self.history.timesteps[idx-1:]
+                sn2numbers=sn2numbers[idx:]
+                sn1anumbers=sn1anumbers[idx:]
+        else:
+                plt.xlabel('Log-scaled age [yrs]')
+                #plt.xscale('log')
         if rate and not fraction:
-	    if xaxis=='redshift':
-			sn1a_rate=np.array(sn1anumbers)/ (np.array(timesteps)/100.)
-			sn2_rate=np.array(sn2numbers)/ (np.array(timesteps)/100.)	
-	    else:
-            		sn1a_rate=np.array(sn1anumbers[1:])/ (np.array(self.history.timesteps)/100.)
-            		sn2_rate=np.array(sn2numbers[1:])/ (np.array(self.history.timesteps)/100.)
-	    sn1a_rate1=[]
-	    sn2_rate1=[]
-	    age=age[1:]
-	    age_sn1a=[] #age[1:]
-	    age_sn2=[]
-	    #correct sn1a rate
-	    for k in range(len(sn1a_rate)):
-		if sn1a_rate[k]>0:
-			sn1a_rate1.append(sn1a_rate[k])
-			age_sn1a.append(age[k])
-			
-	    for k in range(len(sn2_rate)):
-		if sn2_rate[k]>0:
-			sn2_rate1.append(sn2_rate[k])
-			age_sn2.append(age[k])
-	
+            if xaxis=='redshift':
+                sn1a_rate=np.array(sn1anumbers)/ (np.array(timesteps)/100.)
+                sn2_rate=np.array(sn2numbers)/ (np.array(timesteps)/100.)
+            else:
+                sn1a_rate=np.array(sn1anumbers[1:])/ (np.array(self.history.timesteps)/100.)
+                sn2_rate=np.array(sn2numbers[1:])/ (np.array(self.history.timesteps)/100.)
+            sn1a_rate1=[]
+            sn2_rate1=[]
+            age=age[1:]
+            age_sn1a=[] #age[1:]
+            age_sn2=[]
+            #correct sn1a rate
+            for k in range(len(sn1a_rate)):
+                if sn1a_rate[k]>0:
+                        sn1a_rate1.append(sn1a_rate[k])
+                        age_sn1a.append(age[k])
+
+            for k in range(len(sn2_rate)):
+                if sn2_rate[k]>0:
+                        sn2_rate1.append(sn2_rate[k])
+                        age_sn2.append(age[k])
 
             if len(rate_only)==0:
-		    x=[age_sn2,age_sn1a]
-		    y=[sn1a_rate1,sn2_rate1]
-		    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
-		    plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-            	    plt.ylabel('SN rate [century$^{-1}$]')
-	    if rate_only=='sn1a':
-		    x=age_sn1a
-		    y= sn1a_rate1
-		    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
-		    plt.ylabel('SNIa rate [century$^{-1}$]')
-	    if rate_only=='sn2':
-		    x=age_sn2
-		    y=sn2_rate
+                    x=[age_sn2,age_sn1a]
+                    y=[sn1a_rate1,sn2_rate1]
+                    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
                     plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-		    plt.ylabel('SN2 rate [century$^{-1}$]')
-
+                    plt.ylabel('SN rate [century$^{-1}$]')
+            if rate_only=='sn1a':
+                    x=age_sn1a
+                    y= sn1a_rate1
+                    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
+                    plt.ylabel('SNIa rate [century$^{-1}$]')
+            if rate_only=='sn2':
+                    x=age_sn2
+                    y=sn2_rate
+                    plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
+                    plt.ylabel('SN2 rate [century$^{-1}$]')
 
         else:
             #if xaxis=='redshift':
-		
                         #sn1_numbers=np.array(sn1anumbers)/ (np.array(timesteps)/100.)
                         #sn2_numbers=np.array(sn2numbers)/ (np.array(timesteps)/100.)
             #True: #else:
                         #sn1a_rate=np.array(sn1anumbers[1:])/ (np.array(self.history.timesteps)/100.)
                         #sn2_rate=np.array(sn2numbers[1:])/ (np.array(self.history.timesteps)/100.)
 
-	    sn1a_numbers=sn1anumbers[1:]
-	    sn2_numbers=sn2numbers[1:]	
+            sn1a_numbers=sn1anumbers[1:]
+            sn2_numbers=sn2numbers[1:]
             sn1a_numbers1=[]
-	    sn2_numbers1=[]
+            sn2_numbers1=[]
             age_sn1a=[]
-	    age_sn2=[]
+            age_sn2=[]
             age=age[1:]
             for k in range(len(sn1a_numbers)):
                 if sn1a_numbers[k]>0:
                         sn1a_numbers1.append(sn1a_numbers[k])
                         age_sn1a.append(age[k])
-	    for k in range(len(sn2_numbers)):
+            for k in range(len(sn2_numbers)):
                 if sn2_numbers[k]>0:
                         sn2_numbers1.append(sn2_numbers[k])
                         age_sn2.append(age[k])
 
-	    if fraction:
-		age=self.history.age
-		ratio=[]
-		age1=[]
-		for k in range(len(self.wd_sn1a_range1)):
-		    if self.wd_sn1a_range1[k]>0:
-			ratio.append(self.history.sn1a_numbers[1:][k]/self.wd_sn1a_range1[k])
-			age1.append(age[k])
-		plt.plot(age1,ratio)
-		plt.yscale('log')
-		#plt.xscale('log')
-		plt.ylabel('Number of SNIa going off per WD born')
-		label='SNIafractionperWD';label='sn1a '+label
-		x=age1
-		y=ratio
-		self.save_data(header=['age',label],data=[x,y])		
-		return 
-	    else:
-		    if len(rate_only)==0:
-			    x=[age_sn1a,age_sn2]
-			    y=[sn1a_numbers,sn2_numbers]
-			    plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
-			    plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-			    plt.ylabel('SN numbers')
-		    if rate_only=='sn1a':
-			    x= age1
-			    y= sn1anumbers1
-			    plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markever)
-			    plt.ylabel('SN numbers')
-		    if rate_only=='sn2':
-			    x= age[1:]
-			    y= sn2numbers[1:]
-			    plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-			    plt.ylabel('SN numbers')
-
-	plt.legend(loc=1)
-	plt.yscale('log')
-	ax=plt.gca()
-        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	if rate:
-		label='rate'
-	else:
-		label='number'	
-	if len(rate_only)==0:
-		if rate:
-			label='rate'
-		else:
-			label='number'
-		self.save_data(header=['age','SNIa '+label,'age','CCSN '+label],data=[x[0],y[0],x[1],y[1]])
-	else:
-		if rate_only=='sn1a':
-			label='sn1a '+label
-		else:
-			label='ccsn '+label
+            if fraction:
+                age=self.history.age
+                ratio=[]
+                age1=[]
+                for k in range(len(self.wd_sn1a_range1)):
+                    if self.wd_sn1a_range1[k]>0:
+                        ratio.append(self.history.sn1a_numbers[1:][k]/self.wd_sn1a_range1[k])
+                        age1.append(age[k])
+                plt.plot(age1,ratio)
+                plt.yscale('log')
+                #plt.xscale('log')
+                plt.ylabel('Number of SNIa going off per WD born')
+                label='SNIafractionperWD';label='sn1a '+label
+                x=age1
+                y=ratio
                 self.save_data(header=['age',label],data=[x,y])
+                return 
+            else:
+                    if len(rate_only)==0:
+                            x=[age_sn1a,age_sn2]
+                            y=[sn1a_numbers,sn2_numbers]
+                            plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
+                            plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
+                            plt.ylabel('SN numbers')
+                    if rate_only=='sn1a':
+                            x= age1
+                            y= sn1anumbers1
+                            plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markever)
+                            plt.ylabel('SN numbers')
+                    if rate_only=='sn2':
+                            x= age[1:]
+                            y= sn2numbers[1:]
+                            plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
+                            plt.ylabel('SN numbers')
 
+        plt.legend(loc=1)
+        plt.yscale('log')
+        ax=plt.gca()
+        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+        if rate:
+            label='rate'
+        else:
+            label='number'
+        if len(rate_only)==0:
+                if rate:
+                        label='rate'
+                else:
+                        label='number'
+                self.save_data(header=['age','SNIa '+label,'age','CCSN '+label],data=[x[0],y[0],x[1],y[1]])
+        else:
+                if rate_only=='sn1a':
+                        label='sn1a '+label
+                else:
+                        label='ccsn '+label
+                #self.save_data(header=['age',label],data=[x,y])
 
     def save_data(self,header=[],data=[],filename='plot_data.txt'):
-	'''
-		Writes data into a text file. data entries
-		can have different lengths
-	'''
-	out=' '
+        '''
+            Writes data into a text file. data entries
+            can have different lengths
+        '''
+        out=' '
         #header
         for i in range(len(header)):
             out+= ('&'+header[i]+((10-len(header[i]))*' '))
         #data
-	out+='\n'
-	max_data=[]
+        out+='\n'
+        max_data=[]
         for t in range(len(data)):
-		max_data.append(len(data[t]))
+            max_data.append(len(data[t]))
         for t in range(max(max_data)):
             #out+=('&'+'{:.3E}'.format(data[t]))
             #out+=(' &'+'{:.3E}'.format(frac_yields[t]))
             for i in range(len(data)):
-		if t>(len(data[i])-1):
-			out+=(' '*len( ' &'+ '{:.3E}'.format(0)))
-		else:
-                	out+= ( ' &'+ '{:.3E}'.format(data[i][t]))
+                if t>(len(data[i])-1):
+                        out+=(' '*len( ' &'+ '{:.3E}'.format(0)))
+                else:
+                        out+= ( ' &'+ '{:.3E}'.format(data[i][t]))
             #out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
             out+='\n'
-	#import os.path
-	#if os.path.isfile(filename) 
-	#overwrite existing file for now
-	f1=open(filename,'w')
-	f1.write(out)
-	f1.close()
-
+        #import os.path
+        #if os.path.isfile(filename) 
+        #overwrite existing file for now
+        f1=open(filename,'w')
+        f1.write(out)
+        f1.close()
 
 
     ##############################################
     #          Plot Star Formation Rate          #
     ##############################################
     def plot_star_formation_rate(self,fig=6,fraction=False,source='all',marker='',shape='',color='',label='',abs_unit=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
-	'''
-	Plots the star formation rate over time.
-	Shows fraction of ISM mass which transforms into stars.
+        '''
+
+        Plots the star formation rate over time.
+        Shows fraction of ISM mass which transforms into stars.
 
         Parameters
         ----------
 
-	fraction : boolean
-		if true: fraction of ISM which transforms into stars;
-		else: mass of ISM which goes into stars
+        fraction : boolean
+           if true: fraction of ISM which transforms into stars;
+           else: mass of ISM which goes into stars
 
-	source : string
-		either 'all' for total star formation rate; 'agb' for AGB and 'massive' for massive stars
+        source : string
+            either 'all' for total star formation rate; 'agb' for AGB and 'massive' for massive stars
+            WARNING! Do not use in OMEGA, only use it in SYGMA.
 
-	marker : string
-		marker type
-	shape : string
-		line shape type
-	fig: figure id
-	
+        marker : string
+            marker type
+        shape : string
+            line shape type
+        fig: figure id
+
         Examples
         ----------
         >>> s.star_formation_rate()
-	
-	'''
 
-	if (len(marker)==0 and len(shape)==0) and len(color)==0:
-		shape,marker,color=self.__msc(source,shape,marker,color)
-	plt.figure(fig, figsize=(fsize[0],fsize[1]))
-	#maybe a histogram for display the SFR?
-	if False:
-		age=self.history.age
-		#age=[0.1]+self.history.age[1:-1]
-		sfr=self.history.sfr
-		plt.xlabel('Log-scaled age [yrs]')
-		#plt.xscale('log')
-		mean_age=[]
-		color='r'
-		label='aa'
-		age_bdy=[]
-		for k in range(len(age)-1):
-			mean_age.append(1) #age[k+1]-age[k])
-		for k in range(len(age)):
-			age_bdy.append(age[k])	
-		print 'age',len(mean_age)
-		print 'weights',len(sfr)
-		print 'bdy',len(age_bdy)
-		print sfr[:5]
-	        p1 =plt.hist(mean_age, bins=age_bdy,weights=sfr,facecolor=color,color=color,alpha=0.5,label=label)
+        '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
+
+        if (len(marker)==0 and len(shape)==0) and len(color)==0:
+            shape,marker,color=self.__msc(source,shape,marker,color)
+        plt.figure(fig, figsize=(fsize[0],fsize[1]))
+        #maybe a histogram for display the SFR?
+        if False:
+                age=self.history.age
+                #age=[0.1]+self.history.age[1:-1]
+                sfr=self.history.sfr
+                plt.xlabel('Log-scaled age [yrs]')
+                #plt.xscale('log')
+                mean_age=[]
+                color='r'
+                label='aa'
+                age_bdy=[]
+                for k in range(len(age)-1):
+                        mean_age.append(1) #age[k+1]-age[k])
+                for k in range(len(age)):
+                        age_bdy.append(age[k])
+                print 'age',len(mean_age)
+                print 'weights',len(sfr)
+                print 'bdy',len(age_bdy)
+                print sfr[:5]
+                p1 =plt.hist(mean_age, bins=age_bdy,weights=sfr,facecolor=color,color=color,alpha=0.5,label=label)
 
         #Plot the SFR in [Mo yr^-1]
         if abs_unit:
@@ -3369,7 +3639,7 @@ class omega( chem_evol ):
             
             #Label and display axis
             plt.xlabel('Age [yrs]')
-            plt.ylabel('SFR [Mo/yr]')	
+            plt.ylabel('SFR [Mo/yr]')
 
             #Plot
             plt.plot(age,sfr_plot,label=label,marker=marker,color=color,linestyle=shape)
@@ -3377,101 +3647,100 @@ class omega( chem_evol ):
             #self.save_data(header=['age','SFR'],data=[age,sfr_plot])
 
         #Plot the mass fraction of gas available converted into stars
-	elif fraction:
-		sfr=self.history.sfr
+        elif fraction:
+                sfr=self.history.sfr
                 if source=='all':
                         label='all'
                 elif source=='agb':
-			sfr=np.array(sfr)*np.array(self.history.m_locked_agb)/np.array(self.history.m_locked)
+                        sfr=np.array(sfr)*np.array(self.history.m_locked_agb)/np.array(self.history.m_locked)
                         label='AGB'
                 elif source=='massive':
                         masslocked=self.history.m_locked_massive
-			sfr=np.array(sfr)*np.array(self.history.m_locked_massive)/np.array(self.history.m_locked)
+                        sfr=np.array(sfr)*np.array(self.history.m_locked_massive)/np.array(self.history.m_locked)
                         label='Massive'
-		age=self.history.age[:-1]
-		print len(age),len(sfr)
-		plt.xlabel('Age [yrs]')
-		plt.plot(age,sfr,label=label,marker=marker,linestyle=shape)
-		plt.ylabel('Fraction of current gas mass into stars')	
-        	self.save_data(header=['age','SFR'],data=[age,sfr])
+                age=self.history.age[:-1]
+                print len(age),len(sfr)
+                plt.xlabel('Age [yrs]')
+                plt.plot(age,sfr,label=label,marker=marker,linestyle=shape)
+                plt.ylabel('Fraction of current gas mass into stars')
+                #self.save_data(header=['age','SFR'],data=[age,sfr])
 
         #Plot the mass converted into stars
-	else:
-		if source=='all':
-			masslocked=self.history.m_locked
-			label='all'
-		elif source=='agb':
-			masslocked=self.history.m_locked_agb
-			label='AGB'
-		elif source=='massive':
-			masslocked=self.history.m_locked_massive
-			label='Massive'
-		age=self.history.age[1:]
-		plt.plot(age,masslocked,marker=marker,linestyle=shape,label=label)
-		plt.xlabel('Age [yrs]')
-		plt.ylabel('ISM Mass transformed into stars')
-		plt.xscale('log');plt.yscale('log')
-		plt.legend()
+        else:
+                if source=='all':
+                        masslocked=self.history.m_locked
+                        label='all'
+                elif source=='agb':
+                        masslocked=self.history.m_locked_agb
+                        label='AGB'
+                elif source=='massive':
+                        masslocked=self.history.m_locked_massive
+                        label='Massive'
+                age=self.history.age[1:]
+                plt.plot(age,masslocked,marker=marker,linestyle=shape,label=label)
+                plt.xlabel('Age [yrs]')
+                plt.ylabel('ISM Mass transformed into stars')
+                plt.xscale('log');plt.yscale('log')
+                plt.legend()
 
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
-	#print 'Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:'
-	#print sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive)
-
+        #print 'Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:'
+        #print sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive)
 
 
     def __time_to_z(self,time,Hubble_0,Omega_lambda,Omega_m):
-	'''
-	Time to redshift conversion
+        '''
+        Time to redshift conversion
 
-	'''
-	import time_to_redshift as tz
-	#transform into Gyr
-	time_new=[]
-	firstidx=True
-	for k in range(len(time)):
-		if time[k]>=8e8:
-			time_new.append(time[k]/1e9)
-			if firstidx:
-				index=k
-				firstidx=False	
-	return tz.t_to_z(time_new,Hubble_0,Omega_lambda,Omega_m),index
+        '''
+        import time_to_redshift as tz
+        #transform into Gyr
+        time_new=[]
+        firstidx=True
+        for k in range(len(time)):
+                if time[k]>=8e8:
+                        time_new.append(time[k]/1e9)
+                        if firstidx:
+                                index=k
+                                firstidx=False
+        return tz.t_to_z(time_new,Hubble_0,Omega_lambda,Omega_m),index
 
     def __msc(self,source,shape,marker,color):
 
-	'''
-	Function checks if either of shape,color,marker
-	is set. If not then assign in each case
-	a unique property related to the source ('agb','massive'..)
-	to the variable and returns all three
-	'''
+        '''
+        Function checks if either of shape,color,marker
+        is set. If not then assign in each case
+        a unique property related to the source ('agb','massive'..)
+        to the variable and returns all three
+        '''
 
-	if source=='all':
-		shape1='-'
-		marker1='o'
-		color1='k'
-	elif source=='agb':
-		shape1='--'
-		marker1='s'
-		color1='r'
-	elif source=='massive':
-		shape1='-.'
-		marker1='D'
-		color1='b'
-	elif source =='sn1a':
-		shape1=':'
-		marker1='x'
-		color1='g'
-	
-	if len(shape)==0:
-		shape=shape1
-	if len(marker)==0:
-		marker=marker1
-	if len(color)==0:
-		color=color1
+        if source=='all':
+                shape1='-'
+                marker1='o'
+                color1='k'
+        elif source=='agb':
+                shape1='--'
+                marker1='s'
+                color1='r'
+        elif source=='massive':
+                shape1='-.'
+                marker1='D'
+                color1='b'
+        elif source =='sn1a':
+                shape1=':'
+                marker1='x'
+                color1='g'
 
-	return shape,marker,color
+        if len(shape)==0:
+                shape=shape1
+        if len(marker)==0:
+                marker=marker1
+        if len(color)==0:
+                color=color1
+
+        return shape,marker,color
 
 
     ##############################################
@@ -3480,25 +3749,26 @@ class omega( chem_evol ):
     def __fig_standard(self,ax,fontsize=8,labelsize=8,lwtickboth=[6,2],lwtickmajor=[10,3],markersize=8,rspace=0.6,bspace=0.15, legend_fontsize=14):
 
         '''
-	Internal function in order to get standardized figure font sizes.
-	It is used in the plotting functions.
+        Internal function in order to get standardized figure font sizes.
+        It is used in the plotting functions.
+
         '''
 
         plt.legend(loc=2,prop={'size':legend_fontsize})
         plt.rcParams.update({'font.size': fontsize})
         ax.yaxis.label.set_size(labelsize)
         ax.xaxis.label.set_size(labelsize)
-	#ax.xaxis.set_tick_params(width=2)
-	#ax.yaxis.set_tick_params(width=2)		
-	ax.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
-	ax.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
-	#Add that line below at some point
-	#ax.xaxis.set_tick_params(width=2)
-	#ax.yaxis.set_tick_params(width=2)
-	if len(ax.lines)>0:
-		for h in range(len(ax.lines)):
-			ax.lines[h].set_markersize(markersize)
-	ax.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
+        #ax.xaxis.set_tick_params(width=2)
+        #ax.yaxis.set_tick_params(width=2)
+        ax.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
+        ax.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
+        #Add that line below at some point
+        #ax.xaxis.set_tick_params(width=2)
+        #ax.yaxis.set_tick_params(width=2)
+        if len(ax.lines)>0:
+                for h in range(len(ax.lines)):
+                        ax.lines[h].set_markersize(markersize)
+        ax.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
 
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
@@ -3512,42 +3782,45 @@ class omega( chem_evol ):
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the mass-loading factor, which is the ratio
-	between the mass outflow rate and the star formation rate, as a
-	function of time.
+        This function plots the mass-loading factor, which is the ratio
+        between the mass outflow rate and the star formation rate, as a
+        function of time.
 
         Parameters
         ----------
 
         fig : string, float
-	     Figure name.
-	marker : string
-	     Figure marker.
-	shape : string
-	     Line style.
-	color : string
-	     Line color.
-	label : string
-	     Figure label.
-	fsize : 2D float array
-	     Figure dimension/size.
-	fontsize : integer
-	     Font size of the numbers on the X and Y axis.
-	rspace : float
-	     Extra space on the right for the legend.
-	bspace : float
-	     Extra space at the bottom for the Y axis label.
-	labelsize : integer
-	     Font size of the X and Y axis labels.
-	legend_fontsize : integer
- 	       Font size of the legend.
+             Figure name.
+        marker : string
+             Figure marker.
+        shape : string
+             Line style.
+        color : string
+             Line color.
+        label : string
+             Figure label.
+        fsize : 2D float array
+             Figure dimension/size.
+        fontsize : integer
+             Font size of the numbers on the X and Y axis.
+        rspace : float
+             Extra space on the right for the legend.
+        bspace : float
+             Extra space at the bottom for the Y axis label.
+        labelsize : integer
+             Font size of the X and Y axis labels.
+        legend_fontsize : integer
+                Font size of the legend.
 
         Examples
-	----------
+        ----------
 
-	>>> o1.plot_mass_loading(label='Mass-Loading Factor')
+        >>> o1.plot_mass_loading(label='Mass-Loading Factor')
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Define variable only used for plot visual
         source='all'
@@ -3561,7 +3834,7 @@ class omega( chem_evol ):
 
             #Display axis labels
             plt.xlabel('Age [yrs]')
-            plt.ylabel('Mass-loading factor')	
+            plt.ylabel('Mass-loading factor')
 
             #Copy data for x and y axis
             age = self.history.age[:-1]
@@ -3572,7 +3845,7 @@ class omega( chem_evol ):
                      marker=marker,linestyle=shape)
 
             #Save plot
-            self.save_data(header=['age','mass-loading'],data=[age,mass_lo])
+            #self.save_data(header=['age','mass-loading'],data=[age,mass_lo])
 
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
@@ -3590,41 +3863,44 @@ class omega( chem_evol ):
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the mass outflow rate as a function of time
+        This function plots the mass outflow rate as a function of time
         in units of [Mo/yr].
 
         Parameters
         ----------
 
         fig : string, float
-	     Figure name.
-	marker : string
-	     Figure marker.
-	shape : string
-	     Line style.
-	color : string
-	     Line color.
-	label : string
-	     Figure label.
-	fsize : 2D float array
-	     Figure dimension/size.
-	fontsize : integer
-	     Font size of the numbers on the X and Y axis.
-	rspace : float
-	     Extra space on the right for the legend.
-	bspace : float
-	     Extra space at the bottom for the Y axis label.
-	labelsize : integer
-	     Font size of the X and Y axis labels.
-	legend_fontsize : integer
- 	       Font size of the legend.
+             Figure name.
+        marker : string
+             Figure marker.
+        shape : string
+             Line style.
+        color : string
+             Line color.
+        label : string
+             Figure label.
+        fsize : 2D float array
+             Figure dimension/size.
+        fontsize : integer
+             Font size of the numbers on the X and Y axis.
+        rspace : float
+             Extra space on the right for the legend.
+        bspace : float
+             Extra space at the bottom for the Y axis label.
+        labelsize : integer
+             Font size of the X and Y axis labels.
+        legend_fontsize : integer
+                Font size of the legend.
 
         Examples
-	----------
+        ----------
 
-	>>> o1.plot_outflow_rate(label='Outflow Rate')
+        >>> o1.plot_outflow_rate(label='Outflow Rate')
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Define variable only used for plot visual
         source='all'
@@ -3638,7 +3914,7 @@ class omega( chem_evol ):
 
             #Display axis labels
             plt.xlabel('Age [yrs]')
-            plt.ylabel('Outflow rate [Mo/yr]')	
+            plt.ylabel('Outflow rate [Mo/yr]')
 
             #Copy data for x and y axis
             age = self.history.age[:-1]
@@ -3653,7 +3929,7 @@ class omega( chem_evol ):
                      color=color,linestyle=shape)
 
             #Save plot
-            self.save_data(header=['age','outflow rate'],data=[age,outflow_plot])
+            #self.save_data(header=['age','outflow rate'],data=[age,outflow_plot])
 
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
@@ -3671,41 +3947,44 @@ class omega( chem_evol ):
             labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the mass inflow rate as a function of time
+        This function plots the mass inflow rate as a function of time
         in units of [Mo/yr].
 
         Parameters
         ----------
 
         fig : string, float
-	     Figure name.
-	marker : string
-	     Figure marker.
-	shape : string
-	     Line style.
-	color : string
-	     Line color.
-	label : string
-	     Figure label.
-	fsize : 2D float array
-	     Figure dimension/size.
-	fontsize : integer
-	     Font size of the numbers on the X and Y axis.
-	rspace : float
-	     Extra space on the right for the legend.
-	bspace : float
-	     Extra space at the bottom for the Y axis label.
-	labelsize : integer
-	     Font size of the X and Y axis labels.
-	legend_fontsize : integer
- 	       Font size of the legend.
+             Figure name.
+        marker : string
+             Figure marker.
+        shape : string
+             Line style.
+        color : string
+             Line color.
+        label : string
+             Figure label.
+        fsize : 2D float array
+             Figure dimension/size.
+        fontsize : integer
+             Font size of the numbers on the X and Y axis.
+        rspace : float
+             Extra space on the right for the legend.
+        bspace : float
+             Extra space at the bottom for the Y axis label.
+        labelsize : integer
+             Font size of the X and Y axis labels.
+        legend_fontsize : integer
+             Font size of the legend.
 
         Examples
-	----------
+        ----------
 
-	>>> o1.plot_inflow_rate(label='Inflow Rate')
+        >>> o1.plot_inflow_rate(label='Inflow Rate')
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Define variable only used for plot visual
         source='all'
@@ -3715,11 +3994,11 @@ class omega( chem_evol ):
 
             #Define visual aspects
             shape,marker,color=self.__msc(source,shape,marker,color)
-	    plt.figure(fig, figsize=(fsize[0],fsize[1]))
+            plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
             #Display axis labels
             plt.xlabel('Age [yrs]')
-            plt.ylabel('Inflow rate [Mo/yr]')	
+            plt.ylabel('Inflow rate [Mo/yr]')
 
             #Copy data for x and y axis
             age = self.history.age[:-1]
@@ -3733,7 +4012,7 @@ class omega( chem_evol ):
                      color=color,linestyle=shape)
 
             #Save plot
-            self.save_data(header=['age','inflow rate'],data=[age,inflow_plot])
+            #self.save_data(header=['age','inflow rate'],data=[age,inflow_plot])
 
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
@@ -3751,41 +4030,44 @@ class omega( chem_evol ):
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the dark matter halo mass of the galaxy as a 
-	function of time.
+        This function plots the dark matter halo mass of the galaxy as a 
+        function of time.
 
         Parameters
         ----------
 
         fig : string, float
-	     Figure name.
-	marker : string
-	     Figure marker.
-	shape : string
-	     Line style.
-	color : string
-	     Line color.
-	label : string
-	     Figure label.
-	fsize : 2D float array
-	     Figure dimension/size.
-	fontsize : integer
-	     Font size of the numbers on the X and Y axis.
-	rspace : float
-	     Extra space on the right for the legend.
-	bspace : float
-	     Extra space at the bottom for the Y axis label.
-	labelsize : integer
-	     Font size of the X and Y axis labels.
-	legend_fontsize : integer
- 	       Font size of the legend.
+             Figure name.
+        marker : string
+             Figure marker.
+        shape : string
+             Line style.
+        color : string
+             Line color.
+        label : string
+             Figure label.
+        fsize : 2D float array
+             Figure dimension/size.
+        fontsize : integer
+             Font size of the numbers on the X and Y axis.
+        rspace : float
+             Extra space on the right for the legend.
+        bspace : float
+             Extra space at the bottom for the Y axis label.
+        labelsize : integer
+             Font size of the X and Y axis labels.
+        legend_fontsize : integer
+             Font size of the legend.
 
         Examples
-	----------
+        ----------
 
-	>>> o1.plot_dark_matter(label='Dark Matter')
+        >>> o1.plot_dark_matter(label='Dark Matter')
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Define variable only used for plot visual
         source='all'
@@ -3795,11 +4077,11 @@ class omega( chem_evol ):
 
             # Define visual aspects
             shape,marker,color=self.__msc(source,shape,marker,color)
-	    plt.figure(fig, figsize=(fsize[0],fsize[1]))
+            plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
             #Display axis labels
             plt.xlabel('Age [yrs]')
-            plt.ylabel('Dark matter halo mass [Mo]')	
+            plt.ylabel('Dark matter halo mass [Mo]')
 
             #Copy data for x and y axis
             age = self.history.age
@@ -3810,8 +4092,8 @@ class omega( chem_evol ):
                      color=color,linestyle=shape)
 
             #Save plot
-            self.save_data(header=['age','dark matter halo mass'],\
-                           data=[age,DM_plot])
+            #self.save_data(header=['age','dark matter halo mass'],\
+            #               data=[age,DM_plot])
 
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
@@ -3829,41 +4111,44 @@ class omega( chem_evol ):
             labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the star formation timescale as a function of time
+        This function plots the star formation timescale as a function of time
         in units of [yr].
 
         Parameters
         ----------
 
         fig : string, float
-	     Figure name.
-	marker : string
-	     Figure marker.
-	shape : string
-	     Line style.
-	color : string
-	     Line color.
-	label : string
-	     Figure label.
-	fsize : 2D float array
-	     Figure dimension/size.
-	fontsize : integer
-	     Font size of the numbers on the X and Y axis.
-	rspace : float
-	     Extra space on the right for the legend.
-	bspace : float
-	     Extra space at the bottom for the Y axis label.
-	labelsize : integer
-	     Font size of the X and Y axis labels.
-	legend_fontsize : integer
- 	       Font size of the legend.
+             Figure name.
+        marker : string
+             Figure marker.
+        shape : string
+             Line style.
+        color : string
+             Line color.
+        label : string
+             Figure label.
+        fsize : 2D float array
+             Figure dimension/size.
+        fontsize : integer
+             Font size of the numbers on the X and Y axis.
+        rspace : float
+             Extra space on the right for the legend.
+        bspace : float
+             Extra space at the bottom for the Y axis label.
+        labelsize : integer
+             Font size of the X and Y axis labels.
+        legend_fontsize : integer
+             Font size of the legend.
 
         Examples
-	----------
+        ----------
 
-	>>> o1.plot_sf_timescale(label='Star Formation Timescale')
+        >>> o1.plot_sf_timescale(label='Star Formation Timescale')
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Define variable only used for plot visual
         source='all'
@@ -3873,11 +4158,11 @@ class omega( chem_evol ):
 
             #Define visual aspects
             shape,marker,color=self.__msc(source,shape,marker,color)
-	    plt.figure(fig, figsize=(fsize[0],fsize[1]))
+            plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
             #Display axis labels
             plt.xlabel('Age [yrs]')
-            plt.ylabel('Star formation timescale [yr]')	
+            plt.ylabel('Star formation timescale [yr]')
 
             #print len(self.history.age)
             #print len(self.history.t_SF_t)
@@ -3891,8 +4176,8 @@ class omega( chem_evol ):
                      color=color,linestyle=shape)
 
             #Save plot
-            self.save_data(header=['age','star formation timescale'],\
-                                   data=[age,t_SF_plot])
+            #self.save_data(header=['age','star formation timescale'],\
+            #                       data=[age,t_SF_plot])
 
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
@@ -3910,40 +4195,43 @@ class omega( chem_evol ):
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the redshift a function of time.
+        This function plots the redshift a function of time.
 
         Parameters
         ----------
 
         fig : string, float
-	     Figure name.
-	marker : string
-	     Figure marker.
-	shape : string
-	     Line style.
-	color : string
-	     Line color.
-	label : string
-	     Figure label.
-	fsize : 2D float array
-	     Figure dimension/size.
-	fontsize : integer
-	     Font size of the numbers on the X and Y axis.
-	rspace : float
-	     Extra space on the right for the legend.
-	bspace : float
-	     Extra space at the bottom for the Y axis label.
-	labelsize : integer
-	     Font size of the X and Y axis labels.
-	legend_fontsize : integer
- 	       Font size of the legend.
+             Figure name.
+        marker : string
+             Figure marker.
+        shape : string
+             Line style.
+        color : string
+             Line color.
+        label : string
+             Figure label.
+        fsize : 2D float array
+             Figure dimension/size.
+        fontsize : integer
+             Font size of the numbers on the X and Y axis.
+        rspace : float
+             Extra space on the right for the legend.
+        bspace : float
+             Extra space at the bottom for the Y axis label.
+        labelsize : integer
+             Font size of the X and Y axis labels.
+        legend_fontsize : integer
+             Font size of the legend.
 
         Examples
-	----------
+        ----------
 
-	>>> o1.plot_redshift(label='Redshift')
+        >>> o1.plot_redshift(label='Redshift')
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Define variable only used for plot visual
         source='all'
@@ -3957,7 +4245,7 @@ class omega( chem_evol ):
 
             #Display axis labels
             plt.xlabel('Age [yrs]')
-            plt.ylabel('Redshift')	
+            plt.ylabel('Redshift')
 
             #Copy data for x and y axis
             age = self.history.age
@@ -3968,7 +4256,7 @@ class omega( chem_evol ):
                      color=color,linestyle=shape)
 
             #Save plot
-            self.save_data(header=['age','redshift'],data=[age,redshift_plot])
+            #self.save_data(header=['age','redshift'],data=[age,redshift_plot])
 
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
@@ -3990,64 +4278,66 @@ class omega( chem_evol ):
         bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the evolution of an isotopic ratio as a function
-	of time, as a function of an abundance ratio, or as a function of
-	another isotopic ratio.  Isotopic ratios are given in the
-	delta notation and abundances ratios are given in spectroscopic notation.
+        This function plots the evolution of an isotopic ratio as a function
+        of time, as a function of an abundance ratio, or as a function of
+        another isotopic ratio.  Isotopic ratios are given in the
+        delta notation and abundances ratios are given in spectroscopic notation.
 
         Parameters
         ----------
 
-	return_x_y : boolean
-	     If False (default), show the plot.  If True, return two arrays containing
-	     the X and Y axis data, respectively.
+        return_x_y : boolean
+             If False (default), show the plot.  If True, return two arrays containing
+             the X and Y axis data, respectively.
         grain_notation : boolean
              If False (default), show mass ratio.  If True, show ratio in the delta notation 
-	xaxis : string
-	     X axis, either 'age', an abundance ratio such as '[Fe/H]', or an
-	     isotopic ratio such as 'C-12/C-13'.
-	yaxis : string
-	     Y axis, isotopic ratio such as 'C-12/C-13'.
-	solar_ab : string
-	     Path to the solar abundances used to normalize abundance ratios.
-	solar_iso : string
-	     Path to the solar isotopes used to normalize the isotopic ratios.
+        xaxis : string
+             X axis, either 'age', an abundance ratio such as '[Fe/H]', or an
+             isotopic ratio such as 'C-12/C-13'.
+        yaxis : string
+             Y axis, isotopic ratio such as 'C-12/C-13'.
+        solar_ab : string
+             Path to the solar abundances used to normalize abundance ratios.
+        solar_iso : string
+             Path to the solar isotopes used to normalize the isotopic ratios.
         fig : string, float
-	     Figure name.
+             Figure name.
         source : string
             Specificies if yields come from
-	    all sources ('all') or from
-	    distinctive sources:
-	    only AGB stars ('agb'), only
-	    SN Ia ('sn1a'), or only massive stars
-	    ('massive')
-	marker : string
-	     Figure marker.
-	shape : string
-	     Line style.
-	color : string
-	     Line color.
-	label : string
-	     Figure label.
-	fsize : 2D float array
-	     Figure dimension/size.
-	fontsize : integer
-	     Font size of the numbers on the X and Y axis.
-	rspace : float
-	     Extra space on the right for the legend.
-	bspace : float
-	     Extra space at the bottom for the Y axis label.
-	labelsize : integer
-	     Font size of the X and Y axis labels.
-	legend_fontsize : integer
- 	       Font size of the legend.
+            all sources ('all') or from
+            distinctive sources:
+            only AGB stars ('agb'), only
+            SN Ia ('sn1a'), or only massive stars ('massive')
+        marker : string
+             Figure marker.
+        shape : string
+             Line style.
+        color : string
+             Line color.
+        label : string
+             Figure label.
+        fsize : 2D float array
+             Figure dimension/size.
+        fontsize : integer
+             Font size of the numbers on the X and Y axis.
+        rspace : float
+             Extra space on the right for the legend.
+        bspace : float
+             Extra space at the bottom for the Y axis label.
+        labelsize : integer
+             Font size of the X and Y axis labels.
+        legend_fontsize : integer
+             Font size of the legend.
 
         Examples
-	----------
+        ----------
 
-	>>> o1.plot_iso_ratio(xaxis='[Fe/H]', yaxis='C-12/C-13')
+        >>> o1.plot_iso_ratio(xaxis='[Fe/H]', yaxis='C-12/C-13')
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Marker on the plots
         markevery=500
@@ -4244,8 +4534,8 @@ class omega( chem_evol ):
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
                   rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    #plt.xlim(self.history.dt,self.history.tend)	
-	    self.save_data(header=['Iso mass ratio',yaxis],data=[x,y])
+            #plt.xlim(self.history.dt,self.history.tend)
+            #self.save_data(header=['Iso mass ratio',yaxis],data=[x,y])
 
 
     ##############################################
@@ -4296,62 +4586,65 @@ class omega( chem_evol ):
         bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	This function plots the stellar metallicity distribution function (MDF),
-	or the distribution function of any other abundance ratio.
+        This function plots the stellar metallicity distribution function (MDF),
+        or the distribution function of any other abundance ratio.
 
         Parameters
         ----------
 
-	return_x_y : boolean
-	     If False, show the plot.  If True, return two arrays containing
-	     the X and Y axis data, respectively.
-	axis_mdf : string
-	     Abundance ratio for the distribution such as '[Fe/H]' or '[Mg/H]'.
-	dx : float
-	     Bin resolution of the distribution.
-	solar_ab : string
-	     Path to the solar abundances used to normalize abundance ratios.
-	sigma_gauss : float
-	     Each point in the MDF can be associated with a gaussian. This implies
-	     that in reality, the metallicity should have a certain dispersion 
-	     when stars form at each timestep (instead of using only a single
-	     average value).  The sigma_guass parameter sets the sigma value eac
-	     gaussian function.
-	nb_sigma : float
-	     When sigma_gauss is greater than zero, nb_sigma is the number of
-	     sigma by which the X axis range is expanded.
+        return_x_y : boolean
+             If False, show the plot.  If True, return two arrays containing
+             the X and Y axis data, respectively.
+        axis_mdf : string
+             Abundance ratio for the distribution such as '[Fe/H]' or '[Mg/H]'.
+        dx : float
+             Bin resolution of the distribution.
+        solar_ab : string
+             Path to the solar abundances used to normalize abundance ratios.
+        sigma_gauss : float
+             Each point in the MDF can be associated with a gaussian. This implies
+             that in reality, the metallicity should have a certain dispersion 
+             when stars form at each timestep (instead of using only a single
+             average value).  The sigma_guass parameter sets the sigma value eac
+             gaussian function.
+        nb_sigma : float
+             When sigma_gauss is greater than zero, nb_sigma is the number of
+             sigma by which the X axis range is expanded.
         norm : boolean
              Normalize the MDF is True
              Default : True
         fig : string, float
-	     Figure name.
-	marker : string
-	     Figure marker.
-	shape : string
-	     Line style.
-	color : string
-	     Line color.
-	label : string
-	     Figure label.
-	fsize : 2D float array
-	     Figure dimension/size.
-	fontsize : integer
-	     Font size of the numbers on the X and Y axis.
-	rspace : float
-	     Extra space on the right for the legend.
-	bspace : float
-	     Extra space at the bottom for the Y axis label.
-	labelsize : integer
-	     Font size of the X and Y axis labels.
-	legend_fontsize : integer
- 	       Font size of the legend.
+             Figure name.
+        marker : string
+             Figure marker.
+        shape : string
+             Line style.
+        color : string
+             Line color.
+        label : string
+             Figure label.
+        fsize : 2D float array
+             Figure dimension/size.
+        fontsize : integer
+             Font size of the numbers on the X and Y axis.
+        rspace : float
+             Extra space on the right for the legend.
+        bspace : float
+             Extra space at the bottom for the Y axis label.
+        labelsize : integer
+             Font size of the X and Y axis labels.
+        legend_fontsize : integer
+                Font size of the legend.
 
         Examples
-	----------
+        ----------
 
-	>>> o1.plot_mdf(axis_mdf='[Fe/H]', sigma_gauss=0.2)
+        >>> o1.plot_mdf(axis_mdf='[Fe/H]', sigma_gauss=0.2)
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Define variable only used for plot visual
         source='all'
@@ -4533,7 +4826,6 @@ class omega( chem_evol ):
     ##############################################
     #                 Plot Abun                  #
     ##############################################
-
     def plot_abun(self, fig=20, age=9.2e9,\
         solar_norm=False, iso_on=False,\
         list_elem=[], list_iso=[],return_x_y=False, over_plot_solar=False,\
@@ -4543,13 +4835,13 @@ class omega( chem_evol ):
         legend_fontsize=14, markersize=5):
 
         '''
-	This function plots the abundance distribution in mass
+        This function plots the abundance distribution in mass
         fraction at any given point in time or at any given metallicity.
 
         Parameters
         ----------
-	age : float
-	     Time passed since the beginning of the simulation at which abundance distribution is taken.
+        age : float
+             Time passed since the beginning of the simulation at which abundance distribution is taken.
              Default: Time until the formation of the pre-solar cloud. 
         solar_norm: boolean
              If True, the abundances will be divide by the solar abundances.
@@ -4567,8 +4859,8 @@ class omega( chem_evol ):
              Default: [], all isotopes will be included.
              Example: list_iso=['H-1','C-12','C-13','N-14','N-15']
              Note: list_iso dominates over list_elem is both are used.
-	return_x_y : boolean
-	     If False, show the plot.
+        return_x_y : boolean
+             If False, show the plot.
              If True, return two arrays containing the X and Y axis data, respectively.
              If True and iso_list=True, return a multi-D array [i][j][:] where
              j=0 -> list of mass numbers A for the isotopes associated with the element i,
@@ -4583,40 +4875,43 @@ class omega( chem_evol ):
              Fraction of the Y axis where the name of the element will be shown
              Default: f_y_annotate=0.9
         fig : string, float
-	     Figure name.
-	marker : string
-	     Figure marker.
-	marker_s : string
-	     Marker of the solar abundance distribution.
-	shape : string
-	     Line style.
+             Figure name.
+        marker : string
+             Figure marker.
+        marker_s : string
+             Marker of the solar abundance distribution.
+        shape : string
+             Line style.
         shape_s : string
-	     Line style of the solar abundance distribution.
-	color : string
-	     Line color.
-	color_s : string
-	     Line color of the solar abundances pattern.
-	label : string
-	     Figure label.
-	label_s : string
+             Line style of the solar abundance distribution.
+        color : string
+             Line color.
+        color_s : string
+             Line color of the solar abundances pattern.
+        label : string
+             Figure label.
+        label_s : string
             Label of the solar abundance distribution.
-	fsize : 2D float array
-	     Figure dimension/size.
-	fontsize : integer
-	     Font size of the numbers on the X and Y axis.
-	rspace : float
-	     Extra space on the right for the legend.
-	bspace : float
-	     Extra space at the bottom for the Y axis label.
-	labelsize : integer
-	     Font size of the X and Y axis labels.
-	legend_fontsize : integer
- 	     Font size of the legend.
+        fsize : 2D float array
+             Figure dimension/size.
+        fontsize : integer
+             Font size of the numbers on the X and Y axis.
+        rspace : float
+             Extra space on the right for the legend.
+        bspace : float
+             Extra space at the bottom for the Y axis label.
+        labelsize : integer
+             Font size of the X and Y axis labels.
+        legend_fontsize : integer
+              Font size of the legend.
         markersize : float
              Size of the markers
              Default: markersize=5
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Copy the list of selected isotopes
         if len(list_iso) > 0:
@@ -4701,12 +4996,14 @@ class omega( chem_evol ):
                 iso_array_sol[i_Z_index][2].append(iso_list[iso_name_index])
                 iso_array_sol[i_Z_index][3].append(name_temp_upper)
 
-	# Get the index for given age
-	ages = self.history.age
-	timesteps=self.history.timesteps
-	i_sim = min(range(len(ages)), key=lambda i: abs(ages[i]-age))
+        # Get the index for given age
+        ages = self.history.age
+        timesteps=self.history.timesteps
+        i_sim = min(range(len(ages)), key=lambda i: abs(ages[i]-age))
 
-	print 'Extract abundance from closest available time ','{:.3E}'.format(ages[i_sim]),' yrs'	
+        print 'Extract abundance from closest available time ','{:.3E}'.format(ages[i_sim]),' yrs'
+        print self.history.metallicity[i_sim]
+    
 
         # Get the mass of elements and isotopes at the desired time
         ymgal_el_sim  = self.history.ism_elem_yield[i_sim]
@@ -4790,9 +5087,9 @@ class omega( chem_evol ):
                 if species_labels:
                      for i_Z in range(len(iso_array_sol)):
                           #print 'iso ',iso_array_sol[i_Z][2]
-			  #for h in range(len(iso_array_sol[i_Z][2])):
-		          plt.annotate(iso_array_sol[i_Z][2][0].split('-')[0],(iso_array_sol[i_Z][0][0], iso_m_frac_sim[i_Z][0]), \
-				xytext=(-2,0),textcoords='offset points',horizontalalignment='right', verticalalignment='top') 		  
+                          #for h in range(len(iso_array_sol[i_Z][2])):
+                          plt.annotate(iso_array_sol[i_Z][2][0].split('-')[0],(iso_array_sol[i_Z][0][0], iso_m_frac_sim[i_Z][0]), \
+                                xytext=(-2,0),textcoords='offset points',horizontalalignment='right', verticalalignment='top')
 
                 # Annotate the element
                 #ylimm = np.array(plt.gca().get_ylim())
@@ -4823,8 +5120,8 @@ class omega( chem_evol ):
 
             # Plot visual aspect
             plt.yscale('log')
-	    if len(label)>0:
-	            plt.legend()
+            if len(label)>0:
+                    plt.legend()
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
                rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize, markersize=markersize)
@@ -4837,10 +5134,13 @@ class omega( chem_evol ):
             labelsize=15,legend_fontsize=10):
 
         '''
-	This function calculates the basic galaxy properties and put the
+        This function calculates the basic galaxy properties and put the
         relevant information in a folder
 
         '''
+
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         # Create the folder
         log_path = self.inst_name + '_log/'

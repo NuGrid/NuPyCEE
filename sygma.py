@@ -23,7 +23,15 @@ v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg,
               NuGrid collaboration
 
 v0.4 FEB2015: C. Ritter, B. Cote
+
 v0.5 MAY2016: C. Ritter; Note: See from now the official releases via github.
+
+Stop keeking track of version from now on.
+
+MARCH2018: B. Cote
+- Switched to Python 3
+- Capability to include radioactive isotopes
+
 
 Usage
 =====
@@ -76,9 +84,6 @@ For example with artificial yields of only H-1, you can try
 
 '''
 
-# Standard package
-import matplotlib.pyplot as plt
-
 # Import the class inherited by SYGMA
 from chem_evol import *
 
@@ -90,11 +95,11 @@ class sygma( chem_evol ):
     ================
 
     sfr : string
-	Description of the star formation, usually an instantaneous burst.
+        Description of the star formation, usually an instantaneous burst.
         
-	Choices : 
+        Choices : 
 
-		'input' - read and use the sfr_input file to set the percentage
+                'input' - read and use the sfr_input file to set the percentage
                             of gas that is converted into stars at each timestep.
 
                 'schmidt' - use an adapted Schmidt law (see Timmes95)
@@ -114,17 +119,20 @@ class sygma( chem_evol ):
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
                  ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
+                 table_radio='', decay_file='', sn1a_table_radio='',\
+                 bhnsmerger_table_radio='', nsmerger_table_radio='',\
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t03.txt',sn1a_energy=1e51,\
-		 ns_merger_on=False, bhns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
-                 t_merger_max=1.0e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
+                 ns_merger_on=False, bhns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
+                 t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
                  m_ej_bhnsm=2.5e-02, \
-                 bhnsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', \
-                 nsmerger_table = 'yield_tables/r_process_rosswog_2014.txt', iniabu_table='', \
+                 bhnsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
+                 nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', iniabu_table='', \
                  extra_source_on=False, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0, \
                  extra_source_table=['yield_tables/extra_source.txt'], \
-		 f_extra_source=[1.0], pre_calculate_SSPs=False, \
-     	         extra_source_mass_range=[[8,30]], \
-		 extra_source_exclude_Z=[[]], \
+                 f_extra_source=[1.0], pre_calculate_SSPs=False, \
+                 extra_source_mass_range=[[8,30]], \
+                 extra_source_exclude_Z=[[]], \
+                 total_ejecta_interp=True,\
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
@@ -132,17 +140,24 @@ class sygma( chem_evol ):
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
                  stellar_param_on=False, t_dtd_poly_split=-1.0, \
-		 stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
-		 tau_ferrini=False, delayed_extra_log=False, dt_in=np.array([]),\
+                 delayed_extra_yields_log_int=False, \
+                 delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
+                 stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
+                 tau_ferrini=False, delayed_extra_log=False, dt_in=np.array([]),\
                  nsmerger_dtd_array=np.array([]), bhnsmerger_dtd_array=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]), \
                  mass_sampled=np.array([]), scale_cor=np.array([]), \
                  poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
-		 ytables_nsmerger_in=np.array([]), dt_split_info=np.array([]),\
+                 ytables_nsmerger_in=np.array([]), dt_split_info=np.array([]),\
                  delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
-                 delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([])):
+                 delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]), \
+                 delayed_extra_dtd_radio=np.array([]), delayed_extra_dtd_norm_radio=np.array([]), \
+                 delayed_extra_yields_radio=np.array([]), ism_ini_radio=np.array([]), \
+                 delayed_extra_yields_norm_radio=np.array([]), \
+                 ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
+                 ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
@@ -151,17 +166,21 @@ class sygma( chem_evol ):
                  nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table,sn1a_energy=sn1a_energy,\
-		 ns_merger_on=ns_merger_on, nsmerger_table=nsmerger_table, \
-		 f_binary=f_binary, f_merger=f_merger, \
+                 table_radio=table_radio, decay_file=decay_file,\
+                 sn1a_table_radio=sn1a_table_radio, bhnsmerger_table_radio=bhnsmerger_table_radio,\
+                 nsmerger_table_radio=nsmerger_table_radio,\
+                 ns_merger_on=ns_merger_on, nsmerger_table=nsmerger_table, \
+                 f_binary=f_binary, f_merger=f_merger, \
                  bhns_merger_on=bhns_merger_on,
                  m_ej_bhnsm=m_ej_bhnsm, bhnsmerger_table=bhnsmerger_table, \
                  nsm_dtd_power=nsm_dtd_power, \
+                 total_ejecta_interp=total_ejecta_interp, \
                  t_merger_max=t_merger_max, m_ej_nsm = m_ej_nsm, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
                  extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
-		 extra_source_mass_range=extra_source_mass_range, \
-		 extra_source_exclude_Z=extra_source_exclude_Z,
-		 pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
+                 extra_source_mass_range=extra_source_mass_range, \
+                 extra_source_exclude_Z=extra_source_exclude_Z,
+                 pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
                  nb_nsm_per_m=nb_nsm_per_m, t_nsm_coal=t_nsm_coal, \
                  imf_bdys_pop3=imf_bdys_pop3, \
                  imf_yields_range_pop3=imf_yields_range_pop3, \
@@ -173,20 +192,30 @@ class sygma( chem_evol ):
                  netyields_on=netyields_on,wiersmamod=wiersmamod,\
                  yield_interp=yield_interp, tau_ferrini=tau_ferrini,\
                  delayed_extra_log=delayed_extra_log,\
+                 delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
+                 delayed_extra_log_radio=delayed_extra_log_radio,\
+                 delayed_extra_yields_log_int_radio=delayed_extra_yields_log_int_radio,\
                  ytables_in=ytables_in, nsmerger_dtd_array=nsmerger_dtd_array, \
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
-		 ytables_1a_in=ytables_1a_in, ytables_nsmerger_in=ytables_nsmerger_in, \
-		 dt_in=dt_in,stellar_param_on=stellar_param_on,\
+                 ytables_1a_in=ytables_1a_in, ytables_nsmerger_in=ytables_nsmerger_in, \
+                 dt_in=dt_in,stellar_param_on=stellar_param_on,\
                  stellar_param_table=stellar_param_table,\
                  poly_fit_dtd_5th=poly_fit_dtd_5th, \
                  poly_fit_range=poly_fit_range, dt_split_info=dt_split_info, \
                  delayed_extra_dtd=delayed_extra_dtd,\
                  delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
                  delayed_extra_yields=delayed_extra_yields,\
-                 delayed_extra_yields_norm=delayed_extra_yields_norm)
+                 delayed_extra_yields_norm=delayed_extra_yields_norm,\
+                 delayed_extra_dtd_radio=delayed_extra_dtd_radio,\
+                 delayed_extra_dtd_norm_radio=delayed_extra_dtd_norm_radio,\
+                 delayed_extra_yields_radio=delayed_extra_yields_radio,\
+                 delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
+                 ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
+                 ytables_1a_radio_in=ytables_1a_radio_in, ism_ini_radio=ism_ini_radio,\
+                 ytables_nsmerger_radio_in=ytables_nsmerger_radio_in)
 
         if self.need_to_quit:
             return
@@ -194,7 +223,7 @@ class sygma( chem_evol ):
         # Announce the beginning of the simulation 
         print 'SYGMA run in progress..'
         start_time = t_module.time()
-	self.start_time = start_time
+        self.start_time = start_time
 
         # Attribute the input parameter to the current object
         self.sfr = sfr
@@ -232,7 +261,11 @@ class sygma( chem_evol ):
             self.sfrin = self.sfrin_i[i-1]
 
             # Run the timestep i
-            self._evol_stars(i, self.mass_sampled, self.scale_cor)
+            self._evol_stars(i, 0.0, self.mass_sampled, self.scale_cor)
+
+            # Decay radioactive isotopes
+            if self.len_decay_file > 0:
+                self._decay_radio(i)
 
             # Get the new metallicity of the gas
             self.zmetal = self._getmetallicity(i)
@@ -314,19 +347,17 @@ class sygma( chem_evol ):
 
     def write_stellar_param_table(self,table_name='gce_stellar_param_table.txt', path="evol_tables",interact=False):
 
-	'''
-	Writes out evolution of stellar parameter such as luminosity and kinetic energy. 
-	Stellar parameter quantities are available via <sygma instance>.stellar_param_attrs.
+        '''
+        Writes out evolution of stellar parameter such as luminosity and kinetic energy. 
+        Stellar parameter quantities are available via <sygma instance>.stellar_param_attrs.
 
+        Table structure:
 
-	Table structure:
+        &Age &Quantity1 &Quantity2 ...
 
-	&Age &Quantity1 &Quantity2 ...
+        &0.000E+00 &0.000E+00 &0.000E+00
 
-	&0.000E+00 &0.000E+00 &0.000E+00
-
-	&0.000E+00 &0.000E+00 &0.000E+00
-
+        &0.000E+00 &0.000E+00 &0.000E+00
 
         Parameters
         ----------
@@ -335,8 +366,8 @@ class sygma( chem_evol ):
           Name of table. If you use a notebook version, setting a name
           is not necessary.
 
-	path : string
-		directory where to save table.	
+        path : string
+                directory where to save table.
 
         interact: bool
                 If true, saves file in current directory (notebook dir) and creates HTML link useful in ipython notebook environment
@@ -347,11 +378,11 @@ class sygma( chem_evol ):
         >>> s.write_evol_table(table_name='testoutput.txt')
 
 
-	'''
+        '''
 
         time_evol=self.history.age
 
-	#get available quantities
+        #get available quantities
 
         parameter=self.stellar_param_attrs
         parameter_values=self.stellar_param
@@ -361,11 +392,11 @@ class sygma( chem_evol ):
         out='&Age [yr]  '
         for i in range(len(parameter)):
             out+= ('&'+parameter[i]+((20-len(parameter[i]))*' '))
-	out = out + '\n'
-	out+=('&'+'{:.3E}'.format(time_evol[0]))
-	for i in range(len(parameter_values)):
-		out+= ( ' &'+ '{:.3E}'.format(0.))
-	out = out + '\n'	
+        out = out + '\n'
+        out+=('&'+'{:.3E}'.format(time_evol[0]))
+        for i in range(len(parameter_values)):
+                out+= ( ' &'+ '{:.3E}'.format(0.))
+        out = out + '\n'
         #data
         for t in range(len(parameter_values[0])):
             out+=('&'+'{:.3E}'.format(time_evol[t+1]))
@@ -407,15 +438,15 @@ class sygma( chem_evol ):
     def plot_stellar_param(self,fig=8,quantity='Ekindot_wind',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,markevery=1):
 
         '''
-	
-	Plots the evolution of stellar parameter as provided as input in stellar parameter table (stellar_param_table variable).
+
+        Plots the evolution of stellar parameter as provided as input in stellar parameter table (stellar_param_table variable).
 
         Parameters
         ----------
 
-	quantity: string
+        quantity: string
  
-		Name of stellar parameter of interest. Check for available parameter via <sygma instance>.stellar_param_attrs
+                Name of stellar parameter of interest. Check for available parameter via <sygma instance>.stellar_param_attrs
 
         Examples
         ----------
@@ -423,30 +454,31 @@ class sygma( chem_evol ):
         >>> s.plot_stellar_param(quantity='Ekin_wind')
 
 
-	'''
+        '''
 
-	#in case stellar parameter are not used.
-	if self.stellar_param_on==False:
-		print 'Set stellar_param_on to true to use this function.'
-		return
-	
-	if not quantity in self.stellar_param_attrs:
-		print 'Quantity ',quantity,' not provided in yield table'
-		return
-	idx=self.stellar_param_attrs.index(quantity)
-	quantity_evol=self.stellar_param[idx]
-	age=self.history.age[1:]
+        import matplotlib.pyplot as plt
+        #in case stellar parameter are not used.
+        if self.stellar_param_on==False:
+                print 'Set stellar_param_on to true to use this function.'
+                return
 
-	plt.figure(fig)
+        if not quantity in self.stellar_param_attrs:
+                print 'Quantity ',quantity,' not provided in yield table'
+                return
+        idx=self.stellar_param_attrs.index(quantity)
+        quantity_evol=self.stellar_param[idx]
+        age=self.history.age[1:]
+
+        plt.figure(fig)
 
         plt.plot(age,quantity_evol,label=label,marker=marker,color=color,linestyle=shape,markevery=markevery)
  
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         plt.ylabel('log-scaled '+quantity)
-	plt.xlabel('log-scaled age [yr]')
-	plt.yscale('log')
-	plt.xscale('log')
+        plt.xlabel('log-scaled age [yr]')
+        plt.yscale('log')
+        plt.xscale('log')
 
     def plot_metallicity(self,source='all',label='',marker='o',color='r',shape='-',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
@@ -460,94 +492,91 @@ class sygma( chem_evol ):
         source : string
              Specifies if yields come from
 
-	     all sources ('all'), including
-	     AGB+SN1a, massive stars. Or from
+             all sources ('all'), including
+             AGB+SN1a, massive stars. Or from
 
-	     distinctive sources:
+             distinctive sources:
 
-	     only agb stars ('agb'), 
-	
-	     only SN1a ('SN1a')
+             only agb stars ('agb'), 
 
-	     only massive stars ('massive')
+             only SN1a ('SN1a')
+
+             only massive stars ('massive')
 
         Examples
         ----------
 
         >>> s.plot_metallicity(source='all')
 
-
-
         '''
-	iso_non_metal=['H-1','H-2','H-3','He-3','He-4','Li-6','Li-7']
-	idx_iso_non_metal=[]
-	for h in range(len(iso_non_metal)):
-		if iso_non_metal[h] in self.history.isotopes:
-			idx_iso_non_metal.append(self.history.isotopes.index(iso_non_metal[h]))
 
+        import matplotlib.pyplot as plt
+        iso_non_metal=['H-1','H-2','H-3','He-3','He-4','Li-6','Li-7']
+        idx_iso_non_metal=[]
+        for h in range(len(iso_non_metal)):
+                if iso_non_metal[h] in self.history.isotopes:
+                        idx_iso_non_metal.append(self.history.isotopes.index(iso_non_metal[h]))
 
         x=self.history.age
 
-	if source == 'all':
-	       yields_evol=self.history.ism_iso_yield
-	elif source =='agb':
-	      yields_evol=self.history.ism_iso_yield_agb
-	elif source == 'sn1a':
-	      yields_evol=self.history.ism_iso_yield_1a
-	elif source == 'massive':
-	     yields_evol=self.history.ism_iso_yield_massive
-	
+        if source == 'all':
+              yields_evol=self.history.ism_iso_yield
+        elif source =='agb':
+              yields_evol=self.history.ism_iso_yield_agb
+        elif source == 'sn1a':
+              yields_evol=self.history.ism_iso_yield_1a
+        elif source == 'massive':
+             yields_evol=self.history.ism_iso_yield_massive
+
         Z_evol=[]
-	for k in range(len(yields_evol)):
-		isotopes=self.history.isotopes
-		nonmetals=0
-		for h in range(len(idx_iso_non_metal)):
-			nonmetals=nonmetals + yields_evol[k][idx_iso_non_metal[h]]
-		Z_step=(sum(yields_evol[k]) - nonmetals)/sum(yields_evol[k])
-		Z_evol.append(Z_step)
+        for k in range(len(yields_evol)):
+                isotopes=self.history.isotopes
+                nonmetals=0
+                for h in range(len(idx_iso_non_metal)):
+                        nonmetals=nonmetals + yields_evol[k][idx_iso_non_metal[h]]
+                Z_step=(sum(yields_evol[k]) - nonmetals)/sum(yields_evol[k])
+                Z_evol.append(Z_step)
 
-	plt.plot(x,Z_evol,label=label)
+        plt.plot(x,Z_evol,label=label)
 
-	plt.xscale('log')
-	plt.xlabel('age [yr]')
-	plt.ylabel('metal fraction Z')
+        plt.xscale('log')
+        plt.xlabel('age [yr]')
+        plt.ylabel('metal fraction Z')
         #self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-
 
 
     def plot_table_param(self,fig=8,ax='',xaxis='mini',quantity='Lifetime',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	Plots the yield table quantities such as lifetimes versus initial mass as given in yield input tables.
+        Plots the yield table quantities such as lifetimes versus initial mass as given in yield input tables.
 
         Parameters
         ----------
 
         xaxis : string
              if 'mini': use initial mass
-	     if 'time': use lifetime
+             if 'time': use lifetime
         iniZ  : float 
-	      Metallicity of interest
-	masses: list
-	      List of initial masses to be plotted
+              Metallicity of interest
+        masses: list
+              List of initial masses to be plotted
 
-	table: string
-	      Yield table	
+        table: string
+              Yield table
 
         Examples
-        ----------
+        --------
 
         >>> s.plot_table_param(quantity='Lifetime')
 
-
-
-	'''
+        '''
 
         import read_yields as ry
         import re
+        import matplotlib.pyplot as plt
         y_table=ry.read_nugrid_yields(global_path+table)
 
-	plt.figure(fig)
+        plt.figure(fig)
 
         # find all available masses
         if len(masses)==0:
@@ -558,35 +587,35 @@ class sygma( chem_evol ):
                                 masses.append(mfound)
                 #print 'Found masses: ',masses
 
-	if xaxis=='mini':
-		x=masses
-	elif xaxis=='time':
-		x=[]
-		for k in range(len(masses)):
-			x.append(y_table.get(Z=iniZ, M=masses[k], quantity='Lifetime'))	
+        if xaxis=='mini':
+                x=masses
+        elif xaxis=='time':
+                x=[]
+                for k in range(len(masses)):
+                        x.append(y_table.get(Z=iniZ, M=masses[k], quantity='Lifetime'))
 
         param=[]
         for k in range(len(masses)):
                 param.append(y_table.get(Z=iniZ, M=masses[k], quantity=quantity))
 
-	if type(ax)==str:
-		ax=plt.gca()
+        if type(ax)==str:
+                ax=plt.gca()
         ax.plot(x,param,label=label,marker=marker,color=color,linestyle=shape)
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         plt.ylabel(quantity)
-	if xaxis=='mini':
-        	plt.xlabel('initial mass [M$_{\odot}$]')
-	elif xaxis=='time':
-		plt.xlabel('lifetime [yr]')
-	plt.yscale('log')
+        if xaxis=='mini':
+                plt.xlabel('initial mass [M$_{\odot}$]')
+        elif xaxis=='time':
+                plt.xlabel('lifetime [yr]')
+        plt.yscale('log')
 
 
     def plot_table_remnant(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
 
-	Plots the remnant masses versus initial mass given in yield tables.
+        Plots the remnant masses versus initial mass given in yield tables.
 
         Parameters
         ----------
@@ -595,8 +624,8 @@ class sygma( chem_evol ):
              if 'mini': use initial mass; if of the form [specie1/specie2] use spec. notation of 
         yaxis : string
 
-	iniZ : float
-	     Metallicity to choose.
+        iniZ : float
+             Metallicity to choose.
 
         Examples
         ----------
@@ -604,11 +633,13 @@ class sygma( chem_evol ):
         >>> s.plot_table_remnant(iniZ=0.02)
 
 
-	'''
+        '''
+
         import read_yields as ry
         import re
+        import matplotlib.pyplot as plt
         y_table=ry.read_nugrid_yields(global_path+table)
-	plt.figure(fig)
+        plt.figure(fig)
         # find all available masses
         if len(masses)==0:
                 allheader=y_table.table_mz
@@ -617,59 +648,60 @@ class sygma( chem_evol ):
                                 mfound=float(allheader[k].split(',')[0].split('=')[1])
                                 masses.append(mfound)
                 #print 'Found masses: ',masses
-	
-	mfinals=[]
-	for k in range(len(masses)):	
-		mfinals.append(y_table.get(Z=iniZ, M=masses[k], quantity='Mfinal'))
 
-	plt.plot(masses,mfinals,label=label,marker=marker,color=color,linestyle=shape)
+        mfinals=[]
+        for k in range(len(masses)):
+                mfinals.append(y_table.get(Z=iniZ, M=masses[k], quantity='Mfinal'))
+
+        plt.plot(masses,mfinals,label=label,marker=marker,color=color,linestyle=shape)
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	plt.ylabel('remnant mass [M$_{\odot}$]')
-	plt.xlabel('initial mass [M$_{\odot}$]')
-	plt.minorticks_on()
+        plt.ylabel('remnant mass [M$_{\odot}$]')
+        plt.xlabel('initial mass [M$_{\odot}$]')
+        plt.minorticks_on()
 
     def plot_yield_mtot(self,fig=8,plot_imf_mass_ranges=True,fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
-	'''
+        '''
 
-	Plots total mass ejected by stars (!). To distinguish between the total mass of yields from the table and fitted total mass
+        Plots total mass ejected by stars (!). To distinguish between the total mass of yields from the table and fitted total mass
 
         Parameters
         ----------
 
-	plot_imf_mass_ranges : boolean
-		If true plots the initial mass ranges for which yields are consider.	
+        plot_imf_mass_ranges : boolean
+                If true plots the initial mass ranges for which yields are consider.
 
         Examples
         ----------
 
         >>> s.plot_yield_mtot()
 
-	
-	'''
 
-	plt.figure(8)
-	yall=[]
-	for k in range(len(self.yields)):
-	    yall.append(sum(self.yields[k]))
-	mall=self.m_stars
-	x=[]
-	ms=[]
-	for m in np.arange(self.imf_bdys[0],self.imf_bdys[-1],1):
-	    x.append(self.func_total_ejecta(m))
-	    ms.append(m)
-	plt.plot(ms,x,linestyle=':',label='fit')
-	plt.plot(mall,yall,marker='x',color='k',linestyle='',label='input yield grid')
-	plt.xlabel('initial mass [M$_{\odot}$]')
-	plt.ylabel('total yields [M$_{\odot}$]')
-	plt.legend()
+        '''
 
-	if plot_imf_mass_ranges==True:
-		ranges=self.imf_mass_ranges
-		for k in range(len(ranges)):
-		    plt.vlines(ranges[k][0],0,100,linestyle='--')
-		plt.vlines(ranges[-1][1],0,100,linestyle='--')
+        import matplotlib.pyplot as plt
+        plt.figure(8)
+        yall=[]
+        for k in range(len(self.yields)):
+            yall.append(sum(self.yields[k]))
+        mall=self.m_stars
+        x=[]
+        ms=[]
+        for m in np.arange(self.imf_bdys[0],self.imf_bdys[-1],1):
+            x.append(self.func_total_ejecta(m))
+            ms.append(m)
+        plt.plot(ms,x,linestyle=':',label='fit')
+        plt.plot(mall,yall,marker='x',color='k',linestyle='',label='input yield grid')
+        plt.xlabel('initial mass [M$_{\odot}$]')
+        plt.ylabel('total yields [M$_{\odot}$]')
+        plt.legend()
+
+        if plot_imf_mass_ranges==True:
+                ranges=self.imf_mass_ranges
+                for k in range(len(ranges)):
+                    plt.vlines(ranges[k][0],0,100,linestyle='--')
+                plt.vlines(ranges[-1][1],0,100,linestyle='--')
 
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
@@ -677,26 +709,26 @@ class sygma( chem_evol ):
 
     def plot_table_yield_mass(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
-	'''
-	Plots yields for isotopes given in yield tables.
+        '''
+        Plots yields for isotopes given in yield tables.
 
         Parameters
         ----------
 
-	xaxis : string
-		if 'mini' use initial mass on x axis
-	
-	yaxis : string
-		isotope to plot.
-	
+        xaxis : string
+                if 'mini' use initial mass on x axis
+
+        yaxis : string
+        isotope to plot.
 
         Examples
         ----------
 
         >>> s.plot_iso_ratio(yaxis='C-12')
 
-	'''
+        '''
 
+        import matplotlib.pyplot as plt
         # find all available masses
         if len(masses)==0:
                 allheader=y_table.table_mz
@@ -705,7 +737,7 @@ class sygma( chem_evol ):
                                 mfound=float(allheader[k].split(',')[0].split('=')[1])
                                 masses.append(mfound)
                 #print 'Found masses: ',masses
-	if True:
+        if True:
                 x=[]
                 y=[]
                 for mini in masses:
@@ -736,16 +768,16 @@ class sygma( chem_evol ):
 
     def plot_net_yields(self,fig=91,species='[C-12/Fe-56]',netyields_iniabu='yield_tables/iniabu/iniab_solar_Wiersma.ppn'):
 
-	'''
-		Plots net yields as calculated in the code when using netyields_on=True.
+        '''
+                Plots net yields as calculated in the code when using netyields_on=True.
 
-		To be used only with net yield input.
+                To be used only with net yield input.
 
         Parameters
         ----------
 
-	species : string
-		Isotope ratio in spectroscopic notation.
+        species : string
+                Isotope ratio in spectroscopic notation.
 
 
         Examples
@@ -754,65 +786,66 @@ class sygma( chem_evol ):
         >>> s.plot_net_yields(species='[C-12/Fe-56]')
 
 
-	'''
+        '''
 
-	iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
-	isonames=iniabu.names
+        import matplotlib.pyplot as plt
+        iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
+        isonames=iniabu.names
         specie1=species.split('/')[0][1:]
         specie2=species.split('/')[1][:-1]
-	for k in range(len(isonames)):
-		elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
-		A=int(re.split('(\d+)',isonames[k])[1])
-		if specie1 == elem+'-'+str(A):
-			x1sol=iniabu.iso_abundance(elem+'-'+str(A))
-		if specie2 == elem+'-'+str(A):
-			x2sol=iniabu.iso_abundance(elem+'-'+str(A))
+        for k in range(len(isonames)):
+                elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
+                A=int(re.split('(\d+)',isonames[k])[1])
+                if specie1 == elem+'-'+str(A):
+                        x1sol=iniabu.iso_abundance(elem+'-'+str(A))
+                if specie2 == elem+'-'+str(A):
+                        x2sol=iniabu.iso_abundance(elem+'-'+str(A))
 
-	specie1=species.split('/')[0][1:]
-	specie2=species.split('/')[1][:-1]
-	idx1=self.history.isotopes.index(specie1)
-	idx2=self.history.isotopes.index(specie2)
-	y=[]
-	x=range(len(self.history.netyields))
-	x=self.history.age
-	x=self.history.netyields_masses
-	for k in range(len(self.history.netyields)):
-	    x1=self.history.netyields[k][idx1]/sum(self.history.netyields[k])
-	    x2=self.history.netyields[k][idx2]/sum(self.history.netyields[k])
-	    y.append(np.log10(x1/x2 / (x1sol/x2sol)))
-	print 'create figure'
-	plt.figure(fig)
-	plt.plot(x,y,marker='o')
-	plt.ylabel(species)
-	plt.xlabel('initial mass [M$_{\odot}$]')
-	#plt.xscale('log')
+        specie1=species.split('/')[0][1:]
+        specie2=species.split('/')[1][:-1]
+        idx1=self.history.isotopes.index(specie1)
+        idx2=self.history.isotopes.index(specie2)
+        y=[]
+        x=range(len(self.history.netyields))
+        x=self.history.age
+        x=self.history.netyields_masses
+        for k in range(len(self.history.netyields)):
+            x1=self.history.netyields[k][idx1]/sum(self.history.netyields[k])
+            x2=self.history.netyields[k][idx2]/sum(self.history.netyields[k])
+            y.append(np.log10(x1/x2 / (x1sol/x2sol)))
+        print 'create figure'
+        plt.figure(fig)
+        plt.plot(x,y,marker='o')
+        plt.ylabel(species)
+        plt.xlabel('initial mass [M$_{\odot}$]')
+        #plt.xscale('log')
 
     def plot_table_yield(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_abu='',netyields_iniabu=''):
 
         '''
 
-	Plots the yields of the yield input grid versus initial mass. Yields can be plotted in solar masses or in spectroscopic notation.
+        Plots the yields of the yield input grid versus initial mass. Yields can be plotted in solar masses or in spectroscopic notation.
 
 
         Parameters
         ----------
 
-	xaxis : string
-	     if 'mini': use initial mass; if of the form [specie1/specie2] use spec. notation
-	yaxis : string
-	     specifies isotopes or elements with 'C-12' or 'C': plot yield of isotope;
-	     if chosen spectros: use form [specie3/specie4]
-	iniZ : float
-	     specifies the metallicity to be plotted
-	masses : list
-	     if empty plot all available masses for metallicity iniZ; else choose only masses in list masses
-	table : string
-	     table to plot data from; default sygma input table
-	solar_abu : string
-	     solar abundance for spectroscopic notation 
+        xaxis : string
+             if 'mini': use initial mass; if of the form [specie1/specie2] use spec. notation
+        yaxis : string
+             specifies isotopes or elements with 'C-12' or 'C': plot yield of isotope;
+             if chosen spectros: use form [specie3/specie4]
+        iniZ : float
+             specifies the metallicity to be plotted
+        masses : list
+             if empty plot all available masses for metallicity iniZ; else choose only masses in list masses
+        table : string
+             table to plot data from; default sygma input table
+        solar_abu : string
+             solar abundance for spectroscopic notation 
              default: yield_tables/iniabu/iniab2.0E-02GN93.ppn (if empty string)
-	netyields : bool
-	     if true assume net yields in table and add corresponding initial contribution to get total yields
+        netyields : bool
+             if true assume net yields in table and add corresponding initial contribution to get total yields
         netyields_iniabu : string
              initial abundance, only used in conjuction with net yields      
 
@@ -821,267 +854,261 @@ class sygma( chem_evol ):
 
         >>> s.plot_iso_ratio(yaxis='C-12')
         >>> s.plot_iso_ratio(yaxis='C/Fe')
-	>>> s.plot_iso_ratio(yaxis='[C/Fe]')
+        >>> s.plot_iso_ratio(yaxis='[C/Fe]')
         >>> s.plot_iso_ratio(xaxis='[Fe/H]',yaxis='[C/Fe]')
 
         
-	'''
-	import read_yields as ry
-	import re
+        '''
+        import read_yields as ry
+        import re
+        import matplotlib.pyplot as plt
 
-
-	y_table=ry.read_nugrid_yields(global_path+table)
+        y_table=ry.read_nugrid_yields(global_path+table)
         plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
 
-	#spectroscopic notation?
-	specx=False
-	specy=False
-	if ('[' in yaxis):
-		specy=True
-	if ('[' in xaxis):
-		specx=True
+        #spectroscopic notation?
+        specx=False
+        specy=False
+        if ('[' in yaxis):
+                specy=True
+        if ('[' in xaxis):
+                specx=True
 
 
         ####Get solar metallicity elements, if necessary
-	if specx or specy:
-		if len(solar_abu) ==0:
+        if specx or specy:
+                if len(solar_abu) ==0:
                      iniabu_sol=ry.iniabu(global_path+'yield_tables/iniabu/iniab2.0E-02GN93.ppn')
                 else:
-		     iniabu_sol=ry.iniabu(global_path+solar_abu)
-		isonames=iniabu_sol.names
+                     iniabu_sol=ry.iniabu(global_path+solar_abu)
+                isonames=iniabu_sol.names
 
-		ini_elems_frac_sol=[]
-		ini_elems_sol=[]
-		for k in range(len(isonames)):
-				elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
-				A=int(re.split('(\d+)',isonames[k])[1])
-				if elem not in ini_elems_sol:
-					ini_elems_sol.append(elem)
-					ini_elems_frac_sol.append(iniabu_sol.iso_abundance(elem+'-'+str(A)))
-				else:
-					ini_elems_frac_sol[ini_elems_sol.index(elem)]+= iniabu_sol.iso_abundance(elem+'-'+str(A))
+                ini_elems_frac_sol=[]
+                ini_elems_sol=[]
+                for k in range(len(isonames)):
+                                elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
+                                A=int(re.split('(\d+)',isonames[k])[1])
+                                if elem not in ini_elems_sol:
+                                        ini_elems_sol.append(elem)
+                                        ini_elems_frac_sol.append(iniabu_sol.iso_abundance(elem+'-'+str(A)))
+                                else:
+                                        ini_elems_frac_sol[ini_elems_sol.index(elem)]+= iniabu_sol.iso_abundance(elem+'-'+str(A))
 
-		ini_isos_frac_sol=[]
-		ini_isos_sol=[]
-		for k in range(len(isonames)):
-					elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
-					A=int(re.split('(\d+)',isonames[k])[1])
-					newname=elem+'-'+str(A)
-					ini_isos_sol.append(newname)
-					ini_isos_frac_sol.append(iniabu_sol.iso_abundance(elem+'-'+str(A)))
+                ini_isos_frac_sol=[]
+                ini_isos_sol=[]
+                for k in range(len(isonames)):
+                                        elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
+                                        A=int(re.split('(\d+)',isonames[k])[1])
+                                        newname=elem+'-'+str(A)
+                                        ini_isos_sol.append(newname)
+                                        ini_isos_frac_sol.append(iniabu_sol.iso_abundance(elem+'-'+str(A)))
 
+        # for net yields need initial abundance of elements or isotopes
+        if netyields:
 
-	# for net yields need initial abundance of elements or isotopes
-	if netyields:
-
-		iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
-		isonames=iniabu.names
-		#get initial elements 
-		if True:
-			ini_elems=[]
-			ini_elems_frac=[]
-			for k in range(len(isonames)):
-				elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
-				A=int(re.split('(\d+)',isonames[k])[1])
-				if elem not in ini_elems:
-					ini_elems.append(elem)
-					ini_elems_frac.append(iniabu.iso_abundance(elem+'-'+str(A)))
-				else:
-					ini_elems_frac[ini_elems.index(elem)]+=iniabu.iso_abundance(elem+'-'+str(A))
-		#get isotopes
-		if True:	
-			ini_isos=[]
-			ini_isos_frac=[]
+                iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
+                isonames=iniabu.names
+                #get initial elements 
+                if True:
+                        ini_elems=[]
+                        ini_elems_frac=[]
                         for k in range(len(isonames)):
                                 elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
                                 A=int(re.split('(\d+)',isonames[k])[1])
-				newname=elem+'-'+str(A)
-				ini_isos.append(newname)
-				ini_isos_frac.append(iniabu.iso_abundance(elem+'-'+str(A)))
+                                if elem not in ini_elems:
+                                        ini_elems.append(elem)
+                                        ini_elems_frac.append(iniabu.iso_abundance(elem+'-'+str(A)))
+                                else:
+                                        ini_elems_frac[ini_elems.index(elem)]+=iniabu.iso_abundance(elem+'-'+str(A))
+                #get isotopes
+                if True:
+                        ini_isos=[]
+                        ini_isos_frac=[]
+                        for k in range(len(isonames)):
+                                elem=re.split('(\d+)',isonames[k])[0].strip().capitalize()
+                                A=int(re.split('(\d+)',isonames[k])[1])
+                                newname=elem+'-'+str(A)
+                                ini_isos.append(newname)
+                                ini_isos_frac.append(iniabu.iso_abundance(elem+'-'+str(A)))
 
+        #find all available masses
+        if len(masses)==0:
+                allheader=y_table.table_mz
+                for k in range(len(allheader)):
+                        if str(iniZ) in allheader[k]:
+                                mfound=float(allheader[k].split(',')[0].split('=')[1])
+                                masses.append(mfound)
+                #print 'Available masses: ',masses
 
+        # calculate and collect values to plot
+        idx1=-1
+        Z=iniZ
+        y_delay=y_table
+        if True:
+                x=[]
+                y=[]
+                for mini in masses:
 
-	#find all available masses
-	if len(masses)==0:
-		allheader=y_table.table_mz
-		for k in range(len(allheader)):
-			if str(iniZ) in allheader[k]:
-				mfound=float(allheader[k].split(',')[0].split('=')[1])	
-				masses.append(mfound)
-		#print 'Available masses: ',masses
+                        idx1+=1
+                        totmass=sum(y_delay.get(M=mini,Z=Z,quantity='Yields'))
+                        if netyields:
+                                mfinal = y_delay.get(Z=Z, M=mini, quantity='Mfinal')
 
+                        #if xaxis spectro notation
+                        if (not 'mini' in xaxis):
+                                if specx:
+                                        x1=xaxis.split('/')[0][1:]
+                                        x2=xaxis.split('/')[1][:-1]
+                                else:
+                                        x1=xaxis
+                                #if isotope
+                                if '-' in xaxis:
+                                        if specx:
+                                                yx2=y_delay.get(M=mini,Z=Z,specie=x2)
+                                        yx1=y_delay.get(M=mini,Z=Z,specie=x1)
+                                        if netyields:
+                                                ini_species=ini_isos
+                                                ini_species_frac=ini_isos_frac
+                                        if specx:
+                                                ini_species_frac_sol=ini_isos_frac_sol
+                                                ini_species_sol = ini_isos_sol
 
-	# calculate and collect values to plot
-
-	idx1=-1
-	Z=iniZ
-	y_delay=y_table
-	if True:
-		x=[]
-		y=[]
-		for mini in masses:
-			
-			idx1+=1
-			totmass=sum(y_delay.get(M=mini,Z=Z,quantity='Yields'))
-			if netyields:
-				mfinal = y_delay.get(Z=Z, M=mini, quantity='Mfinal')
-
-			#if xaxis spectro notation
-			if (not 'mini' in xaxis):
-				if specx:
-					x1=xaxis.split('/')[0][1:]
-					x2=xaxis.split('/')[1][:-1]
-				else:
-					x1=xaxis
-				#if isotope
-				if '-' in xaxis:
-					if specx:
-	                                	yx2=y_delay.get(M=mini,Z=Z,specie=x2)
-        	                        yx1=y_delay.get(M=mini,Z=Z,specie=x1)
-					if netyields:
-						ini_species=ini_isos
-						ini_species_frac=ini_isos_frac
-					if specx:
-						ini_species_frac_sol=ini_isos_frac_sol
-						ini_species_sol = ini_isos_sol
-
-				#if element
-				else:
-					yx2=0
-					yx1=0
-					#sum up isotopes to get elements
-					isoavail=y_delay.get(M=mini,Z=Z,quantity='Isotopes')
+                                #if element
+                                else:
+                                        yx2=0
+                                        yx1=0
+                                        #sum up isotopes to get elements
+                                        isoavail=y_delay.get(M=mini,Z=Z,quantity='Isotopes')
                                         for k in range(len(isoavail)):
-						if x1 == isoavail[k].split('-')[0]:
-							yx1+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
-						if specx:
-                                                	if x2 == isoavail[k].split('-')[0]:
-                                                	        yx2+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
-					if netyields:
-						ini_species=ini_elems
-						ini_species_frac=ini_elems_frac
-					if specx:
-						ini_species_frac_sol=ini_elems_frac_sol
-						ini_species_sol = ini_elems_sol 
-				if specy:
-					x1_ini_sol=ini_species_frac_sol[ini_species_sol.index(x1)]
-					x2_ini_sol=ini_species_frac_sol[ini_species_sol.index(x2)]
+                                                if x1 == isoavail[k].split('-')[0]:
+                                                        yx1+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
+                                                if specx:
+                                                        if x2 == isoavail[k].split('-')[0]:
+                                                                yx2+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
+                                        if netyields:
+                                                ini_species=ini_elems
+                                                ini_species_frac=ini_elems_frac
+                                        if specx:
+                                                ini_species_frac_sol=ini_elems_frac_sol
+                                                ini_species_sol = ini_elems_sol 
+                                if specy:
+                                        x1_ini_sol=ini_species_frac_sol[ini_species_sol.index(x1)]
+                                        x2_ini_sol=ini_species_frac_sol[ini_species_sol.index(x2)]
 
-				if netyields:
-					x1_ini=ini_species_frac[ini_species.index(x1)]
-					if specx:
-						x2_ini=ini_species_frac[ini_species.index(x2)]
-						miniadd=(x2_ini*(m-mfinal))
-						yx2_frac=( yx2+miniadd  )/totmass
-					miniadd=(x1_ini*(mini-mfinal))
-					yx1_frac=( yx1+miniadd  )/totmass
-				else:
-					if specx:
-						yx2_frac=yx2 #/totmass
-					yx1_frac=yx1 #/totmass
-				if specx:
-					if yx2_frac==0:
-						print 'mini: ',mini,x2,' 0 value: yx2_frac',yx2_frac
-					else:
-						x.append( np.log10( yx1_frac/yx2_frac * x2_ini_sol/x1_ini_sol) )
-					plt.xlabel(xaxis)
-					headerx=xaxis
-				else:
-					x.append(yx1)
-					plt.xlabel('yield [M$_{\odot}$]')
-					headerx='yields/Msun'
-					plt.xscale('log')
-			else:  #'mini' == xaxis:
-				x.append(mini)
-				plt.xlabel('initial mass [M$_{\odot}$]')
-				headerx='Mini/Msun'
-			#else:
-			#	return 'wrong input'	
-			#	x.append(y_delay.get(M=mini,Z=Z,specie=xaxis))
+                                if netyields:
+                                        x1_ini=ini_species_frac[ini_species.index(x1)]
+                                        if specx:
+                                                x2_ini=ini_species_frac[ini_species.index(x2)]
+                                                miniadd=(x2_ini*(m-mfinal))
+                                                yx2_frac=( yx2+miniadd  )/totmass
+                                        miniadd=(x1_ini*(mini-mfinal))
+                                        yx1_frac=( yx1+miniadd  )/totmass
+                                else:
+                                        if specx:
+                                                yx2_frac=yx2 #/totmass
+                                        yx1_frac=yx1 #/totmass
+                                if specx:
+                                        if yx2_frac==0:
+                                                print 'mini: ',mini,x2,' 0 value: yx2_frac',yx2_frac
+                                        else:
+                                                x.append( np.log10( yx1_frac/yx2_frac * x2_ini_sol/x1_ini_sol) )
+                                        plt.xlabel(xaxis)
+                                        headerx=xaxis
+                                else:
+                                        x.append(yx1)
+                                        plt.xlabel('yield [M$_{\odot}$]')
+                                        headerx='yields/Msun'
+                                        plt.xscale('log')
+                        else:  #'mini' == xaxis:
+                                x.append(mini)
+                                plt.xlabel('initial mass [M$_{\odot}$]')
+                                headerx='Mini/Msun'
+                        #else:
+                        #       return 'wrong input'
+                        #       x.append(y_delay.get(M=mini,Z=Z,specie=xaxis))
 
+                        ### yaxis
 
-			### yaxis
-
-			if True: #(not 'mini' in xaxis):
-				if specy:
-					y1=yaxis.split('/')[0][1:]
-					y2=yaxis.split('/')[1][:-1]
-				else:
-					y1=yaxis
-				#if isotope
-				if '-' in yaxis:
-					if specy:
-	                                	yy2=y_delay.get(M=mini,Z=Z,specie=y2)
-        	                        yy1=y_delay.get(M=mini,Z=Z,specie=y1)
-					#print 'get',yy1,mini,Z,y1
-					if netyields:
-						ini_species=ini_isos
-						ini_species_frac=ini_isos_frac
-					if specy:
-						ini_species_frac_sol=ini_isos_frac_sol
-						ini_species_sol = ini_isos_sol
-				#if element
-				else:
-					yy2=0
-					yy1=0
-					#sum up isotopes to get elements
-					isoavail=y_delay.get(M=mini,Z=Z,quantity='Isotopes')
+                        if True: #(not 'mini' in xaxis):
+                                if specy:
+                                        y1=yaxis.split('/')[0][1:]
+                                        y2=yaxis.split('/')[1][:-1]
+                                else:
+                                        y1=yaxis
+                                #if isotope
+                                if '-' in yaxis:
+                                        if specy:
+                                                yy2=y_delay.get(M=mini,Z=Z,specie=y2)
+                                        yy1=y_delay.get(M=mini,Z=Z,specie=y1)
+                                        #print 'get',yy1,mini,Z,y1
+                                        if netyields:
+                                                ini_species=ini_isos
+                                                ini_species_frac=ini_isos_frac
+                                        if specy:
+                                                ini_species_frac_sol=ini_isos_frac_sol
+                                                ini_species_sol = ini_isos_sol
+                                #if element
+                                else:
+                                        yy2=0
+                                        yy1=0
+                                        #sum up isotopes to get elements
+                                        isoavail=y_delay.get(M=mini,Z=Z,quantity='Isotopes')
                                         for k in range(len(isoavail)):
-						if y1 == isoavail[k].split('-')[0]:
-							yy1+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
-						if specy:
-                                                	if y2 == isoavail[k].split('-')[0]:
-                                                	        yy2+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
-					if netyields:
-						ini_species=ini_elems
-						ini_species_frac=ini_elems_frac
-					if specy:
-						ini_species_frac_sol=ini_elems_frac_sol
-						#print 'so true',ini_elems_frac_sol
-						ini_species_sol = ini_elems_sol 
-				if specy:
-					y1_ini_sol=ini_species_frac_sol[ini_species_sol.index(y1)]
-					y2_ini_sol=ini_species_frac_sol[ini_species_sol.index(y2)]
+                                                if y1 == isoavail[k].split('-')[0]:
+                                                        yy1+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
+                                                if specy:
+                                                        if y2 == isoavail[k].split('-')[0]:
+                                                                yy2+=y_delay.get(M=mini,Z=Z,specie=isoavail[k])
+                                        if netyields:
+                                                ini_species=ini_elems
+                                                ini_species_frac=ini_elems_frac
+                                        if specy:
+                                                ini_species_frac_sol=ini_elems_frac_sol
+                                                #print 'so true',ini_elems_frac_sol
+                                                ini_species_sol = ini_elems_sol 
+                                if specy:
+                                        y1_ini_sol=ini_species_frac_sol[ini_species_sol.index(y1)]
+                                        y2_ini_sol=ini_species_frac_sol[ini_species_sol.index(y2)]
 
-				if netyields:
-					y1_ini=ini_species_frac[ini_species.index(y1)]
-					if specy:
-						y2_ini=ini_species_frac[ini_species.index(y2)]
-						miniadd=(y2_ini*(m-mfinal))
-						yy2_frac=( yy2+miniadd  )/totmass
-					miniadd=(y1_ini*(mini-mfinal))
-					yy1_frac=( yy1+miniadd  )/totmass
-				else:
-					if specy:
-						yy2_frac=yy2 #/totmass
-					yy1_frac=yy1 #/totmass
-				if specy:
-					if yy2_frac==0:
-						print 'mini: ',mini,y2,' 0 value: yy2_frac',yy2_frac
-					else:
-						y.append( np.log10( yy1_frac/yy2_frac * y2_ini_sol/y1_ini_sol) )
-					plt.ylabel(yaxis)
-					headery=yaxis
-				else:
-					y.append(yy1)
-					plt.ylabel('yield [M$_{\odot}$]')
-					headery='yields/Msun'
-					plt.yscale('log')
-		#plot results for specific mass
-		#print 'x: ',x
-		#print 'y: ',y
-		if len(label)==0:
-			plt.plot(x,y,label='Z='+str(Z),marker=marker,color=color,linestyle=shape)
-		else:
-			plt.plot(x,y,label=label,marker=marker,color=color,linestyle=shape)
+                                if netyields:
+                                        y1_ini=ini_species_frac[ini_species.index(y1)]
+                                        if specy:
+                                                y2_ini=ini_species_frac[ini_species.index(y2)]
+                                                miniadd=(y2_ini*(m-mfinal))
+                                                yy2_frac=( yy2+miniadd  )/totmass
+                                        miniadd=(y1_ini*(mini-mfinal))
+                                        yy1_frac=( yy1+miniadd  )/totmass
+                                else:
+                                        if specy:
+                                                yy2_frac=yy2 #/totmass
+                                        yy1_frac=yy1 #/totmass
+                                if specy:
+                                        if yy2_frac==0:
+                                                print 'mini: ',mini,y2,' 0 value: yy2_frac',yy2_frac
+                                        else:
+                                                y.append( np.log10( yy1_frac/yy2_frac * y2_ini_sol/y1_ini_sol) )
+                                        plt.ylabel(yaxis)
+                                        headery=yaxis
+                                else:
+                                        y.append(yy1)
+                                        plt.ylabel('yield [M$_{\odot}$]')
+                                        headery='yields/Msun'
+                                        plt.yscale('log')
+                #plot results for specific mass
+                #print 'x: ',x
+                #print 'y: ',y
+                if len(label)==0:
+                        plt.plot(x,y,label='Z='+str(Z),marker=marker,color=color,linestyle=shape)
+                else:
+                        plt.plot(x,y,label=label,marker=marker,color=color,linestyle=shape)
 
-	if specx and specy:
-		for k in range(len(x)):
-			plt.annotate(str(masses[k]), xy = (x[k], y[k]),xytext = (0, 0), textcoords = 'offset points')
+        if specx and specy:
+                for k in range(len(x)):
+                        plt.annotate(str(masses[k]), xy = (x[k], y[k]),xytext = (0, 0), textcoords = 'offset points')
 
-	ax=plt.gca()
-	self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+        ax=plt.gca()
+        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         #return x,y
         #self.__save_data(header=[headerx,headery],data=[x,y])
 
@@ -1089,96 +1116,95 @@ class sygma( chem_evol ):
     def plot_mass_ratio(self,fig=0,xaxis='age',species_ratio='C/N',source='all',label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,logy=True):
 
         '''
-	Mass ratio of two species indicated by species_ratio over time.
-	Choice can either be elemental ratio or isotopic ratios.
-	Masses of species are in solar masses.
-	Note: Similar to plot_mass but with ratios of masses. 
+        Mass ratio of two species indicated by species_ratio over time.
+        Choice can either be elemental ratio or isotopic ratios.
+        Masses of species are in solar masses.
+        Note: Similar to plot_mass but with ratios of masses. 
 
         Parameters
         ----------
 
 
-	specie : string
-	     ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 
-	xaxis  : string
+        specie : string
+             ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 
+        xaxis  : string
              if 'age' : time evolution
-	     if '[Fe/H]' : use [Fe/H]
-	source : string
+             if '[Fe/H]' : use [Fe/H]
+        source : string
              Specifies if yields come from
-	     all sources ('all'), including
-	     AGB+SN1a, massive stars. Or from
-	     distinctive sources:
-	     only agb stars ('agb'), only
-	     SN1a ('SN1a'), or only massive stars
-             ('massive')
-	label : string
-	     figure label
-	marker : string
-	     figure marker
-	shape : string
-	     line style	
-	color : string
-	     color of line
+             all sources ('all'), including
+             AGB+SN1a, massive stars. Or from
+             distinctive sources:
+             only agb stars ('agb'), only
+             SN1a ('SN1a'), or only massive stars ('massive')
+        label : string
+             figure label
+        marker : string
+             figure marker
+        shape : string
+             line style
+        color : string
+             color of line
         fig : string,float
-	     to name the plot figure       
-	logy : bool
-             if yes, choose yaxis in log scale 	      
+             to name the plot figure       
+        logy : bool
+             if yes, choose yaxis in log scale
  
         Examples
-	----------
+        ----------
 
-	>>> s.plot_mass_ratio('C-12')
+        >>> s.plot_mass_ratio('C-12')
 
         '''
-	if len(label)<1:
-		if source=='agb':
-			label=species_ratio+', AGB'
-		if source=='massive':
-			label=species_ratio+', Massive'
-		if source=='sn1a':
-			label=species_ratio+', SNIa'
+        import matplotlib.pyplot as plt
 
-
+        if len(label)<1:
+                if source=='agb':
+                        label=species_ratio+', AGB'
+                if source=='massive':
+                        label=species_ratio+', Massive'
+                if source=='sn1a':
+                        label=species_ratio+', SNIa'
 
         #Reserved for plotting
         if not return_x_y:
             shape,marker,color=self.__msc(source,shape,marker,color)
 
-	specie1=species_ratio.split('/')[0]
-	specie2=species_ratio.split('/')[1]
+        specie1=species_ratio.split('/')[0]
+        specie2=species_ratio.split('/')[1]
 
-	norm = 'no'
+        norm = 'no'
         x,y1=self.plot_mass(fig=0,specie=specie1,source=source,norm=norm,label=label,shape=shape,marker=marker,color=color,markevery=20,multiplot=False,return_x_y=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14)
 
         x,y2=self.plot_mass(fig=0,specie=specie2,source=source,norm=norm,label=label,shape=shape,marker=marker,color=color,markevery=20,multiplot=False,return_x_y=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14)
 
         y_temp=[]
         for k in range(len(y1)):
-	    if y2[k]==0.:
-	       y_temp.append(0.)
-	    else:
-	       y_temp.append(y1[k]/y2[k])
-	y=y_temp
+            if y2[k]==0.:
+               y_temp.append(0.)
+            else:
+               y_temp.append(y1[k]/y2[k])
+        y=y_temp
 
- 	if xaxis == '[Fe/H]': 
-	    age,fe_h=self.plot_spectro(return_x_y=True,xaxis='age',yaxis='[Fe/H]')
-	    #match ages in x and age_dum
-	    y_temp=[]
-	    for k in range(len(age)):
-	         idx=x.index(age[k])
+        if xaxis == '[Fe/H]': 
+            age,fe_h=self.plot_spectro(return_x_y=True,xaxis='age',yaxis='[Fe/H]')
+            #match ages in x and age_dum
+            y_temp=[]
+            for k in range(len(age)):
+                 idx=x.index(age[k])
                  y_temp.append(y[idx] )
             y = y_temp
-	    x = fe_h
+            x = fe_h
         #Reserved for plotting
         if not return_x_y:
            plt.figure(fig, figsize=(fsize[0],fsize[1]))
-	   if xaxis=='age':
+           if xaxis=='age':
               plt.xlabel('age [yr]')
               plt.xscale('log')
            elif xaxis=='[Fe/H]':
-	      plt.xlabel('[Fe/H]')
+              plt.xlabel('[Fe/H]')
            plt.ylabel('mass ratio X$_i$/X$_j$')
-	   if logy==True:
+           if logy==True:
             plt.yscale('log')
         self.y=y
         #If x and y need to be returned ...
@@ -1186,68 +1212,69 @@ class sygma( chem_evol ):
             return x, y
 
         else:
-	    if len(label)==0:
-		label=specie1+'/'+specie2
+            if len(label)==0:
+                label=specie1+'/'+specie2
             plt.plot(x,y,label=label,linestyle=shape,marker=marker,color=color,markevery=markevery)
             plt.legend()
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    if xaxis=='age':
-	        plt.xlim(self.history.dt,self.history.tend)	
-	    #self.__save_data(header=['Age[yr]',specie],data=[x,y])
-       
+            if xaxis=='age':
+                plt.xlim(self.history.dt,self.history.tend)
+            #self.__save_data(header=['Age[yr]',specie],data=[x,y])
 
 
     def plot_mass(self,fig=0,specie='C',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,linewidth=2):
     
         '''
-	mass evolution (in Msun) of an element or isotope vs time.
-	Note: Used in WENDI.
+        mass evolution (in Msun) of an element or isotope vs time.
+        Note: Used in WENDI.
 
         Parameters
         ----------
 
 
-	specie : string
+        specie : string
              1) isotope or element name, in the form 'C' or 'C-12'
-	source : string
+        source : string
              Specifies if yields come from
-	     all sources ('all'), including
-	     AGB+SN1a, massive stars. Or from
-	     distinctive sources:
-	     only agb stars ('agb'), only
-	     SN1a ('SN1a'), or only massive stars
+             all sources ('all'), including
+             AGB+SN1a, massive stars. Or from
+             distinctive sources:
+             only agb stars ('agb'), only
+             SN1a ('SN1a'), or only massive stars
              ('massive')
         norm : string
-	    if 'no', no normalization
+            if 'no', no normalization
             If 'current', normalize to current total amount of specie
 
-	label : string
-	     figure label
-	marker : string
-	     figure marker
-	shape : string
-	     line style	
-	color : string
-	     color of line
+        label : string
+             figure label
+        marker : string
+             figure marker
+        shape : string
+             line style
+        color : string
+             color of line
         fig : string,float
-	     to name the plot figure       
- 	       
-        Examples
-	----------
+             to name the plot figure
 
-	>>> s.plot_mass(specie='C')
+        Examples
+        ----------
+
+        >>> s.plot_mass(specie='C')
 
         '''
-	yaxis=specie
-	if len(label)<1:
-		label=yaxis
-		if source=='agb':
-			label=yaxis+', AGB'
-		if source=='massive':
-			label=yaxis+', Massive'
-		if source=='sn1a':
-			label=yaxis+', SNIa'
+
+        import matplotlib.pyplot as plt
+        yaxis=specie
+        if len(label)<1:
+                label=yaxis
+                if source=='agb':
+                        label=yaxis+', AGB'
+                if source=='massive':
+                        label=yaxis+', Massive'
+                if source=='sn1a':
+                        label=yaxis+', SNIa'
 
         #Reserved for plotting
         if not return_x_y:
@@ -1286,8 +1313,8 @@ class sygma( chem_evol ):
                 y.append(yields_evol[k][idx])
             elif norm == 'current':
                 y.append( yields_evol[k][idx]/yields_evol_all[k][idx])
-	    else:
-		print 'wrong specification of norm parameter'
+            else:
+                print 'wrong specification of norm parameter'
 
         x=x[1:]
         y=y[1:]
@@ -1315,125 +1342,126 @@ class sygma( chem_evol ):
             plt.legend()
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    plt.xlim(self.history.dt,self.history.tend)	
-	    #return x,y
-	    self.__save_data(header=['Age[yr]',specie],data=[x,y])
+            plt.xlim(self.history.dt,self.history.tend)
+            #return x,y
+            self.__save_data(header=['Age[yr]',specie],data=[x,y])
 
     def __plot_mass_multi(self,fig=1,specie=['C'],ylims=[],source='all',norm=False,label=[],shape=['-'],marker=['o'],color=['r'],markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
-    	'''
-	Use the function plot_mass multiple times
-	Mass evolution (in Msun) of an element or isotope vs time.
-	
+        '''
+        Use the function plot_mass multiple times
+        Mass evolution (in Msun) of an element or isotope vs time.
+
 
         Parameters
         ----------
 
 
-	yaxis : array
+        yaxis : array
              isotopes or element names, in the form 'C' or 'C-12'
-	source : string
+        source : string
              Specifies if yields come from
-	     all sources ('all'), including
-	     AGB+SN1a, massive stars. Or from
-	     distinctive sources:
-	     only agb stars ('agb'), only
-	     SN1a ('SN1a'), or only massive stars
+             all sources ('all'), including
+             AGB+SN1a, massive stars. Or from
+             distinctive sources:
+             only agb stars ('agb'), only
+             SN1a ('SN1a'), or only massive stars
              ('massive')
         norm : boolean
              If True, normalize to current total ISM mass
-	label : string
-	     figure label
-	marker : string
-	     figure marker
-	shape : string
-	     line style	
-	color : string
-	     color of line
+        label : string
+             figure label
+        marker : string
+             figure marker
+        shape : string
+             line style
+        color : string
+             color of line
         fig : string,float
-	     to name the plot figure       
- 	       
+             to name the plot figure       
+       
         Examples
-	----------
+        ----------
 
-	'''
-	#fig=plt.figure(fig)
-	#nplots=1#len(specie)
-	#f, ax_plots = plt.subplots(nplots, sharex=True, sharey=False)
-	limits=[]
-	ax=plt.gca()
-	props = dict(boxstyle='square', facecolor='w', alpha=1)
-	for k in range(len(specie)):
-		#if len(ylims)>0:
-			#ylims1=ylims[k]
-			#ax_plots[k].set_ylim(ylims[k][0],ylims[k][1])
-		if len(label)==0:
-			label1=specie[k]
-		else:
-			label1=label[k]
-		x,y=self.plot_mass(fig=fig,specie=specie[k],source=source,norm=norm,label=label1,shape=shape[k],marker=marker[k],color=color[k],markevery=20,multiplot=True)
-		#x=np.log10(np.array(x))
-		y=np.log10(np.array(y))
-		#ax_plots[k]
-		plt.plot(x,y,label=label1,linestyle=shape[k],marker=marker[k],color=color[k],markevery=markevery)
-		#ax_plots[k].set_ylim(min(y),max(y))
-		limits.append([min(y),max(y)])
-		#ax_plots[k].set_xlim(min(x),max(x))
-		#ax_plots[k].
-		plt.xscale('log')
-		#ax_plots[k].set_yscale('log')
-		plt.xlabel('log-scaled age [yr]')
-		#ax_plots[k].locator_params(axis = 'y', nbins = 2)
-		#if norm == False:
-		    #ax_plots[k].set_ylabel('yield [Msun]')
-		    #ax_plots[k].set_yscale('log')
-		#else:
-		#    ax_plots[k].set_ylabel('(IMF-weighted) fraction of ejecta')
-		#plt.legend()
+        '''
+        import matplotlib.pyplot as plt
+        #fig=plt.figure(fig)
+        #nplots=1#len(specie)
+        #f, ax_plots = plt.subplots(nplots, sharex=True, sharey=False)
+        limits=[]
+        ax=plt.gca()
+        props = dict(boxstyle='square', facecolor='w', alpha=1)
+        for k in range(len(specie)):
+                #if len(ylims)>0:
+                        #ylims1=ylims[k]
+                        #ax_plots[k].set_ylim(ylims[k][0],ylims[k][1])
+                if len(label)==0:
+                        label1=specie[k]
+                else:
+                        label1=label[k]
+                x,y=self.plot_mass(fig=fig,specie=specie[k],source=source,norm=norm,label=label1,shape=shape[k],marker=marker[k],color=color[k],markevery=20,multiplot=True)
+                #x=np.log10(np.array(x))
+                y=np.log10(np.array(y))
+                #ax_plots[k]
+                plt.plot(x,y,label=label1,linestyle=shape[k],marker=marker[k],color=color[k],markevery=markevery)
+                #ax_plots[k].set_ylim(min(y),max(y))
+                limits.append([min(y),max(y)])
+                #ax_plots[k].set_xlim(min(x),max(x))
+                #ax_plots[k].
+                plt.xscale('log')
+                #ax_plots[k].set_yscale('log')
+                plt.xlabel('log-scaled age [yr]')
+                #ax_plots[k].locator_params(axis = 'y', nbins = 2)
+                #if norm == False:
+                    #ax_plots[k].set_ylabel('yield [Msun]')
+                    #ax_plots[k].set_yscale('log')
+                #else:
+                #    ax_plots[k].set_ylabel('(IMF-weighted) fraction of ejecta')
+                #plt.legend()
                 self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize,lwtickboth=[3,1],lwtickmajor=[5,1])
-		#ax_plots[k].
-		#plt.legend().set_visible(False)
-		#x.legend(loc='center right', bbox_to_anchor=(1, 0.5),markerscale=0.8,fontsize=fontsize).set_visible(False)
-		#ax_plots[k]
-		#.text(0.90, 0.80, label1, transform=ax_plots[k].transAxes, fontsize=18,verticalalignment='top', bbox=props)
-		plt.xlim(self.history.dt,self.history.tend)
-	if norm == False:
-		fig=plt.gcf()
-		fig.text(0.002, 0.5, 'Log (Yield [M$_{\odot}$])', ha='center', va='center', rotation='vertical')
-	else:
-		fig=plt.gcf()
-		fig.text(0.01, 0.5, '(IMF-weighted) fraction of ejecta', ha='center', va='center', rotation='vertical')
+                #ax_plots[k].
+                #plt.legend().set_visible(False)
+                #x.legend(loc='center right', bbox_to_anchor=(1, 0.5),markerscale=0.8,fontsize=fontsize).set_visible(False)
+                #ax_plots[k]
+                #.text(0.90, 0.80, label1, transform=ax_plots[k].transAxes, fontsize=18,verticalalignment='top', bbox=props)
+                plt.xlim(self.history.dt,self.history.tend)
+        if norm == False:
+                fig=plt.gcf()
+                fig.text(0.002, 0.5, 'Log (Yield [M$_{\odot}$])', ha='center', va='center', rotation='vertical')
+        else:
+                fig=plt.gcf()
+                fig.text(0.01, 0.5, '(IMF-weighted) fraction of ejecta', ha='center', va='center', rotation='vertical')
 
-	#set lim here
-	#print limits
-	#for k in range(len(ax_plots)):
-	#	ax_plots[k].set_ylim(limits[k][0],limits[k][1])
+        #set lim here
+        #print limits
+        #for k in range(len(ax_plots)):
+        #        ax_plots[k].set_ylim(limits[k][0],limits[k][1])
 
-	#f.subplots_adjust(hspace=0.35)#0)
-	#plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
-	return 
+        #f.subplots_adjust(hspace=0.35)#0)
+        #plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
+        return 
 
 
     def plot_massfrac(self,fig=2,xaxis='age',yaxis='O-16',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	Plots mass fraction of isotope or element
-	vs time.
+        Plots mass fraction of isotope or element
+        vs time.
 
         Parameters
         ----------
-	xaxis : string 
+        xaxis : string 
             either 'age' for time
-	yaxis : string
+        yaxis : string
             isotope name, in the same form as for xaxis
 
-	source : string
+        source : string
             Specifies if yields come from
-	    all sources ('all'), including
-	    AGB+SN1a, massive stars. Or from
-	    distinctive sources:
-	    only agb stars ('agb'), only
-	    SN1a ('SN1a'), or only massive stars
+            all sources ('all'), including
+            AGB+SN1a, massive stars. Or from
+            distinctive sources:
+            only agb stars ('agb'), only
+            SN1a ('SN1a'), or only massive stars
             ('massive')
 
         norm : string
@@ -1454,7 +1482,7 @@ class sygma( chem_evol ):
         Examples
         ----------
 
-	>>> s.plot_massfrac('age','C-12')
+        >>> s.plot_massfrac('age','C-12')
 
         '''
 
@@ -1463,8 +1491,7 @@ class sygma( chem_evol ):
         if len(label)<1:
                 label=yaxis
 
-	shape,marker,color=self.__msc(source,shape,marker,color)
-
+        shape,marker,color=self.__msc(source,shape,marker,color)
 
 
         plt.figure(fig, figsize=(fsize[0],fsize[1]))
@@ -1473,21 +1500,21 @@ class sygma( chem_evol ):
         #Input X-axis
         if '-' in xaxis:
         #to test the different contributions
-	    if source == 'all':
-	       yields_evol=self.history.ism_iso_yield
-	    elif source =='agb':
-	      yields_evol=self.history.ism_iso_yield_agb
-	    elif source == 'sn1a':
-	      yields_evol=self.history.ism_iso_yield_1a
-	    elif source == 'massive':
-	     yields_evol=self.history.ism_iso_yield_massive
-	    iso_idx=self.history.isotopes.index(xaxis)
+            if source == 'all':
+               yields_evol=self.history.ism_iso_yield
+            elif source =='agb':
+               yields_evol=self.history.ism_iso_yield_agb
+            elif source == 'sn1a':
+               yields_evol=self.history.ism_iso_yield_1a
+            elif source == 'massive':
+               yields_evol=self.history.ism_iso_yield_massive
+            iso_idx=self.history.isotopes.index(xaxis)
             x=[]
-	    for k in range(1,len(yields_evol)):
-	       if norm=='no':
-	           x.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
-	       if norm=='ini':
-	           x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
+            for k in range(1,len(yields_evol)):
+               if norm=='no':
+                   x.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
+               if norm=='ini':
+                   x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
             plt.xlabel('X('+xaxis+')')
             plt.xscale('log')
         elif 'age' == xaxis:
@@ -1585,35 +1612,35 @@ class sygma( chem_evol ):
         if 'age' == xaxis:
                 x=x[1:]
                 y=y[1:]
-		plt.xlim(self.history.dt,self.history.tend)
+                plt.xlim(self.history.dt,self.history.tend)
         plt.plot(x,y,label=label,linestyle=shape,marker=marker,color=color,markevery=markevery)
         plt.legend()
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	self.__save_data(header=[xaxis,yaxis],data=[x,y])
+        self.__save_data(header=[xaxis,yaxis],data=[x,y])
 
     def plot_spectro(self,fig=3,xaxis='age',yaxis='[Fe/H]',source='all',label='',shape='-',marker='o',color='k',markevery=100,show_data=False,show_sculptor=False,show_legend=True,return_x_y=False,sub_plot=False,linewidth=3,sub=1,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_ab=''):
         '''
         Plots elements in spectroscopic notation.
-	Note: Used in WENDI.
+        Note: Used in WENDI.
 
         Parameters
         ----------
 
-	xaxis : string
+        xaxis : string
             Spectroscopic notation of elements e.g. [Fe/H]
-	    if 'age': time evolution in years
-	yaxis : string
+            if 'age': time evolution in years
+        yaxis : string
                 Elements in spectroscopic notation, e.g. [C/Fe]
-	source : string
+        source : string
                 If yields come from
-		all sources use 'all' (include
-		AGB+SN1a, massive stars.)
+                all sources use 'all' (include
+                AGB+SN1a, massive stars.)
 
-		If yields come from distinctive source:
-		only agb stars use 'agb', only
-		SN1a ('SN1a'), or only massive stars
-		('massive')
+                If yields come from distinctive source:
+                only agb stars use 'agb', only
+                SN1a ('SN1a'), or only massive stars
+                ('massive')
 
         label : string
              figure label
@@ -1628,9 +1655,10 @@ class sygma( chem_evol ):
 
         Examples
         ----------
-	>>> plt.plot_spectro('[Fe/H]','[C/Fe]')
+        >>> plt.plot_spectro('[Fe/H]','[C/Fe]')
 
         '''
+        import matplotlib.pyplot as plt
 
         #Error message if there is the "subplot" has not been provided
         if sub_plot and sub == 1:
@@ -1751,10 +1779,10 @@ class sygma( chem_evol ):
         if not return_x_y and not sub_plot:
             plt.ylabel(yaxis)
         self.y=y
-	#To prevent 0 +log scale
-	if 'age' == xaxis:
-		x=x[1:]
-		y=y[1:]
+        #To prevent 0 +log scale
+        if 'age' == xaxis:
+                x=x[1:]
+                y=y[1:]
                 #Operations associated with plot visual aspects
                 if not return_x_y and not sub_plot:
                     plt.xlim(self.history.dt,self.history.tend)
@@ -1802,26 +1830,26 @@ class sygma( chem_evol ):
 
             #plt.plot([1.93,2.123123,3.23421321321],[4.123123132,5.214124142,6.11111],linestyle='--')
             #plt.plot([1.93,2.123123,3.23421321321],[4.123123132,5.214124142,6.11111],linestyle='--')
-	    if len(label)>0:
-	            plt.legend()
+            if len(label)>0:
+                    plt.legend()
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	    self.__save_data(header=[xaxis,yaxis],data=[x,y])
+            self.__save_data(header=[xaxis,yaxis],data=[x,y])
 
 
     def __plot_abu_distr(self,fig=0,t=-1,x_axis='A',solar_norm=True,marker1=2,linest=0,y_range=[],label='CHEM  module',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	EXPERIMENTAL: DO NOT USE
-	Plots abundance distribution of stable isotopes
-	of certain time t (X/X_sol vs A).:
+        EXPERIMENTAL: DO NOT USE
+        Plots abundance distribution of stable isotopes
+        of certain time t (X/X_sol vs A).:
 
         Parameters
         ----------
 
-	t : float
+        t : float
             default end of the simulation tend
-	x_axis :  string
+        x_axis :  string
             only 'A' setting, mass number, possible
         solar_norm : boolean
             if true, normalize to solar value
@@ -1834,10 +1862,10 @@ class sygma( chem_evol ):
 
         Examples
         ----------
-	>>> s.plot_abu_distr()
+        >>> s.plot_abu_distr()
 
         '''
-
+        import matplotlib.pyplot as plt
 
         color=['r','k','b','g']
         marker_type=['o','+','s','D']
@@ -1941,9 +1969,9 @@ class sygma( chem_evol ):
 
     def plot_totmasses(self,fig=4,mass='gas',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,log=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
         '''
-	Plots either gas or star mass as fraction of total mass
-	vs time.
-    	Note: Used in WENDI.
+        Plots either gas or star mass as fraction of total mass
+        vs time.
+        Note: Used in WENDI.
     
         Parameters
         ----------
@@ -1955,21 +1983,21 @@ class sygma( chem_evol ):
         norm : string
             normalization, either 'no' for no normalization (total gas mass in solar masses),
 
-	    for normalization to the initial gas mass (mgal) with 'ini',
+            for normalization to the initial gas mass (mgal) with 'ini',
 
-	    for normalization to the current total gas mass 'current'.
-	    The latter case makes sense when comparing different
-	    sources (see below)
+            for normalization to the current total gas mass 'current'.
+            The latter case makes sense when comparing different
+            sources (see below)
 
         source : string
             specifies if yields come from
-	    all sources ('all'), including
-	    AGB+SN1a, massive stars. Or from
-	    distinctive sources:
-	    only agb stars ('agb'), only
-	    SN1a ('sn1a'), or only massive stars
-	    ('massive')
-	log : boolean
+            all sources ('all'), including
+            AGB+SN1a, massive stars. Or from
+            distinctive sources:
+            only agb stars ('agb'), only
+            SN1a ('sn1a'), or only massive stars
+            ('massive')
+        log : boolean
             if true plot logarithmic y axis
         label : string
              figure label
@@ -1999,78 +2027,78 @@ class sygma( chem_evol ):
 
         #Assume isotope input
 
-	xaxis='age'
-	if source =='all':
-		if len(label)==0:
-			label='All'
-	if source == 'agb':
-		if len(label)==0:
-			label='AGB'
-	if source =='massive':
-		if len(label)==0:
-			label='Massive'
-	if source =='sn1a':
-		if len(label)==0:
-			label='SNIa'
-	
-	shape,marker,color=self.__msc(source,shape,marker,color)
+        xaxis='age'
+        if source =='all':
+                if len(label)==0:
+                        label='All'
+        if source == 'agb':
+                if len(label)==0:
+                        label='AGB'
+        if source =='massive':
+                if len(label)==0:
+                        label='Massive'
+        if source =='sn1a':
+                if len(label)==0:
+                        label='SNIa'
 
-	if 'age' == xaxis:
-	    x_all=self.history.age#[1:]
-	    plt.xscale('log')
-	    plt.xlabel('log-scaled age [yr]')
-	    #self.x=x
+        shape,marker,color=self.__msc(source,shape,marker,color)
 
-	gas_mass=self.history.gas_mass
+        if 'age' == xaxis:
+            x_all=self.history.age#[1:]
+            plt.xscale('log')
+            plt.xlabel('log-scaled age [yr]')
+            #self.x=x
 
-	#to test the different contributions
-	if source == 'all':
+        gas_mass=self.history.gas_mass
+
+        #to test the different contributions
+        if source == 'all':
             gas_evol=self.history.gas_mass
         else:
             if source =='agb':
-	        yields_evol=self.history.ism_elem_yield_agb
+                yields_evol=self.history.ism_elem_yield_agb
             elif source == 'sn1a':
-	        yields_evol=self.history.ism_elem_yield_1a
+                yields_evol=self.history.ism_elem_yield_1a
             elif source == 'massive':
-	        yields_evol=self.history.ism_elem_yield_massive
+                yields_evol=self.history.ism_elem_yield_massive
             gas_evol=[]
             for k in range(len(yields_evol)):
-	        gas_evol.append(sum(yields_evol[k]))
+                gas_evol.append(sum(yields_evol[k]))
 
-	ism_gasm=[]
-	star_m=[]
-	x=[]
+        ism_gasm=[]
+        star_m=[]
+        x=[]
         #To prevent 0 +log scale
         if 'age' == xaxis:
                 x_all=x_all[1:]
                 gas_evol=gas_evol[1:]
-		gas_mass=gas_mass[1:]
-	for k in range(0,len(gas_evol)):
-	    if (gas_evol[k]==0) or (gas_mass[k]==0):
-		continue
+                gas_mass=gas_mass[1:]
+        for k in range(0,len(gas_evol)):
+            if (gas_evol[k]==0) or (gas_mass[k]==0):
+                continue
             if norm=='ini':
-	        ism_gasm.append(gas_evol[k]/self.history.mgal)
-	        star_m.append((self.history.mgal-gas_evol[k])/self.history.mgal)
-		x.append(x_all[k])
+                ism_gasm.append(gas_evol[k]/self.history.mgal)
+                star_m.append((self.history.mgal-gas_evol[k])/self.history.mgal)
+                x.append(x_all[k])
             if norm == 'current':
-	        if not self.history.gas_mass[k] ==0.:
-	              ism_gasm.append(gas_evol[k]/gas_mass[k])
-	              star_m.append((self.history.mgal-gas_evol[k])/gas_mass[k])
-		      x.append(x_all[k])
-	    #else:
-	     #   ism_gasm.append(0.)
-	      #  star_m.append(0.)
+                if not self.history.gas_mass[k] ==0.:
+                      ism_gasm.append(gas_evol[k]/gas_mass[k])
+                      star_m.append((self.history.mgal-gas_evol[k])/gas_mass[k])
+                      x.append(x_all[k])
+            #else:
+             #   ism_gasm.append(0.)
+             #   star_m.append(0.)
             elif norm == 'no':
-	        ism_gasm.append(gas_evol[k])
-	        star_m.append(self.history.mgal-gas_evol[k])
-		x.append(x_all[k])
+                ism_gasm.append(gas_evol[k])
+                star_m.append(self.history.mgal-gas_evol[k])
+                x.append(x_all[k])
         if mass == 'gas':
-	    y=ism_gasm
+            y=ism_gasm
         if mass == 'stars':
-	    y=star_m
-	plt.plot(x,y,linestyle=shape,marker=marker,markevery=markevery,color=color,label=label)	
+            y=star_m
+        plt.plot(x,y,linestyle=shape,marker=marker,markevery=markevery,color=color,label=label)
         if len(label)>0:
-		plt.legend()
+                plt.legend()
         if norm=='current':
             plt.ylim(0,1)
         if not norm=='no':
@@ -2093,37 +2121,37 @@ class sygma( chem_evol ):
 
         if log==True:
             plt.yscale('log')
-	    if not norm=='no':
-            	plt.ylim(1e-4,1.2)
+            if not norm=='no':
+                plt.ylim(1e-4,1.2)
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	plt.xlim(self.history.dt,self.history.tend)
-	self.__save_data(header=['age','mass'],data=[x,y])
+        plt.xlim(self.history.dt,self.history.tend)
+        self.__save_data(header=['age','mass'],data=[x,y])
 
     def plot_sn_distr(self,fig=5,rate=True,rate_only='',xaxis='time',fraction=False,label1='SNIa',label2='SN2',shape1=':',shape2='--',marker1='o',marker2='s',color1='k',color2='b',markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	Plots the SN1a distribution:
+        Plots the SN1a distribution:
 
-	The evolution of the number of SN1a and SN2
+        The evolution of the number of SN1a and SN2
 
 
         Parameters
         ----------
-	rate : boolean
+        rate : boolean
             if true, calculate rate [1/century] 
             else calculate numbers
-	fraction ; boolean
-	    if true, ignorate rate and calculate number fraction of SNIa per WD
+        fraction ; boolean
+            if true, ignorate rate and calculate number fraction of SNIa per WD
         rate_only : string
-	    if empty string, plot both rates (default)
+            if empty string, plot both rates (default)
 
             if 'sn1a', plot only SN1a rate
 
             if 'sn2', plot only SN2 rate
-	xaxis: string
-	    if 'time' : time evolution
-	    if 'redshift': experimental! use with caution; redshift evolution
+        xaxis: string
+            if 'time' : time evolution
+            if 'redshift': experimental! use with caution; redshift evolution
         label : string
              figure label
         marker : string
@@ -2138,272 +2166,274 @@ class sygma( chem_evol ):
         Examples
         ----------
         >>> s.plot_sn_distr()
+
         '''
-	#For Wiersma09
-	Hubble_0=73.
-	Omega_lambda=0.762
-	Omega_m=0.238
+        import matplotlib.pyplot as plt
+        #For Wiersma09
+        Hubble_0=73.
+        Omega_lambda=0.762
+        Omega_m=0.238
 
         figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
         age=self.history.age
         sn1anumbers=self.history.sn1a_numbers#[:-1]
         sn2numbers=self.history.sn2_numbers
-	if xaxis=='redshift':
-		print 'this features is not tested yet.'
-		return 0
-		age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
-		age=[0]+age
-		plt.xlabel('redshift z')
-		timesteps=self.history.timesteps[idx-1:]
-		sn2numbers=sn2numbers[idx:]
-		sn1anumbers=sn1anumbers[idx:]
-	else:
-		plt.xlabel('age [yr]')
-		plt.xscale('log')
+        if xaxis=='redshift':
+                print 'this features is not tested yet.'
+                return 0
+                age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
+                age=[0]+age
+                plt.xlabel('redshift z')
+                timesteps=self.history.timesteps[idx-1:]
+                sn2numbers=sn2numbers[idx:]
+                sn1anumbers=sn1anumbers[idx:]
+        else:
+                plt.xlabel('age [yr]')
+                plt.xscale('log')
         if rate and not fraction:
-	    if xaxis=='redshift':
-			sn1a_rate=np.array(sn1anumbers)/ (np.array(timesteps)/100.)
-			sn2_rate=np.array(sn2numbers)/ (np.array(timesteps)/100.)	
-	    else:
-            		sn1a_rate=np.array(sn1anumbers[1:])/ (np.array(self.history.timesteps)/100.)
-            		sn2_rate=np.array(sn2numbers[1:])/ (np.array(self.history.timesteps)/100.)
-	    sn1a_rate1=[]
-	    sn2_rate1=[]
-	    age=age[1:]
-	    age_sn1a=[] #age[1:]
-	    age_sn2=[]
-	    #correct sn1a rate
-	    for k in range(len(sn1a_rate)):
-		if sn1a_rate[k]>0:
-			sn1a_rate1.append(sn1a_rate[k])
-			age_sn1a.append(age[k])
-			
-	    for k in range(len(sn2_rate)):
-		if sn2_rate[k]>0:
-			sn2_rate1.append(sn2_rate[k])
-			age_sn2.append(age[k])
-	
+            if xaxis=='redshift':
+                        sn1a_rate=np.array(sn1anumbers)/ (np.array(timesteps)/100.)
+                        sn2_rate=np.array(sn2numbers)/ (np.array(timesteps)/100.)
+            else:
+                        sn1a_rate=np.array(sn1anumbers[1:])/ (np.array(self.history.timesteps)/100.)
+                        sn2_rate=np.array(sn2numbers[1:])/ (np.array(self.history.timesteps)/100.)
+            sn1a_rate1=[]
+            sn2_rate1=[]
+            age=age[1:]
+            age_sn1a=[] #age[1:]
+            age_sn2=[]
+            #correct sn1a rate
+            for k in range(len(sn1a_rate)):
+                if sn1a_rate[k]>0:
+                        sn1a_rate1.append(sn1a_rate[k])
+                        age_sn1a.append(age[k])
+
+            for k in range(len(sn2_rate)):
+                if sn2_rate[k]>0:
+                        sn2_rate1.append(sn2_rate[k])
+                        age_sn2.append(age[k])
 
             if len(rate_only)==0:
-		    x=[age_sn2,age_sn1a]
-		    y=[sn1a_rate1,sn2_rate1]
-		    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
-		    plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-            	    plt.ylabel('SN rate [century$^{-1}$]')
-	    if rate_only=='sn1a':
-		    x=age_sn1a
-		    y= sn1a_rate1
-		    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
-		    plt.ylabel('SNIa rate [century$^{-1}$]')
-	    if rate_only=='sn2':
-		    x=age_sn2
-		    y=sn2_rate
+                    x=[age_sn2,age_sn1a]
+                    y=[sn1a_rate1,sn2_rate1]
+                    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
                     plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-		    plt.ylabel('SN2 rate [century$^{-1}$]')
+                    plt.ylabel('SN rate [century$^{-1}$]')
+            if rate_only=='sn1a':
+                    x=age_sn1a
+                    y= sn1a_rate1
+                    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
+                    plt.ylabel('SNIa rate [century$^{-1}$]')
+            if rate_only=='sn2':
+                    x=age_sn2
+                    y=sn2_rate
+                    plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
+                    plt.ylabel('SN2 rate [century$^{-1}$]')
 
 
         else:
             #if xaxis=='redshift':
-		
+
                         #sn1_numbers=np.array(sn1anumbers)/ (np.array(timesteps)/100.)
                         #sn2_numbers=np.array(sn2numbers)/ (np.array(timesteps)/100.)
             #True: #else:
                         #sn1a_rate=np.array(sn1anumbers[1:])/ (np.array(self.history.timesteps)/100.)
                         #sn2_rate=np.array(sn2numbers[1:])/ (np.array(self.history.timesteps)/100.)
 
-	    sn1a_numbers=sn1anumbers[1:]
-	    sn2_numbers=sn2numbers[1:]	
+            sn1a_numbers=sn1anumbers[1:]
+            sn2_numbers=sn2numbers[1:]
             sn1a_numbers1=[]
-	    sn2_numbers1=[]
+            sn2_numbers1=[]
             age_sn1a=[]
-	    age_sn2=[]
+            age_sn2=[]
             age=age[1:]
             for k in range(len(sn1a_numbers)):
                 if sn1a_numbers[k]>0:
                         sn1a_numbers1.append(sn1a_numbers[k])
                         age_sn1a.append(age[k])
-	    for k in range(len(sn2_numbers)):
+            for k in range(len(sn2_numbers)):
                 if sn2_numbers[k]>0:
                         sn2_numbers1.append(sn2_numbers[k])
                         age_sn2.append(age[k])
 
-	    if fraction:
-		age=self.history.age
-		ratio=[]
-		age1=[]
-		for k in range(len(self.wd_sn1a_range1)):
-		    if self.wd_sn1a_range1[k]>0:
-			ratio.append(self.history.sn1a_numbers[1:][k]/self.wd_sn1a_range1[k])
-			age1.append(age[k])
-		plt.plot(age1,ratio)
-		plt.yscale('log')
-		plt.xscale('log')
-		plt.ylabel('number of SNIa going off per WD born')
-		label='SNIafractionperWD';label='sn1a '+label
-		x=age1
-		y=ratio
-		self.__save_data(header=['age',label],data=[x,y])		
-		return 
-	    else:
-		    if len(rate_only)==0:
-			    x=[age_sn1a,age_sn2]
-			    y=[sn1a_numbers,sn2_numbers]
-			    plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
-			    plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-			    plt.ylabel('SN numbers')
-		    if rate_only=='sn1a':
-			    x= age1
-			    y= sn1anumbers1
-			    plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markever)
-			    plt.ylabel('SN numbers')
-		    if rate_only=='sn2':
-			    x= age[1:]
-			    y= sn2numbers[1:]
-			    plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-			    plt.ylabel('SN numbers')
-
-	plt.legend(loc=1)
-	plt.yscale('log')
-	ax=plt.gca()
-        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-	if rate:
-		label='rate'
-	else:
-		label='number'	
-	if len(rate_only)==0:
-		if rate:
-			label='rate'
-		else:
-			label='number'
-		self.__save_data(header=['age','SNIa '+label,'age','CCSN '+label],data=[x[0],y[0],x[1],y[1]])
-	else:
-		if rate_only=='sn1a':
-			label='sn1a '+label
-		else:
-			label='ccsn '+label
+            if fraction:
+                age=self.history.age
+                ratio=[]
+                age1=[]
+                for k in range(len(self.wd_sn1a_range1)):
+                    if self.wd_sn1a_range1[k]>0:
+                        ratio.append(self.history.sn1a_numbers[1:][k]/self.wd_sn1a_range1[k])
+                        age1.append(age[k])
+                plt.plot(age1,ratio)
+                plt.yscale('log')
+                plt.xscale('log')
+                plt.ylabel('number of SNIa going off per WD born')
+                label='SNIafractionperWD';label='sn1a '+label
+                x=age1
+                y=ratio
                 self.__save_data(header=['age',label],data=[x,y])
-			
+                return 
+            else:
+                    if len(rate_only)==0:
+                            x=[age_sn1a,age_sn2]
+                            y=[sn1a_numbers,sn2_numbers]
+                            plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
+                            plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
+                            plt.ylabel('SN numbers')
+                    if rate_only=='sn1a':
+                            x= age1
+                            y= sn1anumbers1
+                            plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markever)
+                            plt.ylabel('SN numbers')
+                    if rate_only=='sn2':
+                            x= age[1:]
+                            y= sn2numbers[1:]
+                            plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
+                            plt.ylabel('SN numbers')
+
+        plt.legend(loc=1)
+        plt.yscale('log')
+        ax=plt.gca()
+        self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
+        if rate:
+                label='rate'
+        else:
+                label='number'
+        if len(rate_only)==0:
+                if rate:
+                        label='rate'
+                else:
+                        label='number'
+                self.__save_data(header=['age','SNIa '+label,'age','CCSN '+label],data=[x[0],y[0],x[1],y[1]])
+        else:
+                if rate_only=='sn1a':
+                        label='sn1a '+label
+                else:
+                        label='ccsn '+label
+                self.__save_data(header=['age',label],data=[x,y])
+
 
     ##############################################
     #          Plot Star Formation Rate          #
     ##############################################
     def plot_star_formation_rate(self,fig=6,fraction=True,source='all',marker='',shape='',color='',label='',abs_unit=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
-	'''
-	Plots the star formation rate over time.
-	Shows fraction of ISM mass which transforms into stars.
+        '''
+
+        Plots the star formation rate over time.
+        Shows fraction of ISM mass which transforms into stars.
 
         Parameters
         ----------
 
-	fraction : boolean
-		if true: fraction of ISM which transforms into stars;
-		else: mass of ISM which goes into stars
+        fraction : boolean
+                if true: fraction of ISM which transforms into stars;
+                else: mass of ISM which goes into stars
 
-	source : string
-		either 'all' for total star formation rate; 'agb' for AGB and 'massive' for massive stars
+        source : string
+                either 'all' for total star formation rate; 'agb' for AGB and 'massive' for massive stars
 
-	marker : string
-		marker type
-	shape : string
-		line shape type
-	fig: figure id
-	
+        marker : string
+                marker type
+        shape : string
+                line shape type
+        fig: figure id
+
         Examples
         ----------
         >>> s.star_formation_rate()
-	
-	'''
 
-	if (len(marker)==0 and len(shape)==0) and len(color)==0:
-		shape,marker,color=self.__msc(source,shape,marker,color)
-	plt.figure(fig, figsize=(fsize[0],fsize[1]))
-	#maybe a histogram for display the SFR?
-	if False:
-		age=self.history.age
-		#age=[0.1]+self.history.age[1:-1]
-		sfr=self.history.sfr
-		plt.xlabel('age [yr]')
-		#plt.xscale('log')
-		mean_age=[]
-		color='r'
-		label='aa'
-		age_bdy=[]
-		for k in range(len(age)-1):
-			mean_age.append(1) #age[k+1]-age[k])
-		for k in range(len(age)):
-			age_bdy.append(age[k])	
-		print 'age',len(mean_age)
-		print 'weights',len(sfr)
-		print 'bdy',len(age_bdy)
-		print sfr[:5]
-	        p1 =plt.hist(mean_age, bins=age_bdy,weights=sfr,facecolor=color,color=color,alpha=0.5,label=label)
+        '''
+        import matplotlib.pyplot as plt
+        if (len(marker)==0 and len(shape)==0) and len(color)==0:
+                shape,marker,color=self.__msc(source,shape,marker,color)
+        plt.figure(fig, figsize=(fsize[0],fsize[1]))
+        #maybe a histogram for display the SFR?
+        if False:
+                age=self.history.age
+                #age=[0.1]+self.history.age[1:-1]
+                sfr=self.history.sfr
+                plt.xlabel('age [yr]')
+                #plt.xscale('log')
+                mean_age=[]
+                color='r'
+                label='aa'
+                age_bdy=[]
+                for k in range(len(age)-1):
+                        mean_age.append(1) #age[k+1]-age[k])
+                for k in range(len(age)):
+                        age_bdy.append(age[k])
+                print 'age',len(mean_age)
+                print 'weights',len(sfr)
+                print 'bdy',len(age_bdy)
+                print sfr[:5]
+                p1 =plt.hist(mean_age, bins=age_bdy,weights=sfr,facecolor=color,color=color,alpha=0.5,label=label)
 
         #Plot the mass fraction of gas available converted into stars
-	if fraction:
-		sfr=self.history.sfr
+        if fraction:
+                sfr=self.history.sfr
                 if source=='all':
                         label='all'
                 elif source=='agb':
-			sfr=np.array(sfr)*np.array(self.history.m_locked_agb)/np.array(self.history.m_locked)
+                        sfr=np.array(sfr)*np.array(self.history.m_locked_agb)/np.array(self.history.m_locked)
                         label='AGB'
                 elif source=='massive':
                         masslocked=self.history.m_locked_massive
-			sfr=np.array(sfr)*np.array(self.history.m_locked_massive)/np.array(self.history.m_locked)
+                        sfr=np.array(sfr)*np.array(self.history.m_locked_massive)/np.array(self.history.m_locked)
                         label='Massive'
-		age=self.history.age[:-1]
-		print len(age),len(sfr)
-		plt.xlabel('age [yr]')
-		plt.plot(age,sfr,label=label,marker=marker,linestyle=shape)
-		plt.ylabel('fraction of current gas mass into stars')	
-        	self.__save_data(header=['age','SFR'],data=[age,sfr])
+                age=self.history.age[:-1]
+                print len(age),len(sfr)
+                plt.xlabel('age [yr]')
+                plt.plot(age,sfr,label=label,marker=marker,linestyle=shape)
+                plt.ylabel('fraction of current gas mass into stars')
+                self.__save_data(header=['age','SFR'],data=[age,sfr])
 
         #Plot the mass converted into stars
-	else:
-		if source=='all':
-			masslocked=self.history.m_locked
-			label='all'
-		elif source=='agb':
-			masslocked=self.history.m_locked_agb
-			label='AGB'
-		elif source=='massive':
-			masslocked=self.history.m_locked_massive
-			label='Massive'
-		age=self.history.age[1:]
-		plt.plot(age,masslocked,marker=marker,linestyle=shape,label=label)
-		plt.xlabel('age [yr]')
-		plt.ylabel('ISM mass transformed into stars')
-		plt.xscale('log');plt.yscale('log')
-		plt.legend()
+        else:
+                if source=='all':
+                        masslocked=self.history.m_locked
+                        label='all'
+                elif source=='agb':
+                        masslocked=self.history.m_locked_agb
+                        label='AGB'
+                elif source=='massive':
+                        masslocked=self.history.m_locked_massive
+                        label='Massive'
+                age=self.history.age[1:]
+                plt.plot(age,masslocked,marker=marker,linestyle=shape,label=label)
+                plt.xlabel('age [yr]')
+                plt.ylabel('ISM mass transformed into stars')
+                plt.xscale('log');plt.yscale('log')
+                plt.legend()
 
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
-	#print 'Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:'
-	#print sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive)
+        #print 'Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:'
+        #print sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive)
 
     def plot_mass_range_contributions(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
 
         '''
-	Plots yield contribution (Msun) of a certain mass range
-	versus initial mass. Each stellar ejecta in one mass range 
-	is represented by the same yields, yields from certain stellar simulation.
-	Be aware that a larger mass range means also a larger amount
-	of yield for that range.
-	Note: Used in WENDI.
+        Plots yield contribution (Msun) of a certain mass range
+        versus initial mass. Each stellar ejecta in one mass range 
+        is represented by the same yields, yields from certain stellar simulation.
+        Be aware that a larger mass range means also a larger amount
+        of yield for that range.
+        Note: Used in WENDI.
 
         Parameters
         ----------
         specie : string
             Element or isotope name in the form 'C' or 'C-12'
-	prodfac : boolean
-	    if true, calculate stellar production factor for each mass range.
-	    It is the final stellar yield divided by the initial (IMF-weighted)
-	    total mass (ISM+stars) in that region.
-	rebin : change the bin size to uniform mass intervals of size 'rebin'
-	        default 0, bin size is defined by ranges of (stellar) yield inputs	
-	log : boolean
-	    if true, use log yaxis
+        prodfac : boolean
+            if true, calculate stellar production factor for each mass range.
+            It is the final stellar yield divided by the initial (IMF-weighted)
+            total mass (ISM+stars) in that region.
+        rebin : change the bin size to uniform mass intervals of size 'rebin'
+                default 0, bin size is defined by ranges of (stellar) yield inputs
+        log : boolean
+            if true, use log yaxis
         label : string
              figure label
         marker : string
@@ -2420,69 +2450,68 @@ class sygma( chem_evol ):
         >>> s.plot_mass_range_contribution(element='C')
 
         '''
-
-	figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
-
-
-	#e.g. for testing: ratio
-	#ratio, e.g. C/Fe
-	if '/' in specie:
-		specie1=specie.split('/')[0]
-		mean_val,bin_bdys,y1,color,label=self.__plot_mass_range_contributions_single(fig,specie1,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
-		specie2=specie.split('/')[1]
-		mean_val,bin_bdys,y2,color,label=self.__plot_mass_range_contributions_single(fig,specie2,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
-
-		y=np.array(y1)/np.array(y2)
-		label=specie
-	#to get the total mass
-	if 'all' in specie:
-		eles=self.history.elements
-		for k in range(len(eles)):
-			specie=eles[k]
-			ytmp=0
-			mean_val,bin_bdys,ytmp,color,labeltmp=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
-			if k==0:
-				y=np.array(ytmp)
-			else:
-				y= y+np.array(ytmp)
-	#default, mass, C, C-12
-	else:
-		mean_val,bin_bdys,y,color,label=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
+        import matplotlib.pyplot as plt
+        figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
 
+        #e.g. for testing: ratio
+        #ratio, e.g. C/Fe
+        if '/' in specie:
+                specie1=specie.split('/')[0]
+                mean_val,bin_bdys,y1,color,label=self.__plot_mass_range_contributions_single(fig,specie1,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
+                specie2=specie.split('/')[1]
+                mean_val,bin_bdys,y2,color,label=self.__plot_mass_range_contributions_single(fig,specie2,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
 
-	if prodfac==True:
-        	p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label,ec='black')
-	else:
-		p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label,ec='black')
+                y=np.array(y1)/np.array(y2)
+                label=specie
+        #to get the total mass
+        if 'all' in specie:
+                eles=self.history.elements
+                for k in range(len(eles)):
+                        specie=eles[k]
+                        ytmp=0
+                        mean_val,bin_bdys,ytmp,color,labeltmp=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
+                        if k==0:
+                                y=np.array(ytmp)
+                        else:
+                                y= y+np.array(ytmp)
+        #default, mass, C, C-12
+        else:
+                mean_val,bin_bdys,y,color,label=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
+
+
+        if prodfac==True:
+                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label,ec='black')
+        else:
+                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label,ec='black')
         #'''
-	if len(label)>0:
-		plt.legend()
+        if len(label)>0:
+                plt.legend()
         #ax1 = figure.add_subplot(111)
         #ax1.set_xscale('log')
         #ax2 = ax1.twiny()
     #       ax2.set_xticklabels(tick_function(new_tick_locations))
         #plt.plot(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label)
         #ax1.errorbar(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label,xerr=0.05)
-	ax1=plt.gca()
+        ax1=plt.gca()
         #self.__fig_standard(ax=ax1,fontsize=18,labelsize=18)
-	#if log==True:		
-        #	ax1.set_xlabel('log-scaled initial mass [Msun]')
-	#else:
-	ax1.set_xlabel('initial mass [M$_{\odot}$]')
-	if prodfac==False:
-		ax1.set_ylabel('IMF-weighted yield [M$_{\odot}$]')
-	else:
-	        ax1.set_ylabel('production factor')
-	if log==True:
-       		ax1.set_yscale('log')
+        #if log==True:
+        #        ax1.set_xlabel('log-scaled initial mass [Msun]')
+        #else:
+        ax1.set_xlabel('initial mass [M$_{\odot}$]')
+        if prodfac==False:
+                ax1.set_ylabel('IMF-weighted yield [M$_{\odot}$]')
+        else:
+                ax1.set_ylabel('production factor')
+        if log==True:
+                ax1.set_yscale('log')
         #ax1.set_yscale('log')
         #ax1.legend(numpoints = 1)
-	#fontsize=18
-	#labelsize=18
-	lwtickboth=[6,2]
-	lwtickmajor=[10,3]
-	plt.xlim(min(bin_bdys),max(bin_bdys))
+        #fontsize=18
+        #labelsize=18
+        lwtickboth=[6,2]
+        lwtickmajor=[10,3]
+        plt.xlim(min(bin_bdys),max(bin_bdys))
         plt.legend(loc=2,prop={'size':legend_fontsize})
         plt.rcParams.update({'font.size': fontsize})
         ax1.yaxis.label.set_size(labelsize)
@@ -2495,20 +2524,20 @@ class sygma( chem_evol ):
         #ax.xaxis.set_tick_params(width=2)
         #ax.yaxis.set_tick_params(width=2)
         ax1.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
-	self.__save_data(header=['Mean mass','mass bdys (bins)','Yield'],data=[mean_val,bin_bdys,y])
+        self.__save_data(header=['Mean mass','mass bdys (bins)','Yield'],data=[mean_val,bin_bdys,y])
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
 
-	#print [mean_val,bin_bdys,y]
-	return
+        #print [mean_val,bin_bdys,y]
+        return
 
 
     def __plot_mass_range_contributions_single(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-	Internal plotting function for function plot_mass_range_contributions
+        Internal plotting function for function plot_mass_range_contributions
         '''
-    
+        import matplotlib.pyplot as plt
 
         if len(label)==0:
             label=specie
@@ -2550,33 +2579,33 @@ class sygma( chem_evol ):
 
         isotopes=self.history.isotopes
         iso_idx_array=[]
-	x_iso_ism_ini=np.array(self.history.ism_iso_yield[0])/self.history.mgal
+        x_iso_ism_ini=np.array(self.history.ism_iso_yield[0])/self.history.mgal
         #get the element specific indices
         for k in range(len(isotopes)):
-	    if not '-' in specie:
-	    	specie=specie+'-'
+            if not '-' in specie:
+                specie=specie+'-'
             if specie in isotopes[k]:
                 iso_idx_array.append(isotopes.index(isotopes[k]))
         #get the sum of yields for each isotope and mass range
         y=[0]*len(contribution)
         for k in range(len(contribution)):
-	    yields=0 #[0]*len(contribution[k])
-	    x_ini=0
+            yields=0 #[0]*len(contribution[k])
+            x_ini=0
             for iso_idx in iso_idx_array:
                 yields+= np.array(contribution[k][iso_idx])
-		x_ini+=x_iso_ism_ini[iso_idx]
-	    if prodfac==True:
-		if x_ini ==0:
-			print 'Initial abundance not available!'
-			print 'Cannot plot production factor.'
-			return 0
-		y[k]=np.array(yields)/(mtots[k]*x_ini)
-	    else:
-	 	y[k]=yields
-		
-	#print mass_ranges
-	#print 'contribution'
-	#print y
+                x_ini+=x_iso_ism_ini[iso_idx]
+            if prodfac==True:
+                if x_ini ==0:
+                        print 'Initial abundance not available!'
+                        print 'Cannot plot production factor.'
+                        return 0
+                y[k]=np.array(yields)/(mtots[k]*x_ini)
+            else:
+                y[k]=yields
+
+        #print mass_ranges
+        #print 'contribution'
+        #print y
 
         #masses1=[]
         #for m in range(len(mass_ranges)):
@@ -2590,86 +2619,86 @@ class sygma( chem_evol ):
         #'''
         #for histo
         bin_bdys=[]
-	mean_val=[]
+        mean_val=[]
         #bin_bdys.append(1)
         bin_values=[]
-	#rebin the plot using the bin size rebin
-	#print mass_ranges
-	if rebin >0:
-		#print mass_ranges
-		#print y
-		#nprint '-------------------'
-		#_imf(self,mmin,mmax,inte,mass=0,iolevel=0)
-		mass=mass_ranges[0][0]	
-		mmax=mass_ranges[-1][1]
-		bin_bdys1=[]
-		while True:
-			bin_min=round(mass,5)
-			mass+=rebin
-			bin_max=round(mass,5)
-			if (mmax==0):
-				break
-			if bin_max>mmax:
-				bin_max=mmax
-				mass=mmax
-				mmax=0
-			bin_bdys1.append([bin_min,bin_max])
-			bin_values.append(0)
-			#print 'Bin :',bin_bdys1[-1]
-			for k in range(len(mass_ranges)):
-				if (mass_ranges[k][1]<=bin_min) or (mass_ranges[k][0]>=bin_max):
-					continue
-				#print 'interval ',mass_ranges[k]
-				#if mass range inside bin
-				elif (mass_ranges[k][0]>=bin_min) and (mass_ranges[k][1]<=bin_max):
-					bin_values[-1]+=y[k]
-					#print 'bin includes mass range',y[k]
-					continue
-				#if mass range includes bin:
-				elif (mass_ranges[k][0]<=bin_min) and (mass_ranges[k][1]>=bin_max):
+        #rebin the plot using the bin size rebin
+        #print mass_ranges
+        if rebin >0:
+                #print mass_ranges
+                #print y
+                #nprint '-------------------'
+                #_imf(self,mmin,mmax,inte,mass=0,iolevel=0)
+                mass=mass_ranges[0][0]
+                mmax=mass_ranges[-1][1]
+                bin_bdys1=[]
+                while True:
+                        bin_min=round(mass,5)
+                        mass+=rebin
+                        bin_max=round(mass,5)
+                        if (mmax==0):
+                                break
+                        if bin_max>mmax:
+                                bin_max=mmax
+                                mass=mmax
+                                mmax=0
+                        bin_bdys1.append([bin_min,bin_max])
+                        bin_values.append(0)
+                        #print 'Bin :',bin_bdys1[-1]
+                        for k in range(len(mass_ranges)):
+                                if (mass_ranges[k][1]<=bin_min) or (mass_ranges[k][0]>=bin_max):
+                                        continue
+                                #print 'interval ',mass_ranges[k]
+                                #if mass range inside bin
+                                elif (mass_ranges[k][0]>=bin_min) and (mass_ranges[k][1]<=bin_max):
+                                        bin_values[-1]+=y[k]
+                                        #print 'bin includes mass range',y[k]
+                                        continue
+                                #if mass range includes bin:
+                                elif (mass_ranges[k][0]<=bin_min) and (mass_ranges[k][1]>=bin_max):
                                         #normalization to bin mass
                                         h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
                                         y1=h*self._imf(bin_min,bin_max,inte=2)
                                         bin_values[-1]+=y1
                                         #print 'mass range inlcudes bin ',bin_min,bin_max,y1
-					
-				#if upper part of bin is not in mass range
-				elif (mass_ranges[k][1]<bin_max):
-					#normalization to bin mass
-					h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
-					y1=h*self._imf(bin_min,mass_ranges[k][1],inte=2)
-					bin_values[-1]+=y1
-					#print 'add upper half from ',bin_min,mass_ranges[k][1],y1
+
+                                #if upper part of bin is not in mass range
+                                elif (mass_ranges[k][1]<bin_max):
+                                        #normalization to bin mass
+                                        h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
+                                        y1=h*self._imf(bin_min,mass_ranges[k][1],inte=2)
+                                        bin_values[-1]+=y1
+                                        #print 'add upper half from ',bin_min,mass_ranges[k][1],y1
                                 #if lower part of bin is not in mass range
-                                elif mass_ranges[k][0]>bin_min:					
-					#normalization to bin mass
-					h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
-					y1=h*self._imf(mass_ranges[k][0],bin_max,inte=2)
-					#print 'add lower half from ',mass_ranges[k][0],bin_max,y1
-					bin_values[-1]+=y1
-			#if bin_values[-1]==0:
-			#	print 'Note that no values are found in bin range:',bin_min,'-',bin_max
-				#return 0
-			if mmax==bin_max:
-				break
-	#	print bin_bdys1
-#		print bin_values
-		mass_ranges=bin_bdys1
-		y=bin_values
+                                elif mass_ranges[k][0]>bin_min:
+                                        #normalization to bin mass
+                                        h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
+                                        y1=h*self._imf(mass_ranges[k][0],bin_max,inte=2)
+                                        #print 'add lower half from ',mass_ranges[k][0],bin_max,y1
+                                        bin_values[-1]+=y1
+                        #if bin_values[-1]==0:
+                        #        print 'Note that no values are found in bin range:',bin_min,'-',bin_max
+                                #return 0
+                        if mmax==bin_max:
+                                break
+        #        print bin_bdys1
+#                print bin_values
+                mass_ranges=bin_bdys1
+                y=bin_values
 
 
-	for k in range(len(mass_ranges)):
+        for k in range(len(mass_ranges)):
                 #yields1.append(yields[k]) #
-		if k==0:
-                	bin_bdys.append(mass_ranges[k][0])
+                if k==0:
+                        bin_bdys.append(mass_ranges[k][0])
                 bin_bdys.append(mass_ranges[k][1])
-		mean_val.append( (mass_ranges[k][0] + mass_ranges[k][1])/2.)
-	#print 'test'		
-	#print yields
-	#print bin_bdys
-	#print mean_val
+                mean_val.append( (mass_ranges[k][0] + mass_ranges[k][1])/2.)
+        #print 'test'
+        #print yields
+        #print bin_bdys
+        #print mean_val
 
-	return mean_val,bin_bdys,y,color,label
+        return mean_val,bin_bdys,y,color,label
 
 
     ##############################################
@@ -2710,38 +2739,38 @@ class sygma( chem_evol ):
 
     def __msc(self,source,shape,marker,color):
 
-	'''
-	Function checks if either of shape,color,marker
-	is set. If not then assign in each case
-	a unique property related to the source ('agb','massive'..)
-	to the variable and returns all three
-	'''
+        '''
+        Function checks if either of shape,color,marker
+        is set. If not then assign in each case
+        a unique property related to the source ('agb','massive'..)
+        to the variable and returns all three
+        '''
 
-	if source=='all':
-		shape1='-'
-		marker1='o'
-		color1='k'
-	elif source=='agb':
-		shape1='--'
-		marker1='s'
-		color1='r'
-	elif source=='massive':
-		shape1='-.'
-		marker1='D'
-		color1='b'
-	elif source =='sn1a':
-		shape1=':'
-		marker1='x'
-		color1='g'
-	
-	if len(shape)==0:
-		shape=shape1
-	if len(marker)==0:
-		marker=marker1
-	if len(color)==0:
-		color=color1
+        if source=='all':
+                shape1='-'
+                marker1='o'
+                color1='k'
+        elif source=='agb':
+                shape1='--'
+                marker1='s'
+                color1='r'
+        elif source=='massive':
+                shape1='-.'
+                marker1='D'
+                color1='b'
+        elif source =='sn1a':
+                shape1=':'
+                marker1='x'
+                color1='g'
 
-	return shape,marker,color
+        if len(shape)==0:
+                shape=shape1
+        if len(marker)==0:
+                marker=marker1
+        if len(color)==0:
+                color=color1
+
+        return shape,marker,color
 
 
     ##############################################
@@ -2750,91 +2779,91 @@ class sygma( chem_evol ):
     def __fig_standard(self,ax,fontsize=8,labelsize=8,lwtickboth=[6,2],lwtickmajor=[10,3],markersize=8,rspace=0.6,bspace=0.15, legend_fontsize=14):
 
         '''
-	Internal function in order to get standardized figure font sizes.
-	It is used in the plotting functions.
+        Internal function in order to get standardized figure font sizes.
+        It is used in the plotting functions.
         '''
-
+        import matplotlib.pyplot as plt
         plt.legend(loc=2,prop={'size':legend_fontsize})
         plt.rcParams.update({'font.size': fontsize})
         ax.yaxis.label.set_size(labelsize)
         ax.xaxis.label.set_size(labelsize)
-	#ax.xaxis.set_tick_params(width=2)
-	#ax.yaxis.set_tick_params(width=2)		
-	ax.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
-	ax.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
-	#Add that line below at some point
-	#ax.xaxis.set_tick_params(width=2)
-	#ax.yaxis.set_tick_params(width=2)
-	if len(ax.lines)>0:
-		for h in range(len(ax.lines)):
-			ax.lines[h].set_markersize(markersize)
-	ax.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
+        #ax.xaxis.set_tick_params(width=2)
+        #ax.yaxis.set_tick_params(width=2)
+        ax.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
+        ax.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
+        #Add that line below at some point
+        #ax.xaxis.set_tick_params(width=2)
+        #ax.yaxis.set_tick_params(width=2)
+        if len(ax.lines)>0:
+                for h in range(len(ax.lines)):
+                        ax.lines[h].set_markersize(markersize)
+        ax.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
 
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
 
     def __save_data(self,header=[],data=[],filename='plot_data.txt'):
-	'''
-		Writes data into a text file. data entries
-		can have different lengths
-	'''
-	out=' '
+        '''
+                Writes data into a text file. data entries
+                can have different lengths
+        '''
+        out=' '
         #header
         for i in range(len(header)):
             out+= ('&'+header[i]+((10-len(header[i]))*' '))
         #data
-	out+='\n'
-	max_data=[]
+        out+='\n'
+        max_data=[]
         for t in range(len(data)):
-		max_data.append(len(data[t]))
+                max_data.append(len(data[t]))
         for t in range(max(max_data)):
             #out+=('&'+'{:.3E}'.format(data[t]))
             #out+=(' &'+'{:.3E}'.format(frac_yields[t]))
             for i in range(len(data)):
-		if t>(len(data[i])-1):
-			out+=(' '*len( ' &'+ '{:.3E}'.format(0)))
-		else:
-                	out+= ( ' &'+ '{:.3E}'.format(data[i][t]))
+                if t>(len(data[i])-1):
+                        out+=(' '*len( ' &'+ '{:.3E}'.format(0)))
+                else:
+                        out+= ( ' &'+ '{:.3E}'.format(data[i][t]))
             #out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
             out+='\n'
-	#import os.path
-	#if os.path.isfile(filename) 
-	#overwrite existing file for now
-	f1=open(filename,'w')
-	f1.write(out)
-	f1.close()
+        #import os.path
+        #if os.path.isfile(filename) 
+        #overwrite existing file for now
+        f1=open(filename,'w')
+        f1.write(out)
+        f1.close()
 
 
     def write_evol_table(self,elements=['H'],isotopes=['H-1'],table_name='gce_table.txt', path="",interact=False):
 
         '''
-	Writes out evolution of the SSP accummulated ejecta in fraction of total mass of the SSP in the following format
-	(each timestep in a line):
+        Writes out evolution of the SSP accummulated ejecta in fraction of total mass of the SSP in the following format
+        (each timestep in a line):
 
-	&Age       &H-1       &H-2  ....
+        &Age       &H-1       &H-2  ....
 
-	&0.000E+00 &1.000E+00 &7.600E+08 & ...
+        &0.000E+00 &1.000E+00 &7.600E+08 & ...
 
-	&1.000E+07 &1.000E+00 &7.600E+08 & ...
+        &1.000E+07 &1.000E+00 &7.600E+08 & ...
 
-	....
-	
-	This method has a notebook and normal version. If you are
-	using a python notebook the function will
-	open a link to a page containing the table.
-	
+        ....
+
+        This method has a notebook and normal version. If you are
+        using a python notebook the function will
+        open a link to a page containing the table.
+
 
         Parameters
         ----------
         table_name : string,optional
           Name of table. If you use a notebook version, setting a name
-	  is not necessary.
-	elements : array
-		Containing the elements with the name scheme 'H','C'
-	isotopes : array
-		If elements list empty, ignore elements input and use isotopes input; Containing the isotopes with the name scheme 'H-1', 'C-12'
-	interact: bool
-		If true, saves file in current directory (notebook dir) and creates HTML link useful in ipython notebook environment
+          is not necessary.
+        elements : array
+                Containing the elements with the name scheme 'H','C'
+        isotopes : array
+                If elements list empty, ignore elements input and use isotopes input; Containing the isotopes with the name scheme 'H-1', 'C-12'
+        interact: bool
+                If true, saves file in current directory (notebook dir) and creates HTML link useful in ipython notebook environment
 
         Examples
         ----------
@@ -2848,99 +2877,99 @@ class sygma( chem_evol ):
         yields_evol=self.history.ism_iso_yield
         metal_evol=self.history.metallicity
         time_evol=self.history.age
-	idx=[]
-	if len(elements)>0:
-		elements_tot=self.history.elements
-		for k in range(len(elements_tot)):
-			if elements_tot[k] in elements:
-				idx.append(elements_tot.index(elements_tot[k]))
-		yields_specie=self.history.ism_elem_yield
-		specie=elements
-	elif len(isotopes)>0:
+        idx=[]
+        if len(elements)>0:
+                elements_tot=self.history.elements
+                for k in range(len(elements_tot)):
+                        if elements_tot[k] in elements:
+                                idx.append(elements_tot.index(elements_tot[k]))
+                yields_specie=self.history.ism_elem_yield
+                specie=elements
+        elif len(isotopes)>0:
                 iso_tot=self.history.isotopes
                 for k in range(len(iso_tot)):
                         if iso_tot[k] in isotopes:
                                 idx.append(iso_tot.index(iso_tot[k]))
-		yields_specie=self.history.ism_iso_yield	
-		specie=isotopes
-		
-	else:
-		print 'Specify either isotopes or elements'
-		return
-	if len(idx)==0:
-		print 'Please choose the right isotope names'
-		return 0
+                yields_specie=self.history.ism_iso_yield
+                specie=isotopes
+
+        else:
+                print 'Specify either isotopes or elements'
+                return
+        if len(idx)==0:
+                print 'Please choose the right isotope names'
+                return 0
 
 
-	frac_yields=[]
-	for h in range(len(yields_specie)):
-		frac_yields.append([])
-		for k in range(len(idx)):
-			frac_yields[-1].append( np.array(yields_specie[h][idx[k]])/self.history.mgal)
-	
-	mtot_gas=self.history.gas_mass
+        frac_yields=[]
+        for h in range(len(yields_specie)):
+                frac_yields.append([])
+                for k in range(len(idx)):
+                        frac_yields[-1].append( np.array(yields_specie[h][idx[k]])/self.history.mgal)
+
+        mtot_gas=self.history.gas_mass
 
 
         metal_evol=self.history.metallicity
-	#header
+        #header
         out='&Age [yr]  '
         for i in range(len(specie)):
             out+= ('&'+specie[i]+((10-len(specie[i]))*' '))
         out+='M_tot \n'
-	#data
+        #data
         for t in range(len(frac_yields)):
             out+=('&'+'{:.3E}'.format(time_evol[t]))
             #out+=(' &'+'{:.3E}'.format(frac_yields[t]))
             for i in range(len(specie)):
                 out+= ( ' &'+ '{:.3E}'.format(frac_yields[t][i]))
-	    out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
+            out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
             out+='\n'
-	
-	if interact==True:
-		import random
-		randnum=random.randrange(10000,99999)
-		name=table_name+str(randnum)+'.txt'
-		#f1=open(global_path+'evol_tables/'+name,'w')
-		f1=open(name,'w')
-		f1.write(out)
-		f1.close()
-		print 'Created table '+name+'.'
-		print 'Download the table using the following link:'
-		#from IPython.display import HTML
-		#from IPython import display
-		from IPython.core.display import HTML
-		import IPython.display as display
-		#print help(HTML)
-		#return HTML("""<a href="evol_tables/download.php?file="""+name+"""">Download</a>""")
-		#test=
-		#return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
+
+        if interact==True:
+                import random
+                randnum=random.randrange(10000,99999)
+                name=table_name+str(randnum)+'.txt'
+                #f1=open(global_path+'evol_tables/'+name,'w')
+                f1=open(name,'w')
+                f1.write(out)
+                f1.close()
+                print 'Created table '+name+'.'
+                print 'Download the table using the following link:'
+                #from IPython.display import HTML
+                #from IPython import display
+                from IPython.core.display import HTML
+                import IPython.display as display
+                #print help(HTML)
+                #return HTML("""<a href="evol_tables/download.php?file="""+name+"""">Download</a>""")
+                #test=
+                #return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
                 #if interact==False:
                 #return HTML("""<a href="""+global_path+"""/evol_tables/"""+name+""">Download</a>""")
-		return HTML("""<a href="""+name+""">Download</a>""")
+                return HTML("""<a href="""+name+""">Download</a>""")
                 #else:
                 #        return name
-	else:
-		print 'file '+table_name+' saved in subdirectory evol_tables.'
-		f1=open(path+table_name,'w')
-        	f1.write(out)
-        	f1.close()
+        else:
+                print 'file '+table_name+' saved in subdirectory evol_tables.'
+                f1=open(path+table_name,'w')
+                f1.write(out)
+                f1.close()
 
 
     def __time_to_z(self,time,Hubble_0,Omega_lambda,Omega_m):
-	'''
-	Time to redshift conversion
+        '''
+        Time to redshift conversion
 
-	'''
-	import time_to_redshift as tz
-	#transform into Gyr
-	time_new=[]
-	firstidx=True
-	for k in range(len(time)):
-		if time[k]>=8e8:
-			time_new.append(time[k]/1e9)
-			if firstidx:
-				index=k
-				firstidx=False	
-	return tz.t_to_z(time_new,Hubble_0,Omega_lambda,Omega_m),index
+        '''
+        import time_to_redshift as tz
+        #transform into Gyr
+        time_new=[]
+        firstidx=True
+        for k in range(len(time)):
+                if time[k]>=8e8:
+                        time_new.append(time[k]/1e9)
+                        if firstidx:
+                                index=k
+                                firstidx=False
+        return tz.t_to_z(time_new,Hubble_0,Omega_lambda,Omega_m),index
 
 
