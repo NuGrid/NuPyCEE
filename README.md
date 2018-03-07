@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/NuGrid/NuPyCEE.svg?branch=master)](https://travis-ci.org/NuGrid/NuPyCEE)
 
-NUPyCEE
+NuPyCEE
 =======
 
 Public NuGrid Python Chemical Evolution Environment
