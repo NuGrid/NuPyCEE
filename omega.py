@@ -78,6 +78,8 @@ Analysis functions: See the Sphinx documentation
 import copy
 import math
 import random
+import future
+from __future__ import print_function
 
 # Import the class inherited by SYGMA
 import sygma

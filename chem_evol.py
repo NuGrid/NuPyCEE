@@ -52,6 +52,8 @@ import random
 import os
 import sys
 import re
+import future
+from __future__ import print_function
 from pylab import polyfit
 from scipy.integrate import quad
 from scipy.integrate import dblquad
@@ -931,16 +933,16 @@ class chem_evol(object):
              lt=len(self.extra_source_table)
              lf=len(self.f_extra_source)
              lmr=len(self.extra_source_mass_range)
-             leZ=len(self.extra_source_exclude_Z)
+             #leZ=len(self.extra_source_exclude_Z)
              if (not lt == lf):
                  print ('Error - parameter extra_source_table and f_extra_source not of equal size')
                  self.need_to_quit = True
              if (not lt == lmr):
                  print ('Error - parameter extra_source_table and  extra_source_mass_range not of equal size')
                  self.need_to_quit = True    
-             if  (not lt == leZ):
-                 print ('Error - parameter extra_source_table and extra_source_exclude_Z not of equal size')
-                 self.need_to_quit = True
+             #if  (not lt == leZ):
+             #    print ('Error - parameter extra_source_table and extra_source_exclude_Z not of equal size')
+             #    self.need_to_quit = True
 
         # Use of radioactive isotopes
         if self.len_decay_file > 0 and (len(self.table_radio) == 0 and \

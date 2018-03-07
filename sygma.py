@@ -84,6 +84,10 @@ For example with artificial yields of only H-1, you can try
 
 '''
 
+# Import modules
+import future
+from __future__ import print_function
+
 # Import the class inherited by SYGMA
 from chem_evol import *
 

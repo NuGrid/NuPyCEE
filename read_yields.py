@@ -12,10 +12,10 @@
 
 '''
 
-
-import matplotlib.pyplot as plt
 import numpy as np
 import os
+import future
+from __future__ import print_function
 
 color=['r','k','b','g']
 marker_type=['o','p','s','D']
@@ -1041,7 +1041,6 @@ Adapted from NuGrid Utility class
 
 
 '''
-
 #import numpy as np
 #import scipy as sc
 #import ascii_table as att
