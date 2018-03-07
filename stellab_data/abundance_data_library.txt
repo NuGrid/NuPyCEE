@@ -3,7 +3,7 @@ H milky_way
 #        milky_way_data/APOGEE_R13_stellab && APOGEE (R13) && ob
 milky_way_data/Frebel_2010_Milky_Way_stellab && Frebel (2010) && xg
 milky_way_data/Venn_et_al_2004_stellab && Venn et al. (2004) && xr
-milky_way_data/Hinkel_et_al_2014_stellab && Hinkel et al. (2014) && xb
+#        milky_way_data/Hinkel_et_al_2014_stellab && Hinkel et al. (2014) && xb
 milky_way_data/Akerman_et_al_2004_stellab && Akerman et al. (2004) && sr
 milky_way_data/Andrievsky_et_al_2007_stellab && Andrievsky et al. (2007) && og
 milky_way_data/Andrievsky_et_al_2008_stellab && Andrievsky et al. (2008) && og
