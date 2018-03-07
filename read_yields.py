@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 '''
 
         Superclass to extract yield data from tables
@@ -14,8 +16,6 @@
 
 import numpy as np
 import os
-import future
-from __future__ import print_function
 
 color=['r','k','b','g']
 marker_type=['o','p','s','D']

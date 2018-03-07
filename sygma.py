@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 '''
 
 GCE SYGMA (Stellar Yields for Galaxy Modelling Applications) module
@@ -83,10 +85,6 @@ For example with artificial yields of only H-1, you can try
     sn1a_table='yield_tables/sn1a_h1.txt',iniabu_table='yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt')
 
 '''
-
-# Import modules
-import future
-from __future__ import print_function
 
 # Import the class inherited by SYGMA
 from chem_evol import *

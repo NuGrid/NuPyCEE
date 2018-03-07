@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 '''
 
 Chemical Evolution - chem_evol.py
@@ -52,8 +54,6 @@ import random
 import os
 import sys
 import re
-import future
-from __future__ import print_function
 from pylab import polyfit
 from scipy.integrate import quad
 from scipy.integrate import dblquad
