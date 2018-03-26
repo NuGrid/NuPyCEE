@@ -135,6 +135,8 @@ class sygma( chem_evol ):
                  extra_source_mass_range=[[8,30]], \
                  extra_source_exclude_Z=[[]], \
                  total_ejecta_interp=True,\
+                 radio_refinement=100, use_decay_module=False,\
+                 f_network='isotopes_modified.prn', f_format=1,\
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
@@ -217,7 +219,10 @@ class sygma( chem_evol ):
                  delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
                  ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
                  ytables_1a_radio_in=ytables_1a_radio_in, ism_ini_radio=ism_ini_radio,\
-                 ytables_nsmerger_radio_in=ytables_nsmerger_radio_in)
+                 ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
+                 radio_refinement=radio_refinement,\
+                 use_decay_module=use_decay_module,\
+                 f_network=f_network, f_format=f_format)
 
         if self.need_to_quit:
             return
@@ -265,9 +270,15 @@ class sygma( chem_evol ):
             # Run the timestep i
             self._evol_stars(i, 0.0, self.mass_sampled, self.scale_cor)
 
+#            if i == 1:
+#                self.ymgal_radio[i][2] = 1.0
+
             # Decay radioactive isotopes
             if self.len_decay_file > 0:
-                self._decay_radio(i)
+                if self.use_decay_module:
+                    self._decay_radio_with_module(i)
+                else:
+                    self._decay_radio(i)
 
             # Get the new metallicity of the gas
             self.zmetal = self._getmetallicity(i)
@@ -289,7 +300,7 @@ class sygma( chem_evol ):
 
         # Declaration of the array containing the mass fraction converted
         # into stars at every timestep i.
-        sfr_i = []
+        sfr_i = np.zeros(self.nb_timesteps+1)
 
         # Output information
         if self.iolevel >= 3:
@@ -297,17 +308,17 @@ class sygma( chem_evol ):
 
         # For every timestep i considered in the simulation ...
         for i in range(1, self.nb_timesteps+1):
-
+            
             # If an array is used to generate starbursts ...
             if len(self.starbursts) > 0:
                 if len(self.starbursts) >= i:
 
                     # Use the input value
-                    sfr_i.append(self.starbursts[i-1])
+                    sfr_i[i] = self.starbursts[i-1]
                     self.history.sfr.append(sfr_i[i-1])
 
             # If an input file is read for the SFR ...
-            if self.sfr == 'input':
+            elif self.sfr == 'input':
 
                 # Open the input file, read all lines, and close the file
                 f1 = open(global_path+'sfr_input')
@@ -322,6 +333,7 @@ class sygma( chem_evol ):
                     return
 
                 # Copy the SFR (mass fraction) of every timestep
+                sfr_i = []
                 for k in range(len(lines)):
                     if k == (i-1):
                         sfr_i.append(float(lines[k]))
@@ -329,14 +341,14 @@ class sygma( chem_evol ):
                         break
 
             # If the Schmidt law is used (see Timmes98) ... 
-            if self.sfr == 'schmidt':
+            elif self.sfr == 'schmidt':
 
                 # Calculate the mass of available gas
                 mgas = sum(ymgal[i-1])
 
                 # Calculate the SFR according to the current gas fraction
                 B = 2.8 * self.mgal * (mgas / self.mgal)**2    # [Mo/Gyr]
-                sfr_i.append(B/mgas) * (timesteps[i-1] / 1.e9) # mass fraction
+                sfr_i[i] = (B/mgas) * (timesteps[i-1] / 1.e9) # mass fraction
                 self.history.sfr.append(sfr_i[i-1])
 
         # Return the SFR (mass fraction) of every timestep
