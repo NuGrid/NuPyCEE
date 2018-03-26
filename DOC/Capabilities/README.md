@@ -30,6 +30,12 @@ to access the ipython notebooks introduced below.
 	Calculate and plot polynomial fits to STELLAB data with R^2 analysis.
 
 	Fitting_curves_to_STELLAB_data.ipynb
+	
+**Including Radioactive Isotopes**
+	
+	Describing how to include and follow the decay of radioactive isotopes.
+
+	Including_radioactive_isotopes.ipynb
 
 **Net Yields Input**
 
