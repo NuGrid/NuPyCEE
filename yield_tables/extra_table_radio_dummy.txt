@@ -1,0 +1,6 @@
+H Yields (Msun) of radioactive isotopes
+H This is a dummy file to test the code.
+H The yields here are arbitrary and not tied to a particular astronomical event.
+&Isotopes  &Z=0.02
+&Al-26     &1.000E-20
+&U-238     &1.000E-20
