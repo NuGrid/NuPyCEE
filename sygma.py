@@ -21,7 +21,7 @@ v0.1 NOV2013: C. Fryer, C. Ritter
 v0.2 JAN2014: C. Ritter
 
 v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg, 
-              M. Pignatari, S. Jones, K. Venn1, P. A. Denissenkov & the 
+              M. Pignatari, S. Jones, K. Venn, P. A. Denissenkov & the 
               NuGrid collaboration
 
 v0.4 FEB2015: C. Ritter, B. Cote
@@ -300,7 +300,10 @@ class sygma( chem_evol ):
 
         # Declaration of the array containing the mass fraction converted
         # into stars at every timestep i.
-        sfr_i = np.zeros(self.nb_timesteps+1)
+        if self.sfr == 'input':
+            sfr_i = []
+        else:
+            sfr_i = np.zeros(self.nb_timesteps+1)
 
         # Output information
         if self.iolevel >= 3:
@@ -333,7 +336,6 @@ class sygma( chem_evol ):
                     return
 
                 # Copy the SFR (mass fraction) of every timestep
-                sfr_i = []
                 for k in range(len(lines)):
                     if k == (i-1):
                         sfr_i.append(float(lines[k]))
