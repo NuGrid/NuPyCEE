@@ -80,7 +80,7 @@ global_path=global_path+'/'
 import read_yields as ry
 
 # Import the decay module for radioactive isotopes
-import decay_module
+#import decay_module
 
 
 class chem_evol(object):
