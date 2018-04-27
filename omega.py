@@ -258,7 +258,7 @@ class omega( chem_evol ):
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  bhnsmerger_table_radio='', nsmerger_table_radio='',\
                  hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[],\
-                 sn1a_table='yield_tables/sn1a_t86.txt',\
+                 sn1a_table='yield_tables/sn1a_i99_W7.txt',\
                  ns_merger_on=False, f_binary=1.0, f_merger=0.0008,\
                  t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, \
                  nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \

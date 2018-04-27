@@ -123,7 +123,7 @@ class sygma( chem_evol ):
                  ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  bhnsmerger_table_radio='', nsmerger_table_radio='',\
-                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t03.txt',sn1a_energy=1e51,\
+                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_i99_W7.txt',sn1a_energy=1e51,\
                  ns_merger_on=False, bhns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
                  t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
                  m_ej_bhnsm=2.5e-02, \
