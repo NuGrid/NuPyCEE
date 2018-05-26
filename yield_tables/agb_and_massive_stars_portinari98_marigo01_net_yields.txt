@@ -1,14 +1,10 @@
 H IMPORTANT: Below are net yields, not total yields.
-H
 H Name: AGB yields from Marigo (2001) and massive yields from Portinari et al. (1998)
+H Note: Portinari et al. (1998) yields were originally in form of total yields.
+H Note: Total to net yields using the NuGrid initial composition files.
 H Data prepared by: Benoit Cote and Christian Ritter
 H Data prepared date: May 20th 2018
-H Isotopes: H-1, He-3, He-4, C-12, C-13, N-14, N-15, O-16, O-17, O-18, Ne-20, Ne-22, Mg-24, Si-28, S-32, Ca-40, Fe-56
-H
-H Note: Portinari et al. (1998) yields were originally in form of total yields.
-H We converted them into net yields using the same initial composition
-H files used for NuGrid stellar models (see iniabu/ folder).
-H
+H Isotopes: H-1, He-3, He-4, C-12, C-13, N-14, N-15, O-16, O-17, O-18, Ne-20, Ne-22, Mg-24, Si-28, S-32, Ca-40, Fe-56.
 H Number of metallicities: 3
 H Units: Msun, year
 H Table: (M=0.837,Z=0.02)
