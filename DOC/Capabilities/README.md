@@ -18,6 +18,12 @@ to access the ipython notebooks introduced below.
 	Add extra yields to existing stellar yield input; choose mass range.
 
 	Extra_source.ipynb
+	
+**Using Neutron Star Mergers**
+
+	Include and modify the properties of neutron star mergers.
+
+	Using_neutron_star_mergers.ipynb
 
 **Reducing Computing Time**
 	
