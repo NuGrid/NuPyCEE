@@ -123,7 +123,7 @@ class sygma( chem_evol ):
                  ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  bhnsmerger_table_radio='', nsmerger_table_radio='',\
-                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_i99_W7.txt',sn1a_energy=1e51,\
+                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t03.txt',sn1a_energy=1e51,\
                  ns_merger_on=False, bhns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
                  t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
                  m_ej_bhnsm=2.5e-02, \
@@ -2415,29 +2415,29 @@ class sygma( chem_evol ):
         #print ('Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:')
         #print (sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive))
 
-    def plot_mass_range_contributions(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_mass_range_contributions(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14, histtype="stepfilled"):
 
 
         '''
-        Plots yield contribution (Msun) of a certain mass range
-        versus initial mass. Each stellar ejecta in one mass range 
-        is represented by the same yields, yields from certain stellar simulation.
-        Be aware that a larger mass range means also a larger amount
-        of yield for that range.
-        Note: Used in WENDI.
+	Plots yield contribution (Msun) of a certain mass range
+	versus initial mass. Each stellar ejecta in one mass range 
+	is represented by the same yields, yields from certain stellar simulation.
+	Be aware that a larger mass range means also a larger amount
+	of yield for that range.
+	Note: Used in WENDI.
 
         Parameters
         ----------
         specie : string
             Element or isotope name in the form 'C' or 'C-12'
-        prodfac : boolean
-            if true, calculate stellar production factor for each mass range.
-            It is the final stellar yield divided by the initial (IMF-weighted)
-            total mass (ISM+stars) in that region.
-        rebin : change the bin size to uniform mass intervals of size 'rebin'
-                default 0, bin size is defined by ranges of (stellar) yield inputs
-        log : boolean
-            if true, use log yaxis
+	prodfac : boolean
+	    if true, calculate stellar production factor for each mass range.
+	    It is the final stellar yield divided by the initial (IMF-weighted)
+	    total mass (ISM+stars) in that region.
+	rebin : change the bin size to uniform mass intervals of size 'rebin'
+	        default 0, bin size is defined by ranges of (stellar) yield inputs	
+	log : boolean
+	    if true, use log yaxis
         label : string
              figure label
         marker : string
@@ -2454,6 +2454,7 @@ class sygma( chem_evol ):
         >>> s.plot_mass_range_contribution(element='C')
 
         '''
+
         import matplotlib.pyplot as plt
         figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
@@ -2484,24 +2485,15 @@ class sygma( chem_evol ):
                 mean_val,bin_bdys,y,color,label=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
 
 
+
         if prodfac==True:
-                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label,ec='black')
+                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label,ec='black', histtype=histtype)
         else:
-                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label,ec='black')
+                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label,ec='black', histtype=histtype)
         #'''
         if len(label)>0:
                 plt.legend()
-        #ax1 = figure.add_subplot(111)
-        #ax1.set_xscale('log')
-        #ax2 = ax1.twiny()
-    #       ax2.set_xticklabels(tick_function(new_tick_locations))
-        #plt.plot(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label)
-        #ax1.errorbar(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label,xerr=0.05)
         ax1=plt.gca()
-        #self.__fig_standard(ax=ax1,fontsize=18,labelsize=18)
-        #if log==True:
-        #        ax1.set_xlabel('log-scaled initial mass [Msun]')
-        #else:
         ax1.set_xlabel('initial mass [M$_{\odot}$]')
         if prodfac==False:
                 ax1.set_ylabel('IMF-weighted yield [M$_{\odot}$]')
@@ -2509,10 +2501,6 @@ class sygma( chem_evol ):
                 ax1.set_ylabel('production factor')
         if log==True:
                 ax1.set_yscale('log')
-        #ax1.set_yscale('log')
-        #ax1.legend(numpoints = 1)
-        #fontsize=18
-        #labelsize=18
         lwtickboth=[6,2]
         lwtickmajor=[10,3]
         plt.xlim(min(bin_bdys),max(bin_bdys))
@@ -2528,12 +2516,12 @@ class sygma( chem_evol ):
         #ax.xaxis.set_tick_params(width=2)
         #ax.yaxis.set_tick_params(width=2)
         ax1.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
-        self.__save_data(header=['Mean mass','mass bdys (bins)','Yield'],data=[mean_val,bin_bdys,y])
+        #self.__save_data(header=['Mean mass','mass bdys (bins)','Yield'],data=[mean_val,bin_bdys,y])
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
 
+        #print [mean_val,bin_bdys,y]
         return
-
 
     def __plot_mass_range_contributions_single(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
