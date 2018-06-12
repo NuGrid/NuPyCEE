@@ -1,5 +1,5 @@
 #set the path to your NUPYCEE dir
-cd ../../
+cd ../../../
 export SYGMADIR=`pwd`
 cd -
 echo 'set SYGMADIR to '$SYGMADIR
@@ -15,4 +15,6 @@ ln -s $SYGMADIR/yield_tables/ yield_tables
 
 #starts notebook server
 jupyter notebook
+#ipython3-3.4 notebook
+
 
