@@ -38,16 +38,16 @@
 	- 1.0 --> 100%
 
 - - - - - - 
-**agb_and_massive_stars_K10_LCprep.txt**
+**agb_and_massive_stars_K10_LC18.txt**
 
 - AGB: Karakas (2010, K10), <http://adsabs.harvard.edu/abs/2010MNRAS.403.1413K>
-- Massive: Limongi & Chieffi (in preparation, LC), taken from <http://orfeo.iaps.inaf.it/>
-	- 	Please cite Limongi & Chieffi (in preparation) if using this choice.
+- Massive: Limongi & Chieffi (2018, LC18), <http://adsabs.harvard.edu/abs/2018arXiv180509640L>
+	- taken from <http://orfeo.iaps.inaf.it/>	 
 
 |   Z points |3.236e-5|1.0e-4  |3.236e-4|3.236e-3| 0.004  | 0.008  |1.345e-2|  0.02  |
 |-----------:|-------:|-------:|-------:|-------:|-------:|-------:|-------:|-------:|
 | K10        |1.0e-4  |1.0e-4  |`interp`|`interp`| 0.004  | 0.008  |`interp`|  0.02  |
-| LC         |3.236e-5|`interp`|3.236e-4|3.236e-3|`interp`|`interp`|1.345e-2|1.345e-2|
+| LC18         |3.236e-5|`interp`|3.236e-4|3.236e-3|`interp`|`interp`|1.345e-2|1.345e-2|
 
 **Note** 
 
