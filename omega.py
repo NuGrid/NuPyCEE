@@ -253,10 +253,12 @@ class omega( chem_evol ):
                  tend=13e9, mgal=1.0e10, transitionmass=8, iolevel=0, \
                  ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=30.0e6,\
                  table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
+                 use_decay_module=False,\
+                 f_network='isotopes_modified.prn', f_format=1,\
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  bhnsmerger_table_radio='', nsmerger_table_radio='',\
                  hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[],\
-                 sn1a_table='yield_tables/sn1a_t86.txt',\
+                 sn1a_table='yield_tables/sn1a_i99_W7.txt',\
                  ns_merger_on=False, f_binary=1.0, f_merger=0.0008,\
                  t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, \
                  nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
@@ -386,7 +388,9 @@ class omega( chem_evol ):
                  ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
                  ytables_1a_radio_in=ytables_1a_radio_in,\
                  ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
-                 test_clayton=test_clayton, radio_refinement=radio_refinement)
+                 test_clayton=test_clayton, radio_refinement=radio_refinement,\
+                 use_decay_module=use_decay_module,\
+                 f_network=f_network, f_format=f_format)
 
         # Quit if something bad happened in chem_evol ..
         if self.need_to_quit:
@@ -869,41 +873,17 @@ class omega( chem_evol ):
         '''
 
         # Arrays with specific values at every timestep
-        self.sfr_input = []     # Star formation rate [Mo yr^-1]
-        self.m_DM_t = []        # Mass of the dark matter halo
-        self.r_vir_DM_t=[]      # Virial radius of the dark matter halo
-        self.v_vir_DM_t=[]      # Virial velocity of the dark matter "particle"
-        self.m_tot_ISM_t = []   # Mass of the ISM in gas at every timestep
-        self.m_outflow_t = []   # Mass of the outflow at every timestep
-        self.eta_outflow_t = [] # Mass-loading factor == M_outflow / SFR
-        self.t_SF_t = []        # Star formation timescale at every timestep
-        self.m_crit_t = []      # Critital ISM mass below which no SFR
-        self.redshift_t = []    # Redshift associated to every timestep
-        self.m_inflow_t = []    # Mass of the inflow at every timestep
-
-        # Extends the arrays to cover all timestep
-        for k in range(self.nb_timesteps):
-            self.sfr_input.append(0.0)
-            self.m_DM_t.append(0.0)
-            self.r_vir_DM_t.append(0.0)
-            self.v_vir_DM_t.append(0.0)
-            self.m_tot_ISM_t.append(0.0)
-            self.m_outflow_t.append(0.0)
-            self.eta_outflow_t.append(0.0)
-            self.t_SF_t.append(0.0)
-            self.m_crit_t.append(0.0)
-            self.redshift_t.append(0.0)
-            self.m_inflow_t.append(0.0)
-
-        # Add one additional slot for t = tend when needed
-        self.sfr_input.append(0.0)
-        self.m_DM_t.append(0.0)
-        self.r_vir_DM_t.append(0.0)
-        self.v_vir_DM_t.append(0.0)
-        self.m_tot_ISM_t.append(0.0)
-        self.t_SF_t.append(0.0)
-        self.m_crit_t.append(0.0)
-        self.redshift_t.append(0.0)
+        self.sfr_input = np.zeros(self.nb_timesteps+1) # Star formation rate [Mo yr^-1]
+        self.m_DM_t = np.zeros(self.nb_timesteps+1) # Mass of the dark matter halo
+        self.r_vir_DM_t= np.zeros(self.nb_timesteps+1) # Virial radius of the dark matter halo
+        self.v_vir_DM_t= np.zeros(self.nb_timesteps+1) # Virial velocity of the halo
+        self.m_tot_ISM_t = np.zeros(self.nb_timesteps+1) # Mass of the ISM in gas
+        self.m_outflow_t = np.zeros(self.nb_timesteps) # Mass of the outflow at every timestep
+        self.eta_outflow_t = np.zeros(self.nb_timesteps) # Mass-loading factor == M_outflow / SFR
+        self.t_SF_t = np.zeros(self.nb_timesteps+1) # Star formation timescale at every timestep
+        self.m_crit_t = np.zeros(self.nb_timesteps+1) # Critital ISM mass below which no SFR
+        self.redshift_t = np.zeros(self.nb_timesteps+1) # Redshift associated to every timestep
+        self.m_inflow_t = np.zeros(self.nb_timesteps) # Mass of the inflow at every timestep
 
 
     ##############################################
@@ -2174,7 +2154,10 @@ class omega( chem_evol ):
 
             # Decay radioactive isotopes
             if self.len_decay_file > 0:
-                self._decay_radio(i)
+                if self.use_decay_module:
+                    self._decay_radio_with_module(i)
+                else:
+                    self._decay_radio(i)
 
             # Delay outflow is needed (following SNe rather than SFR) ...
             if self.out_follows_E_rate:

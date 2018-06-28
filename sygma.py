@@ -21,7 +21,7 @@ v0.1 NOV2013: C. Fryer, C. Ritter
 v0.2 JAN2014: C. Ritter
 
 v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg, 
-              M. Pignatari, S. Jones, K. Venn1, P. A. Denissenkov & the 
+              M. Pignatari, S. Jones, K. Venn, P. A. Denissenkov & the 
               NuGrid collaboration
 
 v0.4 FEB2015: C. Ritter, B. Cote
@@ -135,6 +135,8 @@ class sygma( chem_evol ):
                  extra_source_mass_range=[[8,30]], \
                  extra_source_exclude_Z=[[]], \
                  total_ejecta_interp=True,\
+                 radio_refinement=100, use_decay_module=False,\
+                 f_network='isotopes_modified.prn', f_format=1,\
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
@@ -217,7 +219,10 @@ class sygma( chem_evol ):
                  delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
                  ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
                  ytables_1a_radio_in=ytables_1a_radio_in, ism_ini_radio=ism_ini_radio,\
-                 ytables_nsmerger_radio_in=ytables_nsmerger_radio_in)
+                 ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
+                 radio_refinement=radio_refinement,\
+                 use_decay_module=use_decay_module,\
+                 f_network=f_network, f_format=f_format)
 
         if self.need_to_quit:
             return
@@ -265,9 +270,15 @@ class sygma( chem_evol ):
             # Run the timestep i
             self._evol_stars(i, 0.0, self.mass_sampled, self.scale_cor)
 
+#            if i == 1:
+#                self.ymgal_radio[i][2] = 1.0
+
             # Decay radioactive isotopes
             if self.len_decay_file > 0:
-                self._decay_radio(i)
+                if self.use_decay_module:
+                    self._decay_radio_with_module(i)
+                else:
+                    self._decay_radio(i)
 
             # Get the new metallicity of the gas
             self.zmetal = self._getmetallicity(i)
@@ -289,7 +300,10 @@ class sygma( chem_evol ):
 
         # Declaration of the array containing the mass fraction converted
         # into stars at every timestep i.
-        sfr_i = []
+        if self.sfr == 'input':
+            sfr_i = []
+        else:
+            sfr_i = np.zeros(self.nb_timesteps+1)
 
         # Output information
         if self.iolevel >= 3:
@@ -297,17 +311,17 @@ class sygma( chem_evol ):
 
         # For every timestep i considered in the simulation ...
         for i in range(1, self.nb_timesteps+1):
-
+            
             # If an array is used to generate starbursts ...
             if len(self.starbursts) > 0:
                 if len(self.starbursts) >= i:
 
                     # Use the input value
-                    sfr_i.append(self.starbursts[i-1])
+                    sfr_i[i] = self.starbursts[i-1]
                     self.history.sfr.append(sfr_i[i-1])
 
             # If an input file is read for the SFR ...
-            if self.sfr == 'input':
+            elif self.sfr == 'input':
 
                 # Open the input file, read all lines, and close the file
                 f1 = open(global_path+'sfr_input')
@@ -329,14 +343,14 @@ class sygma( chem_evol ):
                         break
 
             # If the Schmidt law is used (see Timmes98) ... 
-            if self.sfr == 'schmidt':
+            elif self.sfr == 'schmidt':
 
                 # Calculate the mass of available gas
                 mgas = sum(ymgal[i-1])
 
                 # Calculate the SFR according to the current gas fraction
                 B = 2.8 * self.mgal * (mgas / self.mgal)**2    # [Mo/Gyr]
-                sfr_i.append(B/mgas) * (timesteps[i-1] / 1.e9) # mass fraction
+                sfr_i[i] = (B/mgas) * (timesteps[i-1] / 1.e9) # mass fraction
                 self.history.sfr.append(sfr_i[i-1])
 
         # Return the SFR (mass fraction) of every timestep
@@ -2401,29 +2415,29 @@ class sygma( chem_evol ):
         #print ('Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:')
         #print (sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive))
 
-    def plot_mass_range_contributions(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_mass_range_contributions(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14, histtype="stepfilled"):
 
 
         '''
-        Plots yield contribution (Msun) of a certain mass range
-        versus initial mass. Each stellar ejecta in one mass range 
-        is represented by the same yields, yields from certain stellar simulation.
-        Be aware that a larger mass range means also a larger amount
-        of yield for that range.
-        Note: Used in WENDI.
+	Plots yield contribution (Msun) of a certain mass range
+	versus initial mass. Each stellar ejecta in one mass range 
+	is represented by the same yields, yields from certain stellar simulation.
+	Be aware that a larger mass range means also a larger amount
+	of yield for that range.
+	Note: Used in WENDI.
 
         Parameters
         ----------
         specie : string
             Element or isotope name in the form 'C' or 'C-12'
-        prodfac : boolean
-            if true, calculate stellar production factor for each mass range.
-            It is the final stellar yield divided by the initial (IMF-weighted)
-            total mass (ISM+stars) in that region.
-        rebin : change the bin size to uniform mass intervals of size 'rebin'
-                default 0, bin size is defined by ranges of (stellar) yield inputs
-        log : boolean
-            if true, use log yaxis
+	prodfac : boolean
+	    if true, calculate stellar production factor for each mass range.
+	    It is the final stellar yield divided by the initial (IMF-weighted)
+	    total mass (ISM+stars) in that region.
+	rebin : change the bin size to uniform mass intervals of size 'rebin'
+	        default 0, bin size is defined by ranges of (stellar) yield inputs	
+	log : boolean
+	    if true, use log yaxis
         label : string
              figure label
         marker : string
@@ -2440,6 +2454,7 @@ class sygma( chem_evol ):
         >>> s.plot_mass_range_contribution(element='C')
 
         '''
+
         import matplotlib.pyplot as plt
         figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
@@ -2470,24 +2485,15 @@ class sygma( chem_evol ):
                 mean_val,bin_bdys,y,color,label=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
 
 
+
         if prodfac==True:
-                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label,ec='black')
+                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label,ec='black', histtype=histtype)
         else:
-                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label,ec='black')
+                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label,ec='black', histtype=histtype)
         #'''
         if len(label)>0:
                 plt.legend()
-        #ax1 = figure.add_subplot(111)
-        #ax1.set_xscale('log')
-        #ax2 = ax1.twiny()
-    #       ax2.set_xticklabels(tick_function(new_tick_locations))
-        #plt.plot(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label)
-        #ax1.errorbar(masses,yields,marker=marker,linestyle=shape,color=color,markevery=markevery,markersize=6,label=label,xerr=0.05)
         ax1=plt.gca()
-        #self.__fig_standard(ax=ax1,fontsize=18,labelsize=18)
-        #if log==True:
-        #        ax1.set_xlabel('log-scaled initial mass [Msun]')
-        #else:
         ax1.set_xlabel('initial mass [M$_{\odot}$]')
         if prodfac==False:
                 ax1.set_ylabel('IMF-weighted yield [M$_{\odot}$]')
@@ -2495,10 +2501,6 @@ class sygma( chem_evol ):
                 ax1.set_ylabel('production factor')
         if log==True:
                 ax1.set_yscale('log')
-        #ax1.set_yscale('log')
-        #ax1.legend(numpoints = 1)
-        #fontsize=18
-        #labelsize=18
         lwtickboth=[6,2]
         lwtickmajor=[10,3]
         plt.xlim(min(bin_bdys),max(bin_bdys))
@@ -2514,12 +2516,12 @@ class sygma( chem_evol ):
         #ax.xaxis.set_tick_params(width=2)
         #ax.yaxis.set_tick_params(width=2)
         ax1.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
-        self.__save_data(header=['Mean mass','mass bdys (bins)','Yield'],data=[mean_val,bin_bdys,y])
+        #self.__save_data(header=['Mean mass','mass bdys (bins)','Yield'],data=[mean_val,bin_bdys,y])
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
 
+        #print [mean_val,bin_bdys,y]
         return
-
 
     def __plot_mass_range_contributions_single(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 

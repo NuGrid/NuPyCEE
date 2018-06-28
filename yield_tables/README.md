@@ -4,6 +4,21 @@
 ### Available Yields Tables to Run with NuPyCEE
 
 - - - - - 
+**agb_and_massive_stars_nugrid_MESAonly_xxxx.txt**
+
+- AGB and massive: NuGrid Collaboration, Ritter et al. (2017, R17), <http://adsabs.harvard.edu/abs/2017arXiv170908677R>
+
+|   Z points | 0.0001 | 0.001 | 0.006 | 0.01 | 0.02 |
+|-----------:|-------:|------:|------:|-----:|-----:|
+| R17        | 0.0001 | 0.001 | 0.006 | 0.01 | 0.02 |
+| R17        | 0.0001 | 0.001 | 0.006 | 0.01 | 0.02 |
+
+**Note** 
+
+- fryer12delay and fryer12rapid at the end of the file name refers to the remnant mass prescription use for the core-collapse explosion of massive stars <http://adsabs.harvard.edu/abs/2012ApJ...749...91F>
+- fryer12mix at the end of the file name represents a mixture of 50% delay and 50% rapid.
+	
+- - - - - 
 **agb_and_massive_stars_K10_K06.txt**
 
 - AGB: Karakas (2010, K10), <http://adsabs.harvard.edu/abs/2010MNRAS.403.1413K>
@@ -23,16 +38,16 @@
 	- 1.0 --> 100%
 
 - - - - - - 
-**agb_and_massive_stars_K10_LCprep.txt**
+**agb_and_massive_stars_K10_LC18.txt**
 
 - AGB: Karakas (2010, K10), <http://adsabs.harvard.edu/abs/2010MNRAS.403.1413K>
-- Massive: Limongi & Chieffi (in preparation, LC), taken from <http://orfeo.iaps.inaf.it/>
-	- 	Please cite Limongi & Chieffi (in preparation) if using this choice.
+- Massive: Limongi & Chieffi (2018, LC18), <http://adsabs.harvard.edu/abs/2018arXiv180509640L>
+	- taken from <http://orfeo.iaps.inaf.it/>	 
 
 |   Z points |3.236e-5|1.0e-4  |3.236e-4|3.236e-3| 0.004  | 0.008  |1.345e-2|  0.02  |
 |-----------:|-------:|-------:|-------:|-------:|-------:|-------:|-------:|-------:|
 | K10        |1.0e-4  |1.0e-4  |`interp`|`interp`| 0.004  | 0.008  |`interp`|  0.02  |
-| LC         |3.236e-5|`interp`|3.236e-4|3.236e-3|`interp`|`interp`|1.345e-2|1.345e-2|
+| LC18         |3.236e-5|`interp`|3.236e-4|3.236e-3|`interp`|`interp`|1.345e-2|1.345e-2|
 
 **Note** 
 
@@ -42,6 +57,39 @@
 	- yyy = avg represents a mixture of rotation velocities as seen in Figure 4 of Prantzos et al. (2018), <http://adsabs.harvard.edu/doi/10.1093/mnras/sty316>
 
 - - - - - - 
+**agb_and_massive_stars_portinari98_marigo01.txt**
+
+- AGB: Marigo (2001, M01), <http://adsabs.harvard.edu/abs/2001A%26A...370..194M>
+- Massive: Portinari et al. (1998, P98), <http://adsabs.harvard.edu/abs/1998A%26A...334..505P>
+
+|   Z points |0.004  | 0.008  |   0.02 |
+|-----------:|-------:|-------:|-------:|
+| M01        |0.004  | 0.008  | 0.02 |
+| P98         |0.004  | 0.008  | 0.02 |
+
+**Note** 
+
+- The net yields of M01 has been converted into total yields using the initial compositions used to calculate NuGrid's stellar model.
+- More metallicities are available in the original P98 paper.
+
+- - - - - - 
+**agb_and_massive_stars_portinari98_marigo01_net_yields.txt**
+
+- AGB: Marigo (2001, M01), <http://adsabs.harvard.edu/abs/2001A%26A...370..194M>
+- Massive: Portinari et al. (1998, P98), <http://adsabs.harvard.edu/abs/1998A%26A...334..505P>
+
+|   Z points |0.004  | 0.008  |   0.02 |
+|-----------:|-------:|-------:|-------:|
+| M01        |0.004  | 0.008  | 0.02 |
+| P98         |0.004  | 0.008  | 0.02 |
+
+**Note** 
+
+- Same as *agb_and_massive_stars_portinari98_marigo01.txt*, but in net yields form.
+- The total yields of P98 has been converted into net yields using the initial compositions used to calculate NuGrid's stellar model.
+
+- - - - - - 
+
 
 **Old Content. This will be soon updated.**
 

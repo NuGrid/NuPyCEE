@@ -79,7 +79,8 @@ global_path=global_path+'/'
 # Import the class that reads the input yield tables
 import read_yields as ry
 
-
+# Import the decay module for radioactive isotopes
+#import decay_module
 
 
 class chem_evol(object):
@@ -418,6 +419,7 @@ class chem_evol(object):
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, \
              table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
+             use_decay_module=False, f_network='isotopes_modified.prn', f_format=1, \
              table_radio='', decay_file='', sn1a_table_radio='',\
              bhnsmerger_table_radio='', nsmerger_table_radio='',\
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
@@ -604,6 +606,13 @@ class chem_evol(object):
         self.radio_bhnsmerger_on = False
         self.radio_refinement = radio_refinement
         self.test_clayton = test_clayton
+        self.use_decay_module = use_decay_module
+        if self.use_decay_module:
+            print('In construction .. decay_module deactivated.')
+            return
+            #self.f_network = f_network
+            #self.f_format = f_format
+            #self.__initialize_decay_module()
 
         # Normalization of the delayed extra sources
         if self.nb_delayed_extra > 0:
@@ -679,6 +688,7 @@ class chem_evol(object):
                 self.ytables_radio = ytables_radio_in
                 self.radio_iso = radio_iso_in
                 self.nb_radio_iso = len(self.radio_iso)
+                self.nb_new_radio_iso = len(self.radio_iso)
                 self.ytables_1a_radio = ytables_1a_radio_in
                 self.ytables_nsmerger_radio = ytables_nsmerger_radio_in
 
@@ -733,7 +743,7 @@ class chem_evol(object):
 
             # Initialisation of the composition of the gas reservoir
             if len(self.ism_ini_radio) > 0:
-                for i_ini in range(0,self.ism_ini_radio):
+                for i_ini in range(0,len(self.ism_ini_radio)):
                     ymgal_radio[0][i_ini] = self.ism_ini_radio[i_ini]
 
             # Define indexes to make connection between unstable/stable isotopes
@@ -989,10 +999,11 @@ class chem_evol(object):
                     self.decay_info.append(\
                             [line_split[0].split('&')[1],\
                              line_split[1].split('&')[1],\
-                             np.log(2.0)*float(line_split[2].split('&')[1])])
+                             float(line_split[2].split('&')[1])/np.log(2.0)])
 
         # Count the number of radioactive isotopes
         self.nb_radio_iso = len(self.decay_info)
+        self.nb_new_radio_iso = len(self.decay_info)
 
         # Close the input file
         ddi.close()
@@ -1543,18 +1554,19 @@ class chem_evol(object):
                 # Radioactive isotopes locked
                 if self.len_decay_file > 0:
                     self.ymgal_radio[i] = f_lock * self.ymgal_radio[i-1]
-                if self.radio_massive_agb_on:
-                    self.ymgal_massive_radio[i] = f_lock * self.ymgal_massive_radio[i-1]
-                    self.ymgal_agb_radio[i] = f_lock * self.ymgal_agb_radio[i-1]
-                if self.radio_sn1a_on:
-                    self.ymgal_1a_radio[i] = f_lock * self.ymgal_1a_radio[i-1]
-                if self.radio_nsmerger_on:
-                    self.ymgal_nsm_radio[i] = f_lock * self.ymgal_nsm_radio[i-1]
-                if self.radio_bhnsmerger_on:
-                    self.ymgal_bhnsm_radio[i] = f_lock * self.ymgal_bhnsm_radio[i-1]
-                for iiii in range(0,self.nb_delayed_extra_radio):
-                    self.ymgal_delayed_extra_radio[iiii][i] = \
-                          f_lock * self.ymgal_delayed_extra_radio[iiii][i-1]
+                if not self.use_decay_module:
+                  if self.radio_massive_agb_on:
+                      self.ymgal_massive_radio[i] = f_lock * self.ymgal_massive_radio[i-1]
+                      self.ymgal_agb_radio[i] = f_lock * self.ymgal_agb_radio[i-1]
+                  if self.radio_sn1a_on:
+                      self.ymgal_1a_radio[i] = f_lock * self.ymgal_1a_radio[i-1]
+                  if self.radio_nsmerger_on:
+                      self.ymgal_nsm_radio[i] = f_lock * self.ymgal_nsm_radio[i-1]
+                  if self.radio_bhnsmerger_on:
+                      self.ymgal_bhnsm_radio[i] = f_lock * self.ymgal_bhnsm_radio[i-1]
+                  for iiii in range(0,self.nb_delayed_extra_radio):
+                      self.ymgal_delayed_extra_radio[iiii][i] = \
+                            f_lock * self.ymgal_delayed_extra_radio[iiii][i-1]
 
                 # Correction if comparing with Clayton's analytical model
                 if len(self.test_clayton) > 0:
@@ -1599,18 +1611,19 @@ class chem_evol(object):
                 # Radioactive isotopes
                 if self.len_decay_file > 0:
                     self.ymgal_radio[i] = self.ymgal_radio[i-1]
-                if self.radio_massive_agb_on:
-                    self.ymgal_agb_radio[i] = self.ymgal_agb_radio[i-1]
-                    self.ymgal_massive_radio[i] = self.ymgal_massive_radio[i-1]
-                if self.radio_sn1a_on:
-                    self.ymgal_1a_radio[i] = self.ymgal_1a_radio[i-1]
-                if self.radio_nsmerger_on:
-                    self.ymgal_nsm_radio[i] = self.ymgal_nsm_radio[i-1]
-                if self.radio_bhnsmerger_on:
-                    self.ymgal_bhnsm_radio[i] = self.ymgal_bhnsm_radio[i-1]
-                for iiii in range(0,self.nb_delayed_extra_radio):
-                    self.ymgal_delayed_extra_radio[iiii][i] = \
-                        self.ymgal_delayed_extra_radio[iiii][i-1]
+                if not self.use_decay_module:
+                  if self.radio_massive_agb_on:
+                      self.ymgal_agb_radio[i] = self.ymgal_agb_radio[i-1]
+                      self.ymgal_massive_radio[i] = self.ymgal_massive_radio[i-1]
+                  if self.radio_sn1a_on:
+                      self.ymgal_1a_radio[i] = self.ymgal_1a_radio[i-1]
+                  if self.radio_nsmerger_on:
+                      self.ymgal_nsm_radio[i] = self.ymgal_nsm_radio[i-1]
+                  if self.radio_bhnsmerger_on:
+                      self.ymgal_bhnsm_radio[i] = self.ymgal_bhnsm_radio[i-1]
+                  for iiii in range(0,self.nb_delayed_extra_radio):
+                      self.ymgal_delayed_extra_radio[iiii][i] = \
+                          self.ymgal_delayed_extra_radio[iiii][i-1]
 
             # Output information
             if self.iolevel > 2:
@@ -1624,7 +1637,7 @@ class chem_evol(object):
         if self.pre_calculate_SSPs:
             self.ymgal[i] += self.mdot[i-1]
             if self.len_decay_file > 0:
-                self.ymgal_radio[i] += self.mdot_radio[i-1]
+                self.ymgal_radio[i][:self.nb_radio_iso] += self.mdot_radio[i-1]
         else:
 
             # Stable isotopes
@@ -1644,24 +1657,24 @@ class chem_evol(object):
             # ymgal_radio[i] is treated in the decay_radio function
             # It should not be here!
             # The contribution of individual sources must be here!
-            if self.radio_massive_agb_on:
-                self.ymgal_agb_radio[i] = self.ymgal_agb_radio[i] + \
-                     self.mdot_agb_radio[i-1]
-                self.ymgal_massive_radio[i] = self.ymgal_massive_radio[i] + \
-                     self.mdot_massive_radio[i-1]
-            if self.radio_sn1a_on:
-                self.ymgal_1a_radio[i] = self.ymgal_1a_radio[i] + \
-                     self.mdot_1a_radio[i-1]
-            if self.radio_nsmerger_on:
-                self.ymgal_nsm_radio[i] = self.ymgal_nsm_radio[i] + \
-                     self.mdot_nsm_radio[i-1]
-            if self.radio_bhnsmerger_on:
-                self.ymgal_bhnsm_radio[i] = self.ymgal_bhnsm_radio[i] + \
-                     self.mdot_bhnsm_radio[i-1]
-            for iiii in range(0,self.nb_delayed_extra_radio):
-                self.ymgal_delayed_extra_radio[iiii][i] = \
-                    self.ymgal_delayed_extra_radio[iiii][i] + \
-                        self.mdot_delayed_extra_radio[iiii][i-1]
+            if not self.use_decay_module:
+              if self.radio_massive_agb_on:
+                  self.ymgal_agb_radio[i] += \
+                       self.mdot_agb_radio[i-1]
+                  self.ymgal_massive_radio[i] += \
+                       self.mdot_massive_radio[i-1]
+              if self.radio_sn1a_on:
+                  self.ymgal_1a_radio[i] += \
+                       self.mdot_1a_radio[i-1]
+              if self.radio_nsmerger_on:
+                  self.ymgal_nsm_radio[i] += \
+                       self.mdot_nsm_radio[i-1]
+              if self.radio_bhnsmerger_on:
+                  self.ymgal_bhnsm_radio[i] += \
+                       self.mdot_bhnsm_radio[i-1]
+              for iiii in range(0,self.nb_delayed_extra_radio):
+                  self.ymgal_delayed_extra_radio[iiii][i] += \
+                          self.mdot_delayed_extra_radio[iiii][i-1]
 
             # Convert the mass ejected by massive stars into rate
             if self.history.timesteps[i-1] == 0.0:
@@ -2931,7 +2944,9 @@ class chem_evol(object):
         '''
         This function decays radioactive isotopes present in the
         radioactive gas component and add the stable decayed product
-        inside the stable gas component.
+        inside the stable gas component.  This is using a simple 
+        decay routine where an unstable isotope decay to only one
+        stable isotope.
 
         Argument
         ========
@@ -2990,6 +3005,195 @@ class chem_evol(object):
                     self.ymgal_bhnsm_radio[i][i_dr] *= f_remain
                     for iiii in range(0,self.nb_delayed_extra_radio):
                         self.ymgal_delayed_extra_radio[iiii][i][i_dr] *= f_remain
+
+
+    ##############################################
+    #           Initialize Decay Module          #
+    ##############################################
+    def __initialize_decay_module(self):
+
+        '''
+        This function import and initialize the decay module
+        used to decay unstable isotopes.  Declare arrays used
+        for the communication between the fortran decay code
+        and NuPyCEE
+
+        '''
+
+        # Import and declare the decay module
+        #import decay_module
+        decay_module.initialize(self.f_network, self.f_format, global_path)
+
+        # Declare the element names used to return the charge number Z
+        # Index 0 needs to be NN!  H needs to be index 1!
+        self.element_names = ['NN', 'H', 'He', 'Li', 'Be', 'B', 'C', \
+            'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P',\
+            'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',\
+            'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As',\
+            'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo',\
+            'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb',\
+            'Te', 'I', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd',\
+            'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm',\
+            'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt',\
+            'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr',\
+            'Ra', 'Ac', 'Th', 'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm',\
+            'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db',\
+            'Sg', 'Bh', 'Hs', 'Mt', 'Uun', 'Uuu', 'Uub', 'zzz', \
+            'Uuq']
+
+        # Number is isotope entry in the fortran decay module
+        self.len_iso_module = len(decay_module.iso.z)
+
+        # Find the isotope name associated with each isotope entry
+        self.iso_decay_module = ['']*self.len_iso_module
+        for i_iso in range(self.len_iso_module):
+          if decay_module.iso.z[i_iso] == 0:
+            self.iso_decay_module[i_iso] = 'NN-1'
+          else:
+            self.iso_decay_module[i_iso] = \
+              self.element_names[decay_module.iso.z[i_iso]] + '-' + \
+                str(decay_module.iso.z[i_iso]+decay_module.iso.n[i_iso])
+
+        # Year to second conversion
+        self.yr_to_sec = 3.154e+7
+
+
+    ##############################################
+    #           Decay Radio With Module          #
+    ##############################################
+    def _decay_radio_with_module(self, i):
+
+        '''
+        This function decays radioactive isotopes present in the
+        radioactive gas component and add the stable decayed product
+        inside the stable gas component.  This is using the decay
+        module to account for all decay channels.
+
+        Argument
+        ========
+
+          i : Index of the current timestep.
+          Reminder, here 'i' is the upper-time boundary of the timestep
+
+        '''
+
+        # Nb of refinement steps
+        nb_ref = int(self.radio_refinement)
+        nb_ref_fl = float(nb_ref)
+
+        # Copy the duration of the timestep (duration of the decay)
+        dt_decay = self.history.timesteps[i-1] / nb_ref_fl
+
+        # Keep track of the mass before the decay
+        sum_ymgal_temp = sum(self.ymgal_radio[i])
+        sum_mdot_temp = sum(self.mdot_radio[i-1])
+
+        # If there is something to decay ..
+        if sum_ymgal_temp > 0.0 or sum_mdot_temp > 0.0:
+
+            # Get the mass added to the gas at each refined timesteps
+            m_added = self.mdot_radio[i-1][:self.nb_radio_iso] / nb_ref_fl
+
+            # Declare variable to keep track of the decayed mass
+            m_decay = 0.0
+
+            # For each refinement step ..
+            for i_loop in range(nb_ref):
+
+                # Add ejecta
+                self.ymgal_radio[i][:self.nb_radio_iso] += m_added
+
+                # Call the decay module
+                self.__run_decay_module(i, dt_decay)
+
+
+    ##############################################
+    #              Run Decay Module              #
+    ##############################################
+    def __run_decay_module(self, i, dt_decay):
+
+        '''
+        Decay the current radioactive abundances using
+        the decay module.
+
+        Argument
+        ========
+
+          i : Index of the current timestep.
+          dt_decay: Duration of the decay [yr]
+
+        '''
+
+        # Get the initial abundances of radioactive isotopes
+        init_abun = self.__get_init_abun_decay(i)
+
+        # Call the decay module
+        decay_module.run_decay(dt_decay*self.yr_to_sec, 1, init_abun)
+
+        # For each relevant isotope in the decay module ..
+        need_resize = False
+        for i_iso in range(self.len_iso_module):
+            if decay_module.iso.abundance[i_iso] > 0.0 or init_abun[i_iso] > 0.0:
+
+                # Replace the unstable component by the decayed product
+                if self.iso_decay_module[i_iso] in self.radio_iso:
+                    k_temp = self.radio_iso.index(self.iso_decay_module[i_iso])
+                    self.ymgal_radio[i][k_temp] = \
+                        copy.deepcopy(decay_module.iso.abundance[i_iso])
+
+                # Add decayed product to the stable component
+                elif self.iso_decay_module[i_iso] in self.history.isotopes:
+                    k_temp = self.history.isotopes.index(self.iso_decay_module[i_iso])
+                    self.ymgal[i][k_temp] += decay_module.iso.abundance[i_iso]
+
+                # If this is a new so-far-unacounted isotope ..
+                else:
+                       
+                    # Add the new isotope name
+                    self.radio_iso.append(self.iso_decay_module[i_iso])
+
+                    # Add the entry and the abundance of the new isotope
+                    self.ymgal_radio = np.concatenate((self.ymgal_radio,\
+                        np.zeros((1,self.nb_timesteps+1)).T), axis=1)
+                    self.ymgal_radio[i][-1] = \
+                        copy.deepcopy(decay_module.iso.abundance[i_iso])
+                    need_resize = True
+ 
+        # Resize all radioactive arrays
+        if need_resize:
+            self.nb_new_radio_iso = len(self.radio_iso)
+
+
+    ##############################################
+    #             Get Init Abun Decay            #
+    ##############################################
+    def __get_init_abun_decay(self, i):
+
+        '''
+        Calculate and return the initial abundance of radioactive 
+        isotopes in the format required by the fortran decay module.
+
+        Argument
+        ========
+
+          i : Index of the current timestep.
+
+        '''
+
+        # Initially set abundances to zero
+        init_abun_temp = np.zeros(self.len_iso_module)
+
+        # For each radioactive isotope ..
+        for i_iso in range(self.nb_new_radio_iso):
+
+            # Find the isotope index for the decay module
+            i_temp = self.iso_decay_module.index(self.radio_iso[i_iso])
+
+            # Copy the mass of the isotope
+            init_abun_temp[i_temp] = copy.deepcopy(self.ymgal_radio[i][i_iso])
+
+        # Return the initial abundance
+        return init_abun_temp
 
 
     ##############################################
@@ -6896,6 +7100,7 @@ class chem_evol(object):
                 self.decay_info = self.SSPs_in[6]
                 self.len_decay_file = self.SSPs_in[7]
                 self.nb_radio_iso = len(self.decay_info)
+                self.nb_new_radio_iso = len(self.decay_info)
             del self.SSPs_in
 
 

@@ -1,0 +1,17 @@
+H Decay information for working with radioactive species.
+H Column 1: Unstable isotope.
+H Column 2: Stable isotope where the unstable isotope decays.
+H Column 3: Half-life of the unstable isotope [yr].
+H  
+H Note: For isotopes having multiple decay channels, put H-1
+H       in Column 2, and 0.000E+00 in Column 3.  Then add 
+H       « use_decay_module=True » in the list of parameters
+H       when calling OMEGA/SYGMA. This will use the decay
+H       module and will ignore the 2nd and 3rd columns of
+H       this file. The first column will still be used by
+H       the code to select which radioactive isotopes are
+H       accounted for in the yields.
+H
+&Al-26   &Mg-26   &7.170E+05
+&K-40    &H-1     &1.000E+00
+&U-238   &H-1     &1.000E+00
