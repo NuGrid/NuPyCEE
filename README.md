@@ -2,7 +2,7 @@
 
 NuPyCEE
 =======
- TEST
+ TEST yes!
 Public NuGrid Python Chemical Evolution Environment
 
 This is a code repository containing the simple stellar population code SYGMA (Stellar Yields for Galactic Modeling Applications), the single-zone galaxy code OMEGA (One-zone Model for the Evolution of Galaxies), and the observational data plotting tool STELLAB (Stellar Abundances). 
