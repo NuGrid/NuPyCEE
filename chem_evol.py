@@ -37,6 +37,9 @@ MARCH2018: B. Cote
 - Switched to Python 3
 - Capability to include radioactive isotopes
 
+JULY2018: B. Cote
+- Re-wrote (improved) yields and lifetime treatment
+
 
 Usage
 =====
@@ -148,6 +151,25 @@ class chem_evol(object):
         PopIII stars ejecta taken from Heger et al. (2010)
 
         Default value : [10,30]
+
+    high_mass_extrapolation : string
+        Extrapolation technique used to extrapolate yields for stars more
+        massive than the most massive model (MMM) present in the yields table.
+
+        Choices:
+          "copy" --> This will apply the yields of the most massive model
+                 to all more massive stars.
+
+          "scale" --> This will scale the yields of the most massive model
+                 using the relation between the total ejected mass and
+                 the initial stellar mass.  The later relation is taken
+                 from the interpolation of the two most massive models.
+
+          "extrapolate" --> This will extrapolate the yields of the most massive
+                 model using the interpolation coefficients taken from
+                 the interpolation of the two most massive models.
+
+        Default value : "copy"
 
     iniZ : float
         Initial metallicity of the gas in mass fraction (e.g. Solar Z = 0.02).
@@ -415,7 +437,7 @@ class chem_evol(object):
     ##               Constructor                ##
     ##############################################
     def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
-             sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
+             sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30, \
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, \
              table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
@@ -436,8 +458,9 @@ class chem_evol(object):
              extra_source_exclude_Z=[[]], radio_refinement=100, \
              pop3_table='yield_tables/popIII_heger10.txt', \
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
+             high_mass_extrapolation='copy', \
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
-             exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=-1, \
+             exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=0.0, \
              f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
              netyields_on=False,wiersmamod=False,yield_interp='lin',\
              total_ejecta_interp=True, tau_ferrini=False,\
@@ -504,6 +527,7 @@ class chem_evol(object):
         self.popIII_info_fast = popIII_info_fast
         self.imf_bdys_pop3=imf_bdys_pop3
         self.imf_yields_range_pop3=imf_yields_range_pop3
+        self.high_mass_extrapolation = high_mass_extrapolation
         self.extra_source_on = extra_source_on
         self.f_extra_source= f_extra_source
         self.extra_source_mass_range=extra_source_mass_range
@@ -636,6 +660,10 @@ class chem_evol(object):
             self.alpha_fer[i_fer] = self.alpha_fer[i_fer] + 1
             self.norm_fer[i_fer] = self.norm_fer[i_fer]/(self.alpha_fer[i_fer])
 
+        # Normalize the IMF to 1 MSun
+        self.A_imf = 1.0 / self._imf(self.imf_bdys[0], self.imf_bdys[1], 2)
+        self.A_imf_pop3 = 1.0 / self._imf(self.imf_bdys_pop3[0], self.imf_bdys_pop3[1], 2)
+
         # Parameter that determines if not enough gas is available for star formation
         self.not_enough_gas_count = 0
         self.not_enough_gas = False
@@ -679,7 +707,6 @@ class chem_evol(object):
             self.zm_lifetime_grid_pop3 = zm_lifetime_grid_pop3_in
             self.ytables_1a = ytables_1a_in
             self.ytables_nsmerger = ytables_nsmerger_in
-            self.default_yields = True
             self.extra_source_on = False
             self.ytables_extra = 0
 
@@ -695,8 +722,23 @@ class chem_evol(object):
         # If the yield tables need to be read from the files ...
         else:
 
-            # Initialisation of the yield tables
-            self.__set_yield_tables()
+            # Read of the yield tables
+            self.__read_tables()
+
+            # Declare the interpolation coefficient arrays
+            self.__declare_interpolation_arrays()
+
+            # Interpolate the yields tables
+            self.__interpolate_pop3_yields()
+            self.__interpolate_massive_and_agb_yields()
+
+            # Interpolate lifetimes
+            self.__interpolate_pop3_lifetimes()
+            self.__interpolate_massive_and_agb_lifetimes()
+
+            # Calculate coefficients to interpolate masses from lifetimes
+            self.__interpolate_pop3_m_from_t()
+            self.__interpolate_massive_and_agb_m_from_t()
 
         # If SSPs needs to be pre-calculated ..
         if self.pre_calculate_SSPs:
@@ -919,9 +961,6 @@ class chem_evol(object):
         if self.iniZ == 0.0:
 
             # IMF and yield boundary ranges
-            if not self.imf_yields_range_pop3 == [10,30]:
-                print ('Error - Selected imf_yields_range_pop3 not included yet.')
-                self.need_to_quit = True
             if (self.imf_yields_range_pop3[0] >= self.imf_bdys_pop3[1]) or \
                (self.imf_yields_range_pop3[1] <= self.imf_bdys_pop3[0]):
                 print ('Error - imf_yields_range_pop3 must be within \
@@ -1060,6 +1099,1535 @@ class chem_evol(object):
 
 
     ##############################################
+    #                 Read Tables                #
+    ##############################################
+    def __read_tables(self):
+
+        '''
+        This function reads the isotopes yields table for different sites
+
+        '''
+
+        # Massive stars and AGB stars
+        if self.table[0] == '/':
+            self.ytables = ry.read_nugrid_yields(\
+                self.table, excludemass=self.exclude_masses)
+        else:
+            self.ytables = ry.read_nugrid_yields(\
+                global_path+self.table, excludemass=self.exclude_masses)
+
+        # Get the list of isotopes
+        # The massive and AGB star yields set the list of isotopes
+        M_temp = float(self.ytables.table_mz[0].split(',')[0].split('=')[1])
+        Z_temp = float(self.ytables.table_mz[0].split(',')[1].split('=')[1][:-1])
+        self.history.isotopes = self.ytables.get(\
+            Z=Z_temp, M=M_temp, quantity='Isotopes')
+        self.nb_isotopes = len(self.history.isotopes)
+
+        # PopIII massive stars
+        self.ytables_pop3 = ry.read_nugrid_yields( \
+            global_path+self.pop3_table, self.history.isotopes, \
+                excludemass=self.exclude_masses)
+
+        # SNe Ia
+        #sys.stdout.flush()
+        self.ytables_1a = ry.read_yield_sn1a_tables( \
+            global_path+self.sn1a_table, self.history.isotopes)
+
+        # Neutron star mergers
+        self.ytables_nsmerger = ry.read_yield_sn1a_tables( \
+            global_path+self.nsmerger_table, self.history.isotopes)
+
+        # Black hole neutron star mergers
+        self.ytables_bhnsmerger = ry.read_yield_sn1a_tables( \
+            global_path+self.bhnsmerger_table, self.history.isotopes)
+
+        # Delayed-extra sources
+        if self.nb_delayed_extra > 0:
+          self.ytables_delayed_extra = []
+          for i_syt in range(0,self.nb_delayed_extra):
+            self.ytables_delayed_extra.append(ry.read_yield_sn1a_tables( \
+            global_path+self.delayed_extra_yields[i_syt], self.history.isotopes))
+
+        # Extra yields (on top of massive and AGB yields)
+        if self.extra_source_on == True:
+
+            #go over all extra sources
+            self.ytables_extra =[]
+            for ee in range(len(self.extra_source_table)):  
+
+               #if absolute path don't apply global_path
+               if self.extra_source_table[ee][0] == '/':
+                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
+                        self.extra_source_table[ee], self.history.isotopes))
+               else:
+                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
+                     global_path+self.extra_source_table[ee], self.history.isotopes))
+
+        # Read stellar parameter. stellar_param
+        if self.stellar_param_on:
+            table_param=ry.read_nugrid_parameter(global_path + self.stellar_param_table)
+            self.table_param=table_param
+
+        # Get the list of mass and metallicities found in the yields tables
+        self.__get_M_Z_models()
+
+
+    ##############################################
+    #                Get M Z Models              #
+    ##############################################
+    def __get_M_Z_models(self):
+
+        '''
+        Get the mass and metallicities of the input stellar yields
+
+        '''
+
+        # Main massive and AGB star yields
+        self.Z_table = self.ytables.metallicities
+        self.M_table = []
+        for model in self.ytables.table_mz:
+            the_Z = float(model.split(',')[1].split('=')[1].split(')')[0])
+            if not the_Z == self.Z_table[0]:
+                break
+            self.M_table.append(float(model.split(',')[0].split('=')[1]))
+        self.nb_Z_table = len(self.Z_table)
+        self.nb_M_table = len(self.M_table)
+
+        # Massive PopIII stars
+        Z_table_pop3 = self.ytables_pop3.metallicities
+        self.M_table_pop3 = []
+        for model in self.ytables_pop3.table_mz:
+            self.M_table_pop3.append(float(model.split(',')[0].split('=')[1]))
+            the_Z = float(model.split(',')[1].split('=')[1].split(')')[0])
+            if not the_Z == Z_table_pop3[0]:
+                break
+        self.nb_M_table_pop3 = len(self.M_table_pop3)
+
+
+    ##############################################
+    #          Interpolate Pop3 Yields           #
+    ##############################################
+    def __interpolate_pop3_yields(self):
+
+        '''
+        Interpolate the mass-dependent yields table of massive 
+        popIII yields.  This will create arrays containing interpolation
+        coefficients.  The chemical evolution calculations will then
+        only use these coefficients instead of the yields table.
+
+        Interpolation laws
+        ==================
+
+          Interpolation across stellar mass M
+            log10(yields) = a_M * M + b_M
+
+          Interpolation (total mass) across stellar mass
+            M_ej = a_ej * M + b_ej
+
+        Results
+        =======
+
+          a_M and b_M coefficients
+          ------------------------
+            y_coef_M_pop3[i_coef][i_M_low][i_iso]
+              - i_coef : 0 and 1 for a_M and b_M, respectively
+              - i_M_low : Index of the lower mass limit where
+                          the interpolation occurs
+              - i_iso : Index of the isotope
+
+        '''
+
+        # For each interpolation lower-mass bin point ..
+        for i_M in range(self.nb_inter_M_points_pop3-1):
+
+            # Get the yields for the lower and upper mass models
+            yields_low, yields_upp, m_ej_low, m_ej_upp, yields_ej_low,\
+                    yields_ej_upp = self.__get_y_low_upp_pop3(i_M)
+
+            # Get the interpolation coefficients a_M, b_M
+            self.y_coef_M_pop3[0][i_M], self.y_coef_M_pop3[1][i_M],\
+                self.y_coef_M_ej_pop3[0][i_M], self.y_coef_M_ej_pop3[1][i_M] =\
+                self.__get_inter_coef_M(self.inter_M_points_pop3[i_M],\
+                self.inter_M_points_pop3[i_M+1], yields_low, yields_upp,\
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp)
+
+
+    ##############################################
+    #     Interpolate Massive and AGB Yields     #
+    ##############################################
+    def __interpolate_massive_and_agb_yields(self):
+
+        '''
+        Interpolate the metallicity- and mass-dependent yields
+        table of massive and AGB stars.  This will create arrays
+        containing interpolation coefficients.  The chemical 
+        evolution calculations will then only use these
+        coefficients instead of the yields table.
+
+        Interpolation laws
+        ==================
+
+          Interpolation across stellar mass M
+            log10(yields) = a_M * M + b_M
+
+          Interpolation (total mass) across stellar mass
+            M_ej = a_ej * M + b_ej
+
+          Interpolation of a_M and b_M across metallicity Z
+            x_M    = a_Z * log10(Z) + b_Z
+            x_M_ej = a_Z * log10(Z) + b_Z
+
+          The functions first calculate a_M and b_M for each Z,
+          and then interpolate these coefficients across Z.
+
+        Results
+        =======
+
+          a_M and b_M coefficients
+          ------------------------
+            y_coef_M[i_coef][i_Z][i_M_low][i_iso]
+              - i_coef : 0 and 1 for a_M and b_M, respectively
+              - i_Z : Metallicity index available in the table
+              - i_M_low : Index of the lower mass limit where
+                          the interpolation occurs
+              - i_iso : Index of the isotope
+
+          a_Z and b_Z coefficients for x_M
+          --------------------------------
+            y_coef_Z_xM[i_coef][i_Z_low][i_M_low][i_iso]
+              - i_coef : 0 and 1 for a_Z and b_Z, respectively
+              - i_Z_low : Index of the lower metallicity limit where
+                          the interpolation occurs
+              - i_M_low : Index of the lower mass limit where
+                          the interpolation occurs
+              - i_iso : Index of the isotope
+
+        Note
+        ====
+
+          self.Z_table is in decreasing order
+          but y_coef_... arrays have metallicities in increasing order
+
+        '''
+
+        # Fill the y_coef_M array 
+        # For each metallicity available in the yields ..
+        for i_Z_temp in range(self.nb_Z_table):
+
+            # Get the metallicity index in increasing order
+            i_Z = self.inter_Z_points.index(self.Z_table[i_Z_temp])
+
+            # For each interpolation lower-mass bin point ..
+            for i_M in range(self.nb_inter_M_points-1):
+
+                # Get the yields for the lower and upper mass models
+                yields_low, yields_upp, m_ej_low, m_ej_upp, yields_ej_low,\
+                    yields_ej_upp = self.__get_y_low_upp(i_Z_temp, i_M)
+
+                # Get the interpolation coefficients a_M, b_M
+                self.y_coef_M[0][i_Z][i_M], self.y_coef_M[1][i_Z][i_M],\
+                    self.y_coef_M_ej[0][i_Z][i_M], self.y_coef_M_ej[1][i_Z][i_M] =\
+                    self.__get_inter_coef_M(self.inter_M_points[i_M],\
+                    self.inter_M_points[i_M+1], yields_low, yields_upp,\
+                    m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp)
+
+        # Fill the y_coef_Z_xM arrays 
+        # For each interpolation lower-metallicity point ..
+        for i_Z in range(self.nb_inter_Z_points-1):
+
+            # For each interpolation lower-mass bin point ..
+            for i_M in range(self.nb_inter_M_points-1):
+
+                # Get the interpolation coefficients a_Z, b_Z for a_M
+                self.y_coef_Z_aM[0][i_Z][i_M], self.y_coef_Z_aM[1][i_Z][i_M],\
+                    self.y_coef_Z_aM_ej[0][i_Z][i_M], self.y_coef_Z_aM_ej[1][i_Z][i_M] =\
+                        self.__get_inter_coef_Z(self.y_coef_M[0][i_Z][i_M],\
+                            self.y_coef_M[0][i_Z+1][i_M], self.y_coef_M_ej[0][i_Z][i_M],\
+                                self.y_coef_M_ej[0][i_Z+1][i_M], self.inter_Z_points[i_Z],\
+                                    self.inter_Z_points[i_Z+1])
+
+                # Get the interpolation coefficients a_Z, b_Z for b_M
+                self.y_coef_Z_bM[0][i_Z][i_M], self.y_coef_Z_bM[1][i_Z][i_M],\
+                    self.y_coef_Z_bM_ej[0][i_Z][i_M], self.y_coef_Z_bM_ej[1][i_Z][i_M] =\
+                        self.__get_inter_coef_Z(self.y_coef_M[1][i_Z][i_M],\
+                            self.y_coef_M[1][i_Z+1][i_M], self.y_coef_M_ej[1][i_Z][i_M],\
+                                self.y_coef_M_ej[1][i_Z+1][i_M], self.inter_Z_points[i_Z],\
+                                    self.inter_Z_points[i_Z+1]) 
+
+
+    ##############################################
+    #        Declare Interpolation Arrays        #
+    ##############################################
+    def __declare_interpolation_arrays(self):
+
+        '''
+        Declare the arrays that will contain the interpolation
+        coefficients used in the chemical evolution calculation.
+
+        '''
+
+        # Non-zero metallicity models
+        # ===========================
+
+        # Create the stellar mass and lifetime points in between 
+        # which there will be interpolations
+        self.__create_inter_M_points()
+        self.__create_inter_lifetime_points()
+
+        # Create the stellar metallicity points in between
+        # which there will be interpolations
+        self.inter_Z_points = sorted(self.Z_table)
+        self.nb_inter_Z_points = len(self.inter_Z_points)
+        
+        # Declare the array containing the coefficients for
+        # the yields interpolation between masses (a_M, b_M)
+        self.y_coef_M = np.zeros((2, self.nb_Z_table,\
+            self.nb_inter_M_points-1, self.nb_isotopes))
+
+        # Declare the array containing the coefficients for
+        # the total-mass-ejected interpolation between masses (a_ej, b_ej)
+        self.y_coef_M_ej = np.zeros((2, self.nb_Z_table, self.nb_inter_M_points-1))
+
+        # Declare the array containing the coefficients for
+        # the yields interpolation between metallicities (a_Z, b_Z)
+        self.y_coef_Z_aM = np.zeros((2, self.nb_Z_table-1,\
+            self.nb_inter_M_points-1, self.nb_isotopes))
+        self.y_coef_Z_bM = np.zeros((2, self.nb_Z_table-1,\
+            self.nb_inter_M_points-1, self.nb_isotopes))
+
+        # Declare the array containing the coefficients for
+        # the total-mass-ejected interpolation between metallicities (a_ej, b_ej)
+        self.y_coef_Z_aM_ej = np.zeros((2, self.nb_Z_table-1, self.nb_inter_M_points-1))
+        self.y_coef_Z_bM_ej = np.zeros((2, self.nb_Z_table-1, self.nb_inter_M_points-1))
+
+        # Declare the array containing the coefficients for
+        # the lifetime interpolation between masses (a_M, b_M)
+        self.tau_coef_M = np.zeros((2, self.nb_Z_table, self.nb_M_table-1))
+        self.tau_coef_M_inv = np.zeros((2, self.nb_Z_table, self.nb_inter_lifetime_points-1))
+
+        # Declare the array containing the coefficients for
+        # the lifetime interpolation between metallicities (a_Z, b_Z)
+        self.tau_coef_Z_aM = np.zeros((2, self.nb_Z_table-1, self.nb_M_table-1))
+        self.tau_coef_Z_bM = np.zeros((2, self.nb_Z_table-1, self.nb_M_table-1))
+        self.tau_coef_Z_aM_inv = np.zeros((2, self.nb_Z_table-1, self.nb_inter_lifetime_points-1))
+        self.tau_coef_Z_bM_inv = np.zeros((2, self.nb_Z_table-1, self.nb_inter_lifetime_points-1))
+
+        # Zero metallicity models
+        # =======================
+
+        # Create the stellar mass and lifetime points in between 
+        # which there will be interpolations
+        self.__create_inter_M_points_pop3()
+        self.__create_inter_lifetime_points_pop3()
+
+        # Declare the array containing the coefficients for
+        # the PopIII yields interpolation between masses (a_M, b_M)
+        self.y_coef_M_pop3 = np.zeros((2,\
+            self.nb_inter_M_points_pop3-1, self.nb_isotopes))
+
+        # Declare the array containing the coefficients for
+        # the PopIII total-mass-ejected interpolation between masses (a_ej, b_ej)
+        self.y_coef_M_ej_pop3 = np.zeros((2, self.nb_inter_M_points_pop3-1))
+
+        # Declare the array containing the coefficients for
+        # the lifetime interpolation between masses (a_M, b_M)
+        self.tau_coef_M_pop3 = np.zeros((2, self.nb_M_table_pop3-1))
+        self.tau_coef_M_pop3_inv = np.zeros((2, self.nb_inter_lifetime_points_pop3-1))
+
+
+    ##############################################
+    #         Create Inter M Points Pop3         #
+    ##############################################
+    def __create_inter_M_points_pop3(self):
+
+        '''
+        Create the boundary stellar masses array representing
+        the mass points in between which there will be yields
+        interpolations.  This is for massive PopIII stars.
+
+        '''
+
+        # Initialize the array
+        self.inter_M_points_pop3 = copy.deepcopy(self.M_table_pop3)
+
+        # Add the lower and upper IMF yields range limits
+        if not self.imf_yields_range_pop3[0] in self.M_table_pop3:
+            self.inter_M_points_pop3.append(self.imf_yields_range_pop3[0])
+        if not self.imf_yields_range_pop3[1] in self.M_table_pop3:
+            self.inter_M_points_pop3.append(self.imf_yields_range_pop3[1])
+
+        # Remove masses that are above or beyond the IMF yields range
+        len_temp = len(self.inter_M_points_pop3)
+        for i_m in range(len_temp):
+            ii_m = len_temp - i_m - 1
+            if self.inter_M_points_pop3[ii_m] < self.imf_yields_range_pop3[0] or\
+               self.inter_M_points_pop3[ii_m] > self.imf_yields_range_pop3[1]:
+                self.inter_M_points_pop3.remove(self.inter_M_points_pop3[ii_m])
+
+        # Sort the list of masses
+        self.inter_M_points_pop3 = sorted(self.inter_M_points_pop3)
+
+        # Calculate the number of interpolation mass-points
+        self.nb_inter_M_points_pop3 = len(self.inter_M_points_pop3)
+
+
+    ##############################################
+    #           Create Inter M Points            #
+    ##############################################
+    def __create_inter_M_points(self):
+
+        '''
+        Create the boundary stellar masses array representing
+        the mass points in between which there will be yields
+        interpolations.  This is for massive and AGB stars.
+
+        '''
+
+        # Initialize the array
+        self.inter_M_points = copy.deepcopy(self.M_table)
+
+        # Add the lower and upper IMF yields range limits
+        if not self.imf_yields_range[0] in self.M_table:
+            self.inter_M_points.append(self.imf_yields_range[0])
+        if not self.imf_yields_range[1] in self.M_table:
+            self.inter_M_points.append(self.imf_yields_range[1])
+
+        # Add the transition mass between AGB and massive stars
+        if not self.transitionmass in self.M_table:
+            self.inter_M_points.append(self.transitionmass)
+
+        # Remove masses that are above or beyond the IMF yields range
+        len_temp = len(self.inter_M_points)
+        for i_m in range(len_temp):
+            ii_m = len_temp - i_m - 1
+            if self.inter_M_points[ii_m] < self.imf_yields_range[0] or\
+               self.inter_M_points[ii_m] > self.imf_yields_range[1]:
+                self.inter_M_points.remove(self.inter_M_points[ii_m])
+
+        # Sort the list of masses
+        self.inter_M_points = sorted(self.inter_M_points)
+
+        # Calculate the number of interpolation mass-points
+        self.nb_inter_M_points = len(self.inter_M_points)
+
+
+    ##############################################
+    #             Get Y Low Upp Pop3             #
+    ##############################################
+    def __get_y_low_upp_pop3(self, i_M):
+
+        '''
+        Get the lower and upper boundary yields in between
+        which there will be a yields interpolation.  This is
+        for massive PopIII star yields.
+
+        Argument
+        ========
+
+          i_M : Index of the lower mass limit where the 
+                interpolation occurs.  This is taken from
+                the self.inter_M_points array.
+
+        '''
+
+        # If need to extrapolate on the low-mass end ..
+        # =============================================
+        if self.inter_M_points_pop3[i_M] < self.M_table_pop3[0]:
+
+            # Copy the two least massive PopIII star yields
+            y_tables_0 = self.ytables_pop3.get(\
+                Z=0.0, M=self.M_table_pop3[0], quantity='Yields')
+            y_tables_1 = self.ytables_pop3.get(\
+                Z=0.0, M=self.M_table_pop3[1], quantity='Yields')
+
+            # Extrapolate the lower boundary
+            yields_low = self.scale_yields_to_M_ej(self.M_table_pop3[0],\
+                self.M_table_pop3[1], y_tables_0, y_tables_1, \
+                    self.inter_M_points_pop3[i_M], y_tables_0)
+
+            # Take lowest-mass model for the upper boundary
+            yields_upp = y_tables_0
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.M_table_pop3[0], self.M_table_pop3[1], y_tables_0, y_tables_1
+
+        # If need to extrapolate on the high-mass end ..
+        # ==============================================
+        elif self.inter_M_points_pop3[i_M+1] > self.M_table_pop3[-1]:
+
+            # Take the highest-mass model for the lower boundary
+            yields_low = self.ytables_pop3.get(Z=0.0,\
+                M=self.M_table_pop3[-1], quantity='Yields')
+
+            # Extrapolate the upper boundary
+            yields_upp = self.extrapolate_high_mass(\
+                self.ytables_pop3, 0.0, self.inter_M_points_pop3[i_M+1])
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.inter_M_points_pop3[i_M], self.inter_M_points_pop3[i_M+1],\
+                yields_low, yields_upp
+
+        # If the mass point is the first one, is higher than the
+        # least massive mass in the yields table, but is not part
+        # of the yields table ..
+        # =======================================================
+        elif i_M == 0 and not self.inter_M_points_pop3[i_M] in self.M_table_pop3:
+
+            # Assign the upper-mass model
+            yields_upp = self.ytables_pop3.get(Z=0.0,\
+                M=self.inter_M_points_pop3[i_M+1], quantity='Yields')
+
+            # Interpolate the lower-mass model
+            i_M_upp = self.M_table_pop3.index(self.inter_M_points_pop3[i_M+1])
+            aa, bb, dummy, dummy = self.__get_inter_coef_M(self.M_table_pop3[i_M_upp-1],\
+                self.M_table_pop3[i_M_upp], self.ytables_pop3.get(Z=0.0,\
+                    M=self.M_table_pop3[i_M_upp-1], quantity='Yields'), yields_upp,\
+                        1.0, 2.0, yields_upp, yields_upp)
+            yields_low = 10**(aa * self.inter_M_points_pop3[i_M] + bb)
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            i_M_ori = self.M_table_pop3.index(self.inter_M_points_pop3[i_M+1])
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.M_table_pop3[i_M_ori-1], self.inter_M_points_pop3[i_M+1],\
+                self.ytables_pop3.get(Z=0.0, M=self.M_table_pop3[i_M_ori-1],\
+                quantity='Yields'), yields_upp
+
+        # If the mass point is the last one, is lower than the
+        # most massive mass in the yields table, but is not part
+        # of the yields table ..
+        # ======================================================
+        elif i_M == (self.nb_inter_M_points_pop3-2) and \
+            not self.inter_M_points_pop3[i_M+1] in self.M_table_pop3:
+
+            # Assign the lower-mass model
+            yields_low = self.ytables_pop3.get(Z=0.0,\
+                M=self.inter_M_points_pop3[i_M], quantity='Yields')
+
+            # Interpolate the upper-mass model
+            i_M_low = self.M_table_pop3.index(self.inter_M_points_pop3[i_M])
+            aa, bb, dummy, dummy = self.__get_inter_coef_M(self.M_table_pop3[i_M_low],\
+                self.M_table_pop3[i_M_low+1], yields_low, self.ytables_pop3.get(\
+                    Z=0.0, M=self.M_table_pop3[i_M_low+1],quantity='Yields'),\
+                        1.0, 2.0, yields_low, yields_low)
+            yields_upp = 10**(aa * self.inter_M_points_pop3[i_M+1] + bb)
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            i_M_ori = self.M_table_pop3.index(self.inter_M_points_pop3[i_M])
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.inter_M_points_pop3[i_M], self.M_table_pop3[i_M_ori+1],\
+                yields_low, self.ytables_pop3.get(Z=0.0,\
+                M=self.M_table_pop3[i_M_ori+1], quantity='Yields')
+
+        # If this is an interpolation between two models 
+        # originally in the yields table ..
+        # ==============================================
+        else:
+
+            # Get the original models
+            yields_low = self.ytables_pop3.get(Z=0.0,\
+                M=self.inter_M_points_pop3[i_M], quantity='Yields')
+            yields_upp = self.ytables_pop3.get(Z=0.0,\
+                M=self.inter_M_points_pop3[i_M+1], quantity='Yields')
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.inter_M_points_pop3[i_M], self.inter_M_points_pop3[i_M+1],\
+                yields_low, yields_upp
+
+        # Return the yields for interpolation
+        return yields_low, yields_upp, m_ej_low, m_ej_upp, \
+               yields_ej_low, yields_ej_upp
+
+
+    ##############################################
+    #               Get Y Low Upp                #
+    ##############################################
+    def __get_y_low_upp(self, i_Z, i_M):
+
+        '''
+        Get the lower and upper boundary yields in between
+        which there will be a yields interpolation.  This is
+        for massive and AGB star yields.
+
+        Argument
+        ========
+
+          i_Z : Metallicity index of the yields table
+          i_M : Index of the lower mass limit where the 
+                interpolation occurs.  This is taken from
+                the self.inter_M_points array.
+
+        '''
+
+        # If need to extrapolate on the low-mass end ..
+        # =============================================
+        if self.inter_M_points[i_M] < self.M_table[0]:
+
+            # Copy the two least massive AGB star yields
+            y_tables_0 = self.ytables.get(\
+                Z=self.Z_table[i_Z], M=self.M_table[0], quantity='Yields')
+            y_tables_1 = self.ytables.get(\
+                Z=self.Z_table[i_Z], M=self.M_table[1], quantity='Yields')
+
+            # Extrapolate the lower boundary
+            yields_low = self.scale_yields_to_M_ej(self.M_table[0],\
+                self.M_table[1], y_tables_0, y_tables_1, \
+                    self.inter_M_points[i_M], y_tables_0)
+
+            # Take lowest-mass model for the upper boundary
+            yields_upp = y_tables_0
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.M_table[0], self.M_table[1], y_tables_0, y_tables_1
+
+        # If the upper boundary is the transition mass ..
+        # ===============================================
+        elif self.inter_M_points[i_M+1] == self.transitionmass:
+
+            # Keep the lower-boundary yields
+            yields_low = self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.inter_M_points[i_M], quantity='Yields')
+
+            # If the transition mass is part of the yields table
+            if self.transitionmass in self.M_table:
+
+                # Prepare to use the transition-mass model
+                i_M_add = 1
+
+                # Set the yields and mass for total-mass-ejected interpolation
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                    self.inter_M_points[i_M], self.inter_M_points[i_M+1], \
+                    yields_low, self.ytables.get(Z=self.Z_table[i_Z],\
+                    M=self.inter_M_points[i_M+1], quantity='Yields')
+
+            # If the transition mass is not part of the yields table
+            else:
+
+                # Prepare to use the model after the transition mass
+                i_M_add = 2
+
+                # Set the yields and mass for total-mass-ejected interpolation
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                    self.inter_M_points[i_M], self.inter_M_points[i_M+2], \
+                    yields_low, self.ytables.get(Z=self.Z_table[i_Z],\
+                    M=self.inter_M_points[i_M+2], quantity='Yields')
+
+            # Copy the upper-boundary model used to scale the yields
+            yields_tr_upp = self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.inter_M_points[i_M+i_M_add], quantity='Yields')
+
+            # Scale massive AGB yields for the upper boundary
+            yields_upp = self.scale_yields_to_M_ej(\
+                self.inter_M_points[i_M], self.inter_M_points[i_M+i_M_add],\
+                    yields_low, yields_tr_upp, self.transitionmass, yields_low)
+
+        # If the lower boundary is the transition mass ..
+        # ===============================================
+        elif self.inter_M_points[i_M] == self.transitionmass:
+
+            # Keep the upper-boundary yields
+            yields_upp = self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.inter_M_points[i_M+1], quantity='Yields')
+
+            # If the transition mass is part of the yields table
+            if self.transitionmass in self.M_table:
+
+                # Prepare to use the transition-mass model
+                i_M_add = 0
+
+                # Set the yields and mass for total-mass-ejected interpolation
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                    self.inter_M_points[i_M], self.inter_M_points[i_M+1], \
+                    self.ytables.get(Z=self.Z_table[i_Z],\
+                    M=self.inter_M_points[i_M], quantity='Yields'),\
+                    yields_upp
+
+            # If the transition mass is not part of the yields table
+            else:
+
+                # Prepare to use the model before the transition mass
+                i_M_add = -1
+
+                # Set the yields and mass for total-mass-ejected interpolation
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                    self.inter_M_points[i_M-1], self.inter_M_points[i_M+1], \
+                    self.ytables.get(Z=self.Z_table[i_Z],\
+                    M=self.inter_M_points[i_M-1], quantity='Yields'),\
+                    yields_upp
+
+            # Copy the lower-boundary model used to scale the yields
+            yields_tr_low = self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.inter_M_points[i_M+i_M_add], quantity='Yields')
+            
+            # Scale lowest massive star yields for the lower boundary
+            yields_low = self.scale_yields_to_M_ej(\
+                self.inter_M_points[i_M+i_M_add], self.inter_M_points[i_M+1],\
+                    yields_tr_low, yields_upp, self.transitionmass, yields_upp)
+
+        # If need to extrapolate on the high-mass end ..
+        # ==============================================
+        elif self.inter_M_points[i_M+1] > self.M_table[-1]:
+
+            # Take the highest-mass model for the lower boundary
+            yields_low = self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.M_table[-1], quantity='Yields')
+
+            # Extrapolate the upper boundary
+            yields_upp = self.extrapolate_high_mass(self.ytables,\
+                self.Z_table[i_Z], self.inter_M_points[i_M+1])
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.inter_M_points[i_M], self.inter_M_points[i_M+1],\
+                yields_low, yields_upp
+
+        # If the mass point is the first one, is higher than the
+        # least massive mass in the yields table, but is not part
+        # of the yields table ..
+        # =======================================================
+        elif i_M == 0 and not self.inter_M_points[i_M] in self.M_table:
+
+            # Assign the upper-mass model
+            yields_upp = self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.inter_M_points[i_M+1], quantity='Yields')
+
+            # Interpolate the lower-mass model
+            i_M_upp = self.M_table.index(self.inter_M_points[i_M+1])
+            aa, bb, dummy, dummy = self.__get_inter_coef_M(self.M_table[i_M_upp-1],\
+                self.M_table[i_M_upp], self.ytables.get(Z=self.Z_table[i_Z],\
+                    M=self.M_table[i_M_upp-1], quantity='Yields'), yields_upp,\
+                        1.0, 2.0, yields_upp, yields_upp)
+            yields_low = 10**(aa * self.inter_M_points[i_M] + bb)
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            i_M_ori = self.M_table.index(self.inter_M_points[i_M+1])
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.M_table[i_M_ori-1], self.inter_M_points[i_M+1],\
+                self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.M_table[i_M_ori-1], quantity='Yields'), yields_upp
+
+        # If the mass point is the last one, is lower than the
+        # most massive mass in the yields table, but is not part
+        # of the yields table ..
+        # ======================================================
+        elif i_M == (self.nb_inter_M_points-2) and \
+            not self.inter_M_points[i_M+1] in self.M_table:
+
+            # Assign the lower-mass model
+            yields_low = self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.inter_M_points[i_M], quantity='Yields')
+
+            # Interpolate the upper-mass model
+            i_M_low = self.M_table.index(self.inter_M_points[i_M])
+            aa, bb, dummy, dummy = self.__get_inter_coef_M(self.M_table[i_M_low],\
+                self.M_table[i_M_low+1], yields_low, self.ytables.get(\
+                    Z=self.Z_table[i_Z], M=self.M_table[i_M_low+1],quantity='Yields'),\
+                        1.0, 2.0, yields_low, yields_low)
+            yields_upp = 10**(aa * self.inter_M_points[i_M+1] + bb)
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            i_M_ori = self.M_table.index(self.inter_M_points[i_M])
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.inter_M_points[i_M], self.M_table[i_M_ori+1],\
+                yields_low, self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.M_table[i_M_ori+1], quantity='Yields')
+
+        # If this is an interpolation between two models 
+        # originally in the yields table ..
+        else:
+
+            # Get the original models
+            yields_low = self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.inter_M_points[i_M], quantity='Yields')
+            yields_upp = self.ytables.get(Z=self.Z_table[i_Z],\
+                M=self.inter_M_points[i_M+1], quantity='Yields')
+
+            # Set the yields and mass for total-mass-ejected interpolation
+            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                self.inter_M_points[i_M], self.inter_M_points[i_M+1],\
+                yields_low, yields_upp
+
+        # Return the yields for interpolation
+        return yields_low, yields_upp, m_ej_low, m_ej_upp, \
+               yields_ej_low, yields_ej_upp
+
+
+    ##############################################
+    #           Get Inter Coef Yields M          #
+    ##############################################
+    def __get_inter_coef_M(self, m_low, m_upp, yields_low, yields_upp,\
+                           m_low_ej, m_upp_ej, yields_low_ej, yields_upp_ej):
+
+        '''
+        Calculate the interpolation coefficients for interpolating
+        in between two given yields of different mass.
+
+        Interpolation law
+        =================
+
+          log10(yields) = a_M * M + b_M
+          M_ej = a_ej * M + b_ej
+
+        Argument
+        ========
+
+          m_low : Lower stellar mass boundary (yields)
+          m_upp : Upper stellar mass boundary (yields)
+          yields_low : Yields associated to m_low (yields)
+          yields_upp : Yields associated to m_upp (yields)
+          m_low_ej : Lower stellar mass boundary (total mass)
+          m_upp_ej : Upper stellar mass boundary (total mass)
+          yields_low_ej : Yields associated to m_low (total mass)
+          yields_upp_ej : Yields associated to m_upp (total mass)
+
+        '''
+
+        # Convert zeros into 1.0e-30
+        for i_iso in range(len(yields_upp)):
+            if yields_upp[i_iso] == 0.0:
+                yields_upp[i_iso] = 1.0e-30
+        for i_iso in range(len(yields_low)):
+            if yields_low[i_iso] == 0.0:
+                yields_low[i_iso] = 1.0e-30
+
+        # Calculate the coefficients a_M
+        np_log10_yields_upp = np.log10(yields_upp)
+        the_a_M = (np_log10_yields_upp - np.log10(yields_low)) /\
+            (m_upp - m_low)
+        if m_upp == m_low:
+            print('Problem in __get_inter_coef_M', m_upp, m_low)
+
+        # Calculate the coefficients b_M
+        the_b_M = np_log10_yields_upp - the_a_M * m_upp
+
+        # Calculate the coefficients a_ej
+        sum_yields_upp_ej = sum(yields_upp_ej)
+        the_a_ej = (sum_yields_upp_ej - sum(yields_low_ej)) /\
+            (m_upp_ej - m_low_ej)
+
+        # Calculate the coefficients b_ej
+        the_b_ej = sum_yields_upp_ej - the_a_ej * m_upp_ej
+
+        # Return the coefficients arrays
+        return the_a_M, the_b_M, the_a_ej, the_b_ej
+
+
+    ##############################################
+    #         Get Inter Coef Yields M Tau        #
+    ##############################################
+    def __get_inter_coef_M_tau(self, m_low, m_upp, tau_low, tau_upp):
+
+        '''
+        Calculate the interpolation coefficients for interpolating
+        in between two given lifetimes at different mass.
+
+        Interpolation law
+        =================
+
+          log10(tau) = a_M * log10(M) + b_M
+
+        Argument
+        ========
+
+          m_low : Lower stellar mass boundary
+          m_upp : Upper stellar mass boundary
+          tau_low : Lifetime associated to m_low
+          tau_upp : Lifetime associated to m_upp
+
+        '''
+
+        # Calculate the coefficients a_M
+        np_log10_tau_upp = np.log10(tau_upp)
+        np_log10_m_upp = np.log10(m_upp)
+        the_a_M = (np_log10_tau_upp - np.log10(tau_low)) /\
+            (np_log10_m_upp - np.log10(m_low))
+        if m_upp == m_low:
+            print('Problem in __get_inter_coef_M_tau', m_upp, m_low)
+
+        # Calculate the coefficients b_M
+        the_b_M = np_log10_tau_upp - the_a_M * np_log10_m_upp
+
+        # Return the coefficients arrays
+        return the_a_M, the_b_M
+
+
+    ##############################################
+    #            Scale Yields to M_ej            #
+    ##############################################
+    def scale_yields_to_M_ej(self, m_low, m_upp, yields_low, yields_upp,\
+                             the_m_scale, the_yields):
+
+        '''
+        Scale yields according to the total ejected mass vs initial
+        mass relation.  This will keep the relative chemical composition
+        of the yields.
+
+        Interpolation law
+        =================
+
+          M_ej = a * M_initial + b
+
+        Argument
+        ========
+
+          m_low : Initial mass of the lower-mass boundary model
+          m_upp : Initial mass of the upper-mass boundary model
+          yields_low : Yields of the lower-mass boundary model
+          yields_upp : Yields of the upper-mass boundary model
+          the_m_scale : Initial mass to which the_yields will be scaled
+          the_yields : Yields that need to be scaled
+
+        '''
+
+        # Get the coefficient for the total-mass-ejected interpolation
+        m_ej_low = sum(yields_low)
+        m_ej_upp = sum(yields_upp)
+        a_temp = (m_ej_upp - m_ej_low) / (m_upp - m_low)
+        b_temp = m_ej_upp - a_temp * m_upp
+
+        # Calculate the interpolated (or extrapolated) total ejected mass
+        m_ej_temp = a_temp * the_m_scale + b_temp
+
+        # Return the scaled yields
+        return np.array(the_yields) * m_ej_temp / sum(the_yields)
+
+
+    ##############################################
+    #            Extrapolate High Mass           #
+    ##############################################
+    def extrapolate_high_mass(self, table_ehm, Z_ehm, m_extra):
+
+        '''
+        Extrapolate yields for stellar masses larger than what
+        is provided in the yields table.
+
+        Extrapolation choices (input parameter)
+        =====================
+
+          copy : This will apply the yields of the most massive model
+                 to all more massive stars.
+
+          scale : This will scale the yields of the most massive model
+                  using the relation between the total ejected mass and
+                  the initial stellar mass.  The later relation is taken
+                  from the interpolation of the two most massive models.
+
+          extrapolate : This will extrapolate the yields of the most massive
+                        model using the interpolation coefficients taken from
+                        the interpolation of the two most massive models.
+
+        Arguments
+        =========
+
+          table_ehm : Yields table
+          Z_ehm : Metallicity of the yields table
+          m_extra : Mass to which the yields will be extrapolated
+
+        '''
+
+        # Get the two most massive mass
+        if Z_ehm == 0.0:
+            mass_m2 = self.M_table_pop3[-2]
+            mass_m1 = self.M_table_pop3[-1]
+        else:
+            mass_m2 = self.M_table[-2]
+            mass_m1 = self.M_table[-1]
+
+        # Copy the yields of most massive model
+        y_tables_m1 = table_ehm.get(Z=Z_ehm, M=mass_m1, quantity='Yields')
+
+        # If the yields are copied ..
+        if self.high_mass_extrapolation == 'copy':
+
+            # Return the yields of the most massive model
+            return y_tables_m1
+
+        # If the yields are scaled ..
+        if self.high_mass_extrapolation == 'scale':
+
+            # Copy the yields of the second most massive model
+            y_tables_m2 = table_ehm.get(Z=Z_ehm, M=mass_m2, quantity='Yields')
+
+            # Calculate the scaled yields
+            y_scaled = scale_yields_to_M_ej(mass_m2,\
+                mass_m1, y_tables_m2, y_tables_m1, m_extra, y_tables_m1)
+
+            # Set to 1e-30 if yields are negative.  Do not set 
+            # to zero, because yields will be interpolated in log.
+            if sum(y_scaled) <= 0.0:
+                y_scaled = np.zeros(len(y_scaled))
+                y_scaled += 1.0e-30
+
+            # Return the scaled yields of the most massive model
+            return y_scaled
+
+        # If the yields are extrapolated ..
+        if self.high_mass_extrapolation == 'extrapolate':
+
+            # Copy the yields of the second most massive model
+            y_tables_m2 = table_ehm.get(Z=Z_ehm, M=mass_m2, quantity='Yields')
+
+            # Extrapolate the yields
+            the_a, the_b = self.get_inter_coef_M(\
+                mass_m2, mass_m1, y_tables_m2, y_tables_m1)
+            y_extra = 10**(the_a * m_extra + the_b)
+
+            # # Set to 1e-30 if yields are negative.  Do not set 
+            # to zero, because yields will be interpolated in log.
+            for i_yy in range(len(y_extra)):
+                if y_extra[i_yy] <= 0.0:
+                    y_extra[i_yy] = 1.0e-30
+
+            # Return the extrapolated yields
+            return y_extra
+
+
+    ##############################################
+    #           Get Inter Coef Yields Z          #
+    ##############################################
+    def __get_inter_coef_Z(self, x_M_low, x_M_upp, \
+                           x_M_ej_low, x_M_ej_upp, Z_low, Z_upp):
+
+        '''
+        Calculate the interpolation coefficients for interpolating
+        the mass-interpolation coefficients in between two given
+        metallicities.
+
+        Interpolation laws
+        ==================
+
+          log10(yields) = a_M * M + b_M
+          x_M = a_Z * log10(Z) + b_Z
+
+          The function calculates a_Z and b_Z for either a_M or b_M
+
+        Argument
+        ========
+
+          x_M_low : Lower mass-interpolation coefficient limit (yields)
+          x_M_upp : Upper mass-interpolation coefficient limit (yields)
+          x_M_ej_low : Lower mass-interpolation coefficient limit (total mass)
+          x_M_ej_upp : Upper mass-interpolation coefficient limit (total mass)
+          Z_low : Lower-metallicity limit of the interpolation
+          Z_upp : Upper-metallicity limit of the interpolation
+
+        '''
+
+        # Copy the lower and upper metallicities
+        lg_Z_low = np.log10(Z_low)
+        lg_Z_upp = np.log10(Z_upp)
+
+        # Calculate the coefficients a_Z and b_Z (yields)
+        the_a_Z = (x_M_upp - x_M_low) / (lg_Z_upp - lg_Z_low)
+        the_b_Z = x_M_upp - the_a_Z * lg_Z_upp
+
+        # Calculate the coefficients a_Z and b_Z (total mass)
+        the_a_Z_ej = (x_M_ej_upp - x_M_ej_low) / (lg_Z_upp - lg_Z_low)
+        the_b_Z_ej = x_M_ej_upp - the_a_Z_ej * lg_Z_upp
+
+        # Return the coefficients arrays
+        return the_a_Z, the_b_Z, the_a_Z_ej, the_b_Z_ej
+
+
+    ##############################################
+    #         Get Inter Coef Yields Z Tau        #
+    ##############################################
+    def __get_inter_coef_Z_tau(self, x_M_low, x_M_upp, Z_low, Z_upp):
+
+        '''
+        Calculate the interpolation coefficients for interpolating
+        the mass-interpolation lifetime coefficients in between two
+        given metallicities.
+
+        Interpolation laws
+        ==================
+
+          log10(tau) = a_M * log10(M) + b_M
+          x_M = a_Z * Z + b_Z
+
+          The function calculates a_Z and b_Z for either a_M or b_M
+
+        Argument
+        ========
+
+          x_M_low : Lower mass-interpolation coefficient limit
+          x_M_upp : Upper mass-interpolation coefficient limit
+          Z_low : Lower-metallicity limit of the interpolation
+          Z_upp : Upper-metallicity limit of the interpolation
+
+        '''
+
+        # Calculate the coefficients a_Z and b_Z (yields)
+        the_a_Z = (x_M_upp - x_M_low) / (Z_upp - Z_low)
+        the_b_Z = x_M_upp - the_a_Z * Z_upp
+
+        # Return the coefficients arrays
+        return the_a_Z, the_b_Z
+
+
+    ##############################################
+    #         Interpolate Pop3 Lifetimes         #
+    ##############################################
+    def __interpolate_pop3_lifetimes(self):
+
+        '''
+        Interpolate the mass-dependent lifetimes of PopIII stars.
+        This will create arrays containing interpolation coefficients.
+        The chemical evolution calculations will then only use these
+        coefficients instead of the tabulated lifetimes.
+
+        Interpolation laws
+        ==================
+
+          Interpolation across stellar mass M
+            log10(tau) = a_M * log10(M) + b_M
+
+        Results
+        =======
+
+          a_M and b_M coefficients
+          ------------------------
+            tau_coef_M_pop3[i_coef][i_M_low]
+              - i_coef : 0 and 1 for a_M and b_M, respectively
+              - i_M_low : Index of the lower mass limit where
+                          the interpolation occurs
+
+        Note
+        ====
+
+          self.Z_table is in decreasing order
+          but y_coef_... arrays have metallicities in increasing order
+
+        '''
+
+        # Fill the tau_coef_M_pop3 array 
+        # For each interpolation lower-mass bin point ..
+        for i_M in range(self.nb_M_table_pop3-1):
+
+            # Get the lifetime for the lower and upper mass models
+            tau_low = self.ytables_pop3.get(\
+                M=self.M_table_pop3[i_M], Z=0.0, quantity='Lifetime')
+            tau_upp = self.ytables_pop3.get(\
+                M=self.M_table_pop3[i_M+1], Z=0.0, quantity='Lifetime')
+
+            # Get the interpolation coefficients a_M, b_M
+            self.tau_coef_M_pop3[0][i_M],\
+                self.tau_coef_M_pop3[1][i_M] =\
+                    self.__get_inter_coef_M_tau(self.M_table_pop3[i_M],\
+                        self.M_table_pop3[i_M+1], tau_low, tau_upp)
+
+
+    ##############################################
+    #    Interpolate Massive and AGB Lifetimes   #
+    ##############################################
+    def __interpolate_massive_and_agb_lifetimes(self):
+
+        '''
+        Interpolate the metallicity- and mass-dependent lifetimes
+        of massive and AGB stars.  This will create arrays containing
+        interpolation coefficients.  The chemical evolution calculations
+        will then only use these coefficients instead of the tabulated
+        lifetimes.
+
+        Interpolation laws
+        ==================
+
+          Interpolation across stellar mass M
+            log10(tau) = a_M * log10(M) + b_M
+            log10(M) = a_M * log10(tau) + b_M
+
+          Interpolation of a_M and b_M across metallicity Z
+            x_M = a_Z * Z + b_Z
+
+          The functions first calculate a_M and b_M for each Z,
+          and then interpolate these coefficients across Z.
+
+        Results
+        =======
+
+          a_M and b_M coefficients
+          ------------------------
+            tau_coef_M[i_coef][i_Z][i_M_low]
+              - i_coef : 0 and 1 for a_M and b_M, respectively
+              - i_Z : Metallicity index available in the table
+              - i_M_low : Index of the lower mass limit where
+                          the interpolation occurs
+
+          a_Z and b_Z coefficients for x_M
+          --------------------------------
+            y_coef_Z_xM_tau[i_coef][i_Z_low][i_M_low]
+              - i_coef : 0 and 1 for a_Z and b_Z, respectively
+              - i_Z_low : Index of the lower metallicity limit where
+                          the interpolation occurs
+              - i_M_low : Index of the lower mass limit where
+                          the interpolation occurs
+
+        Note
+        ====
+
+          self.Z_table is in decreasing order
+          but y_coef_... arrays have metallicities in increasing order
+
+        '''
+
+        # Fill the tau_coef_M array 
+        # For each metallicity available in the yields ..
+        for i_Z_temp in range(self.nb_Z_table):
+
+            # Get the metallicity index in increasing order
+            i_Z = self.inter_Z_points.index(self.Z_table[i_Z_temp])
+
+            # For each interpolation lower-mass bin point ..
+            for i_M in range(self.nb_M_table-1):
+
+                # Get the lifetime for the lower and upper mass models
+                tau_low = self.ytables.get(M=self.M_table[i_M],\
+                    Z=self.inter_Z_points[i_Z], quantity='Lifetime')
+                tau_upp = self.ytables.get(M=self.M_table[i_M+1],\
+                    Z=self.inter_Z_points[i_Z], quantity='Lifetime')
+
+                # Get the interpolation coefficients a_M, b_M
+                self.tau_coef_M[0][i_Z][i_M],\
+                    self.tau_coef_M[1][i_Z][i_M] =\
+                        self.__get_inter_coef_M_tau(self.M_table[i_M],\
+                            self.M_table[i_M+1], tau_low, tau_upp)
+
+        # Fill the y_coef_Z_xM_tau arrays 
+        # For each interpolation lower-metallicity point ..
+        for i_Z in range(self.nb_inter_Z_points-1):
+
+            # For each interpolation lower-mass bin point ..
+            for i_M in range(self.nb_M_table-1):
+
+                # Get the interpolation coefficients a_Z, b_Z for a_M
+                self.tau_coef_Z_aM[0][i_Z][i_M],\
+                    self.tau_coef_Z_aM[1][i_Z][i_M] =\
+                    self.__get_inter_coef_Z_tau(self.tau_coef_M[0][i_Z][i_M],\
+                    self.tau_coef_M[0][i_Z+1][i_M], self.inter_Z_points[i_Z],\
+                    self.inter_Z_points[i_Z+1])
+
+                # Get the interpolation coefficients a_Z, b_Z for b_M
+                self.tau_coef_Z_bM[0][i_Z][i_M],\
+                    self.tau_coef_Z_bM[1][i_Z][i_M] =\
+                    self.__get_inter_coef_Z_tau(self.tau_coef_M[1][i_Z][i_M],\
+                    self.tau_coef_M[1][i_Z+1][i_M], self.inter_Z_points[i_Z],\
+                    self.inter_Z_points[i_Z+1])
+
+
+    ##############################################
+    #         Interpolate Pop3 M From T          #
+    ##############################################
+    def __interpolate_pop3_m_from_t(self):
+
+        '''
+        Calculate the interpolation coefficients to extract
+        the mass of stars based on their lifetimes.  
+
+        Interpolation laws
+        ==================
+
+          Interpolation across stellar lifetime tau
+            log10(M) = a_tau * log10(tau) + b_tau
+
+          Interpolation of a_M and b_M across metallicity Z
+            x_M = a_Z * Z + b_Z
+
+        Results
+        =======
+
+          a_tau and b_tau coefficients
+          ----------------------------
+            tau_coef_M_pop3_inv[i_coef][i_tau_low]
+              - i_coef : 0 and 1 for a_tau and b_tau, respectively
+              - i_tau_low : Index of the lower lifetime limit where
+                            the interpolation occurs
+
+          a_Z and b_Z coefficients for x_tau
+          ----------------------------------
+            tau_coef_Z_xM_pop3_inv[i_coef][i_Z_low][i_tau_low]
+              - i_coef : 0 and 1 for a_Z and b_Z, respectively
+              - i_tau_low : Index of the lower lifetime limit where
+                            the interpolation occurs
+
+        Note
+        ====
+
+          self.Z_table is in decreasing order
+          but y_coef_... arrays have metallicities in increasing order
+
+        '''
+
+        # Declare list of lifetimes for each mass at each metallicity
+        self.lifetimes_list_pop3 = np.zeros(self.nb_M_table_pop3)
+        for i_M in range(self.nb_M_table_pop3):
+            self.lifetimes_list_pop3[i_M] = self.ytables_pop3.get(\
+                M=self.M_table_pop3[i_M], Z=0.0, quantity='Lifetime')
+
+        # Fill the tau_coef_M_inv array 
+        # For each interpolation lower-lifetime bin point ..
+        for i_tau in range(self.nb_inter_lifetime_points_pop3-1):
+
+            # Get the mass for the lower and upper lifetimes
+            m_tau_low = self.__get_m_from_tau_pop3(\
+                    self.inter_lifetime_points_pop3[i_tau])
+            m_tau_upp = self.__get_m_from_tau_pop3(\
+                    self.inter_lifetime_points_pop3[i_tau+1])
+
+            # Get the interpolation coefficients a_tau, b_tau
+            # Here we use the __get_inter_coef_M_tau, be we
+            # swap mass for lifetime and vice-versa
+            self.tau_coef_M_pop3_inv[0][i_tau],\
+                self.tau_coef_M_pop3_inv[1][i_tau] =\
+                self.__get_inter_coef_M_tau(self.inter_lifetime_points_pop3[i_tau],\
+                self.inter_lifetime_points_pop3[i_tau+1], m_tau_low, m_tau_upp)
+
+
+    ##############################################
+    #    Interpolate Massive and AGB M From T    #
+    ##############################################
+    def __interpolate_massive_and_agb_m_from_t(self):
+
+        '''
+        Calculate the interpolation coefficients to extract
+        the mass of stars from metallicity- and mass-dependent
+        lifetimes.  This will fix lifetime intervals that will
+        be common to all metallicities.  This will accelerate
+        the mass search during the chemical evolution calculation.
+
+        Interpolation laws
+        ==================
+
+          Interpolation across stellar lifetime tau
+            log10(M) = a_tau * log10(tau) + b_tau
+
+          Interpolation of a_M and b_M across metallicity Z
+            x_M = a_Z * Z + b_Z
+
+        Results
+        =======
+
+          a_tau and b_tau coefficients
+          ----------------------------
+            tau_coef_M_inv[i_coef][i_Z][i_tau_low]
+              - i_coef : 0 and 1 for a_tau and b_tau, respectively
+              - i_Z : Metallicity index available in the table
+              - i_tau_low : Index of the lower lifetime limit where
+                            the interpolation occurs
+
+          a_Z and b_Z coefficients for x_tau
+          ----------------------------------
+            tau_coef_Z_xM_inv[i_coef][i_Z_low][i_tau_low]
+              - i_coef : 0 and 1 for a_Z and b_Z, respectively
+              - i_Z_low : Index of the lower metallicity limit where
+                          the interpolation occurs
+              - i_tau_low : Index of the lower lifetime limit where
+                            the interpolation occurs
+
+        Note
+        ====
+
+          self.Z_table is in decreasing order
+          but y_coef_... arrays have metallicities in increasing order
+
+        '''
+
+        # Declare list of lifetimes for each mass at each metallicity
+        self.lifetimes_list = np.zeros((self.nb_Z_table,self.nb_M_table))
+        for i_Z in range(self.nb_Z_table):
+            for i_M in range(self.nb_M_table):
+                self.lifetimes_list[i_Z][i_M] = self.ytables.get(\
+                    M=self.M_table[i_M], Z=self.Z_table[i_Z],\
+                        quantity='Lifetime')
+
+        # Fill the tau_coef_M_inv array 
+        # For each metallicity available in the yields ..
+        for i_Z_temp in range(self.nb_Z_table):
+
+            # Get the metallicity index in increasing order
+            i_Z = self.inter_Z_points.index(self.Z_table[i_Z_temp])
+
+            # For each interpolation lower-lifetime bin point ..
+            for i_tau in range(self.nb_inter_lifetime_points-1):
+
+                # Get the mass for the lower and upper lifetimes
+                m_tau_low = self.__get_m_from_tau(\
+                        i_Z_temp, self.inter_lifetime_points[i_tau])
+                m_tau_upp = self.__get_m_from_tau(\
+                        i_Z_temp, self.inter_lifetime_points[i_tau+1])
+
+                # Get the interpolation coefficients a_tau, b_tau
+                # Here we use the __get_inter_coef_M_tau, be we
+                # swap mass for lifetime and vice-versa
+                self.tau_coef_M_inv[0][i_Z][i_tau],\
+                    self.tau_coef_M_inv[1][i_Z][i_tau] =\
+                    self.__get_inter_coef_M_tau(self.inter_lifetime_points[i_tau],\
+                    self.inter_lifetime_points[i_tau+1], m_tau_low, m_tau_upp)
+
+        # Fill the tau_coef_Z_inv arrays 
+        # For each interpolation lower-metallicity point ..
+        for i_Z in range(self.nb_inter_Z_points-1):
+
+            # For each interpolation lower-lifetime bin point ..
+            for i_tau in range(self.nb_inter_lifetime_points-1):
+
+                # Get the interpolation coefficients a_Z, b_Z for a_M
+                self.tau_coef_Z_aM_inv[0][i_Z][i_tau],\
+                    self.tau_coef_Z_aM_inv[1][i_Z][i_tau] =\
+                    self.__get_inter_coef_Z_tau(self.tau_coef_M_inv[0][i_Z][i_tau],\
+                    self.tau_coef_M_inv[0][i_Z+1][i_tau], self.inter_Z_points[i_Z],\
+                    self.inter_Z_points[i_Z+1])
+
+                # Get the interpolation coefficients a_Z, b_Z for b_M
+                self.tau_coef_Z_bM_inv[0][i_Z][i_tau],\
+                    self.tau_coef_Z_bM_inv[1][i_Z][i_tau] =\
+                    self.__get_inter_coef_Z_tau(self.tau_coef_M_inv[1][i_Z][i_tau],\
+                    self.tau_coef_M_inv[1][i_Z+1][i_tau], self.inter_Z_points[i_Z],\
+                    self.inter_Z_points[i_Z+1])
+
+
+    ##############################################
+    #     Create Inter Lifetime Points Pop3      #
+    ##############################################
+    def __create_inter_lifetime_points_pop3(self):
+
+        '''
+        Create the lifetime points in between which there will be
+        interpolations.  This is for PopIII stars.
+
+        '''
+
+        # List all lifetimes for Pop III stars
+        self.inter_lifetime_points_pop3 = []
+        for i_M in range(self.nb_M_table_pop3):
+            the_tau = self.ytables_pop3.get(M=self.M_table_pop3[i_M],\
+                      Z=0.0, quantity='Lifetime')
+            if not the_tau in self.inter_lifetime_points_pop3:
+                self.inter_lifetime_points_pop3.append(the_tau)
+        self.nb_inter_lifetime_points_pop3 = len(self.inter_lifetime_points_pop3)
+
+        # Sort the list to have lifetimes in increasing order
+        self.inter_lifetime_points_pop3 = sorted(self.inter_lifetime_points_pop3)
+
+
+    ##############################################
+    #       Create Inter Lifetime Points         #
+    ##############################################
+    def __create_inter_lifetime_points(self):
+
+        '''
+        Create the lifetime points in between which there will be
+        interpolations.  This is for metallicity-dependent models.
+
+        '''
+
+        # List all lifetimes for all metallicities
+        self.inter_lifetime_points = []
+        for i_Z in range(self.nb_Z_table):
+            for i_M in range(self.nb_M_table):
+                the_tau = self.ytables.get(M=self.M_table[i_M],\
+                          Z=self.Z_table[i_Z], quantity='Lifetime')
+                if not the_tau in self.inter_lifetime_points:
+                    self.inter_lifetime_points.append(the_tau)
+        self.nb_inter_lifetime_points = len(self.inter_lifetime_points)
+
+        # Sort the list to have lifetimes in increasing order
+        self.inter_lifetime_points = sorted(self.inter_lifetime_points)
+
+
+    ##############################################
+    #           Get lgM from Tau Pop3            #
+    ##############################################
+    def __get_m_from_tau_pop3(self, the_tau):
+
+        '''
+        Return the interpolated mass of a given lifetime.
+        This is for PopIII stars
+
+        Interpolation law
+        =================
+
+            log10(M) = a_M * log10(tau) + b_M
+
+        Arguments
+        =========
+
+          the_tau : Lifetime [yr]
+
+        '''
+
+        # Find the lower-mass boundary of the interval surrounding
+        # the given lifetime
+        if the_tau >= self.lifetimes_list_pop3[0]:
+            i_M_low = 0
+        elif the_tau <= self.lifetimes_list_pop3[-1]:
+            i_M_low = len(self.lifetimes_list_pop3) - 2
+        else:
+            i_M_low = 0
+            while self.lifetimes_list_pop3[i_M_low+1] >= the_tau:
+                i_M_low += 1
+
+        # Get the interpolation coefficients
+        lg_tau_low = np.log10(self.lifetimes_list_pop3[i_M_low+1])
+        lg_tau_upp = np.log10(self.lifetimes_list_pop3[i_M_low])
+        lg_m_low = np.log10(self.M_table_pop3[i_M_low+1])
+        lg_m_upp = np.log10(self.M_table_pop3[i_M_low])
+        a_temp = (lg_m_upp - lg_m_low) / (lg_tau_upp - lg_tau_low)
+        b_temp = lg_m_upp - a_temp * lg_tau_upp
+
+        # Return the interpolated mass
+        return 10**(a_temp * np.log10(the_tau) + b_temp)
+
+
+    ##############################################
+    #             Get lgM from Tau               #
+    ##############################################
+    def __get_m_from_tau(self, i_Z, the_tau):
+
+        '''
+        Return the interpolated mass of a given metallicity
+        that has a given lifetime.
+
+        Interpolation law
+        =================
+
+            log10(M) = a_M * log10(tau) + b_M
+
+        Arguments
+        =========
+
+          i_Z : Metallicity index of the yields table
+          the_tau : Lifetime [yr]
+
+        '''
+
+        # Find the lower-mass boundary of the interval surrounding
+        # the given lifetime
+        if the_tau >= self.lifetimes_list[i_Z][0]:
+            i_M_low = 0
+        elif the_tau <= self.lifetimes_list[i_Z][-1]:
+            i_M_low = len(self.lifetimes_list[i_Z]) - 2
+        else:
+            i_M_low = 0
+            while self.lifetimes_list[i_Z][i_M_low+1] >= the_tau:
+                i_M_low += 1
+
+        # Get the interpolation coefficients
+        lg_tau_low = np.log10(self.lifetimes_list[i_Z][i_M_low+1])
+        lg_tau_upp = np.log10(self.lifetimes_list[i_Z][i_M_low])
+        lg_m_low = np.log10(self.M_table[i_M_low+1])
+        lg_m_upp = np.log10(self.M_table[i_M_low])
+        a_temp = (lg_m_upp - lg_m_low) / (lg_tau_upp - lg_tau_low)
+        b_temp = lg_m_upp - a_temp * lg_tau_upp
+
+        # Return the interpolated mass
+        return 10**(a_temp * np.log10(the_tau) + b_temp)
+
+
+    ##############################################
     #                  Get Iniabu                #
     ##############################################
     def _get_iniabu(self):
@@ -1105,7 +2673,6 @@ class chem_evol(object):
                     print ('Use initial abundance of ', self.iniabu_table)
 
             # If NuGrid's yields are used ...
-            #else self.default_yields:
             else:
 
                 # Define all the Z and abundance input files considered by NuGrid
@@ -1501,23 +3068,13 @@ class chem_evol(object):
         # of the current timestep which extends from i-1 to i.
         self.t += self.history.timesteps[i-1]
 
-        # Output information
-        if self.iolevel >= 1:
-            tenth = self.nb_timesteps / (10.0)
-            if i%tenth == 0:
-                print ('time and metallicity and total mass:')
-                print ('{:.3E}'.format(self.t),'{:.4E}'.format(self.zmetal), \
-                      '{:.4E}'.format(sum(self.ymgal[i-1])))
-                print ('time and metallicity and total mass:')
-                print ('{:.3E}'.format(self.t),'{:.4E}'.format(self.zmetal), \
-                      '{:.4E}'.format(sum(self.ymgal[i-1])))
-
         # Initialisation of the mass locked into stars
         self.m_locked = 0
         self.m_locked_agb = 0
         self.m_locked_massive = 0
 
-        # If stars are forming during the current timestep ...
+        # If stars are forming during the current timestep ..
+        # Note: self.sfrin is calculated in SYGMA or OMEGA
         if self.sfrin > 0:
 
             # Limit the SFR if there is not enough gas
@@ -1527,136 +3084,160 @@ class chem_evol(object):
                 self.not_enough_gas = True
                 self.not_enough_gas_count += 1
 
-            # Output information
-            if self.iolevel >= 1:
-                print ('################## Star formation at ', \
-                      '{:.3E}'.format(self.t), \
-                      '(Z='+'{:.4E}'.format(self.zmetal)+') of ',self.sfrin)
-
             # Lock gas into stars
-            f_lock = 1.0 - self.sfrin
-            if self.pre_calculate_SSPs:
-                self.ymgal[i] = f_lock * self.ymgal[i-1]
-                self.m_locked += self.sfrin * sum(self.ymgal[i-1])
-                if self.len_decay_file > 0:
-                    self.ymgal_radio[i] = f_lock * self.ymgal_radio[i-1]
-            else:
-                self.ymgal[i] = f_lock * self.ymgal[i-1]
-                self.ymgal_massive[i] = f_lock * self.ymgal_massive[i-1]
-                self.ymgal_agb[i] = f_lock * self.ymgal_agb[i-1]
-                self.ymgal_1a[i] = f_lock * self.ymgal_1a[i-1]
-                self.ymgal_nsm[i] = f_lock * self.ymgal_nsm[i-1]
-                self.ymgal_bhnsm[i] = f_lock * self.ymgal_bhnsm[i-1]
-                self.m_locked += self.sfrin * sum(self.ymgal[i-1])
-                for iiii in range(0,self.nb_delayed_extra):
-                    self.ymgal_delayed_extra[iiii][i] = \
-                        f_lock * self.ymgal_delayed_extra[iiii][i-1]
-                # Radioactive isotopes locked
-                if self.len_decay_file > 0:
-                    self.ymgal_radio[i] = f_lock * self.ymgal_radio[i-1]
-                if not self.use_decay_module:
-                  if self.radio_massive_agb_on:
-                      self.ymgal_massive_radio[i] = f_lock * self.ymgal_massive_radio[i-1]
-                      self.ymgal_agb_radio[i] = f_lock * self.ymgal_agb_radio[i-1]
-                  if self.radio_sn1a_on:
-                      self.ymgal_1a_radio[i] = f_lock * self.ymgal_1a_radio[i-1]
-                  if self.radio_nsmerger_on:
-                      self.ymgal_nsm_radio[i] = f_lock * self.ymgal_nsm_radio[i-1]
-                  if self.radio_bhnsmerger_on:
-                      self.ymgal_bhnsm_radio[i] = f_lock * self.ymgal_bhnsm_radio[i-1]
-                  for iiii in range(0,self.nb_delayed_extra_radio):
-                      self.ymgal_delayed_extra_radio[iiii][i] = \
-                            f_lock * self.ymgal_delayed_extra_radio[iiii][i-1]
+            f_lock_remain = 1.0 - self.sfrin
+            self.__lock_gas_into_stars(i, f_lock_remain)
 
-                # Correction if comparing with Clayton's analytical model
+            # Correction if comparing with Clayton's analytical model
+            # DO NOT USE unless you know why
+            if not self.pre_calculate_SSPs:
                 if len(self.test_clayton) > 0:
                     i_stable = self.test_clayton[0]
                     i_unst = self.test_clayton[1]
                     RR = self.test_clayton[2]
-                    self.ymgal[i][i_stable] = (1.0 - self.sfrin*(1.0-RR)) * self.ymgal[i-1][i_stable]
+                    self.ymgal[i][i_stable] = \
+                        (1.0 - self.sfrin*(1.0-RR)) * self.ymgal[i-1][i_stable]
                     self.ymgal_radio[i][i_unst] = \
                         (1.0 - self.sfrin*(1.0-RR)) * self.ymgal_radio[i-1][i_unst]
-
-            # Output information
-            if self.iolevel >= 1:
-                print ('Mass locked away:','{:.3E}'.format(self.m_locked), \
-                      ', new ISM mass:','{:.3E}'.format(sum(self.ymgal[i])))
 
             # Add the pre-calculated SSP ejecta .. if fast mode
             if self.pre_calculate_SSPs:
                 self.__add_ssp_ejecta(i)
 
-            # Calculate stellar ejecta and the number of SNe .. if normal mode
+            # Calculate stellar ejecta .. if normal mode
             else:
-                self.__sfrmdot(i, f_esc_yields, mass_sampled, scale_cor)
+                self.__calculate_stellar_ejecta(i, f_esc_yields, mass_sampled, scale_cor)
 
         # If no star is forming during the current timestep ...
         else:
 
             # Use the previous gas reservoir for the current timestep
-            if self.pre_calculate_SSPs:
-                self.ymgal[i] = self.ymgal[i-1]
-                if self.len_decay_file > 0:
-                    self.ymgal_radio[i] = self.ymgal_radio[i-1]
-            else:
-                # Stable isotopes
-                self.ymgal[i] = self.ymgal[i-1]
-                self.ymgal_agb[i] = self.ymgal_agb[i-1]
-                self.ymgal_1a[i] = self.ymgal_1a[i-1]
-                self.ymgal_nsm[i] = self.ymgal_nsm[i-1]
-                self.ymgal_bhnsm[i] = self.ymgal_bhnsm[i-1]
-                self.ymgal_massive[i] = self.ymgal_massive[i-1]
-                for iiii in range(0,self.nb_delayed_extra):
-                    self.ymgal_delayed_extra[iiii][i] = self.ymgal_delayed_extra[iiii][i-1]
-                # Radioactive isotopes
-                if self.len_decay_file > 0:
-                    self.ymgal_radio[i] = self.ymgal_radio[i-1]
-                if not self.use_decay_module:
-                  if self.radio_massive_agb_on:
-                      self.ymgal_agb_radio[i] = self.ymgal_agb_radio[i-1]
-                      self.ymgal_massive_radio[i] = self.ymgal_massive_radio[i-1]
-                  if self.radio_sn1a_on:
-                      self.ymgal_1a_radio[i] = self.ymgal_1a_radio[i-1]
-                  if self.radio_nsmerger_on:
-                      self.ymgal_nsm_radio[i] = self.ymgal_nsm_radio[i-1]
-                  if self.radio_bhnsmerger_on:
-                      self.ymgal_bhnsm_radio[i] = self.ymgal_bhnsm_radio[i-1]
-                  for iiii in range(0,self.nb_delayed_extra_radio):
-                      self.ymgal_delayed_extra_radio[iiii][i] = \
-                          self.ymgal_delayed_extra_radio[iiii][i-1]
-
-            # Output information
-            if self.iolevel > 2:
-                print ('Finished getting mdot',self.gettime())
+            # Done by assuming f_lock_remain = 1.0
+            self.__lock_gas_into_stars(i, 1.0)
 
             # Initialize array containing no CC SNe for the SSP_i-1
             if self.out_follows_E_rate:
                 self.ssp_nb_cc_sne = np.array([])
 
         # Add stellar ejecta to the gas reservoir
+        # This needs to be called even if no star formation at the
+        # current timestep, because older stars may still pollute
+        self.__pollute_gas_with_ejecta(i)
+
+        # Convert the mass ejected by massive stars into rate
+        if not self.pre_calculate_SSPs:
+            if self.history.timesteps[i-1] == 0.0:
+                self.massive_ej_rate[i-1] = 0.0
+                self.sn1a_ej_rate[i-1] = 0.0
+            else:
+                self.massive_ej_rate[i-1] = sum(self.mdot_massive[i-1]) / \
+                    self.history.timesteps[i-1]
+                self.sn1a_ej_rate[i-1] = sum(self.mdot_1a[i-1]) / \
+                    self.history.timesteps[i-1]
+
+
+    ##############################################
+    #             Lock Gas Into Stars            #
+    ##############################################
+    def __lock_gas_into_stars(self, i, f_lock_remain):
+
+        '''
+        Correct the mass of the different gas reservoirs "ymgal"
+        for the mass lock into stars.
+
+        Argument
+        ========
+
+          i : Index of the current timestep
+          f_lock_remain: Mass fraction of gas remaining after star formation
+
+        '''
+
+        # If this is the fast chem_evol version ..
         if self.pre_calculate_SSPs:
+
+            # Update a limited number of gas components
+            self.ymgal[i] = f_lock_remain * self.ymgal[i-1]            
+            if self.len_decay_file > 0:
+                self.ymgal_radio[i] = f_lock_remain * self.ymgal_radio[i-1]
+
+            # Keep track of the mass locked into stars
+            self.m_locked += (1.0 - f_lock_remain) * sum(self.ymgal[i-1])
+
+        # If this is the normal chem_evol version ..
+        else:
+
+            # Update all stable gas components
+            self.ymgal[i] = f_lock_remain * self.ymgal[i-1]
+            self.ymgal_massive[i] = f_lock_remain * self.ymgal_massive[i-1]
+            self.ymgal_agb[i] = f_lock_remain * self.ymgal_agb[i-1]
+            self.ymgal_1a[i] = f_lock_remain * self.ymgal_1a[i-1]
+            self.ymgal_nsm[i] = f_lock_remain * self.ymgal_nsm[i-1]
+            self.ymgal_bhnsm[i] = f_lock_remain * self.ymgal_bhnsm[i-1]
+            self.m_locked += self.sfrin * sum(self.ymgal[i-1])
+            for iiii in range(0,self.nb_delayed_extra):
+                self.ymgal_delayed_extra[iiii][i] = \
+                    f_lock_remain * self.ymgal_delayed_extra[iiii][i-1]
+
+            # Update all radioactive gas components
+            if self.len_decay_file > 0:
+                self.ymgal_radio[i] = f_lock_remain * self.ymgal_radio[i-1]
+            if not self.use_decay_module:
+                if self.radio_massive_agb_on:
+                    self.ymgal_massive_radio[i] = f_lock_remain * self.ymgal_massive_radio[i-1]
+                    self.ymgal_agb_radio[i] = f_lock_remain * self.ymgal_agb_radio[i-1]
+                if self.radio_sn1a_on:
+                    self.ymgal_1a_radio[i] = f_lock_remain * self.ymgal_1a_radio[i-1]
+                if self.radio_nsmerger_on:
+                    self.ymgal_nsm_radio[i] = f_lock_remain * self.ymgal_nsm_radio[i-1]
+                if self.radio_bhnsmerger_on:
+                    self.ymgal_bhnsm_radio[i] = f_lock_remain * self.ymgal_bhnsm_radio[i-1]
+                for iiii in range(0,self.nb_delayed_extra_radio):
+                    self.ymgal_delayed_extra_radio[iiii][i] = \
+                        f_lock_remain * self.ymgal_delayed_extra_radio[iiii][i-1]
+
+
+    ##############################################
+    #           Pollute Gas With Ejecta          #
+    ##############################################
+    def __pollute_gas_with_ejecta(self, i):
+
+        '''
+        Add stellar ejecta to the gas components.
+
+        Argument
+        ========
+
+          i : Index of the current timestep
+
+        '''
+
+        # If this is the fast chem_evol version ..
+        if self.pre_calculate_SSPs:
+
+            # Pollute a limited number of gas components
             self.ymgal[i] += self.mdot[i-1]
             if self.len_decay_file > 0:
                 self.ymgal_radio[i][:self.nb_radio_iso] += self.mdot_radio[i-1]
+
+        # If this is the normal chem_evol version ..
         else:
 
-            # Stable isotopes
-            self.ymgal[i] = self.ymgal[i] + self.mdot[i-1]
-            self.ymgal_agb[i] = self.ymgal_agb[i] + self.mdot_agb[i-1]
-            self.ymgal_1a[i] = self.ymgal_1a[i] + self.mdot_1a[i-1]
-            self.ymgal_massive[i] = self.ymgal_massive[i] + self.mdot_massive[i-1]
-            self.ymgal_nsm[i] = self.ymgal_nsm[i] + self.mdot_nsm[i-1]
-            self.ymgal_bhnsm[i] = self.ymgal_bhnsm[i] + self.mdot_bhnsm[i-1]
+            # Pollute all stable gas components
+            self.ymgal[i] += self.mdot[i-1]
+            self.ymgal_agb[i] += self.mdot_agb[i-1]
+            self.ymgal_1a[i] += self.mdot_1a[i-1]
+            self.ymgal_massive[i] += self.mdot_massive[i-1]
+            self.ymgal_nsm[i] += self.mdot_nsm[i-1]
+            self.ymgal_bhnsm[i] += self.mdot_bhnsm[i-1]
             if self.nb_delayed_extra > 0:
                 for iiii in range(0,self.nb_delayed_extra):
-                    self.ymgal_delayed_extra[iiii][i] = \
-                        self.ymgal_delayed_extra[iiii][i] + \
-                            self.mdot_delayed_extra[iiii][i-1]
+                    self.ymgal_delayed_extra[iiii][i] += \
+                        self.mdot_delayed_extra[iiii][i-1]
 
-            # Radioactive isotopes
-            # ymgal_radio[i] is treated in the decay_radio function
-            # It should not be here!
-            # The contribution of individual sources must be here!
+            # Pollute all radioactive gas components
+            # Note: ymgal_radio[i] is treated in the decay_radio function
+            # However, the contribution of individual sources must be here!
             if not self.use_decay_module:
               if self.radio_massive_agb_on:
                   self.ymgal_agb_radio[i] += \
@@ -1675,16 +3256,6 @@ class chem_evol(object):
               for iiii in range(0,self.nb_delayed_extra_radio):
                   self.ymgal_delayed_extra_radio[iiii][i] += \
                           self.mdot_delayed_extra_radio[iiii][i-1]
-
-            # Convert the mass ejected by massive stars into rate
-            if self.history.timesteps[i-1] == 0.0:
-                self.massive_ej_rate[i-1] = 0.0
-                self.sn1a_ej_rate[i-1] = 0.0
-            else:
-                self.massive_ej_rate[i-1] = sum(self.mdot_massive[i-1]) / \
-                    self.history.timesteps[i-1]
-                self.sn1a_ej_rate[i-1] = sum(self.mdot_1a[i-1]) / \
-                    self.history.timesteps[i-1]
 
 
     ##############################################
@@ -1778,112 +3349,18 @@ class chem_evol(object):
 
 
     ##############################################
-    #              Set Yield Tables              #
+    #          Calculate Stellar Ejecta          #
     ##############################################
-    def __set_yield_tables(self): 
+    def __calculate_stellar_ejecta(self, i, f_esc_yields, mass_sampled, \
+                                   scale_cor, dm_imf=0.25):
 
         '''
-        This function sets the variables associated with the yield tables
-        and the stellar lifetimes used to calculate the evolution of stars.
-
-        '''
-
-        # Set if the yields are the default ones or not
-        if not int(self.iniZ) == int(-1):
-            default_yields = True
-            self.default_yields = True
-        else:
-            default_yields = False
-            self.default_yields = False
-
-        # Read stellar yields
-        if self.table[0] == '/':
-            ytables = ry.read_nugrid_yields(self.table,excludemass=self.exclude_masses)
-        else:
-            ytables = ry.read_nugrid_yields(global_path + self.table,excludemass=self.exclude_masses)
-        self.ytables = ytables
-
-        # Interpolate stellar lifetimes
-        self.zm_lifetime_grid_nugrid = self.__interpolate_lifetimes_grid(ytables)
-
-        # Get the isotopes considered by NuGrid
-        mtest=float(ytables.table_mz[0].split(',')[0].split('=')[1])
-        ztest=float(ytables.table_mz[0].split(',')[1].split('=')[1][:-1])
-        isotopes = ytables.get(mtest,ztest,'Isotopes')
-        self.history.isotopes = isotopes
-        self.nb_isotopes = len(self.history.isotopes)
-
-        # Read PopIII stars yields - Heger et al. (2010)
-        self.ytables_pop3 = ry.read_nugrid_yields( \
-            global_path+self.pop3_table,isotopes,excludemass=self.exclude_masses)
-
-        # Check compatibility between PopIII stars and NuGrid yields
-#        isotopes_pop3 = self.ytables_pop3.get(10,0.0,'Isotopes')
-#        if not isotopes_pop3 == isotopes:
-#            print ('Warning - Network not set correctly.')
-
-        # Interpolate PopIII stellar lifetimes
-        self.zm_lifetime_grid_pop3 = \
-            self.__interpolate_lifetimes_pop3(self.ytables_pop3)
-
-        # Read SN Ia yields
-        sys.stdout.flush()
-        self.ytables_1a = ry.read_yield_sn1a_tables( \
-            global_path + self.sn1a_table, isotopes)
-
-        # Read NS merger yields
-        self.ytables_nsmerger = ry.read_yield_sn1a_tables( \
-            global_path + self.nsmerger_table, isotopes)
-
-        # Read BHNS merger yields
-        self.ytables_bhnsmerger = ry.read_yield_sn1a_tables( \
-            global_path + self.bhnsmerger_table, isotopes)
-
-        # Read delayed extra yields
-        if self.nb_delayed_extra > 0:
-          self.ytables_delayed_extra = []
-          for i_syt in range(0,self.nb_delayed_extra):
-            self.ytables_delayed_extra.append(ry.read_yield_sn1a_tables( \
-            global_path + self.delayed_extra_yields[i_syt], isotopes))
-
-        # Should be modified to include extra source for the yields
-        #self.extra_source_on = False
-        #self.ytables_extra = 0
-        if self.extra_source_on == True:
-
-            #go over all extra sources
-            self.ytables_extra =[]
-            for ee in range(len(self.extra_source_table)):  
-
-               #if absolute path don't apply global_path
-               if self.extra_source_table[ee][0] == '/':
-                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
-                        self.extra_source_table[ee], isotopes))
-               else:
-                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
-                     global_path + self.extra_source_table[ee], isotopes))
-
-        #Read stellar parameter. stellar_param
-        if self.stellar_param_on:
-            table_param=ry.read_nugrid_parameter(global_path + self.stellar_param_table)
-            self.table_param=table_param
-
-        # Output information
-        if self.iolevel >= 1:
-            print ('Warning - Use isotopes with care.')
-            print (isotopes)
-
-
-    ##############################################
-    #                  SFR Mdot                  #
-    ##############################################
-    def __sfrmdot(self, i, f_esc_yields, mass_sampled, scale_cor):
-
-        '''
-        This function calculates the stellar yields per isotope from the
-        stars recently formed. These yields are distributed in the mdot
-        array to progressively release the ejecta with time (in the upcoming
-        timesteps), using stellar lifetimes.
+          For each upcoming timestep, including the current one,
+          calculate the yields ejected by the new stellar population
+          that will be deposited in the gas at that timestep.  This
+          function updates the "mdot" arrays, which will eventually
+          be added to the "ymgal" arrays, corresponding to the gas
+          component arrays.
 
         Argument
         ========
@@ -1892,63 +3369,409 @@ class chem_evol(object):
           f_esc_yields: Fraction of non-contributing stellar ejecta
           mass_sampled : Stars sampled in the IMF by an external program
           scale_cor : Envelope correction for the IMF
+          dm_imf : Mass interval resolution of the IMF.  Stars within a
+                   specific mass interval will have the same yields
 
         '''
 
-        # Output information
-        if self.iolevel >= 2:
-            print ('Entering sfrmdot routine')
-            print ('Getting yields',self.gettime())
+        # Select the adequate IMF properties
+        if self.zmetal <= self.Z_trans:
+            the_A_imf = self.A_imf_pop3
+        else:
+            the_A_imf = self.A_imf
 
-        # Interpolate yields in the mass-metallicity plane
-        mstars, yields_all, func_total_ejecta, yields_extra, yields_all_radio = \
-            self.__inter_mm_plane(i)
+        # Initialize the age of the newly-formed stars
+        t_lower = 0.0
 
-        # Get the mass fraction of stars that contribute to the stellar ejecta
-        # relative to the total stellar mass within imf_bdys.
-        mfac = self.__get_mfac()
-        #print ('test ',yields_all[mstars.index(9.0)][3])  #N14 3
+        # For each upcoming timesteps (including the current one) ..
+        for i_cse in range(i-1, self.nb_timesteps):
 
-        # Get the mass boundaries on which each star yields will be applied.
-        # Ex: 12 Mo model yields might be used for all stars from 8 to 12.5 Mo.
-        # also modifies mstars since some stars could lie outside yield range
-        # therefore we also have to create the yields variable
-        mass_bdys, mstars, yields, yields_radio = \
-            self.__get_mass_bdys(mstars, yields_all, yields_all_radio)
-        #print ('test ',yields[mstars.index(9.0)][3])  #N14 3
+            # Get the adapted IMF mass bin information
+            nb_dm, new_dm_imf, m_lower = \
+                self.__get_mass_bin(dm_imf, t_lower, i_cse)
 
-        # Apply the IMF on the mass boundaries
-        mass_bdys, mstars, yields, yields_radio, massfac, mftot = \
-            self.__apply_imf_mass_bdys(mass_bdys, mstars, yields, yields_radio)
+            # If there are yields to be calculated ..
+            if nb_dm > 0:
 
-        # Output information
-        if self.iolevel >= 1:
-            print ('Stars under consideration', \
-                  '(take into account user-selected imf ends):')
-            for kk in range(len(mass_bdys)-1):
-                print (mass_bdys[kk],'|',mstars[kk],'|',mass_bdys[kk+1])
-            print ('lens: ',len(mass_bdys),len(mstars))
+                # For each IMF mass bin ..
+                for i_imf_bin in range(nb_dm):
 
-        # Calculate the mass locked away from the old ejecta of massive and AGB stars
-        massfac = self.__mlock_agb_massive(mstars,mfac,mftot,massfac,mass_bdys,i)
+                    # Calculate lower, central, and upper masses of this bin
+                    the_m_low = m_lower + i_imf_bin * new_dm_imf
+                    the_m_cen = the_m_low + 0.5 * new_dm_imf
+                    the_m_upp = the_m_low + new_dm_imf
 
-        # Save the contribution of each mass range interval
-        self.imf_mass_ranges_contribution[i] = \
-            [len(self.ymgal[0])*[0]] * (len(mass_bdys)-1)
-        imf_mass_ranges=[]
-        for k in range(len(mass_bdys)-1):
-            imf_mass_ranges.append([mass_bdys[k], mass_bdys[k+1]])
-        self.history.imf_mass_ranges[i] = imf_mass_ranges
-        self.imf_mass_ranges = imf_mass_ranges
+                    # Get the number of stars in that mass bin
+                    nb_stars = self.m_locked * the_A_imf *\
+                        self._imf(the_m_low, the_m_upp, 1)
 
-        # Calculate ejecta from stars recently formed and add it to the mdot arrays
-        self.__calculate_ejecta(mstars, yields, yields_extra, yields_radio, \
-            mass_bdys, massfac, i, func_total_ejecta, f_esc_yields, \
-            mass_sampled, scale_cor)
+                    # Get the yields for the central stellar mass
+                    the_yields = self.get_interp_yields(the_m_cen, self.zmetal)
+
+                    # Add yields in the stellar ejecta array.  We do this at
+                    # each mass bin to distinguish between AGB and massive.
+                    self.__add_yields_in_mdot(nb_stars, the_yields, the_m_cen, i_cse, i)
+
+            # Move the lower limit of the lifetime range to the next timestep
+            t_lower += self.history.timesteps[i_cse]
+
+        # Include the ejecta from other enrichment sources
+        # such as SNe Ia, neutron star mergers, ...
+        self.__add_other_sources(i)
+
+
+    ##############################################
+    #               Get Mass Bin                 #
+    ##############################################
+    def __get_mass_bin(self, dm_imf, t_lower, i_cse):
+
+        '''
+        Calculate the new IMF mass bin resolution.  This is based on
+        the input resolution (dm_imf), but adapted to have an integer
+        number of IMF bins that fits within the stellar mass interval
+        defined by a given stellar lifetime interval.
+
+        Arguments
+        =========
+
+          dm_imf : Mass interval resolution of the IMF.  Stars within a
+                   specific mass interval will have the same yields.
+          t_lower : Lower age limit of the stellar populations.
+          i_cse : Index of the "future" timestep (see __calculate_stellar_ejecta).
+
+        '''
+
+        # Copy the adequate IMF yields range
+        if self.zmetal <= self.Z_trans:
+            imf_yr = self.imf_yields_range_pop3
+        else:
+            imf_yr = self.imf_yields_range
+
+        # Calculate the upper age limit of the stars for that timestep
+        t_upper = t_lower + self.history.timesteps[i_cse]
+
+        # Get the lower and upper stellar mass range that will 
+        # contribute to the ejecta in that timestep
+        m_lower = self.get_interp_lifetime_mass(t_upper, self.zmetal, is_mass=False)
+        if t_lower == 0.0:
+            m_upper = 1.0e30
+        else:
+            m_upper = self.get_interp_lifetime_mass(t_lower, self.zmetal, is_mass=False)
+
+        # If the mass interval is outside the IMF yields range ..
+        if m_lower >= imf_yr[1] or m_upper < imf_yr[0]:
+
+            # Skip the yields calculation
+            nb_dm = 0
+            new_dm_imf = 0
+
+        # If the mass interval is inside or overlapping
+        # with the IMF yields range ..
+        else:
+
+            # Redefine the boundary to respect the IMF yields range
+            m_lower = max(m_lower, imf_yr[0])
+            m_upper = min(m_upper, imf_yr[1])
+
+            # Calculate the new IMF resolution, which is based on the
+            # input resolution, but adapted to have an integer number
+            # of IMF bins that fits in the redefined stellar mass interval
+            nb_dm = int(round((m_upper-m_lower)/dm_imf))
+            if nb_dm < 1:
+                nb_dm = 1
+                new_dm_imf = m_upper - m_lower
+            else:
+                new_dm_imf = (m_upper - m_lower) / float(nb_dm)
+
+        # Return the new IMF bin
+        return nb_dm, new_dm_imf, m_lower
+
+
+    ##############################################
+    #             Get Interp Yields              #
+    ##############################################
+    def get_interp_yields(self, M_giy, Z_giy):
+
+        '''
+        Return the interpolated yields for a star with given
+        mass and metallicity
+
+        Interpolation law
+        =================
+
+          log10(yields) = a_M * M + b_M
+          x_M = a_Z * log10(Z) + bZ
+
+        Arguments
+        =========
+
+          M_giy : Initial mass of the star
+          Z_giy : Initial metallicity of the star
+
+        Note
+        ====
+
+          self.Z_table is in decreasing order
+          but y_coef_... arrays have metallicities in increasing order
+
+        '''
+
+        # If the metallicity is in the PopIII regime ..
+        if Z_giy <= self.Z_trans:
+
+            # Find the lower-mass boundary of the interpolation
+            i_M_low = 0
+            while M_giy > self.inter_M_points_pop3[i_M_low+1]:
+                i_M_low += 1
+
+            # Select the M interpolation coefficients of PopIII yields
+            a_M = self.y_coef_M_pop3[0][i_M_low]
+            b_M = self.y_coef_M_pop3[1][i_M_low]
+            a_M_ej = self.y_coef_M_ej_pop3[0][i_M_low]
+            b_M_ej = self.y_coef_M_ej_pop3[1][i_M_low]
+
+        # If we do not use PopIII yields ..
+        else:
+
+            # Find the lower-mass boundary of the interpolation
+            i_M_low = 0
+            while M_giy > self.inter_M_points[i_M_low+1]:
+                i_M_low += 1
+
+            # If the metallicity is below the lowest Z available ..
+            if Z_giy <= self.inter_Z_points[0]:
+
+                # Select the M interpolation coefficients of the lowest Z
+                a_M = self.y_coef_M[0][0][i_M_low]
+                b_M = self.y_coef_M[1][0][i_M_low]
+                a_M_ej = self.y_coef_M_ej[0][0][i_M_low]
+                b_M_ej = self.y_coef_M_ej[1][0][i_M_low]
+
+            # If the metallicity is above the highest Z available ..
+            elif Z_giy > self.inter_Z_points[-1]:
+
+                # Select the M interpolation coefficients of the highest Z
+                a_M = self.y_coef_M[0][-1][i_M_low]
+                b_M = self.y_coef_M[1][-1][i_M_low]
+                a_M_ej = self.y_coef_M_ej[0][-1][i_M_low]
+                b_M_ej = self.y_coef_M_ej[1][-1][i_M_low]
+
+            # If the metallicity is within the Z interval of the yields table ..
+            else:
+
+                # Find the lower-Z boundary of the interpolation
+                i_Z_low = 0
+                while Z_giy > self.inter_Z_points[i_Z_low+1]:
+                    i_Z_low += 1
+                lg_Z_giy = np.log10(Z_giy)
+
+                # Calculate the a coefficient for the M interpolation
+                a_Z = self.y_coef_Z_aM[0][i_Z_low][i_M_low]
+                b_Z = self.y_coef_Z_aM[1][i_Z_low][i_M_low]
+                a_M = a_Z * lg_Z_giy + b_Z
+                a_Z_ej = self.y_coef_Z_aM_ej[0][i_Z_low][i_M_low]
+                b_Z_ej = self.y_coef_Z_aM_ej[1][i_Z_low][i_M_low]
+                a_M_ej = a_Z_ej * lg_Z_giy + b_Z_ej
+
+                # Calculate the b coefficient for the M interpolation
+                a_Z = self.y_coef_Z_bM[0][i_Z_low][i_M_low]
+                b_Z = self.y_coef_Z_bM[1][i_Z_low][i_M_low]
+                b_M = a_Z * lg_Z_giy + b_Z
+                a_Z_ej = self.y_coef_Z_bM_ej[0][i_Z_low][i_M_low]
+                b_Z_ej = self.y_coef_Z_bM_ej[1][i_Z_low][i_M_low]
+                b_M_ej = a_Z_ej * lg_Z_giy + b_Z_ej
+
+        # Interpolate the yields
+        y_interp = 10**(a_M * M_giy + b_M)
+
+        # Calculate the correction factor to match the relation 
+        # between the total ejected mass and the stellar initial
+        # mass.  M_ej = a * M_i + b
+        f_corr = (a_M_ej * M_giy + b_M_ej) / sum(y_interp)
+
+        # Return the interpolated and corrected yields
+        return y_interp * f_corr
+
+
+    ##############################################
+    #          Get Interp Lifetime Mass          #
+    ##############################################
+    def get_interp_lifetime_mass(self, the_quantity, Z_giy, is_mass=True):
+
+        '''
+        Return the interpolated lifetime of a star with a given mass 
+        and metallicity
+
+        Interpolation law
+        =================
+
+          log10(lifetime) = a_M * log10(M) + b_M
+          log10(M) = a_M * log10(lifetime) + b_M
+          x_M = a_Z * Z + bZ
+
+        Arguments
+        =========
+
+          the_quantity : Initial mass or lifetime of the star
+          Z_giy : Initial metallicity of the star
+          is_mass : True  --> the_quantity = mass
+                    False --> the quantity = lifetime
+
+        Note
+        ====
+
+          self.Z_table is in decreasing order
+          but y_coef_... arrays have metallicities in increasing order
+
+        '''
+
+        # Define the quantity
+        if is_mass:
+            quantity_pop3 = self.M_table_pop3
+            nb_quantity_pop3 = self.nb_M_table_pop3
+            tau_coef_M_pop3 = self.tau_coef_M_pop3
+            quantity = self.M_table
+            nb_quantity = self.nb_M_table
+            tau_coef_M = self.tau_coef_M
+            tau_coef_Z_aM = self.tau_coef_Z_aM
+            tau_coef_Z_bM = self.tau_coef_Z_bM
+        else:
+            quantity_pop3 = self.inter_lifetime_points_pop3
+            nb_quantity_pop3 = self.nb_inter_lifetime_points_pop3
+            tau_coef_M_pop3 = self.tau_coef_M_pop3_inv
+            quantity = self.inter_lifetime_points
+            nb_quantity = self.nb_inter_lifetime_points
+            tau_coef_M = self.tau_coef_M_inv
+            tau_coef_Z_aM = self.tau_coef_Z_aM_inv
+            tau_coef_Z_bM = self.tau_coef_Z_bM_inv
+
+        # If the metallicity is in the PopIII regime ..
+        if Z_giy <= self.Z_trans:
+
+            # Find the lower-quantity boundary of the interpolation
+            if the_quantity > quantity_pop3[-1]:
+                i_q_low = nb_quantity_pop3 - 2
+            else:
+                i_q_low = 0
+                while the_quantity > quantity_pop3[i_q_low+1]:
+                    i_q_low += 1
+
+            # Select the M interpolation coefficients of PopIII yields
+            a_M = tau_coef_M_pop3[0][i_q_low]
+            b_M = tau_coef_M_pop3[1][i_q_low]
+
+        # If we do not use PopIII models ..
+        else:
+
+            # Find the lower-mass boundary of the interpolation
+            if the_quantity > quantity[-1]:
+                i_q_low = nb_quantity - 2
+            else:
+                i_q_low = 0
+                while the_quantity > quantity[i_q_low+1]:
+                    i_q_low += 1
+
+            # If the metallicity is below the lowest Z available ..
+            if Z_giy <= self.inter_Z_points[0]:
+
+                # Select the M interpolation coefficients of the lowest Z
+                a_M = tau_coef_M[0][0][i_q_low]
+                b_M = tau_coef_M[1][0][i_q_low]
+
+            # If the metallicity is above the highest Z available ..
+            elif Z_giy > self.inter_Z_points[-1]:
+
+                # Select the M interpolation coefficients of the highest Z
+                a_M = tau_coef_M[0][-1][i_q_low]
+                b_M = tau_coef_M[1][-1][i_q_low]
+
+            # If the metallicity is within the Z interval of the yields table ..
+            else:
+
+                # Find the lower-Z boundary of the interpolation
+                i_Z_low = 0
+                while Z_giy > self.inter_Z_points[i_Z_low+1]:
+                    i_Z_low += 1
+
+                # Calculate the a coefficient for the M interpolation
+                a_Z = tau_coef_Z_aM[0][i_Z_low][i_q_low]
+                b_Z = tau_coef_Z_aM[1][i_Z_low][i_q_low]
+                a_M = a_Z * Z_giy + b_Z
+
+                # Calculate the b coefficient for the M interpolation
+                a_Z = tau_coef_Z_bM[0][i_Z_low][i_q_low]
+                b_Z = tau_coef_Z_bM[1][i_Z_low][i_q_low]
+                b_M = a_Z * Z_giy + b_Z
+
+        # Return the interpolate the lifetime
+        return 10**(a_M * np.log10(the_quantity) + b_M)
+
+
+    ##############################################
+    #            Add Yields in Mdot              #
+    ##############################################
+    def __add_yields_in_mdot(self, nb_stars, the_yields, the_m_cen, i_cse, i):
+
+        '''
+        Add the IMF-weighted stellar yields in the ejecta "mdot" arrays.
+        Keep track of the contribution of low-mass and massive stars.
+
+        Argument
+        ========
+
+          nb_stars : Number of stars in the IMF that eject the yields
+          the_yields : Yields of the IMF-central-mass-bin star
+          the_m_cen : Central stellar mass of the IMF bin
+          i_cse : Index of the "future" timestep (see __calculate_stellar_ejecta)
+          i : Index of the timestep where the stars originally formed
+
+        '''
+
+        # Calculate the total yields
+        the_tot_yields = nb_stars * the_yields
+
+        # Add the yields in the total ejecta array
+        self.mdot[i_cse] += the_tot_yields
+
+        # Keep track of the contribution of massive and AGB stars
+        if the_m_cen > self.transitionmass:
+            self.mdot_massive[i_cse] += the_tot_yields
+        else:
+            self.mdot_agb[i_cse] += the_tot_yields
+
+        # Count the number of core-collapse SNe
+        if the_m_cen > self.transitionmass:
+            self.sn2_numbers[i_cse] += nb_stars
+            if self.out_follows_E_rate:
+                self.ssp_nb_cc_sne[i_cse-i-1] += nb_stars
+#                self.ssp_nb_cc_sne[i_cse-i+1] += nb_stars
+
+        # Sum the total number of stars born in the timestep
+        # where the stars originally formed
+        self.number_stars_born[i] += nb_stars
+
+
+    ##############################################
+    #             Add Other Sources              #
+    ##############################################
+    def __add_other_sources(self, i):
+
+        '''
+        Add the contribution of enrichment sources other than 
+        massive stars (wind + SNe) and AGB stars to the ejecta
+        "mdot" array.
+
+        Argument
+        ========
+
+          i : Index of the timestep where the stars originally formed
+
+        '''
 
         # Add the contribution of SNe Ia, if any ...
-        if self.sn1a_on and (self.zmetal > 0 or self.hardsetZ > 0):
+        if self.sn1a_on and self.zmetal > self.Z_trans:
             if not (self.imf_bdys[0] > 8 or self.imf_bdys[1] < 3):
+                f_esc_yields = 0.0 # temporary, this parameters will disapear
                 self.__sn1a_contribution(i, f_esc_yields)
 
         # Add the contribution of neutron star mergers, if any...
@@ -1962,860 +3785,6 @@ class chem_evol(object):
         # Add the contribution of delayed extra sources, if any...
         if len(self.delayed_extra_dtd) > 0:
             self.__delayed_extra_contribution(i)
-
-
-    ##############################################
-    #               Inter MM Plane               #
-    ##############################################
-    def __inter_mm_plane(self, i):
-
-        '''
-        This function returns the appropriate interpolated yields for this timestep.
-
-        Argument
-        ========
-
-          i : Index of the current timestep
-
-        '''
-
-        # Declare the radioactive yields.  Kept empty if radio_on == False
-        yields_all_radio = []
-
-        # If Zmetal is above the lowest non-zero Z available in the yields ...
-        if self.zmetal >= self.ytables.metallicities[-1]:
-
-            # Get the interpolated stellar yields for the current metallicity.
-            mstars, yields_all, func_total_ejecta = self.__interpolate_yields( \
-                self.zmetal, self.ymgal[i-1], self.ytables)
-            if self.radio_massive_agb_on:
-                dummy, yields_all_radio, dummy = self.__interpolate_yields( \
-                    self.zmetal, self.ymgal[i-1], self.ytables_radio)
-
-            # Copy the stellar lifetimes
-            self.zm_lifetime_grid_current = self.zm_lifetime_grid_nugrid
-
-        # If Z_trans < Zmetal < the lowest available Z
-        elif self.zmetal > self.Z_trans:
-
-            # Use the yields with the lowest metallicity
-            mstars, yields_all, func_total_ejecta = self.__interpolate_yields( \
-                self.ytables.metallicities[-1], self.ymgal[i-1], self.ytables)
-            if self.radio_massive_agb_on:
-                dummy, yields_all_radio, dummy = self.__interpolate_yields( \
-                    self.ytables.metallicities[-1], self.ymgal[i-1], self.ytables_radio)
-
-            # Copy the stellar lifetimes
-            self.zm_lifetime_grid_current = self.zm_lifetime_grid_nugrid
-
-        # If Zmetal < Z_trans
-        else:
-
-            # Output information
-            if self.iolevel > 0:
-                print ('Taking POPIII yields from yield_tables/popIII_heger10.txt')
-                print ('Currently only PopIII massive stars between 10Msun and', \
-                      '100Msun with their yield contributions included')
-                print (' lower IMF minimum (imf_bdys) fixed to 10Msun for now')
-
-            # Use PopIII stars yields
-            mstars, yields_all, func_total_ejecta = \
-                self.__interpolate_yields_pop3(0.0, self.ymgal[i-1], self.ytables)
-
-            # Copy PopIII stars lifetimes
-            self.zm_lifetime_grid_current = self.zm_lifetime_grid_pop3
-
-            #here we save the metallicity selected from yield grid
-            self.Z_gridpoint=0.
-
-
-        # In case an extra yield source for massive stars is considered
-        yields_extra = []
-        if True: #self.default_yields == False:
-            if self.extra_source_on:
-               #go over all extra sources
-               yields_extra=[]
-               for ee in range(len(self.ytables_extra)):  
-                  #check available metallicities
-                  tables_Z = self.ytables_extra[ee].metallicities
-                  #sort lowest to highest
-                  tables_Z.sort(reverse=True)
-                  for tz in tables_Z:
-                    # if current Z above available
-                    if self.zmetal > tz:
-                        yields_extra.append( \
-                        self.ytables_extra[ee].get(Z=tz, quantity='Yields'))
-                        break
-                    #if current Z below available
-                    if self.zmetal < tables_Z[-1]:
-                        yields_extra.append( \
-                        self.ytables_extra[ee].get(Z=tables_Z[-1],quantity='Yields'))
-                        break
-                    else:
-                        if self.zmetal>=tz:
-                            yields_extra.append( \
-                            self.ytables_extra[ee].get(Z=tz,quantity='Yields'))
-
-        # Output information
-        if self.iolevel > 2:
-            print ('yields retrieved', self.gettime())
-        if self.iolevel > 1:
-            for k in range(len(mstars)):
-                print ('test yield input in sfrmdot')
-                print ('test Mstars:',mstars[k])
-                for h in range(len(yields_all[k])):
-                    if yields_all[k][h] < 0:
-                        print ('yields', yields_all[k][h],'of isotope',isotope[h])
-
-        # Return the results of the interpolation
-        return mstars, yields_all, func_total_ejecta, yields_extra, yields_all_radio
-
-
-    ##############################################
-    #                  Get Mfac                  #
-    ##############################################
-    def __get_mfac(self):
-
-        '''
-        This function calculates and returns the mass fraction of stars
-        contributing to the stellar ejecta (yield tables) relative to
-        the total mass of a stellar population weighted by the IMF having
-        lower and upper mass limits set by imf_bdys.
-
-        Example : If only stars in imf_yields_range contribute to the ejecta, 
-                  the rest is just matter locked away --> mfac is scaling factor.
-
-        '''
-
-        # Select the appropriate IMF mass boundary and yield range
-        if (self.zmetal > self.Z_trans) or (self.hardsetZ > 0.0): 
-            bd_gm = self.imf_bdys
-            yr_gm = self.imf_yields_range
-        else:
-            bd_gm = self.imf_bdys_pop3
-            yr_gm = self.imf_yields_range_pop3
-
-        # If the IMF mass boundary includes the yield range ...
-        if bd_gm[1] >= yr_gm[1] and bd_gm[0] <= yr_gm[0]:
-            mfac = (self._imf(yr_gm[0], yr_gm[1], 2)) / \
-                   (self._imf(bd_gm[0], bd_gm[1], 2))
-
-        # If the IMF mass boundary overlaps the yield range but its lower mass
-        # limit is not low enough to cover the entire yield range ...
-        if ( bd_gm[1] >= yr_gm[1] and (bd_gm[0]>yr_gm[0] and bd_gm[0]<yr_gm[1])): 
-            mfac = (self._imf(bd_gm[0], yr_gm[1], 2)) / \
-                   (self._imf(bd_gm[0], bd_gm[1], 2))
-
-        # If the IMF mass boundary overlaps the yield range but its upper mass
-        # limit is not high enough to cover the entire yield range ...
-        if (bd_gm[0] <= yr_gm[0] and (bd_gm[1]<yr_gm[1] and bd_gm[1]>yr_gm[0])):
-            mfac = (self._imf(yr_gm[0], bd_gm[1], 2)) / \
-                   (self._imf(bd_gm[0], bd_gm[1], 2))
-
-        # If the yield range includes the IMF mass boundary ...
-        if bd_gm[1] < yr_gm[1] and bd_gm[0] > yr_gm[0]:
-            mfac = 1.0
-
-        # Return the mass fraction
-        return mfac
-
-
-    ##############################################
-    #               Get Mass Bdys                #
-    ##############################################
-    def __get_mass_bdys(self, mstars, yields, yields_radio):
-
-        '''
-        This function returns the array mass_bdys containing the initial stellar
-        masses where the code switches from the yields of a certain stellar model
-        to another.  The yields of each stellar model available in the input tables
-        are applied to all the stars within a certain mass boundary.  The
-        array mass_bdys represents those mass boundaries.
-
-        This function also adds the transition mass in mass_bdys.  This must be
-        done in order to force the code to have a fixed transition between AGB stars
-        and massive stars.
-
-        '''
-
-        # Select the apropriate yield mass range
-        if (self.zmetal > self.Z_trans) or (self.hardsetZ > 0):
-            yr_gmb = self.imf_yields_range
-        else:
-            yr_gmb = self.imf_yields_range_pop3
-
-        # Lowest stellar mass contributing to the ejecta
-        mass_bdys = [yr_gmb[0]]
-
-        #reduce masses and yields according to yields range
-        mstars1=[]
-        yields1=[]
-        yields1_radio=[]
-        if self.radio_massive_agb_on:
-            for k in range(len(mstars)):
-                if mstars[k]>yr_gmb[1]:
-                    break
-                if mstars[k]<yr_gmb[0]:
-                    continue
-                mstars1.append(mstars[k])
-                yields1.append(yields[k])
-                yields1_radio.append(yields_radio[k])
-        else:
-            for k in range(len(mstars)):
-                if mstars[k]>yr_gmb[1]:
-                    break
-                if mstars[k]<yr_gmb[0]:
-                    continue
-                mstars1.append(mstars[k])
-                yields1.append(yields[k])
-
-        m_stars=[]
-        # For every stellar initial mass already in the old mass array ...
-        for w in range(len(mstars1)):
-            #print (w,mass_bdys)
-            # Add the transition mass if we are at the right mass
-            if (mstars1[w-1] < self.transitionmass) and \
-                   (mstars1[w] > self.transitionmass):
-                mass_bdys.append(self.transitionmass)
-                if (w == len(mstars1) - 1):
-                    mass_bdys.append(yr_gmb[1]) 
-                m_stars.append(mstars1[w-1])
-                continue
-
-            # Calculate the mass where the code switches to another star yield. 
-            if (w>0) and (w < len(mstars1) - 1):
-                #inside imf interval
-                newbdy=(mstars1[w-1] + mstars1[w]) / 2.e0
-                if (newbdy > yr_gmb[0]) and (newbdy<yr_gmb[1]):
-                    mass_bdys.append(newbdy)
-                    if not mstars1[w-1] in m_stars:
-                        m_stars.append(mstars1[w-1])
-                if (newbdy > yr_gmb[0]) and (newbdy>=yr_gmb[1]):
-                    if not mstars1[w-1] in m_stars:
-                        m_stars.append(mstars1[w-1])
-                    mass_bdys.append(yr_gmb[1])
-                    break
-                #print (newbdy,yr_gmb[0])
-            if mstars1[w] == yr_gmb[0]:
-                    if not mstars1[w] in m_stars:
-                        m_stars.append(mstars1[w])
-            '''
-            if mstars[w] == yr_gmb[1]:
-                    newbdy=(mstars[w-1] + mstars[w]) / 2.e0
-                    if not mstars[w] in m_stars:
-                        m_stars.append(mstars[w])
-                    #mass_bdys.append(newbdy)
-                    mass_bdys.append(yr_gmb[1])
-                    break
-            '''
-            # Highest stellar masses contributing to the ejecta 
-            if ((w == len(mstars1) - 1) or mstars1[w] == yr_gmb[1]):
-                newbdy=(mstars1[w-1] + mstars1[w]) / 2.e0
-                oldnewbdy=(mstars1[w-2] + mstars1[w-1]) / 2.e0
-                if newbdy < yr_gmb[1]:
-                    if not newbdy in mass_bdys:
-                        mass_bdys.append(newbdy)
-                    if not mstars1[w-1] in m_stars:
-                        m_stars.append(mstars1[w-1])
-                    if not mstars1[w] in m_stars: 
-                    #if not mstars[w] == yr_gmb[1]:
-                        m_stars.append(mstars1[w])
-                elif oldnewbdy<yr_gmb[1]:
-                    if not mstars1[w-1] in m_stars:
-                        m_stars.append(mstars1[w-1])
-                if not newbdy == yr_gmb[1]:
-                    if not yr_gmb[1] in mass_bdys:
-                        mass_bdys.append(yr_gmb[1])
-                #if mstars[w] == yr_gmb[1]:
-                break
-
-        # Output information
-        if self.iolevel >= 1:
-            print ('__get_mass_bdys: mass_bdys: ',mass_bdys)
-            print ('__get_mass_bdys: m_stars',m_stars)
-
-        # Return the array containing the boundary masses for applying yields
-        return mass_bdys, m_stars, yields1, yields1_radio
-
-
-    ##############################################
-    #            Apply IMF Mass Bdys             #
-    ##############################################
-    def __apply_imf_mass_bdys(self, mass_bdys, mstars, yields_all, yields_all_radio):
-
-        '''
-        This function applies the IMF to the yields mass boundaries to know how
-        many stars and how much mass is in each bin.  That information will be
-        used to scale the specific yields used in each mass bin.
-
-        Arguments
-        =========
-
-          mass_bdys : Stellar mass boundaries where yields are applied.
-          mstars : Initial mass of stellar models available in the input yields.
-          yields_all : Stellar yields available from the input.
-          yields_all_radio : Radioactive stellar yields available from the input.
-
-        '''
-
-        # Copy of the IMF boundary according to the current gas metallicity
-        if (self.zmetal > self.Z_trans) or (self.hardsetZ > 0.0):
-            imf_bd = self.imf_bdys
-        else:
-            imf_bd = self.imf_bdys_pop3
-
-        # Declaration of local variables
-        mftot = 0.0      # Total mass of the yield range limited by the IMF
-        massfac = []     # Number of stars in each mass bin (weighted by the IMF)
-        mstars1 = []     # Copy of mstars but limited by the IMF
-        yields_all1 = [] # Copy of yields_all but limited by the IMF
-        yields_all1_radio = [] # Copy of radioactive yields_all but limited by the IMF
-        mass_bdys1 = []  # Copy of mass_bdys but limited by the IMF
-
-        # For each stellar mass bin ...
-        for w in range(len(mstars)):
-
-            # If the mass bin is outside of the IMF mass range ...
-            if (mass_bdys[1+w] <= imf_bd[0]) or (mass_bdys[w] >= imf_bd[1]):
-
-                # Skip this bin
-                continue
-
-            # If the lower mass limit of the IMF is inside the mass bin ...
-            if imf_bd[0] >= mass_bdys[w] and imf_bd[0] <= mass_bdys[w+1]:
-
-                # Use the lower mass limit of the IMF for the bin lower limit
-                massfac.append(self._imf(imf_bd[0], mass_bdys[w+1], 1))
-                mftot += (self._imf(imf_bd[0], mass_bdys[w+1], 2))
-                mass_bdys1.append(imf_bd[0])
-
-            # If the upper mass limit of the IMF is inside the mass bin ...
-            elif mass_bdys[w] <= imf_bd[1] and mass_bdys[w+1] >= imf_bd[1]:
-
-                # Use the upper mass limit of the IMF for the bin upper limit
-                massfac.append( self._imf(mass_bdys[w], imf_bd[1], 1) )
-                mftot += (self._imf(mass_bdys[w],imf_bd[1], 2))
-                mass_bdys1.append(mass_bdys[w])
-                mass_bdys1.append(imf_bd[1])
-
-            # If the whole mass bin is within the IMF mass boundary ...
-            else:
-
-                # Keep the provided mass boundary for this bin
-                massfac.append(self._imf(mass_bdys[w], mass_bdys[w+1], 1))
-                mftot += (self._imf(mass_bdys[w], mass_bdys[w+1], 2))
-                mass_bdys1.append(mass_bdys[w])
-                if (w == len(mstars)-1) and imf_bd[1] > mass_bdys[w+1]:
-                    mass_bdys1.append(mass_bdys[w+1])
-
-            # Add the mass of the stellar model providing yields if inside the IMF
-            mstars1.append(mstars[w])
-            yields_all1.append(yields_all[w])
-            if self.radio_massive_agb_on:
-                yields_all1_radio.append(yields_all_radio[w])
-        
-        # Update the arrays now corrected for the IMF
-        mass_bdys = mass_bdys1
-        mstars = mstars1
-        yields_all = yields_all1
-        yields_all_radio = yields_all1_radio
-
-        # Keep the mass boundaries in memory
-        self.history.mass_bdys = mass_bdys
-
-        # Return the IMF corrected arrays
-        return mass_bdys, mstars, yields_all, yields_all_radio, massfac, mftot
-
-
-    ##############################################
-    #              Mlock AGB Massive             #
-    ##############################################
-    def __mlock_agb_massive(self, mstars, mfac, mftot, massfac, mass_bdys, i):
-
-        '''
-        This function calculates the mass of massive and AGB ejecta locked
-        away by the star formation.
-
-        Arguments
-        =========
-
-          mstars : Initial mass of stellar models available in the input yields.
-          mfac : Mass fraction of stars that contribute to the stellar ejecta
-                 relative to the total stellar mass within imf_bdys.
-          mftot : Total mass of the yield range limited by the IMF
-          massfac :  Number of stars in each mass bin (weighted by the IMF)
-          mass_bdys : Stellar mass boundaries where yields are applied.
-          i : Index of the current timestep
-
-        '''
-
-        # Testing variable
-        #mtest = 0.0
-
-        # For each mass bin ...
-        for w in range(len(mstars)):
-
-            # Calculate the mass of massive or AGB ejecta locked away
-            # !! Still assumption all stars in interval same mass !!
-            massfac[w] = self.m_locked * mfac / mftot * massfac[w]  
-            mtot_massfac = self.m_locked * mfac / mftot * \
-                                    self._imf(mass_bdys[w], mass_bdys[w+1], 2)
-            self.imf_mass_ranges_mtot[i].append(mtot_massfac)
-
-            #mtest=mtest+massfac[w]*self._imf(mass_bdys[w],mass_bdys[w+1],2)
-            #mtest=mtest+mtot_massfac
-
-            # Add locked mass to the appropriate ejecta
-            if mstars[w] > self.transitionmass:
-                self.m_locked_massive += mtot_massfac 
-            else:
-                self.m_locked_agb += mtot_massfac
-
-        # Output information
-        if self.iolevel >= 1:
-            print ('Total mass of the gas in stars:')
-            #print ('{:.3E}'.format(mtest))
-            print ('AGB: ','{:.3E}'.format(self.m_locked_agb))
-            print ('Massive: ','{:.3E}'.format(self.m_locked_massive))
-
-        # Return the modified massfac array
-        return massfac
-
-
-    ##############################################
-    #             Calculate Ejecta               #
-    ##############################################
-    def __calculate_ejecta(self, mstars, yields_all, yields_extra, yields_all_radio, \
-                           mass_bdys, massfac, i, func_total_ejecta, f_esc_yields, \
-                           mass_sampled, scale_cor):
-
-        '''
-        This function calculates the ejecta coming from the stars that are forming
-        during the current timestep.  The ejecta is then distributed over time, in
-        the future upcoming timesteps, according to the stellar lifetimes.
-
-        Arguments
-        =========
-
-          mstars : Initial mass of stellar models available in the input yields.
-          yields_all : Stellar yields available from the input.
-          yields_extra : Stellar yields from extra source.
-          yields_all_radio : Radioactive stellar yields available from the input.
-          mass_bdys : Stellar mass boundaries where yields are applied.
-          massfac :  Number of stars in each mass bin (weighted by the IMF)
-          i : Index of the current timestep
-          f_esc_yields: Fraction of non-contributing stellar ejecta
-          mass_sampled : Stars sampled in the IMF by an external program
-          scale_cor : Envelope correction for the IMF
-
-        '''
-
-        # Variables used for testing
-        count_numbers_c = 0
-        count_numbers_f = 0
-
-        # Initialize array containing the nb of CC SNe for the SSP_i-1
-        if self.out_follows_E_rate:
-            self.ssp_nb_cc_sne = np.zeros(self.nb_timesteps-i+1,np.float64)
-
-        # For every star having yields, from massive down to low-mass stars ...
-        for w in range(len(mstars))[::-1]:
-
-            #print ('take star ',mstars[w])
-            # Copy the desired yields and mass boundary
-            yields = yields_all[w]
-            yields_radio = []
-            if self.radio_massive_agb_on:
-                yields_radio = yields_all_radio[w]
-            maxm = mass_bdys[w+1]
-            minm = mass_bdys[w]
-
-            # Get stellar lifetimes associated to mass bin lower and upper limits
-            lifetimemin = self.__find_lifetimes(round(self.zmetal,6), maxm)
-            lifetimemax = self.__find_lifetimes(round(self.zmetal,6), minm)
-
-            # Output information
-            if self.iolevel >= 2:
-                lifetime_gridmass = \
-                    self.__find_lifetimes(round(self.zmetal,6), mstars[w])
-                print ('###############################################')
-                print ('Mass range: Mass and lifetime for ', mstars[w], 'Msun:', \
-                      '(table age: ','{:.3E}'.format(lifetime_gridmass),'):')
-                print (maxm,'{:.3E}'.format(lifetimemin))
-                print (minm,'{:.3E}'.format(lifetimemax))
-
-            # Move to the next bin if the lifetime is longer than the simulation
-            if sum(self.history.timesteps) < lifetimemin:
-                if self.iolevel >= 2:
-                    print ('Ejection of ', mstars[w], ' mass range at ', \
-                          '{:.3E}'.format(lifetimemin),'excluded due to timelimit')
-                continue
-
-            # Variable used for testing
-            count_numbers_c += massfac[w]
-
-            # Get imf (number) coefficient in mass interval
-            # This is the normalisation constant of the IMF with Mtot = m_locked
-            p_number = massfac[w] / (self._imf(minm, maxm, 1))
-
-            # Keep the contribution of this mass bin in memory
-            for k in range(len(self.imf_mass_ranges_contribution[i])):
-                r = self.imf_mass_ranges[k]
-                if r[0] >= minm and r[1] <= maxm:
-                    self.imf_mass_ranges_contribution[i][k] += \
-                        (np.array(yields) * massfac[w])
-
-            # Distribute the yields in current and future timesteps
-            self.__distribute_yields(i, count_numbers_c, count_numbers_f, yields, \
-            yields_extra, yields_radio, maxm, minm, lifetimemin, lifetimemax, p_number, \
-            mstars, w, func_total_ejecta, f_esc_yields, mass_sampled, scale_cor)
-
-
-    ##############################################
-    #            Distribute Yields               #
-    ##############################################
-    def __distribute_yields(self, i, count_numbers_c, count_numbers_f, yields, \
-          yields_extra, yields_radio, maxm, minm, lifetimemin, lifetimemax, p_number, mstars, \
-          w, func_total_ejecta, f_esc_yields, mass_sampled, scale_cor):
-
-        '''
-        This function distributes the ejecta of a specific stellar mass bin over
-        the current and the next following timesteps. In practical terms, this
-        function adds the contribution of the specific stellar mass bin to the mdot
-        arrays.
-
-        Arguments
-        =========
-
-          i : Index of the current timestep.
-          count_numbers_c : Variable for testing.
-          count_numbers_f : Variable for testing.
-          yields : Stellar yields for the considered mass bin.
-          yields_extra : Stellar yields from extra source.
-          yields_radio : Radioactive stellar yields for the considered mass bin.
-          maxm : Maximum stellar mass in the considered bin.
-          minm : Minimum stellar mass in the considered bin.
-          lifetimemin : Minimum stellar lifetime in the considered bin.
-          lifetimemax : Maximum stellar lifetime in the considered bin.
-          p_number : IMF (number) coefficient in the mass interval.
-          mstars : Initial mass of stellar models available in the input yields.
-          w : Index of the stellar model providing the yields
-          f_esc_yields: Fraction of non-contributing stellar ejecta
-          mass_sampled : Stars sampled in the IMF by an external program
-          scale_cor : Envelope correction for the IMF
-
-        '''
-
-        # Initialisation of the local variables
-        count_numbers_t = 0  # Star count
-        tt = 0               # Time since the formation of the considered stars
-        text = False         # Print info.. does not look useful
-        firstmin = True      # True if the first ejecta is still to come 
-        min_old = 0
-        minm1 = 0.0
-        maxm1 = 0.0
-
-        # Choose Z param
-
-        # For every timestep, beginning with the current timestep ...
-        for j in range(i-1, self.nb_timesteps):
-
-            # Lifetime limits given by the timestep j (will be modified below)
-            lifetimemin1 = tt 
-            tt += self.history.timesteps[j]
-            lifetimemax1 = tt
-
-            # Set time and mass boundaries for this timestep
-            firstmin, maxm1, minm1, continue_bol, break_bol, min_old = \
-                self.__set_t_m_bdys(tt, lifetimemin, lifetimemin1, firstmin, \
-                  lifetimemax, lifetimemax1, maxm, maxm1, minm, minm1, j, min_old)
-
-            # Verify if last function demanded a continue or a break
-            if continue_bol:
-                continue
-            elif break_bol:
-                break
-
-            #print (mstars[w],'i: ',i,' j: ',j)
-
-            self.history.t_m_bdys.append([minm1, maxm1])
-
-            # Calculate the number of stars contributing in this timestep j
-            number_stars = p_number * (self._imf(minm1, maxm1, 1))
-
-            # Cumulate the number of stars for testing
-            count_numbers_f += number_stars
-            count_numbers_t += number_stars
-
-            # Output information
-            if text==False :
-                text = True
-                if self.iolevel >= 1:
-                    print (mstars[w], 'Wind (if massive +SN2): of Z=', \
-                    '{:.6E}'.format(self.zmetal),' at time ', \
-                    '{:.3E}'.format(sum(self.history.timesteps[:j+1])),\
-                    'with lifetime: ','{:.3E}'.format(self.__find_lifetimes(round(self.zmetal,6), mstars[w])))
-            if self.iolevel > 1:
-                if sum(yields) < 0:
-                    print ('Yields are negative', sum(yields))
-
-            # Add the yields to mdot arrays
-            break_bol = self.__add_yields_mdot(minm1, maxm1, yields, \
-                yields_extra, yields_radio, i, j, w, number_stars, mstars, tt, lifetimemax, \
-                    p_number, func_total_ejecta, f_esc_yields, mass_sampled, scale_cor)
-
-            # Look if the last function demanded a break
-            if break_bol:
-                break
-
-
-    ##############################################
-    #               Set t m Bdys                 #
-    ##############################################
-    def __set_t_m_bdys(self, tt, lifetimemin, lifetimemin1, firstmin, \
-                lifetimemax, lifetimemax1, maxm, maxm1, minm, minm1, j, min_old):
-
-        '''
-        Part of __distribute_yields() function
-
-        '''
-
-        # Values to be returned
-        continue_bol = False
-        break_bol = False
-
-        # If no ejecta occurs before the end of the timestep j ...
-        # Skip this timestep
-        if tt < lifetimemin:
-            continue_bol = True
-            return firstmin, maxm1, minm1, continue_bol, break_bol, min_old
-
-        # If the ejecta is added for the first time ...
-        # Adjust the time and mass boundary for this timestep
-        elif firstmin:
-            lifetimemin1 = lifetimemin
-            maxm1 = maxm
-
-        # If this is the last timestep to receive the ejecta ...
-        # Adjust the time and mass boundary for this timestep
-        if tt >= lifetimemax:
-            lifetimemax1 = lifetimemax
-            minm1 = minm
-
-        # Stop if the considered lifetime is longer than the simulation
-        if (lifetimemax > sum(self.history.timesteps) and \
-                                            j == self.nb_timesteps-1):  
-            if self.iolevel > 0:
-                print ('Ejection of mass at ','{:.3E}'.format(lifetimemax), \
-                      'excluded due to timelimit')
-            break_bol = True
-            return firstmin, maxm1, minm1, continue_bol, break_bol, min_old
- 
-        # In case of timestep being inside the liftime/mass interval,
-        # old minm1 becomes new maxm1 
-        if not firstmin:
-            maxm1 = min_old
-
-        # Set firstmin to False since first ejecta is considered at this point
-        firstmin = False
- 
-        # If the lifetime of the considered star lasts beyond this timestep j...
-        # Find minm1 from lifetime max1
-        if tt < lifetimemax:
-            minm1 = self.__find_lifetimes(round(self.zmetal,6), \
-                                    mass=[minm,maxm], lifetime=lifetimemax1)
-            min_old = minm1
-
-        # Output information
-        if self.iolevel >= 3:
-            print ('(timestep:) ','{:.3E}'.format(lifetimemin1), maxm1, \
-                  'to','{:.3E}'.format(lifetimemax1),minm1)
-
-        return firstmin, maxm1, minm1, continue_bol, break_bol, min_old
-
-
-    ##############################################
-    #              Add yields Mdot               #
-    ##############################################
-    def __add_yields_mdot(self, minm1, maxm1, yields, yields_extra, yields_radio,\
-            i, j, w, number_stars, mstars, tt, lifetimemax, p_number, func_total_ejecta,\
-            f_esc_yields, mass_sampled, scale_cor):
-
-        '''
-        This function adds the yields of the stars formed during timestep i
-        in a future upcoming timestep j.  The stars here are only a fraction
-        of the whole stellar population that just formed.
-
-        Arguments
-        =========
-
-          minm1 : Minimum stellar mass having ejecta in this timestep j.
-          maxm1 : Minimum stellar mass having ejecta in this timestep j.
-          yields : Stellar yields for the considered mass bin.
-          yields_extra : Stellar yields from extra source.
-          yields_radio : Radioactive stellar yields for the considered mass bin.
-          i : Index of the current timestep.
-          j : Index of the future timestep where ejecta is added.
-          w : Index of the stellar model providing the yields.
-          number_stars : Number of stars having ejecta in timestep j.
-          mstars : Initial mass of stellar models available in the input yields.
-          tt : Time between timestep j and timestep i.
-          lifetimemax : Maximum lifetime .
-          p_number : IMF (number) coefficient in the mass interval.
-          f_esc_yields: Fraction of non-contributing stellar ejecta
-          mass_sampled : Stars sampled in the IMF by an external program
-          scale_cor : Envelope correction for the IMF
-
-        '''
-
-        # Scale the total yields (see func_total_eject)
-        if (self.total_ejecta_interp == True):
-            m_tot_ejecta=(func_total_ejecta(minm1)+func_total_ejecta(maxm1)) / 2.0
-            scalefactor = m_tot_ejecta / sum(yields)
-        else:
-            scalefactor = 1
-
-        # Output information
-        if self.iolevel > 1:
-            print ('Scalefactor:', scalefactor)
-
-        # Calculate the scaling factor if mass_sampled is provided
-        if len(mass_sampled) > 0 and mstars[w] > self.transitionmass:
-            number_stars, yield_factor = self.__get_yield_factor(minm1, \
-                maxm1, mass_sampled, func_total_ejecta, mstars[w])
-
-        # If the IMF is full ...
-        else:
-
-            # If the is a correction to apply to the scale factor ...
-            if len(scale_cor) > 0:
-                scalefactor_factor = self.__get_scale_cor(minm1,\
-                    maxm1, scale_cor)
-                scalefactor = scalefactor * scalefactor_factor
-
-            # Calculate the factor that multiplies the yields
-            yield_factor = scalefactor * number_stars
-
-        # For every isotope ...
-        f_contr_yields = (1.0 - f_esc_yields)
-        for k in range(len(self.ymgal[i])):
-
-            # Add the total ejecta
-            if mstars[w] > self.transitionmass:
-                self.mdot[j][k] = self.mdot[j][k] + f_contr_yields * \
-                    yields[k] * scalefactor * number_stars
-            else:
-                self.mdot[j][k] = self.mdot[j][k] +  \
-                    yields[k] * scalefactor * number_stars
-
-            # Add contribution of massive stars
-            if mstars[w] > self.transitionmass:
-                self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                    f_contr_yields * yields[k] * yield_factor
-
-            # Add contribution of AGB stars
-            else:
-                self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
-                    yields[k] * yield_factor
-
-            #here extra source contributions are added
-            if self.extra_source_on:
-
-                    #print (self.Z_gridpoint,self.extra_source_exclude_Z)
-                    for ee in range(len(yields_extra)):
-                      if not self.Z_gridpoint in self.extra_source_exclude_Z[ee]:
-                        if ((minm1 >= self.extra_source_mass_range[ee][0]) and (maxm1 <= self.extra_source_mass_range[ee][1])):
-
-                          self.mdot[j][k] = self.mdot[j][k] + \
-                          yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
-
-                          if mstars[w] > self.transitionmass:
-                            self.mdot_massive[j][k] = self.mdot_massive[j][k] + \
-                            yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
-                          else:
-                            self.mdot_agb[j][k] = self.mdot_agb[j][k] + \
-                            yields_extra[ee][k] * self.f_extra_source[ee] * yield_factor
-
-        # For every radioactive isotope ..
-        if self.radio_massive_agb_on:
-          for k in range(self.nb_radio_iso):
-
-            # Add the total ejecta
-            if mstars[w] > self.transitionmass:
-                self.mdot_radio[j][k] = self.mdot_radio[j][k] + f_contr_yields * \
-                    yields_radio[k] * scalefactor * number_stars
-            else:
-                self.mdot_radio[j][k] = self.mdot_radio[j][k] +  \
-                    yields_radio[k] * scalefactor * number_stars
-
-            # For massive stars ...
-            if mstars[w] > self.transitionmass:
-                self.mdot_massive_radio[j][k] = self.mdot_massive_radio[j][k] + \
-                    f_contr_yields * yields_radio[k] * yield_factor
-
-            # Add contribution of AGB stars
-            else:
-                self.mdot_agb_radio[j][k] = self.mdot_agb_radio[j][k] + \
-                    yields_radio[k] * yield_factor
-
-        # Count the number of core-collapse SNe
-        if mstars[w] > self.transitionmass:
-            self.sn2_numbers[j] += number_stars
-            if self.out_follows_E_rate:
-                self.ssp_nb_cc_sne[j-i-1] += number_stars
-#                self.ssp_nb_cc_sne[j-i+1] += number_stars
-        if ((minm1 >= 3) and (maxm1 <= 8)) or ((minm1 < 3) and (maxm1 > 8)):
-            self.wd_sn1a_range1[j] += number_stars
-        elif minm1 < 3 and maxm1 > 3:
-            self.wd_sn1a_range1[j] += p_number * (self._imf(3, maxm1, 1))
-        elif minm1 < 8 and maxm1 > 8:
-            self.wd_sn1a_range1[j] += p_number * (self._imf(minm1, 8, 1,))
-
-        # Sum the total number of stars born in the current timestep i (not j)
-        self.number_stars_born[i] += number_stars
-
-        #Add other stellar input, only for Z>0 because of different input grid.
-        if self.Z_gridpoint>0. and self.stellar_param_on:
-                q=0
-                qq=0
-                mass_scale_f=0.
-                for p in range(len(self.stellar_param_attrs)):
-                        attr=self.stellar_param_attrs[p]
-                        #Handle SNIa energy in __sn1a_contribution
-                        if attr == 'SNIa energy':
-                                continue
-                        idx=list(self.stellar_param_evol_masses).index(mstars[w])
-                        #to process yield table parameter (1 val for 1 star)
-                        if attr in self.stellar_param_attrs_y:
-                                # rate of quantity
-                                self.stellar_param[p][j] = self.stellar_param[p][j] + self.stellar_param_y[idx][qq]*number_stars/(self.history.timesteps[j]*self.const.syr) 
-                                qq=qq+1
-                        else:
-                                #Apply quantities for stars in time interval i/j, apply their contribution over their whole lifetime (table)
-                                #I need m_tot_ejecta , current time tt at index j, lifetime of star stellar_param_evol_lifetimes[idx]
-                                '''
-                                #if 'Ekindot_wind' in self.stellar_param_attrs and 'Mdot_wind' in self.stellar_param_attrs:
-                                if True:
-                                        if 'Mdot_wind' == attr:
-                                                #scale to total ejecta: total ejecta summed from each time bin / total ejecta from fit
-                                                mass_scale_f=sum(np.array(self.stellar_param_evol[idx][j-1][q]) * np.array(self.history.timesteps)) / m_tot_ejecta
-                                                self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
-                                        #if 'Ekindot_wind' == attr:
-                                        #        self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
-
-                                else:
-                                '''
-                                self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars * np.array(self.stellar_param_evol[idx][j-1][q])
-                                q=q+1
-
-        # Exit loop if no more ejecta to be distributed 
-        if tt >= lifetimemax:
-            break_bol = True
-        else:
-            break_bol = False
-
-        # Return whether the parent function needs to break or not
-        return break_bol
 
 
     ##############################################
@@ -3254,20 +4223,20 @@ class chem_evol(object):
            self.history.sn1a_rate == 'maoz' or \
            self.history.sn1a_rate == 'power_law':
 
-            # Get the lifetimes of the considered stars (if needed ...) 
-            if len(self.poly_fit_dtd_5th) == 0:
-                spline_lifetime, spline_min_time = self.__get_spline_info()
+           # Get the lifetimes of the considered stars (if needed ...) 
+           if len(self.poly_fit_dtd_5th) == 0:
+                lifetime_min = self.inter_lifetime_points[0]
 
         # Normalize the SN Ia rate if not already done
         if len(self.poly_fit_dtd_5th) > 0 and not self.normalized:
             self.__normalize_poly_fit()
-        elif self.history.sn1a_rate == 'exp' and not self.normalized:
-            self.__normalize_efolding(spline_min_time)
+        if self.history.sn1a_rate == 'exp' and not self.normalized:
+            self.__normalize_efolding(lifetime_min)
         elif self.history.sn1a_rate == 'gauss' and not self.normalized:
-            self.__normalize_gauss(spline_min_time)
+            self.__normalize_gauss(lifetime_min)
         elif (self.history.sn1a_rate == 'maoz' or \
             self.history.sn1a_rate == 'power_law') and not self.normalized:
-            self.__normalize_maoz(spline_min_time)
+            self.__normalize_maoz(lifetime_min)
 
         # Initialisation of the cumulated time and number of SNe Ia
         sn1a_output = 0
@@ -3319,37 +4288,34 @@ class chem_evol(object):
                   n1a = self.__vogelsberger13(timemin, timemax)
 
               # No SN Ia if the minimum current stellar lifetime is too long
-              if spline_min_time > timemax:
+              if lifetime_min > timemax:
                   n1a = 0
 
               # If SNe Ia occur during this timestep j ...
               else:
 
                   # Set the lower time limit for the integration
-                  if timemin < spline_min_time:
-                      timemin = spline_min_time 
+                  if timemin < lifetime_min:
+                      timemin = lifetime_min 
 
                   # For an exponential SN Ia rate ...
                   if self.history.sn1a_rate == 'exp':
        
                       # Calculate the number of SNe Ia and white dwarfs (per Mo)
-                      n1a, wd_number = self.__efolding(timemin, \
-                          timemax, spline_lifetime)
+                      n1a, wd_number = self.__efolding(timemin, timemax)
 
                   # For a power law SN Ia rate ...
                   elif self.history.sn1a_rate == 'maoz' or \
                        self.history.sn1a_rate == 'power_law':
 
                       # Calculate the number of SNe Ia and white dwarfs (per Mo)
-                      n1a, wd_number = self.__maoz12_powerlaw(timemin, \
-                          timemax, spline_lifetime)
+                      n1a, wd_number = self.__maoz12_powerlaw(timemin, timemax)
 
                   # For a gaussian SN Ia rate ...
                   elif self.history.sn1a_rate == 'gauss':
 
                       # Calculate the number of SNe Ia and white dwarfs (per Mo)
-                      n1a, wd_number = self.__gauss(timemin, \
-                          timemax, spline_lifetime)
+                      n1a, wd_number = self.__gauss(timemin, timemax)
 
                   # Cumulate the number of white dwarfs in the SN Ia mass range
                   self.wd_sn1a_range[j] += (wd_number * self.m_locked)
@@ -3838,7 +4804,7 @@ class chem_evol(object):
     ##############################################
     #           NS merger normalization          #
     ##############################################
-    def __normalize_nsmerger(self, spline_min_time):
+    def __normalize_nsmerger(self, lifetime_min):
         '''
         This function normalizes the Dominik et al. (2012) delay time distribution
         to appropriately compute the total number of neutron star mergers in an SSP.
@@ -3846,7 +4812,7 @@ class chem_evol(object):
         Arguments
         =========
         
-            spline_min_time : minimum stellar lifetime
+            lifetime_min : minimum stellar lifetime
 
         '''
         # Compute the number of massive stars (NS merger progenitors)
@@ -4536,7 +5502,8 @@ class chem_evol(object):
             minm_prog1a = self.imf_bdys[0]
 
         # Return the minimum mass
-        return float(max(minm_prog1a, 10**self.spline_lifetime(np.log10(t_s))))
+        the_m_ts = self.get_interp_lifetime_mass(t_s, self.zmetal, is_mass=False)
+        return float(max(minm_prog1a, the_m_ts))
 
 
     ##############################################
@@ -4558,7 +5525,7 @@ class chem_evol(object):
         '''
    
         # Calculate the stellar mass associated to the lifetime t
-        mlim = float(10**self.spline_lifetime(np.log10(t)))
+        mlim = self.get_interp_lifetime_mass(t, self.zmetal, is_mass=False)
 
         # Set the maximum mass for SN Ia progenitor
         maxm_prog1a = 8.0
@@ -4624,7 +5591,7 @@ class chem_evol(object):
     ##############################################
     #               Maoz12 PowerLaw              #
     ##############################################
-    def __maoz12_powerlaw(self, timemin, timemax, spline_lifetime):
+    def __maoz12_powerlaw(self, timemin, timemax):
 
         '''
         This function returns the total number of SNe Ia (per Mo formed) and 
@@ -4759,7 +5726,7 @@ class chem_evol(object):
     ##############################################
     #              Wiersma09 E-Folding           #
     ##############################################
-    def __efolding(self, timemin, timemax, spline_lifetime):
+    def __efolding(self, timemin, timemax):
 
         '''
         This function returns the total number of SNe Ia (per Mo formed) and 
@@ -4799,7 +5766,7 @@ class chem_evol(object):
     ##############################################
     #             Normalize WEfolding            #
     ##############################################
-    def __normalize_efolding(self, spline_min_time):
+    def __normalize_efolding(self, lifetime_min):
 
         '''
         This function normalizes the SN Ia rate of a gaussian.
@@ -4807,7 +5774,7 @@ class chem_evol(object):
         Argument
         ========
 
-          spline_min_time : Minimum stellar lifetime.
+          lifetime_min : Minimum stellar lifetime.
 
         '''
 
@@ -4821,7 +5788,7 @@ class chem_evol(object):
 
         # Calculate the normalisation constant
         self.A_exp = self.nb_1a_per_m / dblquad(self.__exp_sn_rate, \
-            spline_min_time, ageofuniverse, \
+            lifetime_min, ageofuniverse, \
             lambda x:self.__spline1(x), lambda x:maxm_prog1a)[0]
 
         if self.direct_norm_1a >0:
@@ -4861,7 +5828,7 @@ class chem_evol(object):
     ##############################################
     #                Wiersma09 Gauss             #
     ##############################################
-    def __gauss(self, timemin, timemax, spline_lifetime):
+    def __gauss(self, timemin, timemax):
 
         '''
         This function returns the total number of SNe Ia (per Mo formed) and 
@@ -4897,7 +5864,7 @@ class chem_evol(object):
     ##############################################
     #               Normalize WGauss             #
     ##############################################
-    def __normalize_gauss(self, spline_min_time):
+    def __normalize_gauss(self, lifetime_min):
 
         '''
         This function normalizes the SN Ia rate of a gaussian (similar to Wiersma09).
@@ -4905,7 +5872,7 @@ class chem_evol(object):
         Argument
         ========
 
-          spline_min_time : Minimum stellar lifetime.
+          lifetime_min : Minimum stellar lifetime.
 
         '''
 
@@ -4919,7 +5886,7 @@ class chem_evol(object):
 
         # Calculate the normalisation constant
         self.A_gauss = self.nb_1a_per_m / dblquad(self.__gauss_sn_rate, \
-            spline_min_time, ageofuniverse, \
+            lifetime_min, ageofuniverse, \
             lambda x:self.__spline1(x), lambda x:maxm_prog1a)[0]
 
         # Avoid renormalizing during the next timesteps
@@ -4927,41 +5894,9 @@ class chem_evol(object):
 
 
     ##############################################
-    #                Get Spline Info             #
-    ##############################################
-    def __get_spline_info(self):
-
-        '''
-        This function returns the stellar lifetimes used in sn1a_contribution()
-   
-        '''
-
-        # Get the [metallicity, log mass, log lifetime] arrays
-        # Values for spline fit must be increasing
-        zm_lifetime_grid = self.zm_lifetime_grid_current
-        idx_z = (np.abs(zm_lifetime_grid[0] - self.zmetal)).argmin()
-        grid_lifetimes = list(zm_lifetime_grid[2][idx_z])[::-1]
-        grid_masses = list(zm_lifetime_grid[1])[::-1]
-
-        # Information for spline functions 
-        spline_degree1 = 2
-        smoothing1 = 0
-        boundary = [None, None]
-
-        # Define the spline
-        self.spline_lifetime = UnivariateSpline(grid_lifetimes, \
-            np.log10(grid_masses), bbox=boundary, k=spline_degree1, s=smoothing1)
-        spline_lifetime = self.spline_lifetime
-        spline_min_time = 10**grid_lifetimes[0]
-
-        # Return all the lifetimes (log) and the miminum lifetime
-        return spline_lifetime, spline_min_time
-
-
-    ##############################################
     #                Normalize Maoz              #
     ##############################################
-    def __normalize_maoz(self, spline_min_time):
+    def __normalize_maoz(self, lifetime_min):
 
         '''
         This function normalizes the SN Ia rate of Maoz or any power law.
@@ -4969,7 +5904,7 @@ class chem_evol(object):
         Argument
         ========
 
-          spline_min_time : Minimum stellar lifetime.
+          lifetime_min : Minimum stellar lifetime.
 
         '''
 
@@ -4983,7 +5918,7 @@ class chem_evol(object):
 
         # Calculate the normalisation constant
 #        self.A_maoz = self.nb_1a_per_m / quad(self.__maoz_sn_rate_int, \
-#            spline_min_time, ageofuniverse)[0]
+#            lifetime_min, ageofuniverse)[0]
 #        print (self.A_maoz)
 
         # Calculate the first part of the integral
@@ -5650,528 +6585,6 @@ class chem_evol(object):
 
 
     ##############################################
-    #             Interpolate Yields             #
-    ##############################################
-    def __interpolate_yields(self, Z, ymgal_t, ytables):
-
-        '''
-        This function takes input yields and interpolates them to return the
-        yields at the desired metallicity (if the metallicity is not available
-        in the grid).
-
-        It also returns the func_total_ejecta function which calculates the 
-        total mass ejected as a function of the stellar initial mass.
-
-        Arguments
-        =========
-
-          Z : Current metallicity of the gas reservoir.
-          ymgal_t : mass of the gas reservoir of last timestep/current gas reservoir (for 'wiersma' setting). 
-          ytables : Ojbect containing the yield tables.
-          type_inter : 'lin' - Simple linear interpolation.
-                       'wiersma' - Interpolation method from Wiersma+ (2009)
-
-        '''
-        # Output information
-        if self.iolevel >= 2:
-             print ('Start interpolating yields')
-
-        # Reduce the number of decimal places in the metallicity variable
-        Z = round(Z, 6)
-
-        # Get all available metallicities
-        Z_grid = ytables.metallicities
-
-        # Simplest case: No interpolation of any kind for the yields 
-        if (self.yield_interp == 'None'):
-
-            #this includes no total ejecta interpolation
-            self.total_ejecta_interp = False
-
-            # to choose the grid metallicity closest to Z
-            z1, z2 = self.__get_Z_bdys(Z, Z_grid)
-            if abs(Z-z1) > abs(Z-z2):
-                Z_gridpoint=z2
-            else:
-                Z_gridpoint=z1
-            m_stars = ytables.get(Z=Z_gridpoint, quantity='masses') 
-            yields=[]
-            for k in range(len(m_stars)):
-                y1 = ytables.get(Z=Z_gridpoint, M=m_stars[k], quantity='Yields') 
-                yields.append(y1)
-
-            # func_total_ejecta is skipped for self.yield_interp == 'None', 
-            # hence return not relevant!!
-            def func_total_ejecta(inimass):
-                return inimass
-            return m_stars, yields, func_total_ejecta
-
-        # If the interpolation is linear between grid points ...
-        elif (self.yield_interp == 'lin') and (not self.netyields_on):
-
-            # Get the lower and upper Z boundaries for the interpolation
-            z1, z2 = self.__get_Z_bdys(Z, Z_grid)
-
-            # Get all initial stellar masses available in each Z boundary
-            m1 = ytables.get(Z=z1, quantity='masses')
-            m2 = ytables.get(Z=z2, quantity='masses')
-            # Get the stellar masses and the interpolated yields at Z
-            m_stars, yields = self.__lin_int_yields(z1, z2, m1, m2, ytables, Z)
-
-            #this step is to get a Z_gridpoint value for self.Z_gridpoint 
-            if abs(Z-z1) > abs(Z-z2):
-                Z_gridpoint=z2
-            else:
-                Z_gridpoint=z1
-
-        # If the "interpolation" is taken from Wiersma et al. (2009) ....   
-        elif (self.yield_interp == 'wiersma'):
-
-            # Get the closest available metallicity (favouring lower boundary)
-            Z_gridpoint = self.__get_Z_wiersma(Z, Z_grid)
-            #print ('Take yields from Z closest to: ',Z,' found: ',Z_gridpoint)
-            # Get all initial masses at the selected closest metallicity
-            m_stars = ytables.get(Z=Z_gridpoint, quantity='masses')
-            # Get the yields corrected for the different initial abundances
-            yields = self.__correct_iniabu(ymgal_t, ytables, Z_gridpoint, m_stars)
-        else:
-            sys.exit('Choice of parameter value of yield_interp not valid!') 
-
-        #here we save the metallicity selected from yield grid
-        self.Z_gridpoint=Z_gridpoint
-
-        # Output information
-        if self.iolevel >= 3:
-            print ('Finished interpolating yields')
-            print ('Interpolation test for ',round(Z,6))
-            print (z1,z2,m_stars) #,star_age
-            print ('Yields:')
-            for k in range(len(m_stars)):
-                print (m_stars[k], yields[k])
-
-        # Calculate the coefficients of the linear fit regarding the total mass
-        # ejected as a function of the stellar initial mass
-        slope, intercept = self.__fit_mej_mini(m_stars, yields)
-
-        # Function that returns the ejected mass as a function of stellar mass
-        def func_total_ejecta(inimass):
-
-            # Use calculated linear fit
-            for h in range(len(m_stars)-1):
-                if (inimass >= m_stars[h]) and (inimass <= m_stars[h+1]):
-                    massejected = slope[h] * inimass + intercept[h]
-                    if massejected < 0:
-                        print (slope[h],intercept[h])
-                        print ('inimass', inimass, \
-                              'problem wiht massejected', massejected)
-                    return massejected
-
-            # Use the last fit for stars more massive than the ones available
-            if inimass > m_stars[-1]:
-                massejected = slope[-1] * inimass + intercept[-1]
-                if massejected < 0:
-                    print (slope[h], intercept[h])
-                    print ('inimass', inimass, \
-                          'problem wiht massejected',massejected)
-                return massejected
-
-        self.func_total_ejecta=func_total_ejecta
-        self.m_stars=m_stars
-        self.yields=yields
-        '''
-        if self.iolevel>0:
-            mtests=np.arange(m_stars[0],m_stars[-1],0.1) 
-            plt.figure()
-            for h in range(len(slope)):
-                y=slope[h]*np.array(mtests)+intercept[h]
-                plt.plot(mtests,y)
-                plt.title('Total mass fit')
-                plt.xlabel('Minis');plt.ylabel('Meject')
-        '''
-
-        if self.stellar_param_on:
-                # Derive stellar parameter 1-parameter-1-mass with linear fits vs mass
-                self.stellar_param=[]
-                self.stellar_param_attrs=[]
-                self.stellar_param_functions=[]
-                m_stars_grid = self.ytables.get(Z=self.Z_gridpoint, quantity='masses')
-                self.stellar_param_mrange=[m_stars_grid[0],m_stars_grid[-1]]
-
-                #parameter hold the evolution and filled in the step where yields are applied
-                table_p=self.table_param #to be better readable
-                table_y=self.ytables
-
-                stellar_param_y=[]
-                #ytables.col_attrs
-                self.stellar_param_attrs_y=[]
-                for hh in range(len(m_stars_grid)):
-                        stellar_param_y.append([])
-                        for k in range(len(table_y.col_attrs)):
-                                if not table_y.col_attrs[k] in ['Table (M,Z)', 'Lifetime', 'Mfinal']:
-                                        stellar_param_y[-1].append(table_y.get(Z=self.Z_gridpoint,M=m_stars_grid[hh],quantity=table_y.col_attrs[k]))
-
-                for k in range(len(table_y.col_attrs)):
-                        if not table_y.col_attrs[k] in ['Table (M,Z)', 'Lifetime', 'Mfinal']:
-                                self.stellar_param_attrs_y.append(table_y.col_attrs[k])
-
-                self.stellar_param_y=stellar_param_y
-                #print ('stellar_param_attrs_y',self.stellar_param_attrs_y)
-                #print ('stellar_param_y',self.stellar_param_y)
-
-                data_cols1=table_p.data_cols
-                #to make sure that Mdot comes before Ekindot, if available (for factors)
-                if 'Mdot_wind' in data_cols1 and 'Ekindot_wind' in data_cols1:
-                        #first Mdot and then Ekindot_wind
-                        idx1= data_cols1.index('Mdot_wind')
-                        idx2= data_cols1.index('Ekindot_wind')
-                        if idx1 > idx2:
-                                data_cols1[idx1]='Ekindot_wind'
-                                data_cols1[idx2]='Mdot_wind'
-
-                data_cols=data_cols1[1:]
-                #print ('data_cols',data_cols)
-                for h in range(len(data_cols)):
-                        self.stellar_param_attrs.append(data_cols[h])
-
-                for h in range(len(data_cols)+len(self.stellar_param_attrs_y)):
-                        self.stellar_param.append([0.]*self.nb_timesteps)
-
-                #add parameter from table file
-                self.stellar_param_attrs += self.stellar_param_attrs_y
-
-                if self.sn1a_on:
-                        self.stellar_param_attrs += ['SNIa energy']
-                        self.stellar_param.append([0.]*self.nb_timesteps)
-
-                stellar_param_evol_num=len(data_cols)
-                dts= self.history.timesteps
-                stellar_param_evol=[]
-                stellar_param_evol_lifetimes=[]
-                #loop over all stars
-                for hh in range(len(m_stars_grid)):
-                        if hh==len(m_stars_grid)-1:
-                                age_before=0.
-                        else:
-                                age_before=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh+1],quantity='Age')[-1]
-                        if hh==0:
-                                age_after=1e99
-                        else:
-                                age_after=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh-1],quantity='Age')[-1]
-                        ages=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh],quantity='Age')
-                        #print ('zgridpoint',Z_gridpoint)
-                        #get the parameter from tables
-                        stellar_param_table_evol=[]
-                        stellar_param_evol1=[]
-                        for k in range(len(data_cols)):
-                                #print ('quantity ',k,self.Z_gridpoint,m_stars_grid[hh],data_cols[k])
-                                tdum=table_p.get(Z=self.Z_gridpoint,M=m_stars_grid[hh],quantity=data_cols[k])
-                                #print (tdum)
-                                stellar_param_table_evol.append(tdum)
-                                stellar_param_evol1.append([0.]*len(dts))
-                        if 'Mdot_wind' in data_cols and 'Ekindot_wind' in data_cols:
-                                #for some reason entry 3 and 4 are switched despite me taking correct quantity, so I switch back
-                                stellar_param_table_evol1=stellar_param_table_evol[:]
-                                stellar_param_table_evol[3]=stellar_param_table_evol1[4]
-                                stellar_param_table_evol[4]=stellar_param_table_evol1[3]
-                        #print ('m star: ',m_stars_grid[hh],stellar_param_table_evol[3])
-                        #fill the time step bins with values
-                        age_sim_last=0.
-                        age_sim=0.
-                        ages=[0.]+list(ages)
-                        scaled_dts=[]
-                        age_sim_save=[]
-                        for k in range(len(dts)):
-                                # for timestep loop over table time entries, are they relevant for time step bin? 
-                                # during which fraction frac of the time step bin are they relevant?
-                                # create mean value for each time step bin by taking account the fractions
-                                age_sim = age_sim + dts[k]
-                                age_sim_save.append(age_sim)
-                                for t in range(1,len(ages)):
-                                        #to prevent same time entries to add up; stop then
-                                        if ages[t] == ages[t-1]:
-                                                break
-                                        #table grid step: ages[t-1] - ages[t]
-                                        if ages[t]<age_sim_last:
-                                                continue
-                                        elif ages[t-1]>age_sim:
-                                                continue
-                                        elif ages[t-1]<=age_sim_last and ages[t]<=age_sim:
-                                                frac = (ages[t] - age_sim_last)/dts[k]
-                                                for p in range(stellar_param_evol_num):
-                                                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac #* age_scale_f
-                                        elif ages[t-1]>=age_sim_last and ages[t]>=age_sim:
-                                                frac = (age_sim - ages[t-1])/dts[k]
-                                                for p in range(stellar_param_evol_num):
-                                                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac #* age_scale_f
-                                        elif ages[t-1]<=age_sim_last and ages[t]>=age_sim:
-                                                frac = 1.
-                                                for p in range(stellar_param_evol_num):
-                                                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac #* age_scale_f
-                                        else:
-                                                frac = (ages[t] - ages[t-1])/dts[k]
-                                                for p in range(stellar_param_evol_num):
-                                                        stellar_param_evol1[p][k] += stellar_param_table_evol[p][t-1] * frac #* age_scale_f
-                                        if frac<0:
-                                                print ('error frac!!!, t: ',t)
-                                age_sim_last=age_sim
-
-                        stellar_param_evol11=[]
-                        #age_star=ages[-1]
-                        for k in range(len(dts)):
-                                stellar_param_evol11.append([])
-                                for h in range(len(data_cols)):
-                                        stellar_param_evol11[-1].append([0.]*self.nb_timesteps)
-
-                        #for each timestep get scaling relation
-                        # in principle one need only these scaling for certain time range which we don't know yet..
-                        #hence we compute for all timesteps... 
-                        #plt.figure(str(m_stars_grid[hh]))
-                        #plt.plot(age_sim_save[:],stellar_param_evol1[4],marker='x',markevery=1)
-                        for u in range(len(dts)):
-
-                                #we need values only for certain lifetime range
-                                if age_sim_save[u]<age_before or age_sim_save[u]>age_after:
-                                        continue
-
-                                #scale facgtor for time steps
-                                age_scale_f=age_sim_save[u]/ages[-1]
-                                scaled_dts= np.array(dts)*age_scale_f
-                                #print ('age scalf ',u,age_scale_f)
-                                #age for scaled timesteps
-                                age_sim1=[0.]
-                                adum=0.
-                                for t in range(len(scaled_dts)):
-                                        adum = adum + scaled_dts[t]
-                                        age_sim1.append(adum)
-
-                                age_sim=0.
-                                age_sim_last=0.
-                                #go over available time steps to fill
-                                for k in range(len(dts)):
-
-                                        age_sim = age_sim + dts[k]
-                                        #for each age find which suites the best in intervall given by time step
-                                        for t in range(1,len(age_sim1)):
-                                                if age_sim1[t]<age_sim_last:
-                                                        continue
-                                                elif age_sim1[t-1]>age_sim:
-                                                        continue
-                                                elif age_sim1[t-1]<=age_sim_last and age_sim1[t]<=age_sim:
-                                                        frac = (age_sim1[t] - age_sim_last)/dts[k]
-                                                        for p in range(stellar_param_evol_num):
-                                                                stellar_param_evol11[u][p][k] += stellar_param_evol1[p][t-1] * frac
-                                                elif age_sim1[t-1]>=age_sim_last and age_sim1[t]>=age_sim:
-                                                        frac = (age_sim - age_sim1[t-1])/dts[k]
-                                                        for p in range(stellar_param_evol_num):
-                                                                stellar_param_evol11[u][p][k] += stellar_param_evol1[p][t-1] * frac
-                                                elif age_sim1[t-1]<=age_sim_last and age_sim1[t]>=age_sim:
-                                                        frac = 1.
-                                                        for p in range(stellar_param_evol_num):
-                                                                stellar_param_evol11[u][p][k] += stellar_param_evol1[p][t-1] * frac #* age_scale_f                    
-                                                else:
-                                                        frac = (age_sim1[t] - age_sim1[t-1])/dts[k]
-                                                        for p in range(stellar_param_evol_num):
-                                                                stellar_param_evol11[u][p][k] += stellar_param_evol1[p][t-1] * frac
-                                                #print ('frac ',frac)
-                                                #if frac>1e4:
-                                                #        print ('frac 1e4',frac)
-                                                if frac<0:
-                                                        print (' negative frac!!!',frac,' t: ',t)
-                                        age_sim_last=age_sim
-
-                                #plt.plot(age_sim_save[:],stellar_param_evol11[u][4],linestyle=':')
-                        stellar_param_evol.append(stellar_param_evol11) #to 11
-                        #plt.yscale('log')
-                        #plt.xscale('log')
-                        #plt.xlim(5e6,1e10);plt.ylim(1e36,1e44) #plt.ylim(1e-14,1e-5)
-                        #stellar_param_evol_lifetimes.append(ages[-1])
-
-                self.stellar_param_evol_masses=m_stars_grid
-                self.stellar_param_evol=stellar_param_evol
-                self.sellar_param_evol_lifetimes=stellar_param_evol_lifetimes
-
-        # Return the stellar masses, yields and ejecta function at Z
-        return m_stars, yields, func_total_ejecta
-
-
-    ##############################################
-    #                 Get Z Bdys                 #
-    ##############################################
-    def __get_Z_bdys(self, Z, Z_grid):
-
-        '''
-        This function returns the lower and upper metallicity boundaries that
-        bracket a given metallicity.  The boundary metallicities represent 
-        available grid points in the input yield tables.
-
-        Arguments
-        =========
-
-          Z : Current metallicity of the gas reservoir.
-          Z_grid : Available metallicity grid points.
-
-        '''
-
-        # For every available metallicity ...
-        for tz in Z_grid:
-
-            # If Z is above the grid range, use max available Z
-            if Z >= Z_grid[0]:
-                z1 = Z_grid[0]
-                z2 = Z_grid[0]
-                if self.iolevel >= 2:
-                    print ('Z > Zgrid')
-                break
-
-            # If Z is below the grid range, use min available Z
-            if Z <= Z_grid[-1]:
-                z1 = Z_grid[-1]
-                z2 = Z_grid[-1]
-                if self.iolevel >= 2:
-                    print ('Z < Zgrid')
-                break
-
-            # If Z is exactly one of the available Z, use no boundary
-            if Z == tz:
-                z1 = tz
-                z2 = tz
-                if self.iolevel >= 2:
-                    print ('Z = Zgrid')
-                break
-
-            # If Z is above the grid point at index tz ...
-            if Z > tz:
-
-                # Use the current grid point as the lower boundary
-                z1 = tz
-
-                # Use the previous grid point as the upper boundary
-                z2 = Z_grid[Z_grid.index(tz) - 1]
-
-                # Output information
-                if self.iolevel >= 2:
-                    print ('interpolation necessary')
-                break
-
-        # Return the boundaries
-        return z1, z2
-
-
-    ##############################################
-    #               Lin Int Yields               #
-    ##############################################
-    def __lin_int_yields(self, z1, z2, m1, m2, ytables, Z):
-
-        '''
-        This function returns the stellar masses and the interpolated yields
-        at a given metallicity.  It uses a linear interpolation.
-        
-
-        Arguments
-        =========
-
-          z1 : Lower metallicity boundary.
-          z2 : Upper metallicity boundary.
-          m1 : Stellar mass grid points at z1.
-          m2 : Stellar mass grid points at z2.
-          ytables : Yield tables.
-          Z : Current metallicity of the gas reservoir.
-
-        '''
-
-        # Declaration of arrays containing the stellar masses and the
-        # interpolated yields at the desired metallicity.
-        m_stars = []
-        yields = []
-
-        # If yields need to be interpolated between metallicities z1 and z2
-        if not z1 == z2:
-
-            #Decide for mass sparsity of grid: Choose grid which has a metallicity closest to Z
-            if abs(Z-z2) < abs(Z-z1):
-                Z_negl=z1 #not z1
-                Z_choice=z2 #decide for z2
-                m_stars = m2
-                m_negl = m1
-            else:
-                Z_negl=z2
-                Z_choice=z1
-                m_stars = m1
-                m_negl= m2
-            m_bdy=[]
-            m_missing=[]
-
-            #find for each mass not available at Z_negl masses m_byd[] (at Z_negl) for a linear interpolation 
-            # to derive yields for the mass only available at Z_choice.
-            for p in range(len(m_stars)):
-                if m_stars[p] not in m_negl:
-                                #print (m_stars[p])
-                                m_missing.append(m_stars[p])
-                                m_bdy.append([0,0])
-                                for m in m_negl:
-                                        if m<m_stars[p]:
-                                                m_bdy[-1][0]=m
-                                        if m>m_stars[p]:
-                                                #in case no lower boundary
-                                                if m_bdy[-1][0] ==0:
-                                                        m_bdy[-1][0]=m
-                                                m_bdy[-1][1]=m
-                                                break
-                                #in case no upper boundary
-                                if m_bdy[-1][1] ==0:
-                                        m_bdy[-1][1]=m_bdy[-1][0]
-                                #print ('found  boundary: ',m_bdy[-1])
-            #print ('missing masses: ',m_missing,zs_missing)
-            m_stars=np.sort(m_stars)
-            # For each mass interpolate each isotope
-            for m in m_stars:
-                yields.append([])
-                if m in m_missing:
-                        #when masses are missing do a interpolation of the yields using m_bdy
-                        idx=m_missing.index(m)
-                        #print ('M=',m,'not available at Z=',Z_negl,': interpolate!')
-                        #print ('boundary : ',m_bdy[idx][0],m_bdy[idx][1],'for ',m)
-                        if m_bdy[idx][0] == m_bdy[idx][1]:
-                                #no interpolation possible, take at available mass
-                                y1 = ytables.get(Z=Z_negl, M=m_bdy[idx][0], quantity='Yields')
-                        else:
-                                #do interpolation in mass for Z_negl
-                                y_min_negl = ytables.get(Z=Z_negl, M=m_bdy[idx][0], quantity='Yields')
-                                y_max_negl = ytables.get(Z=Z_negl, M=m_bdy[idx][1], quantity='Yields')
-                                y_interp_negl=[]
-                                for p in range(len(y_min_negl)):
-                                        slope = (y_max_negl[p] - y_min_negl[p]) / (m_bdy[idx][1] - m_bdy[idx][0])
-                                        b = y_max_negl[p] - slope * m_bdy[idx][1]
-                                        #print (p,y_min_negl[p],y_max_negl[p],slope * m + b)
-                                        y_interp_negl.append(slope * m + b)
-                                y1 = y_interp_negl
-                else:
-                        #if masses are at both Z available
-                        y1 = ytables.get(Z=Z_negl, M=m, quantity='Yields')
-
-                #do interpolatation in metallicity
-                y2 = ytables.get(Z=Z_choice, M=m,quantity='Yields')
-                for p in range(len(y2)):
-                        y1i = y1[p]
-                        y2i = y2[p]
-                        slope = (y2i - y1i) / (Z_choice - Z_negl)
-                        b = y2i - slope * Z_choice
-                        yi = slope * Z + b
-                        yields[-1].append(yi)
-
-        # If no need to interpolate because same metallicities
-        else:
-
-            # Copy one of the available stellar masses and yields
-            m_stars = m1
-            for m in m_stars:
-                yields.append(ytables.get(Z=z1, M=m, quantity='Yields'))
-
-        # Return the stellar masses and the linearly interpolated yields
-        return m_stars, yields
-
-
-    ##############################################
     #                Get Z Wiersma               #
     ##############################################
     def __get_Z_wiersma(self, Z, Z_grid):
@@ -6368,491 +6781,6 @@ class chem_evol(object):
         # Return the linear fit coefficients
         return slope, intercept
 
-
-    ##############################################
-    #         Interpolate Yields PopIII          #
-    ##############################################
-    def __interpolate_yields_pop3(self, zmetal,ymgal_t, ytables):
- 
-        '''
-        This function returns PopIII star yields and the func_total_ejecta that
-        calculates the total mass ejected as a function of the stellar initial
-        mass.
-
-        Arguments
-        =========
-
-          Z : Current metallicity of the gas reservoir (Z = 0).
-          ymgal_t : mass of the gas reservoir of last timestep/current gas reservoir (for 'wiersma' setting). 
-          ytables : Object containing the yield tables.
-
-        '''
-
-        # Declaration of arrays containing the stellar masses and the
-        # interpolated yields at the desired metallicity, which is Z = 0
-        mstars = []
-        yields_all = []
-
-        # Recover PopIII stellar masses and yields
-        for k in range(len(self.ytables_pop3.table_mz)):
-            mini = float(self.ytables_pop3.table_mz[k].split('=')[1].split(',')[0])
-            if mini > self.imf_yields_range_pop3[1]:
-                break
-            if mini < self.imf_yields_range_pop3[0]:
-                continue
-            mstars.append(mini)
-            yields_all.append(self.ytables_pop3.get(Z=zmetal, \
-                M=mini,quantity='Yields'))
-
-        # Copy stellar masses and yields ..
-        m_stars = mstars
-        yields = yields_all
-
-        # The wiersma interpolation below has to be checked.
-        if self.yield_interp == 'wiersma': #self.netyields_on==True:
-            # Get the yields corrected for the different initial abundances
-            #yields = self.__correct_iniabu(ymgal_t, self.ytables_pop3, 0, m_stars)
-            print ('Net-yields approach is not applied for PopIII yield input fot time')
-
-        # Get the actual stellar masses and total mass ejected
-        x_all = np.array(m_stars)
-        y_all = np.array([np.sum(a) for a in yields])
-
-
-        # Calculate the coefficients of the linear fit regarding the total mass
-        # ejected as a function of the stellar initial mass 
-        slope = []
-        intercept = []
-        for h in range(len(x_all)-1):
-            x = np.array([x_all[h], x_all[h+1]])
-            y = np.array([y_all[h], y_all[h+1]])
-            a,b = polyfit(x=x, y=y, deg=1)   
-            slope.append(a)
-            intercept.append(b)
-
-        # Function that returns the ejected mass as a function of stellar mass
-        def func_total_ejecta(inimass):
-            for h in range(len(m_stars)-1):
-                if (inimass >= m_stars[h]) and (inimass <= m_stars[h+1]):
-                    massejected = slope[h] * inimass + intercept[h]
-                    if massejected < 0:
-                        print (slope[h], intercept[h])
-                        print ('inimass', inimass, \
-                              'problem wiht massejected',massejected)
-                    return massejected
-                elif (inimass < m_stars[0] and inimass >= self.imf_yields_range_pop3[0]):
-                    massejected = slope[0] * inimass + intercept[0]
-                    if massejected < 0:
-                        print (slope[h], intercept[h])
-                        print ('inimass', inimass, \
-                              'problem wiht massejected',massejected)
-                    return massejected
-
-        # Return the stellar masses, yields and ejecta function at Z = 0
-        return mstars, yields_all, func_total_ejecta
-
-
-    ##############################################
-    #       Interpolate Lifetimes PopIII         #
-    ##############################################
-    def __interpolate_lifetimes_pop3(self, tables):
-
-        '''
-        This function interpolates and returns the stellar lifetimes of PopIII
-        stars using given yield tables.  The PopIII star yields range boundary
-        is taken into account in the interpolation.
-
-        Argument
-        ========
-
-          tables : Input yield tables 
-
-        '''
-
-        # Get the available lifetimes from the input tables
-        lifetimes = tables.get('Lifetime')
-
-        # Get the available stellar masses from the input tables
-        masses = []
-        sim_ids = tables.get('Table (M,Z)')
-        for k in range(len(sim_ids)):
-            masses.append(float(sim_ids[k].split(',')[0].split('=')[1]))
-
-        # Define the minimum and maximum mass range for the interpolation
-        fit_massmin = self.imf_yields_range_pop3[0]
-        fit_massmax = self.imf_yields_range_pop3[1]
-
-        # Define the parameters of the interpolation
-        spline_degree1 = 2  # Other choices : 1, 2
-        smoothing1 = 0      # Other choices : 0, 1, 2, 3
-        x = np.log10(masses)
-        z = np.log10(lifetimes)
-        boundary = [None,None]
-
-        # Interpolate the stellar masses to have more of them available
-        s = UnivariateSpline(x, z, bbox=boundary, k=spline_degree1, s=smoothing1)
-        all_masses = np.linspace(fit_massmin, fit_massmax, \
-            len(range(fit_massmin, fit_massmax, 1+1)))
-        all_masses = np.linspace(10, 30, len(range(10,30,1)) +1)
-        all_masses = np.linspace(10, 30, len(range(10,30,1)) +21+40+20)
-        all_masses = np.linspace(10, 30, len(range(10,30,1)) +21+40+20+100)
-
-        # Get the interpolated lifetimes from the interpolated stellar masses
-        lifetimes_grid = s(np.log10(np.array(all_masses)))
-
-        # Return Z = 0, interpolated stellar masses and lifetimes
-        return [np.array([0.0]), all_masses, np.array([lifetimes_grid])]
-
-
-    ##############################################
-    #        Interpolate Lifetimes Grid          #
-    ##############################################
-    def __interpolate_lifetimes_grid(self, tables):
-        
-        '''
-        This function interpolates and returns the main sequence lifetimes
-        using given input tables (NuGrid as default).  The yields range boundary
-        is taken into account in the interpolation.
-
-        Argument
-        ========
-
-          tables : Input yield tables
-
-        Return array
-        ============
-
-           [[metallicities Z1,Z2,...], [masses], [[log10(lifetimesofZ1)],
-           [log10(lifetimesofZ2)],..] ]
-
-        '''
-
-        # Output information
-        if self.iolevel >= 2:
-            print ('Entering interpolate_lifetimes_grid routine')
-
-        # Read the lifetimes from the given yield tables
-        lifetimes_all = tables.get('Lifetime')
-        sim_ids = tables.get('Table (M,Z)')
-
-        # Get the available Z, M, and lifetimes from yield table
-        z_all = []
-        m_all = []
-        mass = []
-        metallicity = []
-        lifetimes = []
-        for k in range(len(lifetimes_all)):
-            m = sim_ids[k].split(',')[0].split('=')[-1]
-            z = sim_ids[k].split(',')[1].split('=')[-1][:-1]
-            m_all.append(m)
-            z_all.append(z)
-            if not float(z) in metallicity:
-                metallicity.append(float(z))
-                mass.append([])
-                lifetimes.append([])
-            mass[-1].append(float(m))
-            lifetimes[-1].append(lifetimes_all[k])
-        #save values for test plotting further below
-        mass_save=mass
-        metallicity_save=metallicity
-        lifetimes_save=lifetimes
-        # Initialisation of the interpolation values for mass range
-        fit_massmin = self.imf_yields_range[0]
-        fit_massmax = self.imf_yields_range[1]
-        mmin = np.log10(fit_massmin) 
-        mmax = np.log10(fit_massmax) 
-        all_masses1 = np.linspace(fit_massmin,fit_massmax,2901)
-
-        # Fit lifetimes over the mass ranges for yield metallicity grid
-        spline_degree1 = 2           # 1, 2
-        all_masses = []
-        spline_metallicity = []
-        for m in range(len(metallicity)):
-            x=np.log10(mass[m])
-            for k in range(len(mass[m])):
-                if not mass[m][k] in all_masses:
-                    all_masses.append(mass[m][k])
-            y=len(mass[m])*[metallicity[m]]
-            z=np.log10(lifetimes[m])
-            boundary=[None,None]
-            smoothing1 = len(mass[m]) + spline_degree1
-            s = UnivariateSpline(x,z,bbox=boundary,k=spline_degree1,s=smoothing1)
-            spline_metallicity.append(s)
-
-        # if fit over metallicity not necessary or possible, get separate fit results
-        if len(metallicity)==1:
-                if self.iolevel>0:
-                        print ('Only 1 metallicity provided, no fit over lifetime')
-                all_lifetimes=[]
-                for m in range(len(metallicity)):
-                    x=all_masses1
-                    all_lifetimes.append(s[m](x))
-                    all_metallicities=metallicity
-                    # Creating the return array (masses in solar mass, no log anymore)
-                zm_lifetime_grid = [np.array(all_metallicities), \
-                np.array(all_masses1),np.array(all_lifetimes)]
-                # Return array with M, t, Z (see function definition)
-                return zm_lifetime_grid
-
-        '''
-        # First guess of the metallicity steps
-        all_metallicities = np.array([1e-06, 2e-06, 3e-06, 4e-06, 5e-06, 6e-06, \
-                            7e-06, 8e-06, 9e-06, 1e-05, 2e-05, 3e-05, 4e-05, 5e-05,\
-                            6e-05, 7e-05, 8e-05, 9e-05, 0.0001, 0.0002, 0.0003, \
-                            0.0004, 0.0005, 0.0006, 0.0007, 0.0008, 0.0009, 0.001, \
-                            0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009,\
-                            0.01,0.011,0.012,0.013,0.014,0.015,0.016,0.017,0.018, \
-                            0.019,0.02])
-        '''
-
-        #we limit metallicity range to range provided in yield input grid
-        #since we do a linear interpolation below and values outside the yield input
-        #grid would be constant. __find_lifetimes returns constant values if outside the
-        #z grid range
-        zmin=min(metallicity) #from yield input grid
-        zmax=max(metallicity) #from yield input grid
-        #create metallicity in steps log steps ..1e-X,2e-X,3e-X,..1e-(X+1),2e-(X+1)
-        all_metallicities=[]
-        zdum=zmin
-        dum=1
-        while True:
-                if zdum*dum>zmax:
-                        break
-                all_metallicities.append(zdum*dum)
-                dum=dum+1
-                if dum==10:
-                        dum=1
-                        zdum=zdum*10
-
-        # Initialisation of the interpolation parameters for M vs Z ?
-        # for 2 Z do linear interpolation
-        if len(metallicity)==2:
-                spline_degree1 = 1
-                smoothing1 = 3
-                if self.iolevel>0:
-                        print ('Only 2 metallicities provided, do linear fit over lifetime')
-        else:
-                spline_degree1 = 1#4           # 1, 2
-                smoothing1 = len(metallicity)+spline_degree1 #3               # 0, 1, 2, 3
-
-        # ...
-        all_masses = np.linspace(fit_massmin,fit_massmax,2901)
-        all_masses = np.log10(all_masses)
-        all_lifetimes = []
-        for m in range(len(all_masses)):
-            all_lifetimes.append([])
-            y = []
-            z = []
-            for k in range(len(spline_metallicity)):
-                z.append(spline_metallicity[k](all_masses[m]))  #same mass
-                y.append(metallicity[k])
-            x = [all_masses[m]]*len(y)
-            lifetimes_z = np.interp(all_metallicities, y[::-1], z[::-1]) #1D interpolation to address increasing values in distribution tail
-            for l in lifetimes_z:
-                all_lifetimes[-1].append(l)
-
-        # Sorting
-        all_lifetimes1=[]
-        for k in range(len(all_lifetimes[0])):
-            all_lifetimes1.append([])
-            for j in range(len(all_lifetimes)):
-                all_lifetimes1[-1].append(all_lifetimes[j][k])
-        all_lifetimes = all_lifetimes1
-
-        # Creating the return array (masses in solar mass, no log anymore)
-        zm_lifetime_grid = [np.array(all_metallicities), \
-            np.array(all_masses1),np.array(all_lifetimes)]
-
-        # Output information
-        if self.iolevel >= 2:
-            print ('Routine __interpolate_lifetimes_grid')
-            idx = np.where(zm_lifetime_grid[0] ==0.0001)[0][0]
-            masses = zm_lifetime_grid[1]
-            print ('masses',masses)
-            masses = all_masses1 #10**masses
-            lifetimes = zm_lifetime_grid[2][idx]
-            lifetimes = 10**lifetimes
-            massescheck = [1.,1.65,3.,5.,7.,15.,25.]
-            lifetimescheck = []
-            for k in range(len(massescheck)):
-                idx = np.where(masses==massescheck[k])[0][0]
-                print ('mass',masses[idx])
-                print (lifetimes[idx])
-            print ('end routine')
-        self.lifetime_yield_input = [mass_save,lifetimes_save,metallicity] 
-        if self.iolevel >= 1:
-            import matplotlib.pyplot as plt
-            for k in range(len(all_metallicities)):
-                plt.plot(all_masses,all_lifetimes[k])
-            for k in range(len(metallicity)):
-                x=np.log10(mass_save[k])
-                y=np.log10(lifetimes_save[k])
-                plt.plot(x,y,marker='o',label='Z='+str(metallicity[k]),linestyle='')
-                plt.xlabel('log Mini')
-                plt.ylabel('log lifetime')
-                plt.legend();plt.title('Lifetime fit')
-            for ind, m in enumerate(zm_lifetime_grid[1]):
-                if m == np.max(zm_lifetime_grid[1]):
-                    for ltind, ltarray in enumerate(zm_lifetime_grid[2]):
-                        if ltarray[ind] != np.min(ltarray):
-                            print ('Warning! Maximum mass does not correspond to minimum lifetime for Z=%.04f.' %zm_lifetime_grid[0][ltind])
-                            print ('Lifetime for max mass:', ltarray[ind], 'Minimum lifetime:', np.min(ltarray))
-
-        # Return array with M, t, Z (see function definition)
-        return zm_lifetime_grid
-
-
-    ##############################################
-    #           Interpolate Lifetimes            #
-    ##############################################
-    def __find_lifetimes(self, metallicity, mass, lifetime=0):
-
-        '''
-        Method to find lifetimes in the grid calculated by
-        the method interpolate_lifetimes_grid. The 3D fit
-        is done by using the mass and metallicity dependent
-        lifetime values from the 'table' input (which should be
-        the nugrid table file). Only those fits are tested.
-        If metallicity is above the upper metallicity and 
-        below the lower metallicity the lifetimes
-        at those upper and lower boundaries are used respectively.
-
-        Notes 
-        =====
-
-          !! mass and metallicity in grid are log10
-          round for 4 digits in (precision):
-          Motivation: for M1 (2e-2) timestep size
-          with limit precision 4  the last two timesteps:
-          (timestep:)  1.320E+10 1.321E+10 1.0 1.00023028502
-          (timestep:)  1.321E+10 1.321E+10 1 1.0
-          with limit precsion 5:
-          (timestep:)  1.320E+10 1.321E+10 1.00009210765 1.00027634839
-          (timestep:)  1.321E+10 1.321E+10 1 1.00009210765
-          with 5 last timestep gets properly resolved
-          > fourth digit is changing!
-          difference in mass ~
-        
-        Arguments
-        =========
-
-          metallicity: Metallicity
-          mass : if lifetime>0, expect array input:
-                   array with [minm,maxm], with entries being in solar masses
-                 else: expect float input in solar masses
-          lifetime : if lifetimes is 0:
-                       Find lifetime for certain mass and metallicity
-                       by doing a linear fit between two closest mass points
-                       in the z-m-interpolated grid
-                     if lifetime > 0:
-                       Find
-
-        '''
-
-        # Get the current lifetime grid
-        zm_lifetime_grid = self.zm_lifetime_grid_current
-
-        # Print information
-        if metallicity == 0:
-            if self.iolevel >= 2:
-                grid= zm_lifetime_grid
-                print ('zmetal',grid[0])
-                print ('masses',np.array(grid[1]))
-                print ('lifetimes',grid[2])
-
-        precision = 5
-        if lifetime > 0:
-            mrangemin=mass[0]#round(np.log10(mass[0]),precision)
-            mrangemax=mass[1]#round(np.log10(mass[1]),precision)
-            lifetime=np.log10(lifetime)
-            #for retrieving masses, in certain mass range given by 
-            #mrangemin,mrangemax
-            #for given metallicity Z and lifetime lifetime
-            idx_z = (np.abs(zm_lifetime_grid[0]-metallicity)).argmin()
-            value_found=False
-            firsttest=True
-            #goes over lifetime intervals starting from the high-lifetime end
-            for upper,lower in zip(zm_lifetime_grid[2][idx_z][:-1], \
-                zm_lifetime_grid[2][idx_z][1:]):
-
-                #This first test is in case lifetime is out of the grid range,
-                #which should not be and is only because of the precision. 
-                #If yes, then set it to grid boundary value
-                if firsttest==True:
-                        upper_max=max(zm_lifetime_grid[2][idx_z][:-1])
-                        lower_max=min(zm_lifetime_grid[2][idx_z][:-1])
-                        if lifetime>upper_max:
-                                lifetime=upper_max
-                        if lifetime<lower_max:
-                                lifetime=lower_max
-                firsttest=False
-                #print ('lifetimes',lower,lifetime,upper)
-                #if lifetime lies in lifetime interval
-                lower = min(lower,upper)
-                upper = max(lower,upper)
-                if (lower <= lifetime) and (lifetime <= upper):
-                    #print ('found range, lifetimes',lower,lifetime,upper)
-                    upper_t=upper
-                    upper_t_idx=list(zm_lifetime_grid[2][idx_z]).index(upper_t)
-                    lower_m=zm_lifetime_grid[1][upper_t_idx]
-                    #check that found mass is in interval given by initial mass bdy
-                    lower_t=lower
-                    lower_t_idx=list(zm_lifetime_grid[2][idx_z]).index(lower_t)
-                    upper_m=zm_lifetime_grid[1][lower_t_idx]
-                    #print (lower_m,upper_m)
-                    slope= (lower_m-upper_m)/(upper_t-lower_t)
-                    b= upper_m - slope * lower_t
-                    found_mass = round( slope*lifetime +b,precision)
-                    if mrangemin <= found_mass <= mrangemax:
-                        #lower_t=lower
-                        #lower_t_idx=list(zm_lifetime_grid[2][idx_z]).index(lower_t)
-                        #upper_m=zm_lifetime_grid[1][lower_t_idx]
-                        #print ('masss itnerval found', found_mass)
-                        value_found=True
-                        break
-            if value_found==False:
-                print ('Mass for lifetime ',10**lifetime,', not found')
-                print ('Throwing error in the following...')
-                #a=c
-            return found_mass
-        else:
-            mass_solar=mass
-            idx_z = (np.abs(zm_lifetime_grid[0]-metallicity)).argmin()
-            idx=np.where(zm_lifetime_grid[1]==mass)[0]#[0]
-            if len(idx)>0:
-                    idxfound=idx[0]
-                    #idxfound=list(zm_lifetime_grid[1]).index(np.log10(mass))
-                    found_lifetime = zm_lifetime_grid[2][idx_z][idxfound]
-            #else interpolate linearly between grid points
-            else:
-                    #mass=np.log10(mass)
-                    mass=float(mass)
-                    for lower, upper in zip(zm_lifetime_grid[1][:-1], zm_lifetime_grid[1][1:]):
-                        if (lower <= mass) and (mass <= upper):
-                            upper_m=upper
-                            lower_m=lower
-                            upper_m_idx=list(zm_lifetime_grid[1]).index(upper)
-                            lower_m_idx=list(zm_lifetime_grid[1]).index(lower)
-                            break
-                    upper_t=zm_lifetime_grid[2][idx_z][lower_m_idx]
-                    lower_t=zm_lifetime_grid[2][idx_z][upper_m_idx]
-                    slope=(lower_t-upper_t)/(upper_m-lower_m)
-                    b= upper_t - slope * lower_m
-                    found_lifetime = slope *mass +b
-            #idx_m = (np.abs(zm_lifetime_grid[1]-mass)).argmin()
-            #found_lifetime=zm_lifetime_grid[2][idx_z][idx_m]
-
-            return 10**found_lifetime
-
-
-    def get_lifetimes(self, metallicity, mass, lifetime=0):
-
-        '''
-        To get lifetime for given metallicity and mass.
-        Taken from the interpolated grid.
-        '''
-
-        return self.__find_lifetimes(metallicity=metallicity, mass=mass, lifetime=lifetime)
 
     ##############################################
     #               Get Metallicity              #

@@ -118,8 +118,8 @@ class sygma( chem_evol ):
     ##############################################
     def __init__(self, sfr='input', \
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
-                 sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
-                 nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
+                 sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30, \
+                 nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8.0, iolevel=0, \
                  ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  bhnsmerger_table_radio='', nsmerger_table_radio='',\
