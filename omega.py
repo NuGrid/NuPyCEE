@@ -252,6 +252,7 @@ class omega( chem_evol ):
                  sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
                  tend=13e9, mgal=1.0e10, transitionmass=8.0, iolevel=0, \
                  ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=30.0e6,\
+                 high_mass_extrapolation='copy',\
                  table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  use_decay_module=False,\
                  f_network='isotopes_modified.prn', f_format=1,\
@@ -390,7 +391,8 @@ class omega( chem_evol ):
                  ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
                  test_clayton=test_clayton, radio_refinement=radio_refinement,\
                  use_decay_module=use_decay_module,\
-                 f_network=f_network, f_format=f_format)
+                 f_network=f_network, f_format=f_format,\
+                 high_mass_extrapolation=high_mass_extrapolation)
 
         # Quit if something bad happened in chem_evol ..
         if self.need_to_quit:

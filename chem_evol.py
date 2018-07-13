@@ -1991,6 +1991,8 @@ class chem_evol(object):
 
         # Calculate the interpolated (or extrapolated) total ejected mass
         m_ej_temp = a_temp * the_m_scale + b_temp
+        if m_ej_temp < 0.0:
+            m_ej_temp = 0.0
 
         # Return the scaled yields
         return np.array(the_yields) * m_ej_temp / sum(the_yields)
@@ -2053,7 +2055,7 @@ class chem_evol(object):
             y_tables_m2 = table_ehm.get(Z=Z_ehm, M=mass_m2, quantity='Yields')
 
             # Calculate the scaled yields
-            y_scaled = scale_yields_to_M_ej(mass_m2,\
+            y_scaled = self.scale_yields_to_M_ej(mass_m2,\
                 mass_m1, y_tables_m2, y_tables_m1, m_extra, y_tables_m1)
 
             # Set to 1e-30 if yields are negative.  Do not set 
@@ -2072,9 +2074,12 @@ class chem_evol(object):
             y_tables_m2 = table_ehm.get(Z=Z_ehm, M=mass_m2, quantity='Yields')
 
             # Extrapolate the yields
-            the_a, the_b = self.get_inter_coef_M(\
+            the_a, the_b, the_a_ej, the_b_ej = self.__get_inter_coef_M(\
+                mass_m2, mass_m1, y_tables_m2, y_tables_m1,\
                 mass_m2, mass_m1, y_tables_m2, y_tables_m1)
             y_extra = 10**(the_a * m_extra + the_b)
+            m_ej_extra = the_a_ej * m_extra + the_b_ej
+            y_extra = y_extra * m_ej_extra / sum(y_extra)
 
             # # Set to 1e-30 if yields are negative.  Do not set 
             # to zero, because yields will be interpolated in log.
@@ -3582,12 +3587,14 @@ class chem_evol(object):
                 b_M_ej = a_Z_ej * lg_Z_giy + b_Z_ej
 
         # Interpolate the yields
-        y_interp = 10**(a_M * M_giy + b_M)
+        y_interp = 10**(a_M * M_giy + b_M) 
 
         # Calculate the correction factor to match the relation 
         # between the total ejected mass and the stellar initial
         # mass.  M_ej = a * M_i + b
         f_corr = (a_M_ej * M_giy + b_M_ej) / sum(y_interp)
+        if f_corr < 0.0:
+            f_corr = 0.0
 
         # Return the interpolated and corrected yields
         return y_interp * f_corr
