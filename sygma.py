@@ -118,8 +118,8 @@ class sygma( chem_evol ):
     ##############################################
     def __init__(self, sfr='input', \
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
-                 sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
-                 nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8, iolevel=0, \
+                 sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30, \
+                 nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8.0, iolevel=0, \
                  ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  bhnsmerger_table_radio='', nsmerger_table_radio='',\
@@ -135,6 +135,7 @@ class sygma( chem_evol ):
                  extra_source_mass_range=[[8,30]], \
                  extra_source_exclude_Z=[[]], \
                  total_ejecta_interp=True,\
+                 high_mass_extrapolation='copy',\
                  radio_refinement=100, use_decay_module=False,\
                  f_network='isotopes_modified.prn', f_format=1,\
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -222,7 +223,8 @@ class sygma( chem_evol ):
                  ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
                  radio_refinement=radio_refinement,\
                  use_decay_module=use_decay_module,\
-                 f_network=f_network, f_format=f_format)
+                 f_network=f_network, f_format=f_format,\
+                 high_mass_extrapolation=high_mass_extrapolation)
 
         if self.need_to_quit:
             return
