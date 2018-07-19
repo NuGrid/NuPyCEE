@@ -131,8 +131,9 @@ class chem_evol(object):
         Default value : [1,30]
 
     imf_type : string
-        Choices : 'salpeter', 'chabrier', 'kroupa', 'alphaimf'
+        Choices : 'salpeter', 'chabrier', 'kroupa', 'alphaimf', 'lognormal'
         'alphaimf' creates a custom IMF with a single power-law covering imf_bdys.
+        'lognormal' creates an IMF of the form Exp[1/(2 1^2) Log[x/charMass]^2
 
         Default value : 'kroupa'
 
@@ -458,6 +459,7 @@ class chem_evol(object):
              extra_source_exclude_Z=[[]], radio_refinement=100, \
              pop3_table='yield_tables/popIII_heger10.txt', \
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
+             imf_pop3_char_mass=40.0,  # RJS 
              high_mass_extrapolation='copy', \
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
              exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=0.0, \
@@ -527,6 +529,7 @@ class chem_evol(object):
         self.popIII_info_fast = popIII_info_fast
         self.imf_bdys_pop3=imf_bdys_pop3
         self.imf_yields_range_pop3=imf_yields_range_pop3
+        self.imf_pop3_char_mass=imf_pop3_char_mass # RJS
         self.high_mass_extrapolation = high_mass_extrapolation
         self.extra_source_on = extra_source_on
         self.f_extra_source= f_extra_source
@@ -920,7 +923,7 @@ class chem_evol(object):
 
         # IMF
         if not self.imf_type in ['salpeter','chabrier','kroupa','input', \
-            'alphaimf','chabrieralpha','fpp', 'kroupa93']:
+            'alphaimf','chabrieralpha','fpp', 'kroupa93', 'lognormal']:
             print ('Error - Selected imf_type is not available.')
             self.need_to_quit = True
 
@@ -6222,6 +6225,18 @@ class chem_evol(object):
                 self.imfnorm = 1.0 / quad(self.__g2_kroupa, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
+        elif self.imf_type == 'lognormal': # RJS
+            # Choose the right option
+            if inte == 0:
+                return self.imfnorm * self.__g1_log_normal(mass)
+            if inte == 1:
+                return quad(self.__g1_log_normal, mmin, mmax)[0]
+            if inte == 2:
+                return quad(self.__g2_log_normal, mmin, mmax)[0]
+            if inte == -1:
+                self.imfnorm = 1.0 / quad(self.__g2_log_normal, \
+                    self.imf_bdys[0], self.imf_bdys[1])[0]
+
         # Ferrini, Pardi & Penco (1990)
         elif self.imf_type=='fpp':
 
@@ -6311,6 +6326,49 @@ class chem_evol(object):
             return mass * mass**(-self.alphaimf)
         else:
             return 0
+
+
+    ##############################################
+    #               G1 Log Normal                #
+    ##############################################
+    def __g1_log_normal(self, mass):
+
+        '''
+        This function returns the number of stars having a certain stellar mass
+        with a log normal IMF.
+
+        Arguments
+        =========
+
+          mass : Stellar mass.
+          char_m : Characteristic mass for the distribution, M_sun
+
+          ** future add, sigma... assuming sigma = 1 for now **
+
+        '''
+        # Select the right alpha index
+        return np.exp(-1.0/2.0 * np.log(mass/self.imf_pop3_char_mass)**2) * 1/mass
+
+
+    ##############################################
+    #                G2 Log Normal                #
+    ##############################################
+    def __g2_log_normal(self, mass):
+
+        '''
+        This function returns the total mass of stars having a certain initial
+        mass with a log normal IMF or a similar power law.
+
+        Arguments
+        =========
+
+          mass : Stellar mass.
+          char_m : Characteristic mass for the distribution, M_sun
+
+          ** future add, sigma... assuming sigma = 1 for now **
+
+        '''
+        return np.exp(-1.0/2.0 * np.log(mass/self.imf_pop3_char_mass)**2)
 
 
     ##############################################
