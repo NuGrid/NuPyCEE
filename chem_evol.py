@@ -153,6 +153,11 @@ class chem_evol(object):
 
         Default value : [10,30]
 
+    imf_pop3_char_mass : float
+        The characteristic mass in a log normal IMF distribution. 
+
+        Default value : 40.0
+
     high_mass_extrapolation : string
         Extrapolation technique used to extrapolate yields for stars more
         massive than the most massive model (MMM) present in the yields table.
@@ -6105,6 +6110,96 @@ class chem_evol(object):
         # Avoid renormalizing during the next timesteps
         self.normalized = True
 
+    ##############################################
+    #              element list                  #
+    ##############################################
+    def _i_elem_lists(self, elem):
+        '''
+        Finds and returns the list of indices for isotopes of
+        element 'elem'. Also returns a list of the indices for
+        H and He to facility metallicity calculations.
+        
+        Arguments
+        =========
+
+        elem  : a string identifying the element requested.
+
+        Returns 2 lists
+        =========
+
+        indices of isotopes of elem,
+        indices of isotopes of H and He
+
+        '''
+        # Declare the list of isotope indexes associated with this element
+        i_iso_list = []
+        # Declare the list of isotope indexes associated with H and He
+        i_H_He_list = []
+        
+        # Find the isotopes associated with this element
+        for i_iso in range(self.nb_isotopes):
+            if self.history.isotopes[i_iso].split('-')[0] == elem:
+                i_iso_list.append(i_iso)
+            if 'H-' in self.history.isotopes[i_iso] or 'He-' in self.history.isotopes[i_iso]:
+                i_H_He_list.append(i_iso)
+        return i_iso_list, i_H_He_list
+
+
+    ##############################################
+    #           Compute metal fraction           #
+    ##############################################
+    def Z_x(self, elem, t_step=-1):
+        '''
+        Compute the metal fraction for a list of elements. 
+        The metal fraction is defined as mass_element/mass_metals.
+        
+        Arguments
+        =========
+
+        elem     : the name of the element to use. All isotopes
+                   will be found.
+        t_step   : the indx of the time step to do the calculation. 
+                   if t_step = -1, or not specified, the last 
+                   time_step is used
+
+        Returns
+        =========
+
+        mass fraction of metals for all isotopes identified by
+        i_iso_list as a single number
+
+        '''
+        
+        # Get the list of isotopes indices for element elem
+        # along with a list of indices for H and He
+        i_iso_list, i_H_He_list = self._i_elem_lists(elem)
+        
+        if len(i_iso_list) == 0:
+            print("Element {} not found. Returning -1".format(elem))
+        if t_step > self.nb_timesteps:
+            print("t_step must be < nb_timesteps")
+            return -1.0
+        if t_step == -1:
+            t_step = self.nb_timesteps
+        
+        # Calculate the total mass of gas at that timestep
+        m_tot   = self.ymgal[t_step].sum()
+        m_Z_tot = m_tot
+        # Calculate the total mass of metals at that timestep
+        for i_iso in range(len(i_H_He_list)):
+            m_Z_tot = m_Z_tot - self.ymgal[t_step][i_H_He_list[i_iso]]
+            
+        # Make sure there is something in the gas reservoir ..
+        if m_Z_tot > 0.0:
+            # Sum the mass of each isotope associated with the desired element
+            m_tot_elem = 0.0
+            for i_iso in range(len(i_iso_list)):
+                m_tot_elem += self.ymgal[t_step][ i_iso_list[i_iso] ]
+            
+            # Calculate the mass fraction of metals
+            return m_tot_elem / m_Z_tot
+        else:
+            return 0.0
 
     ##############################################
     #                     IMF                    #
@@ -6335,13 +6430,12 @@ class chem_evol(object):
 
         '''
         This function returns the number of stars having a certain stellar mass
-        with a log normal IMF.
+        with a log normal IMF with characteristic mass self.imf_pop3_char_mass.
 
         Arguments
         =========
 
           mass : Stellar mass.
-          char_m : Characteristic mass for the distribution, M_sun
 
           ** future add, sigma... assuming sigma = 1 for now **
 
@@ -6357,13 +6451,12 @@ class chem_evol(object):
 
         '''
         This function returns the total mass of stars having a certain initial
-        mass with a log normal IMF or a similar power law.
+        mass with a log normal IMF with characteristic mass self.imf_pop3_char_mass.
 
         Arguments
         =========
 
           mass : Stellar mass.
-          char_m : Characteristic mass for the distribution, M_sun
 
           ** future add, sigma... assuming sigma = 1 for now **
 
