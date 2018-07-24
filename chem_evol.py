@@ -131,8 +131,9 @@ class chem_evol(object):
         Default value : [1,30]
 
     imf_type : string
-        Choices : 'salpeter', 'chabrier', 'kroupa', 'alphaimf'
+        Choices : 'salpeter', 'chabrier', 'kroupa', 'alphaimf', 'lognormal'
         'alphaimf' creates a custom IMF with a single power-law covering imf_bdys.
+        'lognormal' creates an IMF of the form Exp[1/(2 1^2) Log[x/charMass]^2
 
         Default value : 'kroupa'
 
@@ -151,6 +152,11 @@ class chem_evol(object):
         PopIII stars ejecta taken from Heger et al. (2010)
 
         Default value : [10,30]
+
+    imf_pop3_char_mass : float
+        The characteristic mass in a log normal IMF distribution. 
+
+        Default value : 40.0
 
     high_mass_extrapolation : string
         Extrapolation technique used to extrapolate yields for stars more
@@ -458,6 +464,7 @@ class chem_evol(object):
              extra_source_exclude_Z=[[]], radio_refinement=100, \
              pop3_table='yield_tables/popIII_heger10.txt', \
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
+             imf_pop3_char_mass=40.0,  # RJS 
              high_mass_extrapolation='copy', \
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
              exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=0.0, \
@@ -527,6 +534,7 @@ class chem_evol(object):
         self.popIII_info_fast = popIII_info_fast
         self.imf_bdys_pop3=imf_bdys_pop3
         self.imf_yields_range_pop3=imf_yields_range_pop3
+        self.imf_pop3_char_mass=imf_pop3_char_mass # RJS
         self.high_mass_extrapolation = high_mass_extrapolation
         self.extra_source_on = extra_source_on
         self.f_extra_source= f_extra_source
@@ -920,7 +928,7 @@ class chem_evol(object):
 
         # IMF
         if not self.imf_type in ['salpeter','chabrier','kroupa','input', \
-            'alphaimf','chabrieralpha','fpp', 'kroupa93']:
+            'alphaimf','chabrieralpha','fpp', 'kroupa93', 'lognormal']:
             print ('Error - Selected imf_type is not available.')
             self.need_to_quit = True
 
@@ -6102,6 +6110,96 @@ class chem_evol(object):
         # Avoid renormalizing during the next timesteps
         self.normalized = True
 
+    ##############################################
+    #              element list                  #
+    ##############################################
+    def _i_elem_lists(self, elem):
+        '''
+        Finds and returns the list of indices for isotopes of
+        element 'elem'. Also returns a list of the indices for
+        H and He to facility metallicity calculations.
+        
+        Arguments
+        =========
+
+        elem  : a string identifying the element requested.
+
+        Returns 2 lists
+        =========
+
+        indices of isotopes of elem,
+        indices of isotopes of H and He
+
+        '''
+        # Declare the list of isotope indexes associated with this element
+        i_iso_list = []
+        # Declare the list of isotope indexes associated with H and He
+        i_H_He_list = []
+        
+        # Find the isotopes associated with this element
+        for i_iso in range(self.nb_isotopes):
+            if self.history.isotopes[i_iso].split('-')[0] == elem:
+                i_iso_list.append(i_iso)
+            if 'H-' in self.history.isotopes[i_iso] or 'He-' in self.history.isotopes[i_iso]:
+                i_H_He_list.append(i_iso)
+        return i_iso_list, i_H_He_list
+
+
+    ##############################################
+    #           Compute metal fraction           #
+    ##############################################
+    def Z_x(self, elem, t_step=-1):
+        '''
+        Compute the metal fraction for a list of elements. 
+        The metal fraction is defined as mass_element/mass_metals.
+        
+        Arguments
+        =========
+
+        elem     : the name of the element to use. All isotopes
+                   will be found.
+        t_step   : the indx of the time step to do the calculation. 
+                   if t_step = -1, or not specified, the last 
+                   time_step is used
+
+        Returns
+        =========
+
+        mass fraction of metals for all isotopes identified by
+        i_iso_list as a single number
+
+        '''
+        
+        # Get the list of isotopes indices for element elem
+        # along with a list of indices for H and He
+        i_iso_list, i_H_He_list = self._i_elem_lists(elem)
+        
+        if len(i_iso_list) == 0:
+            print("Element {} not found. Returning -1".format(elem))
+        if t_step > self.nb_timesteps:
+            print("t_step must be < nb_timesteps")
+            return -1.0
+        if t_step == -1:
+            t_step = self.nb_timesteps
+        
+        # Calculate the total mass of gas at that timestep
+        m_tot   = self.ymgal[t_step].sum()
+        m_Z_tot = m_tot
+        # Calculate the total mass of metals at that timestep
+        for i_iso in range(len(i_H_He_list)):
+            m_Z_tot = m_Z_tot - self.ymgal[t_step][i_H_He_list[i_iso]]
+            
+        # Make sure there is something in the gas reservoir ..
+        if m_Z_tot > 0.0:
+            # Sum the mass of each isotope associated with the desired element
+            m_tot_elem = 0.0
+            for i_iso in range(len(i_iso_list)):
+                m_tot_elem += self.ymgal[t_step][ i_iso_list[i_iso] ]
+            
+            # Calculate the mass fraction of metals
+            return m_tot_elem / m_Z_tot
+        else:
+            return 0.0
 
     ##############################################
     #                     IMF                    #
@@ -6222,6 +6320,18 @@ class chem_evol(object):
                 self.imfnorm = 1.0 / quad(self.__g2_kroupa, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
+        elif self.imf_type == 'lognormal': # RJS
+            # Choose the right option
+            if inte == 0:
+                return self.imfnorm * self.__g1_log_normal(mass)
+            if inte == 1:
+                return quad(self.__g1_log_normal, mmin, mmax)[0]
+            if inte == 2:
+                return quad(self.__g2_log_normal, mmin, mmax)[0]
+            if inte == -1:
+                self.imfnorm = 1.0 / quad(self.__g2_log_normal, \
+                    self.imf_bdys[0], self.imf_bdys[1])[0]
+
         # Ferrini, Pardi & Penco (1990)
         elif self.imf_type=='fpp':
 
@@ -6311,6 +6421,47 @@ class chem_evol(object):
             return mass * mass**(-self.alphaimf)
         else:
             return 0
+
+
+    ##############################################
+    #               G1 Log Normal                #
+    ##############################################
+    def __g1_log_normal(self, mass):
+
+        '''
+        This function returns the number of stars having a certain stellar mass
+        with a log normal IMF with characteristic mass self.imf_pop3_char_mass.
+
+        Arguments
+        =========
+
+          mass : Stellar mass.
+
+          ** future add, sigma... assuming sigma = 1 for now **
+
+        '''
+        # Select the right alpha index
+        return np.exp(-1.0/2.0 * np.log(mass/self.imf_pop3_char_mass)**2) * 1/mass
+
+
+    ##############################################
+    #                G2 Log Normal                #
+    ##############################################
+    def __g2_log_normal(self, mass):
+
+        '''
+        This function returns the total mass of stars having a certain initial
+        mass with a log normal IMF with characteristic mass self.imf_pop3_char_mass.
+
+        Arguments
+        =========
+
+          mass : Stellar mass.
+
+          ** future add, sigma... assuming sigma = 1 for now **
+
+        '''
+        return np.exp(-1.0/2.0 * np.log(mass/self.imf_pop3_char_mass)**2)
 
 
     ##############################################
