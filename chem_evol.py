@@ -37,8 +37,9 @@ MARCH2018: B. Cote
 - Switched to Python 3
 - Capability to include radioactive isotopes
 
-JULY2018: B. Cote
-- Re-wrote (improved) yields and lifetime treatment
+JULY2018: B. Cote & R. Sarmento
+- Re-wrote (improved) yields and lifetime treatment (B. Cote)
+- PopIII IMF and yields update (R. Sarmento)
 
 
 Usage
@@ -185,7 +186,7 @@ class chem_evol(object):
 
         Default value : 0.0
 
-    Z_trans : float
+    Z_trans : floatRJS
         Variable used when interpolating stellar yields as a function of Z.
         Transition Z below which PopIII yields are used, and above which default
         yields are used.
@@ -464,7 +465,7 @@ class chem_evol(object):
              extra_source_exclude_Z=[[]], radio_refinement=100, \
              pop3_table='yield_tables/popIII_heger10.txt', \
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
-             imf_pop3_char_mass=40.0,  # RJS 
+             imf_pop3_char_mass=40.0, \
              high_mass_extrapolation='copy', \
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
              exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=0.0, \
@@ -922,9 +923,6 @@ class chem_evol(object):
         #if #(self.transitionmass <= 7)or(self.transitionmass > 12):
            # print ('Error - transitionmass must be between 7 and 12 Mo.')
            # self.need_to_quit = True
-        if not self.transitionmass ==8:
-            print ('Warning: Non-default transitionmass chosen. Use in agreement '\
-            'with yield input!')
 
         # IMF
         if not self.imf_type in ['salpeter','chabrier','kroupa','input', \
@@ -949,7 +947,7 @@ class chem_evol(object):
             print ('Error - Transitionmass outside imf yield range')
             self.need_to_quit = True
         if self.ns_merger_on:
-            if ((self.nsmerger_bdys[0] >  self.imf_bdys[1]) or \
+            if ((self.nsmerger_bdys[0] > self.imf_bdys[1]) or \
                 (self.nsmerger_bdys[1] < self.imf_bdys[0])):
                 print ('Error - part of nsmerger_bdys must be within imf_bdys.')
                 self.need_to_quit = True
@@ -971,8 +969,7 @@ class chem_evol(object):
             # IMF and yield boundary ranges
             if (self.imf_yields_range_pop3[0] >= self.imf_bdys_pop3[1]) or \
                (self.imf_yields_range_pop3[1] <= self.imf_bdys_pop3[0]):
-                print ('Error - imf_yields_range_pop3 must be within \
-                          imf_bdys_pop3.')
+                print ('Error - imf_yields_range_pop3 must be within imf_bdys_pop3.')
                 self.need_to_quit = True
               
             if self.netyields_on == True and self.Z_trans > 0.0:
@@ -1465,7 +1462,7 @@ class chem_evol(object):
         if not self.imf_yields_range_pop3[1] in self.M_table_pop3:
             self.inter_M_points_pop3.append(self.imf_yields_range_pop3[1])
 
-        # Remove masses that are above or beyond the IMF yields range
+        # Remove masses that are below or beyond the IMF yields range
         len_temp = len(self.inter_M_points_pop3)
         for i_m in range(len_temp):
             ii_m = len_temp - i_m - 1
@@ -3396,6 +3393,20 @@ class chem_evol(object):
         # Initialize the age of the newly-formed stars
         t_lower = 0.0
 
+        # If the IMF is stochastically sampled ..
+        if len(mass_sampled) > 0:
+
+            # Sort the list of masses in decreasing order
+            # And set the index to point to most massive one 
+            mass_sampled_sort = sorted(mass_sampled)[::-1]
+            nb_mass_sampled = len(mass_sampled)
+            stochastic_IMF = True
+            i_m_sampled = 0
+
+        # If the IMF is fully sampled ..
+        else:
+            stochastic_IMF = False
+
         # For each upcoming timesteps (including the current one) ..
         for i_cse in range(i-1, self.nb_timesteps):
 
@@ -3406,24 +3417,47 @@ class chem_evol(object):
             # If there are yields to be calculated ..
             if nb_dm > 0:
 
-                # For each IMF mass bin ..
-                for i_imf_bin in range(nb_dm):
+                # If the IMF is stochastically sampled ..
+                if stochastic_IMF:
 
-                    # Calculate lower, central, and upper masses of this bin
-                    the_m_low = m_lower + i_imf_bin * new_dm_imf
-                    the_m_cen = the_m_low + 0.5 * new_dm_imf
-                    the_m_upp = the_m_low + new_dm_imf
+                    # For each sampled mass in that mass bin ..
+                    m_upper = m_lower + new_dm_imf*nb_dm
+                    while i_m_sampled < nb_mass_sampled and \
+                        mass_sampled_sort[i_m_sampled] >= m_lower and \
+                            mass_sampled_sort[i_m_sampled] <= m_upper:
 
-                    # Get the number of stars in that mass bin
-                    nb_stars = self.m_locked * the_A_imf *\
-                        self._imf(the_m_low, the_m_upp, 1)
+                        # Get the yields for that star
+                        the_yields = self.get_interp_yields(\
+                            mass_sampled_sort[i_m_sampled], self.zmetal)
 
-                    # Get the yields for the central stellar mass
-                    the_yields = self.get_interp_yields(the_m_cen, self.zmetal)
+                        # Add that one star in the stellar ejecta array
+                        self.__add_yields_in_mdot(1.0, the_yields, \
+                            mass_sampled_sort[i_m_sampled], i_cse, i)
 
-                    # Add yields in the stellar ejecta array.  We do this at
-                    # each mass bin to distinguish between AGB and massive.
-                    self.__add_yields_in_mdot(nb_stars, the_yields, the_m_cen, i_cse, i)
+                        # Go to the next sampled mass
+                        i_m_sampled += 1
+
+                # If the IMF is fully sampled ..
+                else:
+
+                    # For each IMF mass bin ..
+                    for i_imf_bin in range(nb_dm):
+
+                        # Calculate lower, central, and upper masses of this bin
+                        the_m_low = m_lower + i_imf_bin * new_dm_imf
+                        the_m_cen = the_m_low + 0.5 * new_dm_imf
+                        the_m_upp = the_m_low + new_dm_imf
+
+                        # Get the number of stars in that mass bin
+                        nb_stars = self.m_locked * the_A_imf *\
+                            self._imf(the_m_low, the_m_upp, 1)
+
+                        # Get the yields for the central stellar mass
+                        the_yields = self.get_interp_yields(the_m_cen, self.zmetal)
+
+                        # Add yields in the stellar ejecta array.  We do this at
+                        # each mass bin to distinguish between AGB and massive.
+                        self.__add_yields_in_mdot(nb_stars, the_yields, the_m_cen, i_cse, i)
 
             # Move the lower limit of the lifetime range to the next timestep
             t_lower += self.history.timesteps[i_cse]

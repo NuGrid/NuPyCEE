@@ -273,6 +273,7 @@ class omega( chem_evol ):
                  extra_source_exclude_Z=[[]], beta_crit=1.0, \
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
+                 imf_pop3_char_mass=40.0, \
                  starbursts=[], beta_pow=-1.0, gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
                  nb_1a_per_m=1.0e-3, f_arfo=1, t_merge=-1.0,\
                  imf_yields_range=[1,30],exclude_masses=[], \
@@ -348,6 +349,7 @@ class omega( chem_evol ):
                  extra_source_exclude_Z=extra_source_exclude_Z,\
                  pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
                  imf_bdys_pop3=imf_bdys_pop3, \
+                 imf_pop3_char_mass=imf_pop3_char_mass, \
                  total_ejecta_interp=total_ejecta_interp, \
                  imf_yields_range_pop3=imf_yields_range_pop3, \
                  starbursts=starbursts, beta_pow=beta_pow, \

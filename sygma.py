@@ -140,7 +140,7 @@ class sygma( chem_evol ):
                  f_network='isotopes_modified.prn', f_format=1,\
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
-                 imf_pop3_char_mass= 40.0, # RJS
+                 imf_pop3_char_mass=40.0, \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
                  nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0.0, \
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
@@ -189,7 +189,7 @@ class sygma( chem_evol ):
                  pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
                  nb_nsm_per_m=nb_nsm_per_m, t_nsm_coal=t_nsm_coal, \
                  imf_bdys_pop3=imf_bdys_pop3, \
-                 imf_pop3_char_mass=imf_pop3_char_mass,  # RJS
+                 imf_pop3_char_mass=imf_pop3_char_mass, \
                  imf_yields_range_pop3=imf_yields_range_pop3, \
                  starbursts=starbursts, beta_pow=beta_pow, \
                  gauss_dtd=gauss_dtd,exp_dtd=exp_dtd,\
