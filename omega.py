@@ -321,7 +321,8 @@ class omega( chem_evol ):
         self.inst_name = text[:text.find('=')].strip()
 
         # Announce the beginning of the simulation 
-        print ('OMEGA run in progress..')
+        if not print_off:
+            print ('OMEGA run in progress..')
         start_time = t_module.time()
         self.start_time = start_time
 
@@ -359,6 +360,7 @@ class omega( chem_evol ):
                  t_merge=t_merge,popIII_info_fast=popIII_info_fast,\
                  out_follows_E_rate=out_follows_E_rate,\
                  stellar_param_on=stellar_param_on,\
+                 print_off=print_off,\
                  ism_ini=ism_ini,ytables_in=ytables_in,\
                  delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
                  delayed_extra_log_radio=delayed_extra_log_radio,\
@@ -2328,7 +2330,8 @@ class omega( chem_evol ):
                 self.f_m_stel_tot.append(self.f_m_stel_tot[-1])
 
                 # Announce the end of the simulation
-                print ('   OMEGA run completed -',self._gettime())
+                if not self.print_off:
+                    print ('   OMEGA run completed -',self._gettime())
 
         # Error message
         else:

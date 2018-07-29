@@ -440,6 +440,7 @@ class chem_evol(object):
              exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=-1, \
              f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
              netyields_on=False,wiersmamod=False,yield_interp='lin',\
+             print_off=False,\
              total_ejecta_interp=True, tau_ferrini=False,\
              input_yields=False,t_merge=-1.0,stellar_param_on=False,\
              stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',\
@@ -581,6 +582,7 @@ class chem_evol(object):
         self.nb_delayed_extra = len(self.delayed_extra_dtd)
         self.pritchet_1a_dtd = pritchet_1a_dtd
         self.len_pritchet_1a_dtd = len(pritchet_1a_dtd)
+        self.print_off = print_off
 
         # Attributes associated with radioactive species
         self.table_radio = table_radio
@@ -1522,7 +1524,8 @@ class chem_evol(object):
 
             # Limit the SFR if there is not enough gas
             if self.sfrin > 1.0:
-                print ('Warning -- Not enough gas to sustain the SFH.', i)
+                if not self.print_off:
+                    print ('Warning -- Not enough gas to sustain the SFH.', i)
                 self.sfrin = 1.0
                 self.not_enough_gas = True
                 self.not_enough_gas_count += 1
