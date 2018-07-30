@@ -7,7 +7,7 @@ from codecs import open
 from os import path, system
 from re import compile as re_compile
 
-__version__="0.1"
+__version__="3.0"
 
 here = path.abspath(path.dirname(__file__))
 def read(filename):
