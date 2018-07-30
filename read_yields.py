@@ -1,4 +1,5 @@
-from __future__ import print_function
+from __future__ import (division, print_function, absolute_import,
+                        unicode_literals)
 
 '''
 
@@ -1155,7 +1156,7 @@ class iniabu():
 
 
 def read_iniabu(filename,isotopes):
-    import read_yields as ry
+    from . import read_yields as ry
     if notebookmode==True:
         os.system('sudo python cp.py '+'iniabu/'+filename)
         iniabu_class=ry.iniabu('tmp/'+filename)
@@ -1171,7 +1172,7 @@ def read_strip_param(filename):
         To read Elses simulatin files
         '''
 
-        import read_yields as ry
+        from . import read_yields as ry
 
         f1=open(filename)
         lines=f1.readlines()

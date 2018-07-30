@@ -1,4 +1,5 @@
-from __future__ import print_function
+from __future__ import (division, print_function, absolute_import,
+                        unicode_literals)
 
 '''
 
@@ -77,7 +78,7 @@ except KeyError:
 global_path=global_path+'/'
 
 # Import the class that reads the input yield tables
-import read_yields as ry
+from . import read_yields as ry
 
 # Import the decay module for radioactive isotopes
 #import decay_module
@@ -6981,7 +6982,7 @@ class chem_evol(object):
         # If the SSPs are not given as an input ..
         if len(self.SSPs_in) == 0:
 
-          import sygma
+          from . import sygma
 
           # Define the SSP timesteps
           len_dt_SSPs = len(self.dt_in_SSPs)

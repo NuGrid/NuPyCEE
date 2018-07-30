@@ -1,4 +1,5 @@
-from __future__ import print_function
+from __future__ import (division, print_function, absolute_import,
+                        unicode_literals)
 
 '''
 
@@ -87,7 +88,7 @@ For example with artificial yields of only H-1, you can try
 '''
 
 # Import the class inherited by SYGMA
-from chem_evol import *
+from .chem_evol import *
 
 
 class sygma( chem_evol ):
@@ -586,7 +587,7 @@ class sygma( chem_evol ):
 
         '''
 
-        import read_yields as ry
+        from . import read_yields as ry
         import re
         import matplotlib.pyplot as plt
         y_table=ry.read_nugrid_yields(global_path+table)
@@ -649,7 +650,7 @@ class sygma( chem_evol ):
 
         '''
 
-        import read_yields as ry
+        from . import read_yields as ry
         import re
         import matplotlib.pyplot as plt
         y_table=ry.read_nugrid_yields(global_path+table)
@@ -871,7 +872,7 @@ class sygma( chem_evol ):
 
         
         '''
-        import read_yields as ry
+        from . import read_yields as ry
         import re
         import matplotlib.pyplot as plt
 
