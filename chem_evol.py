@@ -78,7 +78,12 @@ except KeyError:
 global_path=global_path+'/'
 
 # Import the class that reads the input yield tables
-from . import read_yields as ry
+try:
+    from . import read_yields as ry
+    from . import sygma
+except ValueError:
+    import read_yields as ry
+    import sygma
 
 # Import the decay module for radioactive isotopes
 #import decay_module
@@ -6981,8 +6986,6 @@ class chem_evol(object):
 
         # If the SSPs are not given as an input ..
         if len(self.SSPs_in) == 0:
-
-          from . import sygma
 
           # Define the SSP timesteps
           len_dt_SSPs = len(self.dt_in_SSPs)

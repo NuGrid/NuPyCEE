@@ -1156,7 +1156,10 @@ class iniabu():
 
 
 def read_iniabu(filename,isotopes):
-    from . import read_yields as ry
+    try:
+        from . import read_yields as ry
+    except:
+        import read_yields as ry
     if notebookmode==True:
         os.system('sudo python cp.py '+'iniabu/'+filename)
         iniabu_class=ry.iniabu('tmp/'+filename)
@@ -1172,7 +1175,10 @@ def read_strip_param(filename):
         To read Elses simulatin files
         '''
 
-        from . import read_yields as ry
+        try:
+            from . import read_yields as ry
+        except:
+            import read_yields as ry
 
         f1=open(filename)
         lines=f1.readlines()

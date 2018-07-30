@@ -48,7 +48,10 @@ import os
 from matplotlib.lines import Line2D
 
 #import read_yields
-from . import read_yields as ry
+try:
+    from . import read_yields as ry
+except ValueError:
+    import read_yields as ry
 
 # Define workspace
 global global_path
