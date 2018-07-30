@@ -1,4 +1,5 @@
-from __future__ import print_function
+from __future__ import (division, print_function, absolute_import,
+                        unicode_literals)
 
 '''
 
@@ -82,9 +83,14 @@ import math
 import random
 
 # Import the class inherited by SYGMA
-import sygma
-from chem_evol import *
-
+try:
+    from . import sygma
+    from .chem_evol import *
+    from . import read_yields as ry
+except ValueError:
+    import sygma
+    from chem_evol import *
+    import read_yields as ry
 
 class omega( chem_evol ):
 
