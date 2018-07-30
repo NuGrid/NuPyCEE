@@ -81,7 +81,7 @@ global_path=global_path+'/'
 try:
     from . import read_yields as ry
     from . import sygma
-except ValueError:
+except:
     import read_yields as ry
     import sygma
 

@@ -91,7 +91,7 @@ For example with artificial yields of only H-1, you can try
 try:
     from .chem_evol import *
     from . import read_yields as ry
-except ValueError: # For the notebooks
+except: # For the notebooks
     from chem_evol import *
     import read_yields as ry
     
