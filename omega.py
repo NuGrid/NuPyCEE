@@ -87,7 +87,7 @@ try:
     from . import sygma
     from .chem_evol import *
     from . import read_yields as ry
-except ValueError:
+except:
     import sygma
     from chem_evol import *
     import read_yields as ry

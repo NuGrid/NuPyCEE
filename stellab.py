@@ -50,7 +50,7 @@ from matplotlib.lines import Line2D
 #import read_yields
 try:
     from . import read_yields as ry
-except ValueError:
+except:
     import read_yields as ry
 
 # Define workspace
