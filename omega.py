@@ -319,7 +319,8 @@ class omega( chem_evol ):
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
                  ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
-                 test_clayton=np.array([])):
+                 test_clayton=np.array([]),
+                 omega_0=0.32, omega_b_0=0.05, lambda_0=0.68, H_0=67.11):
 
         # Get the name of the instance
         import traceback
@@ -499,11 +500,17 @@ class omega( chem_evol ):
         #self.H_0       = 71.9    # Hubble constant [km s^-1 Mpc^-1]
 
         # Set cosmological parameters - as in Wise et al. 2012
-        self.omega_0   = 0.266   # Current mass density parameter
-        self.omega_b_0 = 0.0449  # Current baryonic mass density parameter
-        self.lambda_0  = 0.734   # Current dark energy density parameter
-        self.H_0       = 71.0    # Hubble constant [km s^-1 Mpc^-1]
-
+        #self.omega_0   = 0.266   # Current mass density parameter
+        #self.omega_b_0 = 0.0449  # Current baryonic mass density parameter
+        #self.lambda_0  = 0.734   # Current dark energy density parameter
+        #self.H_0       = 71.0    # Hubble constant [km s^-1 Mpc^-1]
+        
+        # Set cosmological parameters - default is Planck 2013 (used in Caterpillar)
+        self.omega_0   = omega_0   # Current mass density parameter
+        self.omega_b_0 = omega_b_0 # Current baryonic mass density parameter
+        self.lambda_0  = lambda_0  # Current dark energy density parameter
+        self.H_0       = H_0       # Hubble constant [km s^-1 Mpc^-1]
+        
         # Look for errors in the input parameters
         self.__check_inputs_omega()
 
