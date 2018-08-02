@@ -620,7 +620,7 @@ class chem_evol(object):
             return
             #self.f_network = f_network
             #self.f_format = f_format
-            #self.__initialize_decay_module()
+            #self.__initialize_decay_module()        
 
         # Normalization of the delayed extra sources
         if self.nb_delayed_extra > 0:
@@ -763,7 +763,7 @@ class chem_evol(object):
 
         # Create empty arrays if on the fast mode
         if self.pre_calculate_SSPs:
-            self.history.gas_mass.append(sum(ymgal[0]))
+            self.history.gas_mass.append(np.sum(ymgal[0]))
             self.history.ism_iso_yield.append(ymgal[0])
             self.history.m_locked = []
             self.history.m_locked_agb = []
@@ -773,7 +773,7 @@ class chem_evol(object):
 
         # Add the initialized arrays to the history class
         else:
-            self.history.gas_mass.append(sum(ymgal[0]))
+            self.history.gas_mass.append(np.sum(ymgal[0]))
             self.history.ism_iso_yield.append(ymgal[0])
             self.history.ism_iso_yield_agb.append(ymgal_agb[0])
             self.history.ism_iso_yield_1a.append(ymgal_1a[0])
@@ -837,12 +837,25 @@ class chem_evol(object):
             self.mdot_bhnsm_radio = mdot_bhnsm_radio
             self.mdot_delayed_extra_radio = mdot_delayed_extra_radio
 
+        # Declare non-metals for the getmetallicity function
+        self.nonmetals = ['H-','He-','Li-']
+        self.i_nonmetals = []
+        for i_iso in range(self.nb_isotopes):
+            if 'H-' in self.history.isotopes[i_iso] or\
+               'He-' in self.history.isotopes[i_iso] or\
+               'Li-' in self.history.isotopes[i_iso]:
+                self.i_nonmetals.append(i_iso)
+        self.len_i_nonmetals = len(self.i_nonmetals)
+
         # Set the initial time and metallicity 
         zmetal = self._getmetallicity(0)
         self.history.metallicity.append(zmetal)
         self.t = 0
         self.history.age.append(self.t)
         self.zmetal = zmetal
+
+        # Define the element to isotope index connections
+        self.__get_elem_to_iso_main()
 
         # Get coefficients for the fraction of white dwarfs fit (2nd poly)
         if not pre_calculate_SSPs:
@@ -976,6 +989,23 @@ class chem_evol(object):
             if self.Z_trans > 0.0:
                 print ('Error - Radioactive isotopes cannot be used with PopIII stars .. for now.')
                 self.need_to_quit = True
+
+
+    ##############################################
+    #             Get elem-to-iso Main           #
+    ##############################################
+    def __get_elem_to_iso_main(self):
+
+        # Get the list of elements
+        self.elements = []
+        self.i_elem_for_iso = np.zeros(self.nb_isotopes,dtype=int)
+        for i_iso in range(self.nb_isotopes):
+            the_elem = self.history.isotopes[i_iso].split('-')[0]
+            if not the_elem in self.elements:
+                self.elements.append(the_elem)
+            i_elem = self.elements.index(the_elem)            
+            self.i_elem_for_iso[i_iso] = i_elem
+        self.nb_elements = len(self.elements)
 
 
     ##############################################
@@ -1144,8 +1174,8 @@ class chem_evol(object):
                        self.mgal
 
         # Make sure the total mass of gas does not exceed mgal
-        if sum(ymgal_gi) > self.mgal:
-            ymgal_gi[0] = ymgal_gi[0] - (sum(ymgal_gi) - self.mgal)
+        if np.sum(ymgal_gi) > self.mgal:
+            ymgal_gi[0] = ymgal_gi[0] - (np.sum(ymgal_gi) - self.mgal)
 
         # Return the gas reservoir
         return ymgal_gi
@@ -1244,7 +1274,7 @@ class chem_evol(object):
 
         # Correct the last timestep if needed
         if timesteps_gt[-1] == 0.0:
-            timesteps_gt[-1] = self.history.tend - sum(timesteps_gt)
+            timesteps_gt[-1] = self.history.tend - np.sum(timesteps_gt)
 
         # Return the duration of all timesteps
         return timesteps_gt
@@ -1515,10 +1545,10 @@ class chem_evol(object):
             if i%tenth == 0:
                 print ('time and metallicity and total mass:')
                 print ('{:.3E}'.format(self.t),'{:.4E}'.format(self.zmetal), \
-                      '{:.4E}'.format(sum(self.ymgal[i-1])))
+                      '{:.4E}'.format(np.sum(self.ymgal[i-1])))
                 print ('time and metallicity and total mass:')
                 print ('{:.3E}'.format(self.t),'{:.4E}'.format(self.zmetal), \
-                      '{:.4E}'.format(sum(self.ymgal[i-1])))
+                      '{:.4E}'.format(np.sum(self.ymgal[i-1])))
 
         # Initialisation of the mass locked into stars
         self.m_locked = 0
@@ -1546,7 +1576,7 @@ class chem_evol(object):
             f_lock = 1.0 - self.sfrin
             if self.pre_calculate_SSPs:
                 self.ymgal[i] = f_lock * self.ymgal[i-1]
-                self.m_locked += self.sfrin * sum(self.ymgal[i-1])
+                self.m_locked += self.sfrin * np.sum(self.ymgal[i-1])
                 if self.len_decay_file > 0:
                     self.ymgal_radio[i] = f_lock * self.ymgal_radio[i-1]
             else:
@@ -1556,7 +1586,7 @@ class chem_evol(object):
                 self.ymgal_1a[i] = f_lock * self.ymgal_1a[i-1]
                 self.ymgal_nsm[i] = f_lock * self.ymgal_nsm[i-1]
                 self.ymgal_bhnsm[i] = f_lock * self.ymgal_bhnsm[i-1]
-                self.m_locked += self.sfrin * sum(self.ymgal[i-1])
+                self.m_locked += self.sfrin * np.sum(self.ymgal[i-1])
                 for iiii in range(0,self.nb_delayed_extra):
                     self.ymgal_delayed_extra[iiii][i] = \
                         f_lock * self.ymgal_delayed_extra[iiii][i-1]
@@ -1589,7 +1619,7 @@ class chem_evol(object):
             # Output information
             if self.iolevel >= 1:
                 print ('Mass locked away:','{:.3E}'.format(self.m_locked), \
-                      ', new ISM mass:','{:.3E}'.format(sum(self.ymgal[i])))
+                      ', new ISM mass:','{:.3E}'.format(np.sum(self.ymgal[i])))
 
             # Add the pre-calculated SSP ejecta .. if fast mode
             if self.pre_calculate_SSPs:
@@ -1690,9 +1720,9 @@ class chem_evol(object):
                 self.massive_ej_rate[i-1] = 0.0
                 self.sn1a_ej_rate[i-1] = 0.0
             else:
-                self.massive_ej_rate[i-1] = sum(self.mdot_massive[i-1]) / \
+                self.massive_ej_rate[i-1] = np.sum(self.mdot_massive[i-1]) / \
                     self.history.timesteps[i-1]
-                self.sn1a_ej_rate[i-1] = sum(self.mdot_1a[i-1]) / \
+                self.sn1a_ej_rate[i-1] = np.sum(self.mdot_1a[i-1]) / \
                     self.history.timesteps[i-1]
 
 
@@ -1721,13 +1751,13 @@ class chem_evol(object):
         if self.pre_calculate_SSPs:
             self.history.metallicity.append(self.zmetal)
             self.history.age.append(self.t)
-            self.history.gas_mass.append(sum(self.ymgal[i]))
+            self.history.gas_mass.append(np.sum(self.ymgal[i]))
             self.history.ism_iso_yield.append(self.ymgal[i])
             self.history.m_locked.append(self.m_locked)
         else:
             self.history.metallicity.append(self.zmetal)
             self.history.age.append(self.t)
-            self.history.gas_mass.append(sum(self.ymgal[i]))
+            self.history.gas_mass.append(np.sum(self.ymgal[i]))
             self.history.ism_iso_yield.append(self.ymgal[i])
             self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
             self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
@@ -1762,28 +1792,22 @@ class chem_evol(object):
         # Convert isotopes into elements
         if self.pre_calculate_SSPs:
           for h in range(len(self.history.ism_iso_yield)):
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield[h])
-            self.history.ism_elem_yield.append(conv[1])
-            # List of all the elements
-            if h == 0:
-               self.history.elements = conv[0]
+            self.history.ism_elem_yield.append(self._iso_abu_to_elem(self.history.ism_iso_yield[h]))
+
         else:
           for h in range(len(self.history.ism_iso_yield)):
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield[h])
-            self.history.ism_elem_yield.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h])
-            self.history.ism_elem_yield_agb.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h])
-            self.history.ism_elem_yield_1a.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h])
-            self.history.ism_elem_yield_nsm.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h])
-            self.history.ism_elem_yield_bhnsm.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h])
-            self.history.ism_elem_yield_massive.append(conv[1])
-            # List of all the elements
-            if h == 0:
-               self.history.elements = conv[0]
+            self.history.ism_elem_yield.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield[h]))
+            self.history.ism_elem_yield_agb.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h]))
+            self.history.ism_elem_yield_1a.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h]))
+            self.history.ism_elem_yield_nsm.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h]))
+            self.history.ism_elem_yield_bhnsm.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h]))
+            self.history.ism_elem_yield_massive.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h]))
 
 
     ##############################################
@@ -2454,7 +2478,7 @@ class chem_evol(object):
                 print (minm,'{:.3E}'.format(lifetimemax))
 
             # Move to the next bin if the lifetime is longer than the simulation
-            if sum(self.history.timesteps) < lifetimemin:
+            if np.sum(self.history.timesteps) < lifetimemin:
                 if self.iolevel >= 2:
                     print ('Ejection of ', mstars[w], ' mass range at ', \
                           '{:.3E}'.format(lifetimemin),'excluded due to timelimit')
@@ -2562,11 +2586,11 @@ class chem_evol(object):
                 if self.iolevel >= 1:
                     print (mstars[w], 'Wind (if massive +SN2): of Z=', \
                     '{:.6E}'.format(self.zmetal),' at time ', \
-                    '{:.3E}'.format(sum(self.history.timesteps[:j+1])),\
+                    '{:.3E}'.format(np.sum(self.history.timesteps[:j+1])),\
                     'with lifetime: ','{:.3E}'.format(self.__find_lifetimes(round(self.zmetal,6), mstars[w])))
             if self.iolevel > 1:
-                if sum(yields) < 0:
-                    print ('Yields are negative', sum(yields))
+                if np.sum(yields) < 0:
+                    print ('Yields are negative', np.sum(yields))
 
             # Add the yields to mdot arrays
             break_bol = self.__add_yields_mdot(minm1, maxm1, yields, \
@@ -2612,7 +2636,7 @@ class chem_evol(object):
             minm1 = minm
 
         # Stop if the considered lifetime is longer than the simulation
-        if (lifetimemax > sum(self.history.timesteps) and \
+        if (lifetimemax > np.sum(self.history.timesteps) and \
                                             j == self.nb_timesteps-1):  
             if self.iolevel > 0:
                 print ('Ejection of mass at ','{:.3E}'.format(lifetimemax), \
@@ -2680,7 +2704,7 @@ class chem_evol(object):
         # Scale the total yields (see func_total_eject)
         if (self.total_ejecta_interp == True):
             m_tot_ejecta=(func_total_ejecta(minm1)+func_total_ejecta(maxm1)) / 2.0
-            scalefactor = m_tot_ejecta / sum(yields)
+            scalefactor = m_tot_ejecta / np.sum(yields)
         else:
             scalefactor = 1
 
@@ -2807,7 +2831,7 @@ class chem_evol(object):
                                 if True:
                                         if 'Mdot_wind' == attr:
                                                 #scale to total ejecta: total ejecta summed from each time bin / total ejecta from fit
-                                                mass_scale_f=sum(np.array(self.stellar_param_evol[idx][j-1][q]) * np.array(self.history.timesteps)) / m_tot_ejecta
+                                                mass_scale_f=np.sum(np.array(self.stellar_param_evol[idx][j-1][q]) * np.array(self.history.timesteps)) / m_tot_ejecta
                                                 self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
                                         #if 'Ekindot_wind' == attr:
                                         #        self.stellar_param[p][:]= self.stellar_param[p][:] + number_stars* mass_scale_f * np.array(self.stellar_param_evol[idx][j-1][q])
@@ -3094,8 +3118,8 @@ class chem_evol(object):
         dt_decay = self.history.timesteps[i-1] / nb_ref_fl
 
         # Keep track of the mass before the decay
-        sum_ymgal_temp = sum(self.ymgal_radio[i])
-        sum_mdot_temp = sum(self.mdot_radio[i-1])
+        sum_ymgal_temp = np.sum(self.ymgal_radio[i])
+        sum_mdot_temp = np.sum(self.mdot_radio[i-1])
 
         # If there is something to decay ..
         if sum_ymgal_temp > 0.0 or sum_mdot_temp > 0.0:
@@ -6259,7 +6283,7 @@ class chem_evol(object):
         # Calculate the isotope mass fractions of the gas reservoir
         X_ymgal_t = []
         for p in range(len(ymgal_t)):
-            X_ymgal_t.append(ymgal_t[p] / sum(ymgal_t))
+            X_ymgal_t.append(ymgal_t[p] / np.sum(ymgal_t))
  
         if not Z_gridpoint==0: #X0 is not in popIII tables and not necessary for popIII setting
              # Get the initial abundances used for the stellar model calculation
@@ -6306,7 +6330,7 @@ class chem_evol(object):
                         #lead to big differences in yi; yield table X0 has only limited digits
                         relat_corr=abs(X_ymgal_t[p] - X0[p])/X_ymgal_t[p]
                         if (relat_corr - 1.)>1e-3:
-                                yi = y[p] + ( X_ymgal_t[p] - X0[p]) * (m-mfinal) #sum(y) #total yields yi, Eq. 7 in Wiersma09
+                                yi = y[p] + ( X_ymgal_t[p] - X0[p]) * (m-mfinal) #np.sum(y) #total yields yi, Eq. 7 in Wiersma09
                         else:
                                 yi = y[p]
                 if yi < 0:
@@ -6318,14 +6342,14 @@ class chem_evol(object):
                 yi_all.append(yi)
 
             # we do not do the normalization
-            #norm = (m-mfinal)/sum(yi_all)
+            #norm = (m-mfinal)/np.sum(yi_all)
             yi_all= np.array(yi_all) #* norm
             yields.append(yi_all)
             # save calculated net yields and corresponding masses
             self.history.netyields=yields           
             self.history.netyields_masses=m_stars
 
-            #print ('star ',m,(m-mfinal),sum(yields[-1]))
+            #print ('star ',m,(m-mfinal),np.sum(yields[-1]))
         # Return the corrected yields
         return yields
 
@@ -6884,14 +6908,8 @@ class chem_evol(object):
             zmetal = self.hardsetZ
             return zmetal
         
-        # Calculate the total mass and the mass of metals
-        mgastot = 0.e0
-        mmetal = 0.e0 
-        nonmetals = ['H-1','H-2','H-3','He-3','He-4','Li-6','Li-7']
-        for k in range(len(self.history.isotopes)): 
-            mgastot = mgastot + self.ymgal[i][k]
-            if not self.history.isotopes[k] in nonmetals:
-                mmetal = mmetal + self.ymgal[i][k]
+        # Calculate the total mass 
+        mgastot = np.sum(self.ymgal[i])
 
         # In the case where there is no gas left
         if mgastot == 0.0:
@@ -6899,18 +6917,10 @@ class chem_evol(object):
 
         # If gas left, calculate the mass fraction of metals
         else:
-            zmetal = mmetal / mgastot
-
-        # Output information
-        if self.iolevel > 0:
-            error = 0
-            for k in range(len(self.ymgal[i])):
-                if self.ymgal[i][k] < 0:
-                    print ('check current ymgal[i] ISM mass')
-                    print ('ymgal[i][k]<0',self.ymgal[i][k],self.history.isotopes[k])
-                    error = 1
-                if error == 1:
-                    sys.exit('ERROR: zmetal<0 in getmetal routine')
+            m_non_metal = 0.0
+            for i_nm in range(self.len_i_nonmetals):
+                m_non_metal += self.ymgal[i][self.i_nonmetals[i_nm]]
+            zmetal = 1.0 - m_non_metal / mgastot
 
         # Return the metallicity of the gas reservoir
         return zmetal
@@ -6919,36 +6929,20 @@ class chem_evol(object):
     ##############################################
     #               Iso Abu to Elem              #
     ##############################################
-    def _iso_abu_to_elem(self, yields_iso, iso_list=[]):
+    def _iso_abu_to_elem(self, yields_iso):
 
         '''
         This function converts isotope yields in elements and returns the result. 
 
-        Argument
-        ========
-
-          yields_iso : List of yields (isotopes)
-
         '''
 
-        # Get the list of isotopes
-        if len(iso_list) == 0:
-            iso_list = self.history.isotopes
-
-        # Get the list of all the elements
-        elements = []
-        yields_ele = []
-        for iso in iso_list:
-            ele = iso.split('-')[0]
-            if not ele in elements:
-                elements.append(ele)
-                yields_ele.append(yields_iso[iso_list.index(iso)])
-            else:
-                idx=elements.index(ele)
-                yields_ele[idx] += yields_iso[iso_list.index(iso)]
+        # Combine isotopes into elements
+        yields_ele = np.zeros(self.nb_elements)
+        for i_iso in range(self.nb_isotopes):
+            yields_ele[self.i_elem_for_iso[i_iso]] += yields_iso[i_iso]
 
         # Return the list of elements, and the associated yields
-        return elements, yields_ele
+        return yields_ele
 
 
     ##############################################
