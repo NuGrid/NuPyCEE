@@ -11,7 +11,7 @@ This is a code repository containing the simple stellar population code SYGMA (S
 
 **Online usage**: These tools can be used directly online via the public <a href="http://www.nugridstars.org/projects/wendi">WENDI interface</a>.
 
-**Userguides**: All of our codes have <a href="http://nugrid.github.io/NuPyCEE/teaching.html">teaching iPython notebooks</a> and userguides that are available on <a href="http://www.nugridstars.org/projects/wendi">WENDI </a>. We also have <a href="http://nugrid.github.io/NuPyCEE/SPHINX/build/html/index.html">Sphinx documentation</a> to learn about the NuPyCEE functions and input parameters.
+**Userguides**: See the <a href="https://github.com/NuGrid/NuPyCEE/tree/master/DOC"> Documentation </a> folder.
 
 **Acknowledgments**: 
 
@@ -22,16 +22,21 @@ This is a code repository containing the simple stellar population code SYGMA (S
 * STELLAB: Please refer to the <a href="http://adsabs.harvard.edu/abs/2016ascl.soft10015R">NuPyCEE code library</a>.
 
 
-Installation Instructions
-=======
-* Clone the NuPyCEE package.
-* Go into the NuPyCEE directory.
-* Run `python setup.py develop`
-* Set the environment variable $SYGMADIR to point to this directory (used for accessing the yield tables).
-	* `export SYGMADIR="your_path_to_go_inside_the_NuPyCEE_directory"`
-* This should be enough if you used Anaconda Python. However, if using something else, you may have to set your `PYTHONPATH` environment variable to point to the directory containing the NuPyCEE folder.
-	* `export PYTHONPATH="your_path_to_go_before_the_NuPyCEE_directory:$PYTHONPATH"`
-* You can include the two `export` commands into your bash file so it automatically loads when you open a terminal.
+### Installation Instructions
 
-* When in Python mode, you can import the code by typing
-	* `from NuPyCEE import omega, sygma`
+* Create the directory where you want to download the codes.
+* Go in that directory with a terminal and clone the GitHub repository.
+	* `git clone https://github.com/NuGrid/NuPyCEE.git`
+* Go into the NuPyCEE directory and install the codes.
+	* `python setup.py develop`
+	* **Note**: Use the Python version you will be working with.
+* Set the path to access stellar yields and STELLAB data. This is the path where you are currently in (inside NuPyCEE).
+	* `export SYGMADIR="your_path_to_NuPyCEE"`
+	* **Example**: `export SYGMADIR="benoitcote/gce_code/NuPyCEE"`
+* Update the python path to locate NuPyCEE. This is the path to the directory just before the NuPyCEE directory.
+	* `export PYTHONPATH="your_path_to_before_NuPyCEE:$PYTHONPATH"`
+	* **Example**: `export PYTHONPATH="benoitcote/gce_code:$PYTHONPATH"`
+	* **Note**: Do not forget `:$PYTHONPATH` at the end, otherwise the python path will be overwritten.
+* **Note**: All `export` commands should be put into your bash file. With MAC, it is the .bash_profile file in your home directory. Otherwise, you will need to define the paths each time you open a terminal.
+
+* When in Python mode, you can import the code by typing `import omega`, `import sygma` and `import stellab`.
