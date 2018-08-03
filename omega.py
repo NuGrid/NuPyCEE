@@ -2985,7 +2985,8 @@ class omega( chem_evol ):
             data_file.close()
 
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
-        elements,x_ini=self._iso_abu_to_elem(x_ini_iso)
+        elements = self.history.elements
+        x_ini=self._iso_abu_to_elem(x_ini_iso)
         #to test the different contributions
         if source == 'all':
             yields_evol=self.history.ism_elem_yield
@@ -4353,7 +4354,8 @@ class omega( chem_evol ):
         #Access solar abundance
         iniabu=ry.iniabu(global_path+solar_ab)
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
-        elements,x_ini=self._iso_abu_to_elem(x_ini_iso)
+        elements = self.history.elements
+        x_ini=self._iso_abu_to_elem(x_ini_iso)
 
         # Get the wanted source
         if source == 'all':
@@ -4751,7 +4753,8 @@ class omega( chem_evol ):
         x_ini_iso = iniabu.iso_abundance(self.history.isotopes)
 
         # Access 
-        elements, x_ini = self._iso_abu_to_elem(x_ini_iso)
+        elements = self.history.elements
+        x_ini = self._iso_abu_to_elem(x_ini_iso)
         yields_evol = self.history.ism_elem_yield
 
         # Isolate the X and Y in [X/Y]
@@ -4830,7 +4833,8 @@ class omega( chem_evol ):
     ##############################################
     #                 Plot Abun                  #
     ##############################################
-    def plot_abun(self, fig=20, age=9.2e9,\
+        '''
+        def plot_abun(self, fig=20, age=9.2e9,\
         solar_norm=False, iso_on=False,\
         list_elem=[], list_iso=[],return_x_y=False, over_plot_solar=False,\
         solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn', species_labels=True,f_y_annotate=0.9,\
@@ -4838,6 +4842,7 @@ class omega( chem_evol ):
         fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,\
         legend_fontsize=14, markersize=5):
 
+        '''
         '''
         This function plots the abundance distribution in mass
         fraction at any given point in time or at any given metallicity.
@@ -4912,6 +4917,7 @@ class omega( chem_evol ):
              Size of the markers
              Default: markersize=5
 
+        '''
         '''
 
         import matplotlib
@@ -5129,6 +5135,7 @@ class omega( chem_evol ):
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
                rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize, markersize=markersize)
+        '''
 
 
     ##############################################
