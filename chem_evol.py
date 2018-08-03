@@ -995,18 +995,16 @@ class chem_evol(object):
     #             Get elem-to-iso Main           #
     ##############################################
     def __get_elem_to_iso_main(self):
-
         # Get the list of elements
-        self.elements = []
+        self.history.elements = []
         self.i_elem_for_iso = np.zeros(self.nb_isotopes,dtype=int)
         for i_iso in range(self.nb_isotopes):
             the_elem = self.history.isotopes[i_iso].split('-')[0]
-            if not the_elem in self.elements:
-                self.elements.append(the_elem)
-            i_elem = self.elements.index(the_elem)            
+            if not the_elem in self.history.elements:
+                self.history.elements.append(the_elem)
+            i_elem = self.history.elements.index(the_elem)
             self.i_elem_for_iso[i_iso] = i_elem
-        self.nb_elements = len(self.elements)
-
+        self.nb_elements = len(self.history.elements)
 
     ##############################################
     #               Read Decay Info              #
