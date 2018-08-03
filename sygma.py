@@ -1697,7 +1697,8 @@ class sygma( chem_evol ):
             iniabu=ry.iniabu(global_path+'yield_tables/iniabu/iniab2.0E-02GN93.ppn')
 
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
-        elements,x_ini=self._iso_abu_to_elem(x_ini_iso)
+        elements = self.history.elements
+        x_ini=self._iso_abu_to_elem(x_ini_iso)
         #to test the different contributions
         if source == 'all':
             yields_evol=self.history.ism_elem_yield
