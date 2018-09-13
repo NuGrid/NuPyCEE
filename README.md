@@ -40,3 +40,11 @@ This is a code repository containing the simple stellar population code SYGMA (S
 * **Note**: All `export` commands should be put into your bash file. With MAC, it is the .bash_profile file in your home directory. Otherwise, you will need to define the paths each time you open a terminal.
 
 * When in Python mode, you can import the code by typing `import omega`, `import sygma` and `import stellab`.
+
+### Installation of the Decay Module for Using Radioactive Isotopes
+
+* In the NuPyCEE folder, type the following
+	* `f2py -c decay_module.f95 -m decay_module`
+	* **Note**: Use the f2py version that will be compatible with your Python version.
+* In `chem_evol.py`, uncomment the following line `#import decay_module`.
+
