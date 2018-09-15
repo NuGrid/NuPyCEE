@@ -17,7 +17,7 @@ This is a code repository containing the simple stellar population code SYGMA (S
 
 * SYGMA: Please refer to <a href="http://adsabs.harvard.edu/abs/2017arXiv171109172R">Ritter et al. (2017)</a>.
 
-* OMEGA: Please refer to <a href="h* ttp://adsabs.harvard.edu/abs/2016arXiv160407824C">Côté et al. (2017)</a>.
+* OMEGA: Please refer to <a href="http://adsabs.harvard.edu/abs/2016arXiv160407824C">Côté et al. (2017)</a>.
 
 * STELLAB: Please refer to the <a href="http://adsabs.harvard.edu/abs/2016ascl.soft10015R">NuPyCEE code library</a>.
 
