@@ -35,11 +35,11 @@ This is a code repository containing the simple stellar population code SYGMA (S
 	* **Example**: `export SYGMADIR="benoitcote/gce_code/NuPyCEE"`
 * Update the python path to locate NuPyCEE. This is the path to the directory just before the NuPyCEE directory.
 	* `export PYTHONPATH="your_path_to_before_NuPyCEE:$PYTHONPATH"`
+	* **Important**: Do not forget `:$PYTHONPATH` at the end, otherwise the python path will be overwritten.
 	* **Example**: `export PYTHONPATH="benoitcote/gce_code:$PYTHONPATH"`
-	* **Note**: Do not forget `:$PYTHONPATH` at the end, otherwise the python path will be overwritten.
 * **Note**: All `export` commands should be put into your bash file. With MAC, it is the .bash_profile file in your home directory. Otherwise, you will need to define the paths each time you open a terminal.
 
-* When in Python mode, you can import the code by typing `import omega`, `import sygma` and `import stellab`.
+* When in Python mode, you can import the code by typing `from NuPyCEE import omega`, `from NuPyCEE import sygma` and `from NuPyCEE import stellab`.
 
 ### Installation of the Decay Module for Using Radioactive Isotopes
 
