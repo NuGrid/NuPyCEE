@@ -6,17 +6,28 @@
 - - - - - 
 **agb_and_massive_stars_nugrid_MESAonly_xxxx.txt**
 
-- AGB and massive: NuGrid Collaboration, Ritter et al. (2017, R17), <http://adsabs.harvard.edu/abs/2017arXiv170908677R>
+- AGB and massive: NuGrid Collaboration, Ritter et al. (2018, R18), <http://adsabs.harvard.edu/abs/2018MNRAS.480..538R>
 
 |   Z points | 0.0001 | 0.001 | 0.006 | 0.01 | 0.02 |
 |-----------:|-------:|------:|------:|-----:|-----:|
-| R17        | 0.0001 | 0.001 | 0.006 | 0.01 | 0.02 |
-| R17        | 0.0001 | 0.001 | 0.006 | 0.01 | 0.02 |
+| R18        | 0.0001 | 0.001 | 0.006 | 0.01 | 0.02 |
+| R18        | 0.0001 | 0.001 | 0.006 | 0.01 | 0.02 |
 
 **Note** 
 
 - fryer12delay and fryer12rapid at the end of the file name refers to the remnant mass prescription use for the core-collapse explosion of massive stars <http://adsabs.harvard.edu/abs/2012ApJ...749...91F>
 - fryer12mix at the end of the file name represents a mixture of 50% delay and 50% rapid.
+	
+- - - - - 
+**agb_and_massive_stars_KL16_nugrid_fryer12delay.txt**
+
+- AGB: Karakas & Lugaro (2016, KL16), <http://adsabs.harvard.edu/abs/2016ApJ...825...26K>
+- Massive: NuGrid Collaboration, Ritter et al. (2018, R18), <http://adsabs.harvard.edu/abs/2018MNRAS.480..538R>
+
+|   Z points | 0.03   | 0.014 | 0.007 |
+|-----------:|-------:|------:|------:|
+| KL16       | 0.03   | 0.014 | 0.007 |
+| R18        | 0.02   | `interp` | `interp` |
 	
 - - - - - 
 **agb_and_massive_stars_K10_K06.txt**
