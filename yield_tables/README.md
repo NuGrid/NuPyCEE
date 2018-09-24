@@ -19,17 +19,7 @@
 - fryer12mix at the end of the file name represents a mixture of 50% delay and 50% rapid.
 	
 - - - - - 
-**agb_and_massive_stars_KL16_nugrid_fryer12delay.txt**
 
-- AGB: Karakas & Lugaro (2016, KL16), <http://adsabs.harvard.edu/abs/2016ApJ...825...26K>
-- Massive: NuGrid Collaboration, Ritter et al. (2018, R18), <http://adsabs.harvard.edu/abs/2018MNRAS.480..538R>
-
-|   Z points | 0.03   | 0.014 | 0.007 |
-|-----------:|-------:|------:|------:|
-| KL16       | 0.03   | 0.014 | 0.007 |
-| R18        | 0.02   | `interp` | `interp` |
-	
-- - - - - 
 **agb_and_massive_stars_K10_K06.txt**
 
 - AGB: Karakas (2010, K10), <http://adsabs.harvard.edu/abs/2010MNRAS.403.1413K>
