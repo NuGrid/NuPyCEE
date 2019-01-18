@@ -1022,7 +1022,7 @@ class chem_evol(object):
         self.decay_info = []
 
         # Open the input file
-        with open(global_path + self.decay_file, 'r') as ddi:
+        with open(global_path + self.decay_file, 'r', encoding="utf-8") as ddi:
 
             # For each line in the input file ..
             for line in ddi:
