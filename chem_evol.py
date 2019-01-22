@@ -275,6 +275,13 @@ class chem_evol(object):
 
         Default value : 'yield_tables/iniabu/iniab2.0E-02GN93.ppn'
 
+    yield_tables_dir : string
+        Path to a custom directory that includes yields.
+        !! It needs to point to the directory where the yields directory is !!
+        This will bypass the default yields directory.
+
+        Default value : '' --> Deactivated
+
     yield_interp : string
         if 'None' : no yield interpolation, no interpolation of total ejecta
 
@@ -446,7 +453,7 @@ class chem_evol(object):
              exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=-1, \
              f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
              netyields_on=False,wiersmamod=False,yield_interp='lin',\
-             print_off=False,\
+             print_off=False, yield_tables_dir='',\
              total_ejecta_interp=True, tau_ferrini=False,\
              input_yields=False,t_merge=-1.0,stellar_param_on=False,\
              stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',\
@@ -589,6 +596,12 @@ class chem_evol(object):
         self.pritchet_1a_dtd = pritchet_1a_dtd
         self.len_pritchet_1a_dtd = len(pritchet_1a_dtd)
         self.print_off = print_off
+        self.yield_tables_dir = yield_tables_dir
+        self.the_path = global_path
+        if len(yield_tables_dir) > 0:
+            if not self.yield_tables_dir[-1] == '/':
+                self.yield_tables_dir += '/'
+            self.the_path = self.yield_tables_dir
 
         # Attributes associated with radioactive species
         self.table_radio = table_radio
@@ -1022,7 +1035,7 @@ class chem_evol(object):
         self.decay_info = []
 
         # Open the input file
-        with open(global_path + self.decay_file, 'r', encoding="utf-8") as ddi:
+        with open(self.the_path + self.decay_file, 'r', encoding="utf-8") as ddi:
 
             # For each line in the input file ..
             for line in ddi:
@@ -1063,7 +1076,7 @@ class chem_evol(object):
         # Massive and AGB stars
         if len(self.table_radio) > 0:
             self.radio_massive_agb_on = True
-            self.ytables_radio = ry.read_nugrid_yields(global_path+self.table_radio,\
+            self.ytables_radio = ry.read_nugrid_yields(self.the_path+self.table_radio,\
                 excludemass=self.exclude_masses, isotopes=self.radio_iso)
 
         # SNe Ia
@@ -1071,26 +1084,26 @@ class chem_evol(object):
         if len(self.sn1a_table_radio) > 0:
             self.radio_sn1a_on = True
             self.ytables_1a_radio = ry.read_yield_sn1a_tables( \
-                global_path + self.sn1a_table_radio, self.radio_iso)
+                self.the_path + self.sn1a_table_radio, self.radio_iso)
 
         # NS mergers
         if len(self.nsmerger_table_radio) > 0:
             self.radio_nsmerger_on = True
             self.ytables_nsmerger_radio = ry.read_yield_sn1a_tables( \
-                global_path + self.nsmerger_table_radio, self.radio_iso)
+                self.the_path + self.nsmerger_table_radio, self.radio_iso)
 
         # BHNS mergers
         if len(self.bhnsmerger_table_radio) > 0:
             self.radio_bhnsmerger_on = True
             self.ytables_bhnsmerger_radio = ry.read_yield_sn1a_tables( \
-                global_path + self.bhnsmerger_table_radio, self.radio_iso)
+                self.the_path + self.bhnsmerger_table_radio, self.radio_iso)
 
         # Delayed extra sources
         if self.nb_delayed_extra_radio > 0:
             self.ytables_delayed_extra_radio = []
             for i_syt in range(0,self.nb_delayed_extra_radio):
               self.ytables_delayed_extra_radio.append(ry.read_yield_sn1a_tables( \
-              global_path + self.delayed_extra_yields_radio[i_syt], self.radio_iso))
+              self.the_path + self.delayed_extra_yields_radio[i_syt], self.radio_iso))
 
 
     ##############################################
@@ -1109,7 +1122,7 @@ class chem_evol(object):
 
             # If an input iniabu table is provided ...
             if len(self.iniabu_table) > 0:
-                iniabu=ry.iniabu(global_path + self.iniabu_table)
+                iniabu=ry.iniabu(self.the_path + self.iniabu_table)
                 if self.iolevel >0:
                     print ('Use initial abundance of ', self.iniabu_table)
                 ymgal_gi = np.array(iniabu.iso_abundance(self.history.isotopes)) * \
@@ -1120,7 +1133,7 @@ class chem_evol(object):
                 # Get the primordial composition of Walker et al. (1991)
                 iniabu_table = 'yield_tables/iniabu/iniab_bb_walker91.txt'
                 ytables_bb = ry.read_yield_sn1a_tables( \
-                    global_path+iniabu_table, self.history.isotopes)
+                    self.the_path+iniabu_table, self.history.isotopes)
 
                 # Assign the composition to the gas reservoir
                 ymgal_gi = ytables_bb.get(quantity='Yields') * self.mgal
@@ -1134,7 +1147,7 @@ class chem_evol(object):
 
             # If an input iniabu table is provided ...
             if len(self.iniabu_table) > 0:
-                iniabu=ry.iniabu(global_path + self.iniabu_table)
+                iniabu=ry.iniabu(self.the_path + self.iniabu_table)
                 if self.iolevel > 0:
                     print ('Use initial abundance of ', self.iniabu_table)
 
@@ -1153,7 +1166,7 @@ class chem_evol(object):
                 # Pick the composition associated to the input iniZ
                 for metal in ini_Z:
                     if metal == float(self.iniZ):
-                        iniabu = ry.iniabu(global_path + \
+                        iniabu = ry.iniabu(self.the_path + \
                         'yield_tables/iniabu/' + ini_list[ini_Z.index(metal)])
                         if self.iolevel>0:
                             print ('Use initial abundance of ', \
@@ -1162,7 +1175,7 @@ class chem_evol(object):
 
             # Input file for the initial composition ...
             #else:
-            #    iniabu=ry.iniabu(global_path + iniabu_table)
+            #    iniabu=ry.iniabu(self.the_path + iniabu_table)
             #    print ('Use initial abundance of ', iniabu_table)
 
             # Assign the composition to the gas reservoir
@@ -1829,7 +1842,7 @@ class chem_evol(object):
         if self.table[0] == '/':
             ytables = ry.read_nugrid_yields(self.table,excludemass=self.exclude_masses)
         else:
-            ytables = ry.read_nugrid_yields(global_path + self.table,excludemass=self.exclude_masses)
+            ytables = ry.read_nugrid_yields(self.the_path + self.table,excludemass=self.exclude_masses)
         self.ytables = ytables
 
         # Interpolate stellar lifetimes
@@ -1844,7 +1857,7 @@ class chem_evol(object):
 
         # Read PopIII stars yields - Heger et al. (2010)
         self.ytables_pop3 = ry.read_nugrid_yields( \
-            global_path+self.pop3_table,isotopes,excludemass=self.exclude_masses)
+            self.the_path+self.pop3_table,isotopes,excludemass=self.exclude_masses)
 
         # Check compatibility between PopIII stars and NuGrid yields
 #        isotopes_pop3 = self.ytables_pop3.get(10,0.0,'Isotopes')
@@ -1858,22 +1871,22 @@ class chem_evol(object):
         # Read SN Ia yields
         sys.stdout.flush()
         self.ytables_1a = ry.read_yield_sn1a_tables( \
-            global_path + self.sn1a_table, isotopes)
+            self.the_path + self.sn1a_table, isotopes)
 
         # Read NS merger yields
         self.ytables_nsmerger = ry.read_yield_sn1a_tables( \
-            global_path + self.nsmerger_table, isotopes)
+            self.the_path + self.nsmerger_table, isotopes)
 
         # Read BHNS merger yields
         self.ytables_bhnsmerger = ry.read_yield_sn1a_tables( \
-            global_path + self.bhnsmerger_table, isotopes)
+            self.the_path + self.bhnsmerger_table, isotopes)
 
         # Read delayed extra yields
         if self.nb_delayed_extra > 0:
           self.ytables_delayed_extra = []
           for i_syt in range(0,self.nb_delayed_extra):
             self.ytables_delayed_extra.append(ry.read_yield_sn1a_tables( \
-            global_path + self.delayed_extra_yields[i_syt], isotopes))
+            self.the_path + self.delayed_extra_yields[i_syt], isotopes))
 
         # Should be modified to include extra source for the yields
         #self.extra_source_on = False
@@ -1890,11 +1903,11 @@ class chem_evol(object):
                         self.extra_source_table[ee], isotopes))
                else:
                    self.ytables_extra.append( ry.read_yield_sn1a_tables( \
-                     global_path + self.extra_source_table[ee], isotopes))
+                     self.the_path + self.extra_source_table[ee], isotopes))
 
         #Read stellar parameter. stellar_param
         if self.stellar_param_on:
-            table_param=ry.read_nugrid_parameter(global_path + self.stellar_param_table)
+            table_param=ry.read_nugrid_parameter(self.the_path + self.stellar_param_table)
             self.table_param=table_param
 
         # Output information

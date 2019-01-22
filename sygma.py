@@ -141,7 +141,7 @@ class sygma( chem_evol ):
                  f_extra_source=[1.0], pre_calculate_SSPs=False, \
                  extra_source_mass_range=[[8,30]], \
                  extra_source_exclude_Z=[[]], \
-                 total_ejecta_interp=True,\
+                 total_ejecta_interp=True, yield_tables_dir='',\
                  radio_refinement=100, use_decay_module=False,\
                  f_network='isotopes_modified.prn', f_format=1,\
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -184,7 +184,7 @@ class sygma( chem_evol ):
                  f_binary=f_binary, f_merger=f_merger, \
                  bhns_merger_on=bhns_merger_on,
                  m_ej_bhnsm=m_ej_bhnsm, bhnsmerger_table=bhnsmerger_table, \
-                 nsm_dtd_power=nsm_dtd_power, \
+                 nsm_dtd_power=nsm_dtd_power, yield_tables_dir=yield_tables_dir, \
                  total_ejecta_interp=total_ejecta_interp, \
                  t_merger_max=t_merger_max, m_ej_nsm = m_ej_nsm, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \

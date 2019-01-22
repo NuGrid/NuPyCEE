@@ -259,7 +259,7 @@ class omega( chem_evol ):
                  tend=13e9, mgal=1.0e10, transitionmass=8, iolevel=0, \
                  ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=30.0e6,\
                  table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
-                 use_decay_module=False,\
+                 use_decay_module=False, yield_tables_dir='',\
                  f_network='isotopes_modified.prn', f_format=1,\
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  bhnsmerger_table_radio='', nsmerger_table_radio='',\
@@ -367,7 +367,7 @@ class omega( chem_evol ):
                  t_merge=t_merge,popIII_info_fast=popIII_info_fast,\
                  out_follows_E_rate=out_follows_E_rate,\
                  stellar_param_on=stellar_param_on,\
-                 print_off=print_off,\
+                 print_off=print_off, yield_tables_dir=yield_tables_dir, \
                  ism_ini=ism_ini,ytables_in=ytables_in,\
                  delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
                  delayed_extra_log_radio=delayed_extra_log_radio,\
