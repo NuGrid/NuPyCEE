@@ -152,7 +152,6 @@ class sygma( chem_evol ):
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
                  stellar_param_on=False, t_dtd_poly_split=-1.0, \
                  delayed_extra_yields_log_int=False, \
-                 delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
                  stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
                  tau_ferrini=False, delayed_extra_log=False, dt_in=np.array([]),\
                  nsmerger_dtd_array=np.array([]), bhnsmerger_dtd_array=np.array([]),\
@@ -164,7 +163,6 @@ class sygma( chem_evol ):
                  ytables_nsmerger_in=np.array([]), dt_split_info=np.array([]),\
                  delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
                  delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]), \
-                 delayed_extra_dtd_radio=np.array([]), delayed_extra_dtd_norm_radio=np.array([]), \
                  delayed_extra_yields_radio=np.array([]), ism_ini_radio=np.array([]), \
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
@@ -203,8 +201,6 @@ class sygma( chem_evol ):
                  netyields_on=netyields_on,wiersmamod=wiersmamod,\
                  yield_interp=yield_interp, tau_ferrini=tau_ferrini,\
                  delayed_extra_log=delayed_extra_log,\
-                 delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
-                 delayed_extra_log_radio=delayed_extra_log_radio,\
                  delayed_extra_yields_log_int_radio=delayed_extra_yields_log_int_radio,\
                  ytables_in=ytables_in, nsmerger_dtd_array=nsmerger_dtd_array, \
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
@@ -220,8 +216,6 @@ class sygma( chem_evol ):
                  delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
                  delayed_extra_yields=delayed_extra_yields,\
                  delayed_extra_yields_norm=delayed_extra_yields_norm,\
-                 delayed_extra_dtd_radio=delayed_extra_dtd_radio,\
-                 delayed_extra_dtd_norm_radio=delayed_extra_dtd_norm_radio,\
                  delayed_extra_yields_radio=delayed_extra_yields_radio,\
                  delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
                  ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\

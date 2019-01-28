@@ -292,7 +292,6 @@ class omega( chem_evol ):
                  r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
                  stellar_param_on=False, delayed_extra_log=False,\
                  delayed_extra_yields_log_int=False,\
-                 delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
                  bhnsmerger_dtd_array=np.array([]), dt_in_SSPs=np.array([]), \
                  DM_array=np.array([]), nsmerger_dtd_array=np.array([]),\
                  sfh_array=np.array([]),ism_ini=np.array([]),\
@@ -314,7 +313,6 @@ class omega( chem_evol ):
                  m_tot_ISM_t_in=np.array([]), m_inflow_X_array=np.array([]),\
                  delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
                  delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]),\
-                 delayed_extra_dtd_radio=np.array([]), delayed_extra_dtd_norm_radio=np.array([]), \
                  delayed_extra_yields_radio=np.array([]), \
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
