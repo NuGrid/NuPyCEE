@@ -4296,7 +4296,8 @@ class chem_evol(object):
     #               Get Nb Y Interp             #
     #############################################
     def __get_nb_y_interp(self, timemin, timemax, i_extra, iZ_low, iZ_up,\
-                          yextra_low, yextra_up, Z_extra):
+                          yextra_low, yextra_up, Z_extra, yextra_low_radio=[],\
+                          yextra_up_radio=[], return_radio=False):
 
         '''
         This function returns the yields, metallicities, and Z boundary indexes
