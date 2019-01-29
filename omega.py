@@ -368,8 +368,6 @@ class omega( chem_evol ):
                  print_off=print_off, yield_tables_dir=yield_tables_dir, \
                  ism_ini=ism_ini,ytables_in=ytables_in,\
                  delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
-                 delayed_extra_log_radio=delayed_extra_log_radio,\
-                 delayed_extra_yields_log_int_radio=delayed_extra_yields_log_int_radio,\
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
@@ -388,8 +386,6 @@ class omega( chem_evol ):
                  delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
                  delayed_extra_yields=delayed_extra_yields,\
                  delayed_extra_yields_norm=delayed_extra_yields_norm,\
-                 delayed_extra_dtd_radio=delayed_extra_dtd_radio,\
-                 delayed_extra_dtd_norm_radio=delayed_extra_dtd_norm_radio,\
                  delayed_extra_yields_radio=delayed_extra_yields_radio,\
                  delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
                  ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
