@@ -38,9 +38,11 @@ MARCH2018: B. Cote
 - Capability to include radioactive isotopes
 
 JULY2018: B. Cote & R. Sarmento
-- Re-wrote (improved) yields and lifetime treatment (B. Cote)
+- Re-wrote (improved) yield and lifetime treatment (B. Cote)
 - PopIII IMF and yields update (R. Sarmento)
 
+JAN2019: B. Cote
+- Re-included radioactive isotopes with the new (improved) yield treatment
 
 Usage
 =====
@@ -683,13 +685,6 @@ class chem_evol(object):
             return
         # NOTE: This if statement also needs to be in SYGMA and OMEGA!
 
-        # If radioactive isotopes are used ..
-        if self.len_decay_file > 0:
-
-            # Define the decay properties and read radioactive tables
-            self.__define_decay_info()
-            self.__read_radio_tables()
-
         # Initialisation of the timesteps 
         if len(self.dt_split_info) > 0: # and len(self.ej_massive) == 0:
             timesteps = self.__build_split_dt()
@@ -703,6 +698,11 @@ class chem_evol(object):
             for i_init in range(1,self.nb_timesteps):
                 self.t_ce[i_init] = self.t_ce[i_init-1] + \
                     self.history.timesteps[i_init]
+
+        # Define the decay properties and read radioactive tables
+        if self.len_decay_file > 0:
+            self.__define_decay_info()
+            self.__read_radio_tables()
 
         # If the yield tables have already been read previously ...
         if input_yields:
@@ -748,6 +748,12 @@ class chem_evol(object):
             # Calculate coefficients to interpolate masses from lifetimes
             self.__interpolate_pop3_m_from_t()
             self.__interpolate_massive_and_agb_m_from_t()
+
+            # If radioactive isotopes are used ..
+            if self.len_decay_file > 0:
+
+                # Interpolate the radioactive yields tables
+                self.__interpolate_massive_and_agb_yields(is_radio=True)
 
         # If SSPs needs to be pre-calculated ..
         if self.pre_calculate_SSPs:
@@ -1261,7 +1267,7 @@ class chem_evol(object):
     ##############################################
     #     Interpolate Massive and AGB Yields     #
     ##############################################
-    def __interpolate_massive_and_agb_yields(self):
+    def __interpolate_massive_and_agb_yields(self, is_radio=False):
 
         '''
         Interpolate the metallicity- and mass-dependent yields
@@ -1328,37 +1334,66 @@ class chem_evol(object):
 
                 # Get the yields for the lower and upper mass models
                 yields_low, yields_upp, m_ej_low, m_ej_upp, yields_ej_low,\
-                    yields_ej_upp = self.__get_y_low_upp(i_Z_temp, i_M)
+                    yields_ej_upp = self.__get_y_low_upp(i_Z_temp, i_M, \
+                        is_radio=is_radio)
 
                 # Get the interpolation coefficients a_M, b_M
-                self.y_coef_M[0][i_Z][i_M], self.y_coef_M[1][i_Z][i_M],\
-                    self.y_coef_M_ej[0][i_Z][i_M], self.y_coef_M_ej[1][i_Z][i_M] =\
-                    self.__get_inter_coef_M(self.inter_M_points[i_M],\
-                    self.inter_M_points[i_M+1], yields_low, yields_upp,\
-                    m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp)
+                if is_radio: # Ignore the total mass ejected (done when stable)
+                    self.y_coef_M_radio[0][i_Z][i_M], self.y_coef_M_radio[1][i_Z][i_M],\
+                        dummy, dummy = self.__get_inter_coef_M(self.inter_M_points[i_M],\
+                        self.inter_M_points[i_M+1], yields_low, yields_upp,\
+                        1.0, 2.0, yields_upp, yields_upp)
+                else:
+                    self.y_coef_M[0][i_Z][i_M], self.y_coef_M[1][i_Z][i_M],\
+                        self.y_coef_M_ej[0][i_Z][i_M], self.y_coef_M_ej[1][i_Z][i_M] =\
+                        self.__get_inter_coef_M(self.inter_M_points[i_M],\
+                        self.inter_M_points[i_M+1], yields_low, yields_upp,\
+                        m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp)
 
         # Fill the y_coef_Z_xM arrays 
         # For each interpolation lower-metallicity point ..
         for i_Z in range(self.nb_inter_Z_points-1):
 
             # For each interpolation lower-mass bin point ..
-            for i_M in range(self.nb_inter_M_points-1):
+            for i_M in range(self.nb_inter_M_points-1): 
 
-                # Get the interpolation coefficients a_Z, b_Z for a_M
-                self.y_coef_Z_aM[0][i_Z][i_M], self.y_coef_Z_aM[1][i_Z][i_M],\
-                    self.y_coef_Z_aM_ej[0][i_Z][i_M], self.y_coef_Z_aM_ej[1][i_Z][i_M] =\
-                        self.__get_inter_coef_Z(self.y_coef_M[0][i_Z][i_M],\
-                            self.y_coef_M[0][i_Z+1][i_M], self.y_coef_M_ej[0][i_Z][i_M],\
-                                self.y_coef_M_ej[0][i_Z+1][i_M], self.inter_Z_points[i_Z],\
-                                    self.inter_Z_points[i_Z+1])
+                # If radioactive table ..
+                if is_radio:
 
-                # Get the interpolation coefficients a_Z, b_Z for b_M
-                self.y_coef_Z_bM[0][i_Z][i_M], self.y_coef_Z_bM[1][i_Z][i_M],\
-                    self.y_coef_Z_bM_ej[0][i_Z][i_M], self.y_coef_Z_bM_ej[1][i_Z][i_M] =\
-                        self.__get_inter_coef_Z(self.y_coef_M[1][i_Z][i_M],\
-                            self.y_coef_M[1][i_Z+1][i_M], self.y_coef_M_ej[1][i_Z][i_M],\
-                                self.y_coef_M_ej[1][i_Z+1][i_M], self.inter_Z_points[i_Z],\
-                                    self.inter_Z_points[i_Z+1]) 
+                    # Get the interpolation coefficients a_Z, b_Z for a_M
+                    self.y_coef_Z_aM_radio[0][i_Z][i_M], self.y_coef_Z_aM_radio[1][i_Z][i_M],\
+                        dummy, dummy =\
+                            self.__get_inter_coef_Z(self.y_coef_M_radio[0][i_Z][i_M],\
+                                self.y_coef_M_radio[0][i_Z+1][i_M], self.y_coef_M_ej[0][i_Z][i_M],\
+                                    self.y_coef_M_ej[0][i_Z+1][i_M], self.inter_Z_points[i_Z],\
+                                        self.inter_Z_points[i_Z+1])
+
+                    # Get the interpolation coefficients a_Z, b_Z for b_M
+                    self.y_coef_Z_bM_radio[0][i_Z][i_M], self.y_coef_Z_bM_radio[1][i_Z][i_M],\
+                        dummy, dummy =\
+                            self.__get_inter_coef_Z(self.y_coef_M_radio[1][i_Z][i_M],\
+                                self.y_coef_M_radio[1][i_Z+1][i_M], self.y_coef_M_ej[1][i_Z][i_M],\
+                                    self.y_coef_M_ej[1][i_Z+1][i_M], self.inter_Z_points[i_Z],\
+                                        self.inter_Z_points[i_Z+1]) 
+
+                # If stable table ..
+                else:
+
+                    # Get the interpolation coefficients a_Z, b_Z for a_M
+                    self.y_coef_Z_aM[0][i_Z][i_M], self.y_coef_Z_aM[1][i_Z][i_M],\
+                        self.y_coef_Z_aM_ej[0][i_Z][i_M], self.y_coef_Z_aM_ej[1][i_Z][i_M] =\
+                            self.__get_inter_coef_Z(self.y_coef_M[0][i_Z][i_M],\
+                                self.y_coef_M[0][i_Z+1][i_M], self.y_coef_M_ej[0][i_Z][i_M],\
+                                    self.y_coef_M_ej[0][i_Z+1][i_M], self.inter_Z_points[i_Z],\
+                                        self.inter_Z_points[i_Z+1])
+
+                    # Get the interpolation coefficients a_Z, b_Z for b_M
+                    self.y_coef_Z_bM[0][i_Z][i_M], self.y_coef_Z_bM[1][i_Z][i_M],\
+                        self.y_coef_Z_bM_ej[0][i_Z][i_M], self.y_coef_Z_bM_ej[1][i_Z][i_M] =\
+                            self.__get_inter_coef_Z(self.y_coef_M[1][i_Z][i_M],\
+                                self.y_coef_M[1][i_Z+1][i_M], self.y_coef_M_ej[1][i_Z][i_M],\
+                                    self.y_coef_M_ej[1][i_Z+1][i_M], self.inter_Z_points[i_Z],\
+                                        self.inter_Z_points[i_Z+1])
 
 
     ##############################################
@@ -1440,6 +1475,22 @@ class chem_evol(object):
         self.tau_coef_M_pop3 = np.zeros((2, self.nb_M_table_pop3-1))
         self.tau_coef_M_pop3_inv = np.zeros((2, self.nb_inter_lifetime_points_pop3-1))
 
+        # Radioactive isotopes (non-zero metallicity)
+        # ===========================================
+        if self.len_decay_file > 0:
+        
+            # Declare the array containing the coefficients for
+            # the yields interpolation between masses (a_M, b_M)
+            self.y_coef_M_radio = np.zeros((2, self.nb_Z_table,\
+                self.nb_inter_M_points-1, self.nb_radio_iso))
+
+            # Declare the array containing the coefficients for
+            # the yields interpolation between metallicities (a_Z, b_Z)
+            self.y_coef_Z_aM_radio = np.zeros((2, self.nb_Z_table-1,\
+                self.nb_inter_M_points-1, self.nb_radio_iso))
+            self.y_coef_Z_bM_radio = np.zeros((2, self.nb_Z_table-1,\
+                self.nb_inter_M_points-1, self.nb_radio_iso))
+
 
     ##############################################
     #         Create Inter M Points Pop3         #
@@ -1482,7 +1533,7 @@ class chem_evol(object):
     ##############################################
     def __create_inter_M_points(self):
 
-        '''
+        ''' 
         Create the boundary stellar masses array representing
         the mass points in between which there will be yields
         interpolations.  This is for massive and AGB stars.
@@ -1549,7 +1600,7 @@ class chem_evol(object):
             # Extrapolate the lower boundary
             yields_low = self.scale_yields_to_M_ej(self.M_table_pop3[0],\
                 self.M_table_pop3[1], y_tables_0, y_tables_1, \
-                    self.inter_M_points_pop3[i_M], y_tables_0)
+                    self.inter_M_points_pop3[i_M], y_tables_0, sum(y_tables_0))
 
             # Take lowest-mass model for the upper boundary
             yields_upp = y_tables_0
@@ -1650,7 +1701,7 @@ class chem_evol(object):
     ##############################################
     #               Get Y Low Upp                #
     ##############################################
-    def __get_y_low_upp(self, i_Z, i_M):
+    def __get_y_low_upp(self, i_Z, i_M, is_radio=False):
 
         '''
         Get the lower and upper boundary yields in between
@@ -1665,7 +1716,7 @@ class chem_evol(object):
                 interpolation occurs.  This is taken from
                 the self.inter_M_points array.
 
-        '''
+        '''            
 
         # If need to extrapolate on the low-mass end ..
         # =============================================
@@ -1677,24 +1728,43 @@ class chem_evol(object):
             y_tables_1 = self.ytables.get(\
                 Z=self.Z_table[i_Z], M=self.M_table[1], quantity='Yields')
 
-            # Extrapolate the lower boundary
-            yields_low = self.scale_yields_to_M_ej(self.M_table[0],\
-                self.M_table[1], y_tables_0, y_tables_1, \
-                    self.inter_M_points[i_M], y_tables_0)
+            # If radioactive yields table ..
+            if is_radio:
 
-            # Take lowest-mass model for the upper boundary
-            yields_upp = y_tables_0
+                # Get radioactive yields
+                y_tables_0_radio = self.ytables_radio.get(\
+                    Z=self.Z_table[i_Z], M=self.M_table[0], quantity='Yields')
 
-            # Set the yields and mass for total-mass-ejected interpolation
-            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
-                self.M_table[0], self.M_table[1], y_tables_0, y_tables_1
+                # Extrapolate the lower boundary (using stable yields total mass)
+                yields_low = self.scale_yields_to_M_ej(self.M_table[0],\
+                    self.M_table[1], y_tables_0, y_tables_1, \
+                        self.inter_M_points[i_M], y_tables_0_radio, \
+                            sum(y_tables_0))
+
+                # Take lowest-mass model for the upper boundary
+                yields_upp = y_tables_0_radio
+
+            # If stable yields table ..
+            else:
+
+                # Extrapolate the lower boundary
+                yields_low = self.scale_yields_to_M_ej(self.M_table[0],\
+                    self.M_table[1], y_tables_0, y_tables_1, \
+                        self.inter_M_points[i_M], y_tables_0, sum(y_tables_0))
+
+                # Take lowest-mass model for the upper boundary
+                yields_upp = y_tables_0
+
+                # Set the yields and mass for total-mass-ejected interpolation
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                    self.M_table[0], self.M_table[1], y_tables_0, y_tables_1
 
         # If the upper boundary is the transition mass ..
         # ===============================================
         elif self.inter_M_points[i_M+1] == self.transitionmass:
 
             # Keep the lower-boundary yields
-            yields_low = self.ytables.get(Z=self.Z_table[i_Z],\
+            yields_low_stable = self.ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M], quantity='Yields')
 
             # If the transition mass is part of the yields table
@@ -1706,7 +1776,7 @@ class chem_evol(object):
                 # Set the yields and mass for total-mass-ejected interpolation
                 m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
                     self.inter_M_points[i_M], self.inter_M_points[i_M+1], \
-                    yields_low, self.ytables.get(Z=self.Z_table[i_Z],\
+                    yields_low_stable, self.ytables.get(Z=self.Z_table[i_Z],\
                     M=self.inter_M_points[i_M+1], quantity='Yields')
 
             # If the transition mass is not part of the yields table
@@ -1718,24 +1788,38 @@ class chem_evol(object):
                 # Set the yields and mass for total-mass-ejected interpolation
                 m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
                     self.inter_M_points[i_M], self.inter_M_points[i_M+2], \
-                    yields_low, self.ytables.get(Z=self.Z_table[i_Z],\
+                    yields_low_stable, self.ytables.get(Z=self.Z_table[i_Z],\
                     M=self.inter_M_points[i_M+2], quantity='Yields')
 
             # Copy the upper-boundary model used to scale the yields
             yields_tr_upp = self.ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M+i_M_add], quantity='Yields')
 
+            # If radioactive table
+            if is_radio:
+
+                # Keep the lower-boundary yields
+                yields_low = self.ytables_radio.get(Z=self.Z_table[i_Z],\
+                    M=self.inter_M_points[i_M], quantity='Yields')
+
+            # If stable table
+            else:
+
+                # Keep the lower-boundary yields (stable)
+                yields_low = yields_low_stable
+
             # Scale massive AGB yields for the upper boundary
             yields_upp = self.scale_yields_to_M_ej(\
                 self.inter_M_points[i_M], self.inter_M_points[i_M+i_M_add],\
-                    yields_low, yields_tr_upp, self.transitionmass, yields_low)
+                    yields_low_stable, yields_tr_upp, self.transitionmass, \
+                        yields_low, sum(yields_low_stable))
 
         # If the lower boundary is the transition mass ..
         # ===============================================
         elif self.inter_M_points[i_M] == self.transitionmass:
 
             # Keep the upper-boundary yields
-            yields_upp = self.ytables.get(Z=self.Z_table[i_Z],\
+            yields_upp_stable = self.ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M+1], quantity='Yields')
 
             # If the transition mass is part of the yields table
@@ -1749,7 +1833,7 @@ class chem_evol(object):
                     self.inter_M_points[i_M], self.inter_M_points[i_M+1], \
                     self.ytables.get(Z=self.Z_table[i_Z],\
                     M=self.inter_M_points[i_M], quantity='Yields'),\
-                    yields_upp
+                    yields_upp_stable
 
             # If the transition mass is not part of the yields table
             else:
@@ -1762,33 +1846,61 @@ class chem_evol(object):
                     self.inter_M_points[i_M-1], self.inter_M_points[i_M+1], \
                     self.ytables.get(Z=self.Z_table[i_Z],\
                     M=self.inter_M_points[i_M-1], quantity='Yields'),\
-                    yields_upp
+                    yields_upp_stable
 
             # Copy the lower-boundary model used to scale the yields
             yields_tr_low = self.ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M+i_M_add], quantity='Yields')
+
+            # If radioactive table
+            if is_radio:
+
+                # Keep the lower-boundary yields
+                yields_upp = self.ytables_radio.get(Z=self.Z_table[i_Z],\
+                    M=self.inter_M_points[i_M+1], quantity='Yields')
+
+            # If stable table
+            else:
+
+                # Keep the lower-boundary yields (stable)
+                yields_upp = yields_upp_stable
             
             # Scale lowest massive star yields for the lower boundary
             yields_low = self.scale_yields_to_M_ej(\
                 self.inter_M_points[i_M+i_M_add], self.inter_M_points[i_M+1],\
-                    yields_tr_low, yields_upp, self.transitionmass, yields_upp)
+                    yields_tr_low, yields_upp_stable, self.transitionmass, \
+                        yields_upp, sum(yields_upp_stable))
 
         # If need to extrapolate on the high-mass end ..
         # ==============================================
         elif self.inter_M_points[i_M+1] > self.M_table[-1]:
 
-            # Take the highest-mass model for the lower boundary
-            yields_low = self.ytables.get(Z=self.Z_table[i_Z],\
-                M=self.M_table[-1], quantity='Yields')
+            # If radioactive table ..
+            if is_radio:
 
-            # Extrapolate the upper boundary
-            yields_upp = self.extrapolate_high_mass(self.ytables,\
-                self.Z_table[i_Z], self.inter_M_points[i_M+1])
+                # Take the highest-mass model for the lower boundary
+                yields_low = self.ytables_radio.get(Z=self.Z_table[i_Z],\
+                    M=self.M_table[-1], quantity='Yields')
 
-            # Set the yields and mass for total-mass-ejected interpolation
-            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
-                self.inter_M_points[i_M], self.inter_M_points[i_M+1],\
-                yields_low, yields_upp
+                # Extrapolate the upper boundary
+                yields_upp = self.extrapolate_high_mass(self.ytables_radio,\
+                    self.Z_table[i_Z], self.inter_M_points[i_M+1])
+
+            # If stable table ..
+            else:
+
+                # Take the highest-mass model for the lower boundary
+                yields_low = self.ytables.get(Z=self.Z_table[i_Z],\
+                    M=self.M_table[-1], quantity='Yields')
+
+                # Extrapolate the upper boundary
+                yields_upp = self.extrapolate_high_mass(self.ytables,\
+                    self.Z_table[i_Z], self.inter_M_points[i_M+1])
+
+                # Set the yields and mass for total-mass-ejected interpolation
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                    self.inter_M_points[i_M], self.inter_M_points[i_M+1],\
+                    yields_low, yields_upp
 
         # If the mass point is the first one, is higher than the
         # least massive mass in the yields table, but is not part
@@ -1796,24 +1908,31 @@ class chem_evol(object):
         # =======================================================
         elif i_M == 0 and not self.inter_M_points[i_M] in self.M_table:
 
+            # Use the appropriate yield tables ..
+            if is_radio:
+                the_ytables = self.ytables_radio
+            else:
+                the_ytables = self.ytables
+
             # Assign the upper-mass model
-            yields_upp = self.ytables.get(Z=self.Z_table[i_Z],\
+            yields_upp = the_ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M+1], quantity='Yields')
 
             # Interpolate the lower-mass model
             i_M_upp = self.M_table.index(self.inter_M_points[i_M+1])
             aa, bb, dummy, dummy = self.__get_inter_coef_M(self.M_table[i_M_upp-1],\
-                self.M_table[i_M_upp], self.ytables.get(Z=self.Z_table[i_Z],\
-                    M=self.M_table[i_M_upp-1], quantity='Yields'), yields_upp,\
-                        1.0, 2.0, yields_upp, yields_upp)
+               self.M_table[i_M_upp], the_ytables.get(Z=self.Z_table[i_Z],\
+                   M=self.M_table[i_M_upp-1], quantity='Yields'), yields_upp,\
+                       1.0, 2.0, yields_upp, yields_upp)
             yields_low = 10**(aa * self.inter_M_points[i_M] + bb)
 
             # Set the yields and mass for total-mass-ejected interpolation
-            i_M_ori = self.M_table.index(self.inter_M_points[i_M+1])
-            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
-                self.M_table[i_M_ori-1], self.inter_M_points[i_M+1],\
-                self.ytables.get(Z=self.Z_table[i_Z],\
-                M=self.M_table[i_M_ori-1], quantity='Yields'), yields_upp
+            if not is_radio:
+                i_M_ori = self.M_table.index(self.inter_M_points[i_M+1])
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                    self.M_table[i_M_ori-1], self.inter_M_points[i_M+1],\
+                    self.ytables.get(Z=self.Z_table[i_Z],\
+                    M=self.M_table[i_M_ori-1], quantity='Yields'), yields_upp
 
         # If the mass point is the last one, is lower than the
         # most massive mass in the yields table, but is not part
@@ -1822,43 +1941,60 @@ class chem_evol(object):
         elif i_M == (self.nb_inter_M_points-2) and \
             not self.inter_M_points[i_M+1] in self.M_table:
 
+            # Use the appropriate yield tables ..
+            if is_radio:
+                the_ytables = self.ytables_radio
+            else:
+                the_ytables = self.ytables
+
             # Assign the lower-mass model
-            yields_low = self.ytables.get(Z=self.Z_table[i_Z],\
+            yields_low = the_ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M], quantity='Yields')
 
             # Interpolate the upper-mass model
             i_M_low = self.M_table.index(self.inter_M_points[i_M])
             aa, bb, dummy, dummy = self.__get_inter_coef_M(self.M_table[i_M_low],\
-                self.M_table[i_M_low+1], yields_low, self.ytables.get(\
+                self.M_table[i_M_low+1], yields_low, the_ytables.get(\
                     Z=self.Z_table[i_Z], M=self.M_table[i_M_low+1],quantity='Yields'),\
                         1.0, 2.0, yields_low, yields_low)
             yields_upp = 10**(aa * self.inter_M_points[i_M+1] + bb)
 
             # Set the yields and mass for total-mass-ejected interpolation
-            i_M_ori = self.M_table.index(self.inter_M_points[i_M])
-            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
-                self.inter_M_points[i_M], self.M_table[i_M_ori+1],\
-                yields_low, self.ytables.get(Z=self.Z_table[i_Z],\
-                M=self.M_table[i_M_ori+1], quantity='Yields')
+            if not is_radio:
+                i_M_ori = self.M_table.index(self.inter_M_points[i_M])
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                    self.inter_M_points[i_M], self.M_table[i_M_ori+1],\
+                    yields_low, self.ytables.get(Z=self.Z_table[i_Z],\
+                    M=self.M_table[i_M_ori+1], quantity='Yields')
 
         # If this is an interpolation between two models 
         # originally in the yields table ..
         else:
 
+            # Use the appropriate yield tables ..
+            if is_radio:
+                the_ytables = self.ytables_radio
+            else:
+                the_ytables = self.ytables
+
             # Get the original models
-            yields_low = self.ytables.get(Z=self.Z_table[i_Z],\
+            yields_low = the_ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M], quantity='Yields')
-            yields_upp = self.ytables.get(Z=self.Z_table[i_Z],\
+            yields_upp = the_ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M+1], quantity='Yields')
 
             # Set the yields and mass for total-mass-ejected interpolation
-            m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
-                self.inter_M_points[i_M], self.inter_M_points[i_M+1],\
-                yields_low, yields_upp
+            if not is_radio:
+                m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp = \
+                    self.inter_M_points[i_M], self.inter_M_points[i_M+1],\
+                    yields_low, yields_upp
 
         # Return the yields for interpolation
-        return yields_low, yields_upp, m_ej_low, m_ej_upp, \
-               yields_ej_low, yields_ej_upp
+        if is_radio:
+            return yields_low, yields_upp, 1.0, 2.0, 1.0, 1.0
+        else:
+            return yields_low, yields_upp, m_ej_low, m_ej_upp, \
+                   yields_ej_low, yields_ej_upp
 
 
     ##############################################
@@ -1964,7 +2100,7 @@ class chem_evol(object):
     #            Scale Yields to M_ej            #
     ##############################################
     def scale_yields_to_M_ej(self, m_low, m_upp, yields_low, yields_upp,\
-                             the_m_scale, the_yields):
+                             the_m_scale, the_yields, the_yields_m_tot):
 
         '''
         Scale yields according to the total ejected mass vs initial
@@ -1985,6 +2121,7 @@ class chem_evol(object):
           yields_upp : Yields of the upper-mass boundary model
           the_m_scale : Initial mass to which the_yields will be scaled
           the_yields : Yields that need to be scaled
+          the_yields_m_tot : Total mass of the yields that need to be scaled
 
         '''
 
@@ -2000,13 +2137,13 @@ class chem_evol(object):
             m_ej_temp = 0.0
 
         # Return the scaled yields
-        return np.array(the_yields) * m_ej_temp / sum(the_yields)
+        return np.array(the_yields) * m_ej_temp / the_yields_m_tot
 
 
     ##############################################
     #            Extrapolate High Mass           #
     ##############################################
-    def extrapolate_high_mass(self, table_ehm, Z_ehm, m_extra):
+    def extrapolate_high_mass(self, table_ehm, Z_ehm, m_extra, is_radio=False):
 
         '''
         Extrapolate yields for stellar masses larger than what
@@ -2056,12 +2193,14 @@ class chem_evol(object):
         # If the yields are scaled ..
         if self.high_mass_extrapolation == 'scale':
 
-            # Copy the yields of the second most massive model
-            y_tables_m2 = table_ehm.get(Z=Z_ehm, M=mass_m2, quantity='Yields')
+            # Make sure we use the stable yields for scaling (table_ehm could be radio)
+            y_stable_m1 = self.ytables.get(Z=Z_ehm, M=mass_m1, quantity='Yields')
+            y_stable_m2 = self.ytables.get(Z=Z_ehm, M=mass_m2, quantity='Yields')
 
             # Calculate the scaled yields
             y_scaled = self.scale_yields_to_M_ej(mass_m2,\
-                mass_m1, y_tables_m2, y_tables_m1, m_extra, y_tables_m1)
+                mass_m1, y_stable_m2, y_stable_m1, m_extra, y_tables_m1,\
+                    sum(y_stable_m1))
 
             # Set to 1e-30 if yields are negative.  Do not set 
             # to zero, because yields will be interpolated in log.
@@ -2712,9 +2851,12 @@ class chem_evol(object):
             ymgal_gi = np.array(iniabu.iso_abundance(self.history.isotopes)) * \
                        self.mgal
 
-        # Make sure the total mass of gas does not exceed mgal
-        if sum(ymgal_gi) > self.mgal:
-            ymgal_gi[0] = ymgal_gi[0] - (sum(ymgal_gi) - self.mgal)
+        # Make sure the total mass of gas is exactly mgal
+        # This is in case we have a few isotopes without H and He
+        ymgal_gi = ymgal_gi * self.mgal / sum(ymgal_gi)
+
+#        if sum(ymgal_gi) > self.mgal:
+#            ymgal_gi[0] = ymgal_gi[0] - (sum(ymgal_gi) - self.mgal)
 
         # Return the gas reservoir
         return ymgal_gi
@@ -3459,6 +3601,18 @@ class chem_evol(object):
                         # each mass bin to distinguish between AGB and massive.
                         self.__add_yields_in_mdot(nb_stars, the_yields, the_m_cen, i_cse, i)
 
+                        # If there are radioactive isotopes
+                        if self.len_decay_file > 0:
+
+                            # Get the yields for the central stellar mass
+                            the_yields = self.get_interp_yields(the_m_cen, \
+                                self.zmetal, is_radio=True)
+
+                            # Add yields in the stellar ejecta array.  We do this at
+                            # each mass bin to distinguish between AGB and massive.
+                            self.__add_yields_in_mdot(nb_stars, the_yields, \
+                                the_m_cen, i_cse, i, is_radio=True)
+
             # Move the lower limit of the lifetime range to the next timestep
             t_lower += self.history.timesteps[i_cse]
 
@@ -3537,7 +3691,7 @@ class chem_evol(object):
     ##############################################
     #             Get Interp Yields              #
     ##############################################
-    def get_interp_yields(self, M_giy, Z_giy):
+    def get_interp_yields(self, M_giy, Z_giy, is_radio=False):
 
         '''
         Return the interpolated yields for a star with given
@@ -3563,8 +3717,18 @@ class chem_evol(object):
 
         '''
 
+        # Select the appropriate interpolation coefficients
+        if is_radio:
+            the_y_coef_M = self.y_coef_M_radio
+            the_y_coef_Z_aM = self.y_coef_Z_aM_radio
+            the_y_coef_Z_bM = self.y_coef_Z_bM_radio
+        else:
+            the_y_coef_M = self.y_coef_M
+            the_y_coef_Z_aM = self.y_coef_Z_aM
+            the_y_coef_Z_bM = self.y_coef_Z_bM
+
         # If the metallicity is in the PopIII regime ..
-        if Z_giy <= self.Z_trans:
+        if Z_giy <= self.Z_trans and not is_radio:
 
             # Find the lower-mass boundary of the interpolation
             i_M_low = 0
@@ -3589,19 +3753,21 @@ class chem_evol(object):
             if Z_giy <= self.inter_Z_points[0]:
 
                 # Select the M interpolation coefficients of the lowest Z
-                a_M = self.y_coef_M[0][0][i_M_low]
-                b_M = self.y_coef_M[1][0][i_M_low]
-                a_M_ej = self.y_coef_M_ej[0][0][i_M_low]
-                b_M_ej = self.y_coef_M_ej[1][0][i_M_low]
+                a_M = the_y_coef_M[0][0][i_M_low]
+                b_M = the_y_coef_M[1][0][i_M_low]
+                if not is_radio:
+                    a_M_ej = self.y_coef_M_ej[0][0][i_M_low]
+                    b_M_ej = self.y_coef_M_ej[1][0][i_M_low]
 
             # If the metallicity is above the highest Z available ..
             elif Z_giy > self.inter_Z_points[-1]:
 
                 # Select the M interpolation coefficients of the highest Z
-                a_M = self.y_coef_M[0][-1][i_M_low]
-                b_M = self.y_coef_M[1][-1][i_M_low]
-                a_M_ej = self.y_coef_M_ej[0][-1][i_M_low]
-                b_M_ej = self.y_coef_M_ej[1][-1][i_M_low]
+                a_M = the_y_coef_M[0][-1][i_M_low]
+                b_M = the_y_coef_M[1][-1][i_M_low]
+                if not is_radio:
+                    a_M_ej = self.y_coef_M_ej[0][-1][i_M_low]
+                    b_M_ej = self.y_coef_M_ej[1][-1][i_M_low]
 
             # If the metallicity is within the Z interval of the yields table ..
             else:
@@ -3613,20 +3779,22 @@ class chem_evol(object):
                 lg_Z_giy = np.log10(Z_giy)
 
                 # Calculate the a coefficient for the M interpolation
-                a_Z = self.y_coef_Z_aM[0][i_Z_low][i_M_low]
-                b_Z = self.y_coef_Z_aM[1][i_Z_low][i_M_low]
+                a_Z = the_y_coef_Z_aM[0][i_Z_low][i_M_low]
+                b_Z = the_y_coef_Z_aM[1][i_Z_low][i_M_low]
                 a_M = a_Z * lg_Z_giy + b_Z
-                a_Z_ej = self.y_coef_Z_aM_ej[0][i_Z_low][i_M_low]
-                b_Z_ej = self.y_coef_Z_aM_ej[1][i_Z_low][i_M_low]
-                a_M_ej = a_Z_ej * lg_Z_giy + b_Z_ej
+                if not is_radio:
+                    a_Z_ej = self.y_coef_Z_aM_ej[0][i_Z_low][i_M_low]
+                    b_Z_ej = self.y_coef_Z_aM_ej[1][i_Z_low][i_M_low]
+                    a_M_ej = a_Z_ej * lg_Z_giy + b_Z_ej
 
                 # Calculate the b coefficient for the M interpolation
-                a_Z = self.y_coef_Z_bM[0][i_Z_low][i_M_low]
-                b_Z = self.y_coef_Z_bM[1][i_Z_low][i_M_low]
+                a_Z = the_y_coef_Z_bM[0][i_Z_low][i_M_low]
+                b_Z = the_y_coef_Z_bM[1][i_Z_low][i_M_low]
                 b_M = a_Z * lg_Z_giy + b_Z
-                a_Z_ej = self.y_coef_Z_bM_ej[0][i_Z_low][i_M_low]
-                b_Z_ej = self.y_coef_Z_bM_ej[1][i_Z_low][i_M_low]
-                b_M_ej = a_Z_ej * lg_Z_giy + b_Z_ej
+                if not is_radio:
+                    a_Z_ej = self.y_coef_Z_bM_ej[0][i_Z_low][i_M_low]
+                    b_Z_ej = self.y_coef_Z_bM_ej[1][i_Z_low][i_M_low]
+                    b_M_ej = a_Z_ej * lg_Z_giy + b_Z_ej
 
         # Interpolate the yields
         y_interp = 10**(a_M * M_giy + b_M) 
@@ -3634,9 +3802,12 @@ class chem_evol(object):
         # Calculate the correction factor to match the relation 
         # between the total ejected mass and the stellar initial
         # mass.  M_ej = a * M_i + b
-        f_corr = (a_M_ej * M_giy + b_M_ej) / sum(y_interp)
-        if f_corr < 0.0:
-            f_corr = 0.0
+        if is_radio:
+            f_corr = 1.0
+        else:
+            f_corr = (a_M_ej * M_giy + b_M_ej) / sum(y_interp)
+            if f_corr < 0.0:
+                f_corr = 0.0
 
         # Return the interpolated and corrected yields
         return y_interp * f_corr
@@ -3759,7 +3930,8 @@ class chem_evol(object):
     ##############################################
     #            Add Yields in Mdot              #
     ##############################################
-    def __add_yields_in_mdot(self, nb_stars, the_yields, the_m_cen, i_cse, i):
+    def __add_yields_in_mdot(self, nb_stars, the_yields, the_m_cen, \
+                             i_cse, i, is_radio=False):
 
         '''
         Add the IMF-weighted stellar yields in the ejecta "mdot" arrays.
@@ -3779,25 +3951,40 @@ class chem_evol(object):
         # Calculate the total yields
         the_tot_yields = nb_stars * the_yields
 
-        # Add the yields in the total ejecta array
-        self.mdot[i_cse] += the_tot_yields
+        # If radioactive yields ..
+        if is_radio:
 
-        # Keep track of the contribution of massive and AGB stars
-        if the_m_cen > self.transitionmass:
-            self.mdot_massive[i_cse] += the_tot_yields
+            # Add the yields in the total ejecta array
+            self.mdot_radio[i_cse] += the_tot_yields
+
+            # Keep track of the contribution of massive and AGB stars
+            if the_m_cen > self.transitionmass:
+                self.mdot_massive_radio[i_cse] += the_tot_yields
+            else:
+                self.mdot_agb_radio[i_cse] += the_tot_yields
+
+        # If stable yields ..
         else:
-            self.mdot_agb[i_cse] += the_tot_yields
 
-        # Count the number of core-collapse SNe
-        if the_m_cen > self.transitionmass:
-            self.sn2_numbers[i_cse] += nb_stars
-            if self.out_follows_E_rate:
-                self.ssp_nb_cc_sne[i_cse-i-1] += nb_stars
-#                self.ssp_nb_cc_sne[i_cse-i+1] += nb_stars
+            # Add the yields in the total ejecta array
+            self.mdot[i_cse] += the_tot_yields
 
-        # Sum the total number of stars born in the timestep
-        # where the stars originally formed
-        self.number_stars_born[i] += nb_stars
+            # Keep track of the contribution of massive and AGB stars
+            if the_m_cen > self.transitionmass:
+                self.mdot_massive[i_cse] += the_tot_yields
+            else:
+                self.mdot_agb[i_cse] += the_tot_yields
+
+            # Count the number of core-collapse SNe
+            if the_m_cen > self.transitionmass:
+                self.sn2_numbers[i_cse] += nb_stars
+                if self.out_follows_E_rate:
+                    self.ssp_nb_cc_sne[i_cse-i-1] += nb_stars
+#                    self.ssp_nb_cc_sne[i_cse-i+1] += nb_stars
+
+            # Sum the total number of stars born in the timestep
+            # where the stars originally formed
+            self.number_stars_born[i] += nb_stars
 
 
     ##############################################

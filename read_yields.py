@@ -367,9 +367,9 @@ class read_nugrid_yields():
             for t in range(2,len(yield_data[-1])):
                 if column_titles[t] == 'A' or column_titles[t] =='Z':
                     yield_data[-1][t].append(int(line.split('&')[t+1].strip()))
-
                 else:
                     yield_data[-1][t].append(float(line.split('&')[t+1].strip()))
+
         #choose only isotoopes and right order
         ######reading finished
         #In [43]: tablesN.col_attrs
@@ -430,6 +430,7 @@ class read_nugrid_yields():
             i+=1
         #define  header
         self.header_attrs={}
+        #print(header1)
         for h in header1:
             self.header_attrs[h.split(':')[0][1:].strip()]=h.split(':')[1].strip()
         self.data_cols=column_titles #previous data_attrs
