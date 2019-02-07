@@ -23,7 +23,7 @@ v0.1 NOV2013: C. Fryer, C. Ritter
 
 v0.2 JAN2014: C. Ritter
 
-v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg, 
+v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg,
               M. Pignatari, S. Jones, K. Venn, P. A. Denissenkov & the
               NuGrid collaboration
 
@@ -119,7 +119,7 @@ class chem_evol(object):
         Array format : dt_split_info[number of conditions][0->dt,1->upper time limit]
         Exemple : dt_split_info = [[1e6,40e6],[1e8,13e9]] means the timesteps will be
                   of 1 Myr until the time reaches 40 Myr, after which the timesteps
-                  will be of 100 Myr until the time reaches 13 Gyr.  The number of 
+                  will be of 100 Myr until the time reaches 13 Gyr.  The number of
                   "split" is unlimited, but the array must be in chronological order.
         Default value : [] --> Not taken into account
 
@@ -146,7 +146,7 @@ class chem_evol(object):
         Default value : 2.35
 
     imf_bdys_pop3 : list
-        Upper and lower mass limits of the IMF of PopIII stars [Mo]. 
+        Upper and lower mass limits of the IMF of PopIII stars [Mo].
 
         Default value : [0.1,100]
 
@@ -157,7 +157,7 @@ class chem_evol(object):
         Default value : [10,30]
 
     imf_pop3_char_mass : float
-        The characteristic mass in a log normal IMF distribution. 
+        The characteristic mass in a log normal IMF distribution.
 
         Default value : 40.0
 
@@ -208,7 +208,7 @@ class chem_evol(object):
     sn1a_rate : string
         SN Ia delay-time distribution function used to calculate the SN Ia rate.
 
-        Choices : 
+        Choices :
                 'power_law' - custom power law, set parameter with beta_pow (similar to Maoz & Mannucci 2012)
 
                 'gauss' - gaussian DTD, set parameter with gauss_dtd
@@ -252,10 +252,10 @@ class chem_evol(object):
         Default value : -1.0
 
     gauss_dtd : list
-        Contains parameter for the gaussian DTD: first the characteristic time [yrs] (gaussian center) 
-        and then the width of the distribution [yrs]. 
+        Contains parameter for the gaussian DTD: first the characteristic time [yrs] (gaussian center)
+        and then the width of the distribution [yrs].
 
-        Default value : [3.3e9,6.6e8] 
+        Default value : [3.3e9,6.6e8]
 
     exp_dtd : float
         Characteristic delay time [yrs] for the e-folding DTD.
@@ -266,7 +266,7 @@ class chem_evol(object):
         Default value : 1.0e-03
 
     direct_norm_1a : float
-        Normalization coefficient for SNIa rate integral. 
+        Normalization coefficient for SNIa rate integral.
 
         Default: deactived but replaces the usage of teh nb_1a_per_m when its value is larger than zero.
 
@@ -278,7 +278,7 @@ class chem_evol(object):
     exclude_masses : list
         Contains initial masses in yield tables to be excluded from the simulation;
 
-        Default value : [] 
+        Default value : []
 
     table : string
         Path pointing toward the stellar yield tables for massive and AGB stars.
@@ -311,30 +311,30 @@ class chem_evol(object):
         if netyields_on is true than makes use of given net yields
         else calculates net yields from given X0 in yield table.
 
-        Default : 'lin' 
+        Default : 'lin'
 
     netyields_on : boolean
-        if true assumes that yields (input from table parameter) 
-        are net yields. 
+        if true assumes that yields (input from table parameter)
+        are net yields.
 
         Default : false.
 
     total_ejecta_interp : boolean
-        if true then interpolates total ejecta given in yield tables 
-                  over initial mass range.  
+        if true then interpolates total ejecta given in yield tables
+                  over initial mass range.
 
         Default : True
 
     stellar_param_on : boolean
         if true reads in additional stellar parameter given in table stellar_param_table.
 
-        Default : true in sygma and false in omega 
+        Default : true in sygma and false in omega
         
     stellar_param_table: string
-        Path pointoing toward the table hosting the evolution of stellar parameter 
+        Path pointoing toward the table hosting the evolution of stellar parameter
         derived from stellar evolution calculations.
 
-        Default table : 'yield_tables/isotope_yield_table_MESA_only_param.txt' 
+        Default table : 'yield_tables/isotope_yield_table_MESA_only_param.txt'
 
     iolevel : int
         Specifies the amount of output for testing purposes (up to 3).
@@ -357,9 +357,9 @@ class chem_evol(object):
 
     mass_sampled : list
         Stellar masses that are sampled to eject yields in a stellar population.
-        Warning : The use of this parameter bypasses the IMF calculation and 
+        Warning : The use of this parameter bypasses the IMF calculation and
         do not ensure a correlation with the star formation rate.  Each sampled
-        mass will eject the exact amount of mass give in the stellar yields. 
+        mass will eject the exact amount of mass give in the stellar yields.
 
         Default value : np.array([]) --> Deactivated
 
@@ -405,7 +405,7 @@ class chem_evol(object):
         nb_sources is the number of different input astrophysical site (e.g.,
         SNe Ia, neutron star mergers).
         nb_Z is the number of available metallicities.
-        delayed_extra_dtd[i][j] is a 2D array in the form of 
+        delayed_extra_dtd[i][j] is a 2D array in the form of
         [ number_of_times ][ 0-time, 1-rate ].
 
         Defalut value : np.array([]), deactivated
@@ -429,7 +429,7 @@ class chem_evol(object):
         Defalut value : np.array([]), deactivated
 
     delayed_extra_stochastic : Numpy array of Boolean --> [nb_sources]
-        Determine whether the DTD provided as an input needs to be 
+        Determine whether the DTD provided as an input needs to be
         stochastically sampled using a Monte Carlo technique.
 
         Defalut value : np.array([]), deactivated
@@ -685,7 +685,7 @@ class chem_evol(object):
             return
         # NOTE: This if statement also needs to be in SYGMA and OMEGA!
 
-        # Initialisation of the timesteps 
+        # Initialisation of the timesteps
         if len(self.dt_split_info) > 0: # and len(self.ej_massive) == 0:
             timesteps = self.__build_split_dt()
         else:
@@ -886,12 +886,15 @@ class chem_evol(object):
             self.mdot_bhnsm_radio = mdot_bhnsm_radio
             self.mdot_delayed_extra_radio = mdot_delayed_extra_radio
 
-        # Set the initial time and metallicity 
+        # Set the initial time and metallicity
         zmetal = self._getmetallicity(0)
         self.history.metallicity.append(zmetal)
         self.t = 0
         self.history.age.append(self.t)
         self.zmetal = zmetal
+
+        # Define the element to isotope index connections
+        self.__get_elem_to_iso_main()
 
         # Get coefficients for the fraction of white dwarfs fit (2nd poly)
         if not pre_calculate_SSPs:
@@ -902,6 +905,21 @@ class chem_evol(object):
             print ('### Start with initial metallicity of ','{:.4E}'.format(zmetal))
             print ('###############################')
 
+    ##############################################
+    #             Get elem-to-iso Main           #
+    ##############################################
+    def __get_elem_to_iso_main(self):
+
+        # Get the list of elements
+        self.history.elements = []
+        self.i_elem_for_iso = np.zeros(self.nb_isotopes,dtype=int)
+        for i_iso in range(self.nb_isotopes):
+            the_elem = self.history.isotopes[i_iso].split('-')[0]
+            if not the_elem in self.history.elements:
+                self.history.elements.append(the_elem)
+            i_elem = self.history.elements.index(the_elem)
+            self.i_elem_for_iso[i_iso] = i_elem
+        self.nb_elements = len(self.history.elements)
 
     ##############################################
     #                 Check Inputs               #
@@ -925,7 +943,7 @@ class chem_evol(object):
             print ('Error - dt must be smaller or equal to tend.')
             self.need_to_quit = True
 
-        # Transition mass between AGB and massive stars 
+        # Transition mass between AGB and massive stars
         #if #(self.transitionmass <= 7)or(self.transitionmass > 12):
            # print ('Error - transitionmass must be between 7 and 12 Mo.')
            # self.need_to_quit = True
@@ -999,7 +1017,7 @@ class chem_evol(object):
                  self.need_to_quit = True
              if (not lt == lmr):
                  print ('Error - parameter extra_source_table and  extra_source_mass_range not of equal size')
-                 self.need_to_quit = True    
+                 self.need_to_quit = True
              #if  (not lt == leZ):
              #    print ('Error - parameter extra_source_table and extra_source_exclude_Z not of equal size')
              #    self.need_to_quit = True
@@ -1165,7 +1183,7 @@ class chem_evol(object):
 
             #go over all extra sources
             self.ytables_extra =[]
-            for ee in range(len(self.extra_source_table)):  
+            for ee in range(len(self.extra_source_table)):
 
                #if absolute path don't apply global_path
                if self.extra_source_table[ee][0] == '/':
@@ -1222,7 +1240,7 @@ class chem_evol(object):
     def __interpolate_pop3_yields(self):
 
         '''
-        Interpolate the mass-dependent yields table of massive 
+        Interpolate the mass-dependent yields table of massive
         popIII yields.  This will create arrays containing interpolation
         coefficients.  The chemical evolution calculations will then
         only use these coefficients instead of the yields table.
@@ -1272,7 +1290,7 @@ class chem_evol(object):
         '''
         Interpolate the metallicity- and mass-dependent yields
         table of massive and AGB stars.  This will create arrays
-        containing interpolation coefficients.  The chemical 
+        containing interpolation coefficients.  The chemical
         evolution calculations will then only use these
         coefficients instead of the yields table.
 
@@ -1322,7 +1340,7 @@ class chem_evol(object):
 
         '''
 
-        # Fill the y_coef_M array 
+        # Fill the y_coef_M array
         # For each metallicity available in the yields ..
         for i_Z_temp in range(self.nb_Z_table):
 
@@ -1350,12 +1368,12 @@ class chem_evol(object):
                         self.inter_M_points[i_M+1], yields_low, yields_upp,\
                         m_ej_low, m_ej_upp, yields_ej_low, yields_ej_upp)
 
-        # Fill the y_coef_Z_xM arrays 
+        # Fill the y_coef_Z_xM arrays
         # For each interpolation lower-metallicity point ..
         for i_Z in range(self.nb_inter_Z_points-1):
 
             # For each interpolation lower-mass bin point ..
-            for i_M in range(self.nb_inter_M_points-1): 
+            for i_M in range(self.nb_inter_M_points-1):
 
                 # If radioactive table ..
                 if is_radio:
@@ -1374,7 +1392,7 @@ class chem_evol(object):
                             self.__get_inter_coef_Z(self.y_coef_M_radio[1][i_Z][i_M],\
                                 self.y_coef_M_radio[1][i_Z+1][i_M], self.y_coef_M_ej[1][i_Z][i_M],\
                                     self.y_coef_M_ej[1][i_Z+1][i_M], self.inter_Z_points[i_Z],\
-                                        self.inter_Z_points[i_Z+1]) 
+                                        self.inter_Z_points[i_Z+1])
 
                 # If stable table ..
                 else:
@@ -1410,7 +1428,7 @@ class chem_evol(object):
         # Non-zero metallicity models
         # ===========================
 
-        # Create the stellar mass and lifetime points in between 
+        # Create the stellar mass and lifetime points in between
         # which there will be interpolations
         self.__create_inter_M_points()
         self.__create_inter_lifetime_points()
@@ -1456,7 +1474,7 @@ class chem_evol(object):
         # Zero metallicity models
         # =======================
 
-        # Create the stellar mass and lifetime points in between 
+        # Create the stellar mass and lifetime points in between
         # which there will be interpolations
         self.__create_inter_M_points_pop3()
         self.__create_inter_lifetime_points_pop3()
@@ -1523,6 +1541,7 @@ class chem_evol(object):
 
         # Sort the list of masses
         self.inter_M_points_pop3 = sorted(self.inter_M_points_pop3)
+        self.inter_M_points_pop3_tree = self._bin_tree(self.inter_M_points_pop3)
 
         # Calculate the number of interpolation mass-points
         self.nb_inter_M_points_pop3 = len(self.inter_M_points_pop3)
@@ -1533,7 +1552,7 @@ class chem_evol(object):
     ##############################################
     def __create_inter_M_points(self):
 
-        ''' 
+        '''
         Create the boundary stellar masses array representing
         the mass points in between which there will be yields
         interpolations.  This is for massive and AGB stars.
@@ -1563,6 +1582,7 @@ class chem_evol(object):
 
         # Sort the list of masses
         self.inter_M_points = sorted(self.inter_M_points)
+        self.inter_M_points_tree = self._bin_tree(self.inter_M_points)
 
         # Calculate the number of interpolation mass-points
         self.nb_inter_M_points = len(self.inter_M_points)
@@ -1581,7 +1601,7 @@ class chem_evol(object):
         Argument
         ========
 
-          i_M : Index of the lower mass limit where the 
+          i_M : Index of the lower mass limit where the
                 interpolation occurs.  This is taken from
                 the self.inter_M_points array.
 
@@ -1677,7 +1697,7 @@ class chem_evol(object):
                 yields_low, self.ytables_pop3.get(Z=0.0,\
                 M=self.M_table_pop3[i_M_ori+1], quantity='Yields')
 
-        # If this is an interpolation between two models 
+        # If this is an interpolation between two models
         # originally in the yields table ..
         # ==============================================
         else:
@@ -1712,11 +1732,11 @@ class chem_evol(object):
         ========
 
           i_Z : Metallicity index of the yields table
-          i_M : Index of the lower mass limit where the 
+          i_M : Index of the lower mass limit where the
                 interpolation occurs.  This is taken from
                 the self.inter_M_points array.
 
-        '''            
+        '''
 
         # If need to extrapolate on the low-mass end ..
         # =============================================
@@ -1967,7 +1987,7 @@ class chem_evol(object):
                     yields_low, self.ytables.get(Z=self.Z_table[i_Z],\
                     M=self.M_table[i_M_ori+1], quantity='Yields')
 
-        # If this is an interpolation between two models 
+        # If this is an interpolation between two models
         # originally in the yields table ..
         else:
 
@@ -2202,7 +2222,7 @@ class chem_evol(object):
                 mass_m1, y_stable_m2, y_stable_m1, m_extra, y_tables_m1,\
                     sum(y_stable_m1))
 
-            # Set to 1e-30 if yields are negative.  Do not set 
+            # Set to 1e-30 if yields are negative.  Do not set
             # to zero, because yields will be interpolated in log.
             if sum(y_scaled) <= 0.0:
                 y_scaled = np.zeros(len(y_scaled))
@@ -2225,7 +2245,7 @@ class chem_evol(object):
             m_ej_extra = the_a_ej * m_extra + the_b_ej
             y_extra = y_extra * m_ej_extra / sum(y_extra)
 
-            # # Set to 1e-30 if yields are negative.  Do not set 
+            # # Set to 1e-30 if yields are negative.  Do not set
             # to zero, because yields will be interpolated in log.
             for i_yy in range(len(y_extra)):
                 if y_extra[i_yy] <= 0.0:
@@ -2353,7 +2373,7 @@ class chem_evol(object):
 
         '''
 
-        # Fill the tau_coef_M_pop3 array 
+        # Fill the tau_coef_M_pop3 array
         # For each interpolation lower-mass bin point ..
         for i_M in range(self.nb_M_table_pop3-1):
 
@@ -2423,7 +2443,7 @@ class chem_evol(object):
 
         '''
 
-        # Fill the tau_coef_M array 
+        # Fill the tau_coef_M array
         # For each metallicity available in the yields ..
         for i_Z_temp in range(self.nb_Z_table):
 
@@ -2445,7 +2465,7 @@ class chem_evol(object):
                         self.__get_inter_coef_M_tau(self.M_table[i_M],\
                             self.M_table[i_M+1], tau_low, tau_upp)
 
-        # Fill the y_coef_Z_xM_tau arrays 
+        # Fill the y_coef_Z_xM_tau arrays
         # For each interpolation lower-metallicity point ..
         for i_Z in range(self.nb_inter_Z_points-1):
 
@@ -2474,7 +2494,7 @@ class chem_evol(object):
 
         '''
         Calculate the interpolation coefficients to extract
-        the mass of stars based on their lifetimes.  
+        the mass of stars based on their lifetimes.
 
         Interpolation laws
         ==================
@@ -2516,7 +2536,7 @@ class chem_evol(object):
             self.lifetimes_list_pop3[i_M] = self.ytables_pop3.get(\
                 M=self.M_table_pop3[i_M], Z=0.0, quantity='Lifetime')
 
-        # Fill the tau_coef_M_inv array 
+        # Fill the tau_coef_M_inv array
         # For each interpolation lower-lifetime bin point ..
         for i_tau in range(self.nb_inter_lifetime_points_pop3-1):
 
@@ -2592,7 +2612,7 @@ class chem_evol(object):
                     M=self.M_table[i_M], Z=self.Z_table[i_Z],\
                         quantity='Lifetime')
 
-        # Fill the tau_coef_M_inv array 
+        # Fill the tau_coef_M_inv array
         # For each metallicity available in the yields ..
         for i_Z_temp in range(self.nb_Z_table):
 
@@ -2616,7 +2636,7 @@ class chem_evol(object):
                     self.__get_inter_coef_M_tau(self.inter_lifetime_points[i_tau],\
                     self.inter_lifetime_points[i_tau+1], m_tau_low, m_tau_upp)
 
-        # Fill the tau_coef_Z_inv arrays 
+        # Fill the tau_coef_Z_inv arrays
         # For each interpolation lower-metallicity point ..
         for i_Z in range(self.nb_inter_Z_points-1):
 
@@ -2660,6 +2680,8 @@ class chem_evol(object):
 
         # Sort the list to have lifetimes in increasing order
         self.inter_lifetime_points_pop3 = sorted(self.inter_lifetime_points_pop3)
+        self.inter_lifetime_points_pop3_tree = self._bin_tree(
+                self.inter_lifetime_points_pop3)
 
 
     ##############################################
@@ -2685,6 +2707,8 @@ class chem_evol(object):
 
         # Sort the list to have lifetimes in increasing order
         self.inter_lifetime_points = sorted(self.inter_lifetime_points)
+        self.inter_lifetime_points_tree = self._bin_tree(
+                self.inter_lifetime_points)
 
 
     ##############################################
@@ -2783,7 +2807,7 @@ class chem_evol(object):
 
         '''
         This function returns the initial gas reservoir, ymgal, containing
-        the mass of all the isotopes considered by the stellar yields.  
+        the mass of all the isotopes considered by the stellar yields.
 
         '''
 
@@ -2868,7 +2892,7 @@ class chem_evol(object):
     def __get_timesteps(self):
 
         '''
-        This function calculates and returns the duration of every timestep.  
+        This function calculates and returns the duration of every timestep.
 
         '''
 
@@ -2969,7 +2993,7 @@ class chem_evol(object):
         '''
         This function declares and returns all the arrays containing information
         about the evolution of the stellar ejecta, the gas reservoir, the star
-        formation rate, and the number of core-collapse SNe, SNe Ia, neutron star 
+        formation rate, and the number of core-collapse SNe, SNe Ia, neutron star
         mergers, and white dwarfs.
 
         Argument
@@ -3131,8 +3155,8 @@ class chem_evol(object):
 
         '''
         This function calculates the coefficients for the fraction of white
-        dwarfs fit in the form of f_wd = a*lg(t)**2 + b*lg(t) + c.  Only 
-        progenitor stars for SNe Ia are considered. 
+        dwarfs fit in the form of f_wd = a*lg(t)**2 + b*lg(t) + c.  Only
+        progenitor stars for SNe Ia are considered.
 
         '''
 
@@ -3309,7 +3333,7 @@ class chem_evol(object):
         if self.pre_calculate_SSPs:
 
             # Update a limited number of gas components
-            self.ymgal[i] = f_lock_remain * self.ymgal[i-1]            
+            self.ymgal[i] = f_lock_remain * self.ymgal[i-1]
             if self.len_decay_file > 0:
                 self.ymgal_radio[i] = f_lock_remain * self.ymgal_radio[i-1]
 
@@ -3476,28 +3500,23 @@ class chem_evol(object):
         # Convert isotopes into elements
         if self.pre_calculate_SSPs:
           for h in range(len(self.history.ism_iso_yield)):
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield[h])
-            self.history.ism_elem_yield.append(conv[1])
-            # List of all the elements
-            if h == 0:
-               self.history.elements = conv[0]
+            self.history.ism_elem_yield.append(self._iso_abu_to_elem(self.history.ism_iso_yield[h]))
+
         else:
           for h in range(len(self.history.ism_iso_yield)):
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield[h])
-            self.history.ism_elem_yield.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h])
-            self.history.ism_elem_yield_agb.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h])
-            self.history.ism_elem_yield_1a.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h])
-            self.history.ism_elem_yield_nsm.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h])
-            self.history.ism_elem_yield_bhnsm.append(conv[1])
-            conv = self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h])
-            self.history.ism_elem_yield_massive.append(conv[1])
-            # List of all the elements
-            if h == 0:
-               self.history.elements = conv[0]
+            self.history.ism_elem_yield.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield[h]))
+            self.history.ism_elem_yield_agb.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h]))
+            self.history.ism_elem_yield_1a.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h]))
+            self.history.ism_elem_yield_nsm.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h]))
+            self.history.ism_elem_yield_bhnsm.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h]))
+            self.history.ism_elem_yield_massive.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h]))
+
 
 
     ##############################################
@@ -3539,7 +3558,7 @@ class chem_evol(object):
         if len(mass_sampled) > 0:
 
             # Sort the list of masses in decreasing order
-            # And set the index to point to most massive one 
+            # And set the index to point to most massive one
             mass_sampled_sort = sorted(mass_sampled)[::-1]
             nb_mass_sampled = len(mass_sampled)
             stochastic_IMF = True
@@ -3651,7 +3670,7 @@ class chem_evol(object):
         # Calculate the upper age limit of the stars for that timestep
         t_upper = t_lower + self.history.timesteps[i_cse]
 
-        # Get the lower and upper stellar mass range that will 
+        # Get the lower and upper stellar mass range that will
         # contribute to the ejecta in that timestep
         m_lower = self.get_interp_lifetime_mass(t_upper, self.zmetal, is_mass=False)
         if t_lower == 0.0:
@@ -3731,9 +3750,12 @@ class chem_evol(object):
         if Z_giy <= self.Z_trans and not is_radio:
 
             # Find the lower-mass boundary of the interpolation
-            i_M_low = 0
-            while M_giy > self.inter_M_points_pop3[i_M_low+1]:
-                i_M_low += 1
+            if self.nb_inter_M_points_pop3 < 30:
+                i_M_low = 0
+                while M_giy > self.inter_M_points_pop3[i_M_low+1]:
+                    i_M_low += 1
+            else:
+                i_M_low = self.inter_M_points_pop3_tree.search_left(M_giy)
 
             # Select the M interpolation coefficients of PopIII yields
             a_M = self.y_coef_M_pop3[0][i_M_low]
@@ -3745,9 +3767,12 @@ class chem_evol(object):
         else:
 
             # Find the lower-mass boundary of the interpolation
-            i_M_low = 0
-            while M_giy > self.inter_M_points[i_M_low+1]:
-                i_M_low += 1
+            if self.nb_inter_M_points < 30:
+                i_M_low = 0
+                while M_giy > self.inter_M_points[i_M_low+1]:
+                    i_M_low += 1
+            else:
+                i_M_low = self.inter_M_points_pop3_tree.search_left(M_giy)
 
             # If the metallicity is below the lowest Z available ..
             if Z_giy <= self.inter_Z_points[0]:
@@ -3797,9 +3822,9 @@ class chem_evol(object):
                     b_M_ej = a_Z_ej * lg_Z_giy + b_Z_ej
 
         # Interpolate the yields
-        y_interp = 10**(a_M * M_giy + b_M) 
+        y_interp = 10**(a_M * M_giy + b_M)
 
-        # Calculate the correction factor to match the relation 
+        # Calculate the correction factor to match the relation
         # between the total ejected mass and the stellar initial
         # mass.  M_ej = a * M_i + b
         if is_radio:
@@ -3819,7 +3844,7 @@ class chem_evol(object):
     def get_interp_lifetime_mass(self, the_quantity, Z_giy, is_mass=True):
 
         '''
-        Return the interpolated lifetime of a star with a given mass 
+        Return the interpolated lifetime of a star with a given mass
         and metallicity
 
         Interpolation law
@@ -3857,9 +3882,11 @@ class chem_evol(object):
             tau_coef_Z_bM = self.tau_coef_Z_bM
         else:
             quantity_pop3 = self.inter_lifetime_points_pop3
+            quantity_pop3_tree = self.inter_lifetime_points_pop3_tree
             nb_quantity_pop3 = self.nb_inter_lifetime_points_pop3
             tau_coef_M_pop3 = self.tau_coef_M_pop3_inv
             quantity = self.inter_lifetime_points
+            quantity_tree = self.inter_lifetime_points_tree
             nb_quantity = self.nb_inter_lifetime_points
             tau_coef_M = self.tau_coef_M_inv
             tau_coef_Z_aM = self.tau_coef_Z_aM_inv
@@ -3872,9 +3899,12 @@ class chem_evol(object):
             if the_quantity > quantity_pop3[-1]:
                 i_q_low = nb_quantity_pop3 - 2
             else:
-                i_q_low = 0
-                while the_quantity > quantity_pop3[i_q_low+1]:
-                    i_q_low += 1
+                if nb_quantity_pop3 < 30:
+                    i_q_low = 0
+                    while the_quantity > quantity_pop3[i_q_low+1]:
+                        i_q_low += 1
+                else:
+                    i_q_low = quantity_pop3_tree.search_left(the_quantity)
 
             # Select the M interpolation coefficients of PopIII yields
             a_M = tau_coef_M_pop3[0][i_q_low]
@@ -3887,9 +3917,12 @@ class chem_evol(object):
             if the_quantity > quantity[-1]:
                 i_q_low = nb_quantity - 2
             else:
-                i_q_low = 0
-                while the_quantity > quantity[i_q_low+1]:
-                    i_q_low += 1
+                if nb_quantity < 30:
+                    i_q_low = 0
+                    while the_quantity > quantity[i_q_low+1]:
+                        i_q_low += 1
+                else:
+                    i_q_low = quantity_tree.search_left(the_quantity)
 
             # If the metallicity is below the lowest Z available ..
             if Z_giy <= self.inter_Z_points[0]:
@@ -3993,7 +4026,7 @@ class chem_evol(object):
     def __add_other_sources(self, i):
 
         '''
-        Add the contribution of enrichment sources other than 
+        Add the contribution of enrichment sources other than
         massive stars (wind + SNe) and AGB stars to the ejecta
         "mdot" array.
 
@@ -4031,7 +4064,7 @@ class chem_evol(object):
 
         '''
         This function calculates the factor that must be multiplied to
-        the input stellar yields, given the mass bin implied for the 
+        the input stellar yields, given the mass bin implied for the
         considered timestep and the stellar masses sampled by an external
         program.
    
@@ -4127,7 +4160,7 @@ class chem_evol(object):
                 frac_temp = (min(maxm1, scale_cor[i_gsc][0]) - \
                             max(minm1, m_low_temp)) * m_bin_width_inv
 
-                # Cumulate the correction 
+                # Cumulate the correction
                 scalefactor_factor += frac_temp * scale_cor[i_gsc][1]
 
                 # Increment the number of overlaps
@@ -4149,7 +4182,7 @@ class chem_evol(object):
         '''
         This function decays radioactive isotopes present in the
         radioactive gas component and add the stable decayed product
-        inside the stable gas component.  This is using a simple 
+        inside the stable gas component.  This is using a simple
         decay routine where an unstable isotope decay to only one
         stable isotope.
 
@@ -4375,7 +4408,7 @@ class chem_evol(object):
     def __get_init_abun_decay(self, i):
 
         '''
-        Calculate and return the initial abundance of radioactive 
+        Calculate and return the initial abundance of radioactive
         isotopes in the format required by the fortran decay module.
 
         Argument
@@ -4426,10 +4459,10 @@ class chem_evol(object):
         if self.radio_sn1a_on:
             tables_Z_radio = sorted(self.ytables_1a_radio.metallicities,reverse=True)
 
-        # Pick the metallicity 
+        # Pick the metallicity
         for tz in tables_Z:
             if self.zmetal <= tables_Z[-1]:
-                yields1a = self.ytables_1a.get(Z=tables_Z[-1], quantity='Yields')    
+                yields1a = self.ytables_1a.get(Z=tables_Z[-1], quantity='Yields')
                 break
             if self.zmetal >= tables_Z[0]:
                 yields1a = self.ytables_1a.get(Z=tables_Z[0], quantity='Yields')
@@ -4443,7 +4476,7 @@ class chem_evol(object):
             for tz in tables_Z_radio:
                 if self.zmetal <= tables_Z_radio[-1]:
                     yields1a_radio = \
-                        self.ytables_1a_radio.get(Z=tables_Z_radio[-1], quantity='Yields')    
+                        self.ytables_1a_radio.get(Z=tables_Z_radio[-1], quantity='Yields')
                     break
                 if self.zmetal >= tables_Z_radio[0]:
                     yields1a_radio = \
@@ -4459,7 +4492,7 @@ class chem_evol(object):
            self.history.sn1a_rate == 'maoz' or \
            self.history.sn1a_rate == 'power_law':
 
-           # Get the lifetimes of the considered stars (if needed ...) 
+           # Get the lifetimes of the considered stars (if needed ...)
            if len(self.poly_fit_dtd_5th) == 0:
                 lifetime_min = self.inter_lifetime_points[0]
 
@@ -4532,7 +4565,7 @@ class chem_evol(object):
 
                   # Set the lower time limit for the integration
                   if timemin < lifetime_min:
-                      timemin = lifetime_min 
+                      timemin = lifetime_min
 
                   # For an exponential SN Ia rate ...
                   if self.history.sn1a_rate == 'exp':
@@ -4637,7 +4670,7 @@ class chem_evol(object):
             tt += self.history.timesteps[j]
             timemax = tt
 
-            # Stop if the SSP no more NS merger occurs 
+            # Stop if the SSP no more NS merger occurs
             if timemin >= self.t_merger_max:
                 break
 
@@ -4960,7 +4993,7 @@ class chem_evol(object):
     ##############################################
     def __get_nb_nsm_array(self, timemin, timemax, i_Z_temp):
         '''
-        This function returns the number of NSMs that occur within 
+        This function returns the number of NSMs that occur within
         a specific time interval for the input DTD array.
         
         Arguments
@@ -5005,7 +5038,7 @@ class chem_evol(object):
     def __nsmerger_rate(self, t):
         '''
         This function returns the rate of neutron star mergers occurring at a given
-        stellar lifetime. It uses the delay time distribution 
+        stellar lifetime. It uses the delay time distribution
         of Dominik et al. (2012).
         
         Arguments
@@ -5136,7 +5169,7 @@ class chem_evol(object):
             tt += self.history.timesteps[j]
             timemax = tt
 
-            # Stop if the SSP no more BHNS merger occurs 
+            # Stop if the SSP no more BHNS merger occurs
             #if timemin >= self.t_bhns_merger_max:
             #    break
 
@@ -5214,7 +5247,7 @@ class chem_evol(object):
     ##############################################
     def __get_nb_bhnsm_array(self, timemin, timemax, i_Z_temp):
         '''
-        This function returns the number of BHNSMs that occur within 
+        This function returns the number of BHNSMs that occur within
         a specific time interval for the input DTD array.
         
         Arguments
@@ -5614,7 +5647,7 @@ class chem_evol(object):
           # If a power law with an index of -1
           else:
 
-              # Integrate with a natural logarithm 
+              # Integrate with a natural logarithm
               N_ided = b_ided * (np.log(t_max_temp) - np.log(t_min_temp))
 
         # If we integrate NOT in the log-log space
@@ -5669,7 +5702,7 @@ class chem_evol(object):
         # If the age fac is in between the given time interval ...
         elif timemin <= fac:
 
-            # Limit the lower time boundary to fac 
+            # Limit the lower time boundary to fac
             timemin = fac
             n1a = quad(self.__vb, timemin, timemax, args=(fac))[0]
 
@@ -5748,9 +5781,9 @@ class chem_evol(object):
     def __wd_number(self, m, t):
 
         '''
-        This function returns the number of white dwarfs, at a given time, which 
-        had stars of a given initial mass as progenitors.  The number is 
-        normalized to a stellar population having a total mass of 1 Mo. 
+        This function returns the number of white dwarfs, at a given time, which
+        had stars of a given initial mass as progenitors.  The number is
+        normalized to a stellar population having a total mass of 1 Mo.
    
         Arguments
         =========
@@ -5830,7 +5863,7 @@ class chem_evol(object):
     def __maoz12_powerlaw(self, timemin, timemax):
 
         '''
-        This function returns the total number of SNe Ia (per Mo formed) and 
+        This function returns the total number of SNe Ia (per Mo formed) and
         white dwarfs for a given time interval.  It uses the delay-time
         distribution of Maoz & Mannucci (2012).
    
@@ -5898,7 +5931,7 @@ class chem_evol(object):
                 # Add the number of SNe Ia (with the wrong units)
                 n1a = (temp_up - temp_low)
 
-            # If the integration continues beyond the point where all 
+            # If the integration continues beyond the point where all
             # progenitor white dwarfs are present (this should not be an elif)
             if timemax > self.t_3_0:
 
@@ -5918,7 +5951,7 @@ class chem_evol(object):
                 # Add the number of SNe Ia (with the wrong units)
                 n1a += temp_int
 
-            # Add the right units 
+            # Add the right units
             n1a = n1a * self.A_maoz * 4.0e-13 / 10**(9.0*self.beta_pow)
 
         # Calculate the number of white dwarfs
@@ -5965,7 +5998,7 @@ class chem_evol(object):
     def __efolding(self, timemin, timemax):
 
         '''
-        This function returns the total number of SNe Ia (per Mo formed) and 
+        This function returns the total number of SNe Ia (per Mo formed) and
         white dwarfs for a given time interval.  It uses the exponential delay-
         time distribution of Wiersma et al. (2009).
    
@@ -6053,7 +6086,7 @@ class chem_evol(object):
         '''
 
         # Gaussian characteristic delay timescale, and its sigma value
-        tau = self.gauss_dtd[0]   #Wiersma09 defaults:1.0e9 
+        tau = self.gauss_dtd[0]   #Wiersma09 defaults:1.0e9
         sigma = self.gauss_dtd[1] #Wiersma09 defaults: 0.66e9
 
         # Return the SN Ia rate at time t coming from stars of mass m
@@ -6067,7 +6100,7 @@ class chem_evol(object):
     def __gauss(self, timemin, timemax):
 
         '''
-        This function returns the total number of SNe Ia (per Mo formed) and 
+        This function returns the total number of SNe Ia (per Mo formed) and
         white dwarfs for a given time interval.  It uses the gaussian delay-
         time distribution of Wiersma et al. (2009).
    
@@ -6371,7 +6404,7 @@ class chem_evol(object):
     ##############################################
     def Z_x(self, elem, t_step=-1):
         '''
-        Compute the metal fraction for a list of elements. 
+        Compute the metal fraction for a list of elements.
         The metal fraction is defined as mass_element/mass_metals.
         
         Arguments
@@ -6379,8 +6412,8 @@ class chem_evol(object):
 
         elem     : the name of the element to use. All isotopes
                    will be found.
-        t_step   : the indx of the time step to do the calculation. 
-                   if t_step = -1, or not specified, the last 
+        t_step   : the indx of the time step to do the calculation.
+                   if t_step = -1, or not specified, the last
                    time_step is used
 
         Returns
@@ -6460,7 +6493,7 @@ class chem_evol(object):
             # Choose the right option
             if inte == 0:
                 return self.imfnorm * self.__g1_power_law(mass)
-            if inte == 1: 
+            if inte == 1:
                 return quad(self.__g1_power_law, mmin, mmax)[0]
             if inte == 2:
                 return quad(self.__g2_power_law, mmin, mmax)[0]
@@ -6534,7 +6567,7 @@ class chem_evol(object):
             if inte == 0:
                 return self.imfnorm * self.__g1_kroupa(mass)
             if inte == 1:
-                return quad(self.__g1_kroupa, mmin, mmax)[0]
+                return self.__integrate_g1_kroupa(mmin, mmax)
             if inte == 2:
                 return quad(self.__g2_kroupa, mmin, mmax)[0]
             if inte == -1:
@@ -6897,6 +6930,48 @@ class chem_evol(object):
 
 
     ##############################################
+    #            Integrate G1 Kroupa             #
+    ##############################################
+    def __integrate_g1_kroupa(self, mmin, mmax):
+
+        '''
+        This function returns the integration of the Kroupa (2001)
+        IMF. Number of stars.
+
+        Arguments
+        =========
+
+          mmin : Lower-boundary mass of the integration
+          mmax : Upper-boundary mass
+
+        '''
+
+        # Declare the integral result
+        integral_sum = 0.0
+
+        # Integrate the lower-mass regime if needed
+        # 1.42857 = 1.0 / 0.7
+        if mmin < 0.08:
+            integral_sum += self.p0 * 1.42857 * \
+                            ( min(mmax,0.08)**0.7 - mmin**0.7 )
+
+        # Integrate the intermediate-mass regime if needed
+        if mmax > 0.08 and mmin < 0.5:
+        # 3.33333 = 1.0 / 0.3
+            integral_sum += self.p1 * 3.33333 * \
+                            ( max(mmin,0.08)**(-0.3) - min(mmax,0.5)**(-0.3) )
+
+        # Integrate the high-mass regime if needed
+        if mmax > 0.5:
+        # 0.769231 = 1.0 / 1.3
+            integral_sum += self.p1*self.p2 * 0.769231 * \
+                            ( max(mmin,0.5)**(-1.3) - mmax**(-1.3) )
+
+        # Return the integral of all mass regime combined
+        return integral_sum
+
+
+    ##############################################
     #                  G2 Kroupa                 #
     ##############################################
     def __g2_kroupa(self, mass):
@@ -6969,7 +7044,7 @@ class chem_evol(object):
     def __get_Z_wiersma(self, Z, Z_grid):
 
         '''
-        This function returns the closest available metallicity grid point 
+        This function returns the closest available metallicity grid point
         for a given Z.  It always favours the lower boundary.
 
         Arguments
@@ -7066,7 +7141,7 @@ class chem_evol(object):
                 #assume your yields are net yields
                 if (self.netyields_on==True):
                     if self.wiersmamod: #for Wiesma09 tests
-                            # initial amount depending on the simulation Z + net production factors 
+                            # initial amount depending on the simulation Z + net production factors
                             if (m>8) and (iso_name[p] in ['C-12','Mg-24','Fe-56']):
                                 yi = (X_ymgal_t[p]*(m-mfinal) + y[p]) #total yields, Eq. 4 in Wiersma09
                                 if iso_name[p] in ['C-12','Fe-56']:
@@ -7105,7 +7180,7 @@ class chem_evol(object):
             yi_all= np.array(yi_all) #* norm
             yields.append(yi_all)
             # save calculated net yields and corresponding masses
-            self.history.netyields=yields           
+            self.history.netyields=yields
             self.history.netyields_masses=m_stars
 
             #print ('star ',m,(m-mfinal),sum(yields[-1]))
@@ -7184,9 +7259,9 @@ class chem_evol(object):
         
         # Calculate the total mass and the mass of metals
         mgastot = 0.e0
-        mmetal = 0.e0 
+        mmetal = 0.e0
         nonmetals = ['H-1','H-2','H-3','He-3','He-4','Li-6','Li-7']
-        for k in range(len(self.history.isotopes)): 
+        for k in range(len(self.history.isotopes)):
             mgastot = mgastot + self.ymgal[i][k]
             if not self.history.isotopes[k] in nonmetals:
                 mmetal = mmetal + self.ymgal[i][k]
@@ -7213,40 +7288,23 @@ class chem_evol(object):
         # Return the metallicity of the gas reservoir
         return zmetal
 
-
     ##############################################
     #               Iso Abu to Elem              #
     ##############################################
-    def _iso_abu_to_elem(self, yields_iso, iso_list=[]):
+    def _iso_abu_to_elem(self, yields_iso):
 
         '''
-        This function converts isotope yields in elements and returns the result. 
-
-        Argument
-        ========
-
-          yields_iso : List of yields (isotopes)
+        This function converts isotope yields in elements and returns the result.
 
         '''
 
-        # Get the list of isotopes
-        if len(iso_list) == 0:
-            iso_list = self.history.isotopes
-
-        # Get the list of all the elements
-        elements = []
-        yields_ele = []
-        for iso in iso_list:
-            ele = iso.split('-')[0]
-            if not ele in elements:
-                elements.append(ele)
-                yields_ele.append(yields_iso[iso_list.index(iso)])
-            else:
-                idx=elements.index(ele)
-                yields_ele[idx] += yields_iso[iso_list.index(iso)]
+        # Combine isotopes into elements
+        yields_ele = np.zeros(self.nb_elements)
+        for i_iso in range(self.nb_isotopes):
+            yields_ele[self.i_elem_for_iso[i_iso]] += yields_iso[i_iso]
 
         # Return the list of elements, and the associated yields
-        return elements, yields_ele
+        return yields_ele
 
 
     ##############################################
@@ -7456,7 +7514,7 @@ class chem_evol(object):
                
                 # Calculate the "a" and "b" coefficients
                 self.ej_SSP_coef[0][i_cic][j_cic][k_cic] = \
-                    (iso_up - iso_low) * dif_logZ_inv 
+                    (iso_up - iso_low) * dif_logZ_inv
                 self.ej_SSP_coef[1][i_cic][j_cic][k_cic] = iso_up - \
                     self.ej_SSP_coef[0][i_cic][j_cic][k_cic] * logZ_up
 
@@ -7470,7 +7528,7 @@ class chem_evol(object):
                
                     # Calculate the "a" and "b" coefficients
                     self.ej_SSP_coef_radio[0][i_cic][j_cic][k_cic] = \
-                        (iso_up - iso_low) * dif_logZ_inv 
+                        (iso_up - iso_low) * dif_logZ_inv
                     self.ej_SSP_coef_radio[1][i_cic][j_cic][k_cic] = iso_up - \
                         self.ej_SSP_coef_radio[0][i_cic][j_cic][k_cic] * logZ_up
 
@@ -7484,7 +7542,7 @@ class chem_evol(object):
         Distribute the SSP ejecta.  The SSP that forms during this step
         is treated by interpolating SYGMA results that were kept in memory.
         The SSp still deposit its ejecta in the upcoming timesteps, as in the
-        original chem_evol.py class. 
+        original chem_evol.py class.
 
         Argument
         ========
@@ -7513,7 +7571,7 @@ class chem_evol(object):
             # Keep the initial current simulation step in memory
             i_sim_low = i_sim
 
-            # While all simulation steps covered by the SSP step 
+            # While all simulation steps covered by the SSP step
             # have not been treated ...
             not_complete = True
             while not_complete:
@@ -7528,7 +7586,7 @@ class chem_evol(object):
                 else:
                     t_low_ce = self.t_ce[i_sim-1]
 
-                # Calculate the time covered by the SSP step on 
+                # Calculate the time covered by the SSP step on
                 # the considered simulation step
                 time_frac.append( \
                   min((self.t_ce[i_sim]-t_form), self.t_ssp[i_ssp]) - \
@@ -7634,7 +7692,7 @@ class chem_evol(object):
 
                 # Break if the SSP time exceed the simulation time
                 if self.t_ssp[j_ise] > t_left_ce:
-                  break 
+                  break
 
 
     ##############################################
@@ -7686,7 +7744,7 @@ class chem_evol(object):
     class __const():
 
         '''
-        Holds the physical constants. 
+        Holds the physical constants.
         Please add further constants if required.
 
         '''
@@ -7704,7 +7762,7 @@ class chem_evol(object):
 
             self.syr = 31536000 #seconds in a year
             self.c= 2.99792458e10 #speed of light in vacuum (cm s^-1)
-            self.pi = 3.1415926535897932384626433832795029e0 
+            self.pi = 3.1415926535897932384626433832795029e0
             self.planck_h  = 6.62606896e-27 # Planck's constant (erg s)
             self.ev2erg = 1.602176487e-12 # electron volt (erg)
             self.rsol = 6.9598e10 # solar radius (cm)
@@ -7713,3 +7771,119 @@ class chem_evol(object):
             self.ggrav = 6.67428e-8 #(g^-1 cm^3 s^-2)
 
 
+    ##############################################
+    #               BinTree CLASS                #
+    ##############################################
+    class _bin_tree():
+
+        '''
+        Class for the construction and search in a binary tree.
+
+        '''
+
+        #############################
+        #        Constructor        #
+        #############################
+        def __init__(self, sorted_array):
+
+            '''
+            Initialize the balanced tree
+
+            '''
+
+            self.head = self._create_tree(sorted_array)
+
+        #############################
+        #        Tree creation      #
+        #############################
+        def _create_tree(self, sorted_array, index = 0):
+            '''
+            Create the tree itself
+
+            '''
+
+            # Sort edge cases
+            len_array = len(sorted_array)
+            if len_array == 0:
+                return None
+            elif len_array == 1:
+                return self._node(sorted_array[0], index)
+
+            # Find middle value and index, introduce them
+            # and recursively create the children
+            mid_index = len_array//2
+            mid_value = sorted_array[mid_index]
+            new_node = self._node(mid_value, mid_index + index)
+            new_node.lchild = self._create_tree(sorted_array[0:mid_index], index)
+            new_node.rchild = self._create_tree(sorted_array[mid_index + 1:],
+                    mid_index + 1 + index)
+
+            return new_node
+
+        #############################
+        #  Wraper Tree search left  #
+        #############################
+        def search_left(self, value):
+            '''
+            Wrapper for search_left
+            Search for the rightmost index lower or equal than value
+
+            '''
+
+            # Call function and be careful with lowest case
+            index = self._search_left_rec(value, self.head)
+            if index is None:
+                return 0
+
+            return index
+
+        #############################
+        #        Tree search left   #
+        #############################
+        def _search_left_rec(self, value, node):
+            '''
+            Search for the rightmost index lower or equal than value
+
+            '''
+
+            # Sort edge case
+            if node is None:
+                return None
+
+            # If to the left, we can always return the index, even if None.
+            # If to the right and none, we return current index, as it will
+            # be the closest to value from the left
+            if value < node.value:
+                return self._search_left_rec(value, node.lchild)
+            else:
+                index = self._search_left_rec(value, node.rchild)
+                if index is None:
+                    return node.index
+
+                return index
+
+
+        ##############################################
+        #               Node CLASS                   #
+        ##############################################
+        class _node():
+
+            '''
+            Class for the bin_tree nodes.
+
+            '''
+
+            #############################
+            #        Constructor        #
+            #############################
+            def __init__(self, value, index):
+
+                '''
+                Initialize the constructor
+
+                '''
+
+                self.value = value
+                self.index = index
+                self.lchild = None
+                self.rchild = None
