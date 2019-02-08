@@ -3907,7 +3907,7 @@ class chem_evol(object):
         if Z_giy <= self.Z_trans:
 
             # Find the lower-quantity boundary of the interpolation
-            if the_quantity > quantity_pop3[-1]:
+            if the_quantity >= quantity_pop3[-1]:
                 i_q_low = nb_quantity_pop3 - 2
             else:
                 if nb_quantity_pop3 < 30:
@@ -3925,7 +3925,7 @@ class chem_evol(object):
         else:
 
             # Find the lower-mass boundary of the interpolation
-            if the_quantity > quantity[-1]:
+            if the_quantity >= quantity[-1]:
                 i_q_low = nb_quantity - 2
             else:
                 if nb_quantity < 30:
