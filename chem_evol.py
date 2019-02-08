@@ -470,8 +470,9 @@ class chem_evol(object):
              extra_source_exclude_Z=[[]], radio_refinement=100, \
              pop3_table='yield_tables/popIII_heger10.txt', \
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
-             imf_pop3_char_mass=40.0, \
-             high_mass_extrapolation='copy', \
+             imf_pop3_char_mass=40.0,\
+             high_mass_extrapolation='copy',\
+             use_external_integration=False,\
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
              exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=0.0, \
              f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
@@ -619,6 +620,7 @@ class chem_evol(object):
         self.nb_delayed_extra = len(self.delayed_extra_dtd)
         self.pritchet_1a_dtd = pritchet_1a_dtd
         self.len_pritchet_1a_dtd = len(pritchet_1a_dtd)
+        self.use_external_integration = use_external_integration
 
         # Attributes associated with radioactive species
         self.table_radio = table_radio
@@ -3248,24 +3250,28 @@ class chem_evol(object):
         self.t += self.history.timesteps[i-1]
 
         # Initialisation of the mass locked into stars
-        self.m_locked = 0
-        self.m_locked_agb = 0
-        self.m_locked_massive = 0
+        if not self.use_external_integration:
+            self.m_locked = 0
+            self.m_locked_agb = 0
+            self.m_locked_massive = 0
 
         # If stars are forming during the current timestep ..
         # Note: self.sfrin is calculated in SYGMA or OMEGA
         if self.sfrin > 0:
 
-            # Limit the SFR if there is not enough gas
-            if self.sfrin > 1.0:
-                print ('Warning -- Not enough gas to sustain the SFH.', i)
-                self.sfrin = 1.0
-                self.not_enough_gas = True
-                self.not_enough_gas_count += 1
+            # If not using an integration scheme to advanced the system ..
+            if not self.use_external_integration:
 
-            # Lock gas into stars
-            f_lock_remain = 1.0 - self.sfrin
-            self.__lock_gas_into_stars(i, f_lock_remain)
+                # Limit the SFR if there is not enough gas
+                if self.sfrin > 1.0:
+                    print ('Warning -- Not enough gas to sustain the SFH.', i)
+                    self.sfrin = 1.0
+                    self.not_enough_gas = True
+                    self.not_enough_gas_count += 1
+
+                # Lock gas into stars
+                f_lock_remain = 1.0 - self.sfrin
+                self.__lock_gas_into_stars(i, f_lock_remain)
 
             # Correction if comparing with Clayton's analytical model
             # DO NOT USE unless you know why
@@ -3292,7 +3298,8 @@ class chem_evol(object):
 
             # Use the previous gas reservoir for the current timestep
             # Done by assuming f_lock_remain = 1.0
-            self.__lock_gas_into_stars(i, 1.0)
+            if not self.use_external_integration:
+                self.__lock_gas_into_stars(i, 1.0)
 
             # Initialize array containing no CC SNe for the SSP_i-1
             if self.out_follows_E_rate:
@@ -3301,7 +3308,8 @@ class chem_evol(object):
         # Add stellar ejecta to the gas reservoir
         # This needs to be called even if no star formation at the
         # current timestep, because older stars may still pollute
-        self.__pollute_gas_with_ejecta(i)
+        if not self.use_external_integration:
+            self.__pollute_gas_with_ejecta(i)
 
         # Convert the mass ejected by massive stars into rate
         if not self.pre_calculate_SSPs:

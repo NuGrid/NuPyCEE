@@ -43,6 +43,9 @@ MARCH2018: B. Cote
 - Switched to Python 3
 - Capability to include radioactive isotopes
 
+FEB2019: A. Yagüe, B. Cote
+- Optimized to code to run faster
+
 
 Note
 ====
@@ -280,7 +283,8 @@ class omega( chem_evol ):
                  netyields_on=False,wiersmamod=False,skip_zero=False,\
                  redshift_f=0.0,print_off=False,long_range_ref=False,\
                  f_s_enhance=1.0,m_gas_f=-1.0, cl_SF_law=False,\
-                 external_control=False, calc_SSP_ej=False, tau_ferrini=False,\
+                 external_control=False, use_external_integration=False,\
+                 calc_SSP_ej=False, tau_ferrini=False,\
                  input_yields=False, popIII_info_fast=True, t_sf_z_dep = 1.0,\
                  m_crit_on=False, norm_crit_m=8.0e+09, mass_frac_SSP=0.5,\
                  sfh_array_norm=-1.0, imf_rnd_sampling=False,\
@@ -362,6 +366,7 @@ class omega( chem_evol ):
                  t_merge=t_merge,popIII_info_fast=popIII_info_fast,\
                  out_follows_E_rate=out_follows_E_rate,\
                  stellar_param_on=stellar_param_on,\
+                 use_external_integration=use_external_integration,\
                  ism_ini=ism_ini,ytables_in=ytables_in,\
                  delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
                  delayed_extra_log_radio=delayed_extra_log_radio,\
@@ -2146,12 +2151,18 @@ class omega( chem_evol ):
         # Make sure that the the number of timestep is not exceeded
         if not i == (self.nb_timesteps+1):
 
-            #test
+            # For testing ..
             if i == 1:
                 self.sfr_test = sfr_rs
 
-            # Calculate the current mass fraction of gas converted into stars
-            self.__cal_m_frac_stars(i, sfr_rs)
+            # Calculate the current mass fraction of gas converted into stars,
+            # but only if the star formation rate is not followed
+            # within a self-consistent integration scheme.
+            if not self.use_external_integration:
+                self.__cal_m_frac_stars(i, sfr_rs)
+            else:
+                self.sfrin = sfr_rs # [Msun/yr]
+                self.m_locked = self.sfrin * self.history.timesteps[i-1]
 
             # Run the timestep i (!need to be right after __cal_m_frac_stars!)
             self._evol_stars(i, f_esc_yields, mass_sampled, scale_cor)
@@ -2168,171 +2179,171 @@ class omega( chem_evol ):
                 self.__delay_outflow(i)
 
             # Add the incoming gas (if any)
-            len_m_added = len(m_added)
-            for k_op in range(0, len_m_added):
-                self.ymgal[i][k_op] += m_added[k_op]
+            if not self.use_external_integration:
+                len_m_added = len(m_added)
+                for k_op in range(0, len_m_added):
+                    self.ymgal[i][k_op] += m_added[k_op]
 
-            # If gas needs to be removed ...
-            if m_lost > 0.0:
+            # If no integration scheme is used to advance the system ..
+            if not self.use_external_integration:
 
-                # Calculate the gas fraction lost
-                f_lost = m_lost / sum(self.ymgal[i])
-                if f_lost > 1.0:
-                    f_lost = 1.0
-                    if not self.print_off:
-                        print ('!!Warning -- Remove more mass than available!!')
+                # If gas needs to be removed ...
+                if m_lost > 0.0:
+
+                    # Calculate the gas fraction lost
+                    f_lost = m_lost / sum(self.ymgal[i])
+                    if f_lost > 1.0:
+                        f_lost = 1.0
+                        if not self.print_off:
+                            print ('!!Warning -- Remove more mass than available!!')
                 
-                # Remove the mass for each isotope
-                f_lost_2 = (1.0 - f_lost)
-                self.ymgal[i] = f_lost_2 * self.ymgal[i]
-                if self.len_decay_file > 0:
-                    self.ymgal_radio[i] = f_lost_2 * self.ymgal_radio[i]
-                if not self.pre_calculate_SSPs:
-                    self.ymgal_agb[i] = f_lost_2 * self.ymgal_agb[i]
-                    self.ymgal_1a[i] = f_lost_2 * self.ymgal_1a[i]
-                    self.ymgal_nsm[i] = f_lost_2 * self.ymgal_nsm[i]
-                    self.ymgal_bhnsm[i] = f_lost_2 * self.ymgal_bhnsm[i]
-                    self.ymgal_massive[i] = f_lost_2 * self.ymgal_massive[i]
-                    for iiii in range(0,self.nb_delayed_extra):
-                        self.ymgal_delayed_extra[iiii][i] = \
-                            f_lost_2 * self.ymgal_delayed_extra[iiii][i]
-                    # Radioactive isotopes lost
+                    # Remove the mass for each isotope
+                    f_lost_2 = (1.0 - f_lost)
+                    self.ymgal[i] = f_lost_2 * self.ymgal[i]
                     if self.len_decay_file > 0:
-                        if self.radio_massive_agb_on:
-                            self.ymgal_massive_radio[i] = f_lost_2 * self.ymgal_massive_radio[i]
-                            self.ymgal_agb_radio[i] = f_lost_2 * self.ymgal_agb_radio[i]
-                        if self.radio_sn1a_on:
-                            self.ymgal_1a_radio[i] = f_lost_2 * self.ymgal_1a_radio[i]
-                        if self.radio_nsmerger_on:
-                            self.ymgal_nsm_radio[i] = f_lost_2 * self.ymgal_nsm_radio[i]
-                        if self.radio_bhnsmerger_on:
-                            self.ymgal_bhnsm_radio[i] = f_lost_2 * self.ymgal_bhnsm_radio[i]
-                        for iiii in range(0,self.nb_delayed_extra_radio):
-                            self.ymgal_delayed_extra_radio[iiii][i] = \
-                                f_lost_2 * self.ymgal_delayed_extra_radio[iiii][i]
+                        self.ymgal_radio[i] = f_lost_2 * self.ymgal_radio[i]
+                    if not self.pre_calculate_SSPs:
+                        self.ymgal_agb[i] = f_lost_2 * self.ymgal_agb[i]
+                        self.ymgal_1a[i] = f_lost_2 * self.ymgal_1a[i]
+                        self.ymgal_nsm[i] = f_lost_2 * self.ymgal_nsm[i]
+                        self.ymgal_bhnsm[i] = f_lost_2 * self.ymgal_bhnsm[i]
+                        self.ymgal_massive[i] = f_lost_2 * self.ymgal_massive[i]
+                        for iiii in range(0,self.nb_delayed_extra):
+                            self.ymgal_delayed_extra[iiii][i] = \
+                                f_lost_2 * self.ymgal_delayed_extra[iiii][i]
+                        # Radioactive isotopes lost
+                        if self.len_decay_file > 0:
+                            if self.radio_massive_agb_on:
+                                self.ymgal_massive_radio[i] = f_lost_2 * self.ymgal_massive_radio[i]
+                                self.ymgal_agb_radio[i] = f_lost_2 * self.ymgal_agb_radio[i]
+                            if self.radio_sn1a_on:
+                                self.ymgal_1a_radio[i] = f_lost_2 * self.ymgal_1a_radio[i]
+                            if self.radio_nsmerger_on:
+                                self.ymgal_nsm_radio[i] = f_lost_2 * self.ymgal_nsm_radio[i]
+                            if self.radio_bhnsmerger_on:
+                                self.ymgal_bhnsm_radio[i] = f_lost_2 * self.ymgal_bhnsm_radio[i]
+                            for iiii in range(0,self.nb_delayed_extra_radio):
+                                self.ymgal_delayed_extra_radio[iiii][i] = \
+                                    f_lost_2 * self.ymgal_delayed_extra_radio[iiii][i]
 
-            # If the open box scenario is used (and it is not skipped) ...
-            if self.open_box and (not no_in_out):
+                # If the open box scenario is used (and it is not skipped) ...
+                if self.open_box and (not no_in_out):
 
-                # Calculate the total mass of the gas reservoir at timstep i
-                # after the star formation and the stellar ejecta
-                m_tot_current = 0.0
-                for k_op in range(0, self.nb_isotopes):
-                    m_tot_current += self.ymgal[i][k_op]
+                    # Calculate the total mass of the gas reservoir at timstep i
+                    # after the star formation and the stellar ejecta
+                    m_tot_current = sum(self.ymgal[i])
 
-                # Add inflows
-                if self.len_m_inflow_X_array > 0.0:
-                    self.ymgal[i] += self.m_inflow_X_array[i-1]
-                    m_inflow_current = self.m_inflow_array[i-1]
-                    self.m_inflow_t[i-1] = float(m_inflow_current)
-                else:
+                    # Add inflows
+                    if self.len_m_inflow_X_array > 0.0:
+                        self.ymgal[i] += self.m_inflow_X_array[i-1]
+                        m_inflow_current = self.m_inflow_array[i-1]
+                        self.m_inflow_t[i-1] = float(m_inflow_current)
+                    else:
 
-                    # Get the current mass of inflow
-                    m_inflow_current = self.__get_m_inflow(i, m_tot_current)
+                        # Get the current mass of inflow
+                        m_inflow_current = self.__get_m_inflow(i, m_tot_current)
 
-                    # Add primordial gas coming with the inflow
-                    if m_inflow_current > 0.0:
-                        ym_inflow = self.prim_comp.get(quantity='Yields') * \
-                                    m_inflow_current
-                        for k_op in range(0, self.nb_isotopes):
-                            self.ymgal[i][k_op] += ym_inflow[k_op]
-                
-                # Calculate the fraction of gas removed by the outflow
-                if not (m_tot_current + m_inflow_current) == 0.0:
-                    if self.len_m_gas_array > 0:
-                        self.m_outflow_t[i-1] = (m_tot_current + m_inflow_current) - self.m_gas_array[i]
-                        frac_rem = self.m_outflow_t[i-1] / (m_tot_current + m_inflow_current)
-                        if frac_rem < 0.0:
-                            frac_rem = 0.0
-                            # Add primordial gas coming with the inflow
-                            self.m_outflow_t[i-1] = 0.0
+                        # Add primordial gas coming with the inflow
+                        if m_inflow_current > 0.0:
                             ym_inflow = self.prim_comp.get(quantity='Yields') * \
-                                        (-1.0) * self.m_outflow_t[i-1]
+                                        m_inflow_current
                             for k_op in range(0, self.nb_isotopes):
                                 self.ymgal[i][k_op] += ym_inflow[k_op]
+                
+                    # Calculate the fraction of gas removed by the outflow
+                    if not (m_tot_current + m_inflow_current) == 0.0:
+                        if self.len_m_gas_array > 0:
+                            self.m_outflow_t[i-1] = (m_tot_current + m_inflow_current) - self.m_gas_array[i]
+                            frac_rem = self.m_outflow_t[i-1] / (m_tot_current + m_inflow_current)
+                            if frac_rem < 0.0:
+                                frac_rem = 0.0
+                                # Add primordial gas coming with the inflow
+                                self.m_outflow_t[i-1] = 0.0
+                                ym_inflow = self.prim_comp.get(quantity='Yields') * \
+                                            (-1.0) * self.m_outflow_t[i-1]
+                                for k_op in range(0, self.nb_isotopes):
+                                    self.ymgal[i][k_op] += ym_inflow[k_op]
+                        else:
+                            frac_rem = self.m_outflow_t[i-1] / \
+                                (m_tot_current + m_inflow_current)
                     else:
-                        frac_rem = self.m_outflow_t[i-1] / \
-                            (m_tot_current + m_inflow_current)
-                else:
-                    frac_rem = 0.0
+                        frac_rem = 0.0
 
-                # Limit the outflow mass to the amount of available gas
-                if frac_rem > 1.0:
-                    frac_rem = 1.0
-                    self.m_outflow_t[i-1] = m_tot_current + m_inflow_current
-                    if not self.print_off:
-                        print ('Warning - '\
-                          'Outflows eject more mass than available.  ' \
-                          'It has been reduced to the amount of available gas.')
+                    # Limit the outflow mass to the amount of available gas
+                    if frac_rem > 1.0:
+                        frac_rem = 1.0
+                        self.m_outflow_t[i-1] = m_tot_current + m_inflow_current
+                        if not self.print_off:
+                            print ('Warning - '\
+                              'Outflows eject more mass than available.  ' \
+                              'It has been reduced to the amount of available gas.')
 
-                # Remove mass from the ISM because of the outflow
-                self.ymgal[i] *= (1.0 - frac_rem)
-                if self.len_decay_file > 0:
-                    self.ymgal_radio[i]  *= (1.0 - frac_rem)
-                if not self.pre_calculate_SSPs:
-                    self.ymgal_agb[i] *= (1.0 - frac_rem)
-                    self.ymgal_1a[i] *= (1.0 - frac_rem)
-                    self.ymgal_nsm[i] *= (1.0 - frac_rem)
-                    self.ymgal_bhnsm[i] *= (1.0 - frac_rem)
-                    self.ymgal_massive[i] *= (1.0 - frac_rem)
-                    for iiii in range(0,self.nb_delayed_extra):
-                        self.ymgal_delayed_extra[iiii][i] *= (1.0 - frac_rem)
-                    # Radioactive isotopes lost
+                    # Remove mass from the ISM because of the outflow
+                    self.ymgal[i] *= (1.0 - frac_rem)
                     if self.len_decay_file > 0:
-                        if self.radio_massive_agb_on:
-                            self.ymgal_massive_radio[i] *= (1.0 - frac_rem)
-                            self.ymgal_agb_radio[i] *= (1.0 - frac_rem)
-                        if self.radio_sn1a_on:
-                            self.ymgal_1a_radio[i] *= (1.0 - frac_rem)
-                        if self.radio_nsmerger_on:
-                            self.ymgal_nsm_radio[i] *= (1.0 - frac_rem)
-                        if self.radio_bhnsmerger_on:
-                            self.ymgal_bhnsm_radio[i] *= (1.0 - frac_rem)
-                        for iiii in range(0,self.nb_delayed_extra_radio):
-                            self.ymgal_delayed_extra_radio[iiii][i] *= (1.0 - frac_rem)
+                        self.ymgal_radio[i]  *= (1.0 - frac_rem)
+                    if not self.pre_calculate_SSPs:
+                        self.ymgal_agb[i] *= (1.0 - frac_rem)
+                        self.ymgal_1a[i] *= (1.0 - frac_rem)
+                        self.ymgal_nsm[i] *= (1.0 - frac_rem)
+                        self.ymgal_bhnsm[i] *= (1.0 - frac_rem)
+                        self.ymgal_massive[i] *= (1.0 - frac_rem)
+                        for iiii in range(0,self.nb_delayed_extra):
+                            self.ymgal_delayed_extra[iiii][i] *= (1.0 - frac_rem)
+                        # Radioactive isotopes lost
+                        if self.len_decay_file > 0:
+                            if self.radio_massive_agb_on:
+                                self.ymgal_massive_radio[i] *= (1.0 - frac_rem)
+                                self.ymgal_agb_radio[i] *= (1.0 - frac_rem)
+                            if self.radio_sn1a_on:
+                                self.ymgal_1a_radio[i] *= (1.0 - frac_rem)
+                            if self.radio_nsmerger_on:
+                                self.ymgal_nsm_radio[i] *= (1.0 - frac_rem)
+                            if self.radio_bhnsmerger_on:
+                                self.ymgal_bhnsm_radio[i] *= (1.0 - frac_rem)
+                            for iiii in range(0,self.nb_delayed_extra_radio):
+                                self.ymgal_delayed_extra_radio[iiii][i] *= (1.0 - frac_rem)
 
-            # Get the new metallicity of the gas
-            self.zmetal = self._getmetallicity(i)
+                # Get the new metallicity of the gas and update history class
+                self.zmetal = self._getmetallicity(i)
+                self._update_history(i)
 
-            # Update the history class
-            self._update_history(i)
+                # If this is the last step ...
+                if i == self.nb_timesteps:
 
-            # If this is the last step ...
-            if i == self.nb_timesteps:
+                    # Do the final update of the history class
+                    self._update_history_final()
 
-                # Do the final update of the history class
-                self._update_history_final()
+                    # Add the evolution arrays to the history class
+                    self.history.m_DM_t = self.m_DM_t
+                    self.history.m_tot_ISM_t = self.m_tot_ISM_t
+                    self.history.m_outflow_t = self.m_outflow_t
+                    self.history.m_inflow_t = self.m_inflow_t
+                    self.history.eta_outflow_t = self.eta_outflow_t
+                    self.history.t_SF_t = self.t_SF_t
+                    self.history.redshift_t = self.redshift_t
 
-                # Add the evolution arrays to the history class
-                self.history.m_DM_t = self.m_DM_t
-                self.history.m_tot_ISM_t = self.m_tot_ISM_t
-                self.history.m_outflow_t = self.m_outflow_t
-                self.history.m_inflow_t = self.m_inflow_t
-                self.history.eta_outflow_t = self.eta_outflow_t
-                self.history.t_SF_t = self.t_SF_t
-                self.history.redshift_t = self.redshift_t
+                    # If external control ...
+                    if self.external_control:
+                        self.history.sfr_abs[i] = self.history.sfr_abs[i-1]
 
-                # If external control ...
-                if self.external_control:
-                    self.history.sfr_abs[i] = self.history.sfr_abs[i-1]
+                    # Calculate the total mass of gas
+                    self.m_stel_tot = 0.0
+                    for i_tot in range(0,len(self.history.timesteps)):
+                        self.m_stel_tot += self.history.sfr_abs[i_tot] * \
+                            self.history.timesteps[i_tot]
+                    if self.m_stel_tot > 0.0:            
+                        self.m_stel_tot = 1.0 / self.m_stel_tot
+                    self.f_m_stel_tot = []
+                    m_temp = 0.0
+                    for i_tot in range(0,len(self.history.timesteps)):
+                        m_temp += self.history.sfr_abs[i_tot] * \
+                            self.history.timesteps[i_tot]
+                        self.f_m_stel_tot.append(m_temp*self.m_stel_tot)
+                    self.f_m_stel_tot.append(self.f_m_stel_tot[-1])
 
-                # Calculate the total mass of gas
-                self.m_stel_tot = 0.0
-                for i_tot in range(0,len(self.history.timesteps)):
-                    self.m_stel_tot += self.history.sfr_abs[i_tot] * \
-                        self.history.timesteps[i_tot]
-                if self.m_stel_tot > 0.0:            
-                    self.m_stel_tot = 1.0 / self.m_stel_tot
-                self.f_m_stel_tot = []
-                m_temp = 0.0
-                for i_tot in range(0,len(self.history.timesteps)):
-                    m_temp += self.history.sfr_abs[i_tot] * \
-                        self.history.timesteps[i_tot]
-                    self.f_m_stel_tot.append(m_temp*self.m_stel_tot)
-                self.f_m_stel_tot.append(self.f_m_stel_tot[-1])
-
-                # Announce the end of the simulation
-                print ('   OMEGA run completed -',self._gettime())
+                    # Announce the end of the simulation
+                    print ('   OMEGA run completed -',self._gettime())
 
         # Error message
         else:
