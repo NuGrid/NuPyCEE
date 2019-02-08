@@ -44,6 +44,9 @@ JULY2018: B. Cote & R. Sarmento
 JAN2019: B. Cote
 - Re-included radioactive isotopes with the new (improved) yield treatment
 
+FEB2019: A. Yagüe, B. Cote
+- Optimized to code to run faster
+
 Usage
 =====
 
