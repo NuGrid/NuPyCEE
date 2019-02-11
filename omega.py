@@ -1267,12 +1267,8 @@ class omega( chem_evol ):
 
                     # Calculate the average SFR for the specific OMEGA timestep
                     if i_dt_csi < self.nb_timesteps:
-                        if (t_csi+self.history.timesteps[i_dt_csi] * 0.5) > parts_2[0]:
-                            self.sfr_input[i_dt_csi] = a_csi * (parts_2[0] + \
-                               parts_1[0]) * 0.5 + b_csi
-                        else:
-                            self.sfr_input[i_dt_csi] = a_csi * (t_csi + \
-                                self.history.timesteps[i_dt_csi] * 0.5) + b_csi
+                        self.sfr_input[i_dt_csi] = a_csi * (t_csi + \
+                            self.history.timesteps[i_dt_csi] * 0.5) + b_csi
                     else:
                         self.sfr_input[i_dt_csi] = a_csi * t_csi + b_csi
 
