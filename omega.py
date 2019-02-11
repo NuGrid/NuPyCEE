@@ -1449,6 +1449,9 @@ class omega( chem_evol ):
         # Initiate the age of the galaxy
         t_czt = 0.0
 
+        # Initialize the linear interpolation coefficients
+        self.redshift_t_coef = np.zeros((self.nb_timesteps,2))
+
         #For each timestep
         for i_czt in range(0, self.nb_timesteps+1):
 
@@ -1457,6 +1460,15 @@ class omega( chem_evol ):
 
             #Calculate the redshift at that time
             self.redshift_t[i_czt] = self.__get_z_from_t(age_universe_czt)
+
+            # Calculate the interpolation coefficients
+            # z = self.redshift_t_coef[0] * t + self.redshift_t_coef[1]
+            if i_czt > 0:
+                self.redshift_t_coef[i_czt-1][0] = \
+                    (self.redshift_t[i_czt]-self.redshift_t[i_czt-1]) / \
+                        self.history.timesteps[i_czt-1]
+                self.redshift_t_coef[i_czt-1][1] = self.redshift_t[i_czt] - \
+                    self.redshift_t_coef[i_czt-1][0] * t_czt
 
             #Udpate the age of the galaxy [yr]
             if i_czt < self.nb_timesteps:
@@ -1542,6 +1554,15 @@ class omega( chem_evol ):
                 m_dm_scale = self.m_DM_0 / self.m_DM_t[-1]
                 for i_cmdt in range(0, self.nb_timesteps+1):
                     self.m_DM_t[i_cmdt] = self.m_DM_t[i_cmdt] * m_dm_scale
+
+        # Create the interpolation coefficients
+        # M_DM = self.m_DM_t_coef[0] * t + self.m_DM_t_coef[1]
+        self.m_DM_t_coef = np.zeros((self.nb_timesteps,2))
+        for i_cmdt in range(0, self.nb_timesteps):
+            self.m_DM_t_coef[i_cmdt][0] = (self.m_DM_t[i_cmdt+1] - \
+                self.m_DM_t[i_cmdt]) / self.history.timesteps[i_cmdt]
+            self.m_DM_t_coef[i_cmdt][1] = self.m_DM_t[i_cmdt] - \
+                self.m_DM_t_coef[i_cmdt][0] * self.history.age[i_cmdt]
 
 
     ##############################################
@@ -1659,6 +1680,15 @@ class omega( chem_evol ):
             #self.r_vir_DM_t[i_dt_csa] = self.r_vir_DM_t[i_dt_csa-1]
             i_dt_csa += 1
 
+        # Create the interpolation coefficients
+        # R_vir = self.r_vir_DM_t_coef[0] * t + self.r_vir_DM_t_coef[1]
+        self.r_vir_DM_t_coef = np.zeros((self.nb_timesteps,2))
+        for i_cmdt in range(0, self.nb_timesteps):
+            self.r_vir_DM_t_coef[i_cmdt][0] = (self.r_vir_DM_t[i_cmdt+1] - \
+                self.r_vir_DM_t[i_cmdt]) / self.history.timesteps[i_cmdt]
+            self.r_vir_DM_t_coef[i_cmdt][1] = self.r_vir_DM_t[i_cmdt] - \
+                self.r_vir_DM_t_coef[i_cmdt][0] * self.history.age[i_cmdt]
+
 
     ##############################################
     #                  Get DM Bdy                #
@@ -1749,6 +1779,24 @@ class omega( chem_evol ):
             self.v_vir_DM_t[i_cv] = ( 4.302e-6 * self.m_DM_t[i_cv] / \
                 self.r_vir_DM_t[i_cv] )** 0.5
 
+        # Create the interpolation coefficients
+        # R_vir = self.r_vir_DM_t_coef[0] * t + self.r_vir_DM_t_coef[1]
+        self.r_vir_DM_t_coef = np.zeros((self.nb_timesteps,2))
+        for i_cmdt in range(0, self.nb_timesteps):
+            self.r_vir_DM_t_coef[i_cmdt][0] = (self.r_vir_DM_t[i_cmdt+1] - \
+                self.r_vir_DM_t[i_cmdt]) / self.history.timesteps[i_cmdt]
+            self.r_vir_DM_t_coef[i_cmdt][1] = self.r_vir_DM_t[i_cmdt] - \
+                self.r_vir_DM_t_coef[i_cmdt][0] * self.history.age[i_cmdt]
+
+        # Create the interpolation coefficients
+        # v_vir = self.v_vir_DM_t_coef[0] * t + self.v_vir_DM_t_coef[1]
+        self.v_vir_DM_t_coef = np.zeros((self.nb_timesteps,2))
+        for i_cmdt in range(0, self.nb_timesteps):
+            self.v_vir_DM_t_coef[i_cmdt][0] = (self.v_vir_DM_t[i_cmdt+1] - \
+                self.v_vir_DM_t[i_cmdt]) / self.history.timesteps[i_cmdt]
+            self.v_vir_DM_t_coef[i_cmdt][1] = self.v_vir_DM_t[i_cmdt] - \
+                self.v_vir_DM_t_coef[i_cmdt][0] * self.history.age[i_cmdt]
+
 
     ##############################################
     #             Calculate M_crit_t             #
@@ -1777,6 +1825,15 @@ class omega( chem_evol ):
 
                 # Set the critical mass to zero
                 self.m_crit_t[i_ctst] = 0.0
+
+        # Create the interpolation coefficients
+        # M_crit = self.m_crit_t_coef[0] * t + self.m_crit_t_coef[1]
+        self.m_crit_t_coef = np.zeros((self.nb_timesteps,2))
+        for i_cmdt in range(0, self.nb_timesteps):
+            self.m_crit_t_coef[i_cmdt][0] = (self.m_crit_t[i_cmdt+1] - \
+                self.m_crit_t[i_cmdt]) / self.history.timesteps[i_cmdt]
+            self.m_crit_t_coef[i_cmdt][1] = self.m_crit_t[i_cmdt] - \
+                self.m_crit_t_coef[i_cmdt][0] * self.history.age[i_cmdt]
 
 
     ##############################################
@@ -1816,6 +1873,15 @@ class omega( chem_evol ):
                     else:
                         self.t_SF_t[i_ctst] = self.f_dyn * 0.1 / self.H_0 * \
                                 9.7759839e11
+
+        # Create the interpolation coefficients
+        # SF_t = self.t_SF_t_coef[0] * t + self.t_SF_t_coef[1]
+        self.t_SF_t_coef = np.zeros((self.nb_timesteps,2))
+        for i_cmdt in range(0, self.nb_timesteps):
+            self.t_SF_t_coef[i_cmdt][0] = (self.t_SF_t[i_cmdt+1] - \
+                self.t_SF_t[i_cmdt]) / self.history.timesteps[i_cmdt]
+            self.t_SF_t_coef[i_cmdt][1] = self.t_SF_t[i_cmdt] - \
+                self.t_SF_t_coef[i_cmdt][0] * self.history.age[i_cmdt]
 
 
     ##############################################
@@ -1990,6 +2056,15 @@ class omega( chem_evol ):
                     # Calculate the outflow mass during the current timestep
                     self.m_outflow_t[i_ceo] = self.eta_outflow_t[i_ceo] * \
                         self.sfr_input[i_ceo] * self.history.timesteps[i_ceo]
+
+        # Create the interpolation coefficients
+        # eta = self.eta_outflow_t_coef[0] * t + self.eta_outflow_t_coef[1]
+        self.eta_outflow_t_coef = np.zeros((self.nb_timesteps,2))
+        for i_cmdt in range(0, self.nb_timesteps):
+            self.eta_outflow_t_coef[i_cmdt][0] = (self.eta_outflow_t[i_cmdt+1] - \
+                self.eta_outflow_t[i_cmdt]) / self.history.timesteps[i_cmdt]
+            self.eta_outflow_t_coef[i_cmdt][1] = self.eta_outflow_t[i_cmdt] - \
+                self.eta_outflow_t_coef[i_cmdt][0] * self.history.age[i_cmdt]
 
 
     ##############################################
