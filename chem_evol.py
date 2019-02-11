@@ -3586,8 +3586,12 @@ class chem_evol(object):
             nb_dm, new_dm_imf, m_lower = \
                 self.__get_mass_bin(dm_imf, t_lower, i_cse)
 
+            # If the population is not active anymore, stop the loop
+            if nb_dm == -1:
+                break
+
             # If there are yields to be calculated ..
-            if nb_dm > 0:
+            elif nb_dm > 0:
 
                 # If the IMF is stochastically sampled ..
                 if stochastic_IMF:
@@ -3689,8 +3693,14 @@ class chem_evol(object):
         else:
             m_upper = self.get_interp_lifetime_mass(t_lower, self.zmetal, is_mass=False)
 
-        # If the mass interval is outside the IMF yields range ..
-        if m_lower >= imf_yr[1] or m_upper < imf_yr[0]:
+        # Return a sing that the population is not active anymore
+        # if the age is larger than the lower-mass stellar model ..
+        if m_upper < imf_yr[0]:
+            return -1, 0, 0
+
+        # Skip the yields calculation if the age is too low to
+        # activate the most massive star model ..
+        elif m_lower > imf_yr[1]:
 
             # Skip the yields calculation
             nb_dm = 0
