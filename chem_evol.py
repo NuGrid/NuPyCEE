@@ -895,7 +895,10 @@ class chem_evol(object):
         zmetal = self._getmetallicity(0)
         self.history.metallicity.append(zmetal)
         self.t = 0
-        self.history.age.append(self.t)
+        self.history.age = np.zeros(self.nb_timesteps+1)
+        for i_tt in range(0,self.nb_timesteps):
+            self.history.age[i_tt+1] = self.history.age[i_tt] + \
+                self.history.timesteps[i_tt]
         self.zmetal = zmetal
 
         # Define the element to isotope index connections
@@ -3469,13 +3472,13 @@ class chem_evol(object):
         # Keep the current in memory
         if self.pre_calculate_SSPs:
             self.history.metallicity.append(self.zmetal)
-            self.history.age.append(self.t)
+            #self.history.age.append(self.t)
             self.history.gas_mass.append(sum(self.ymgal[i]))
             self.history.ism_iso_yield.append(self.ymgal[i])
             self.history.m_locked.append(self.m_locked)
         else:
             self.history.metallicity.append(self.zmetal)
-            self.history.age.append(self.t)
+            #self.history.age.append(self.t)
             self.history.gas_mass.append(sum(self.ymgal[i]))
             self.history.ism_iso_yield.append(self.ymgal[i])
             self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])

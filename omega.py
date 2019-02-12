@@ -2060,11 +2060,13 @@ class omega( chem_evol ):
         # Create the interpolation coefficients
         # eta = self.eta_outflow_t_coef[0] * t + self.eta_outflow_t_coef[1]
         self.eta_outflow_t_coef = np.zeros((self.nb_timesteps,2))
-        for i_cmdt in range(0, self.nb_timesteps):
+        for i_cmdt in range(self.nb_timesteps-1):
             self.eta_outflow_t_coef[i_cmdt][0] = (self.eta_outflow_t[i_cmdt+1] - \
                 self.eta_outflow_t[i_cmdt]) / self.history.timesteps[i_cmdt]
             self.eta_outflow_t_coef[i_cmdt][1] = self.eta_outflow_t[i_cmdt] - \
                 self.eta_outflow_t_coef[i_cmdt][0] * self.history.age[i_cmdt]
+        self.eta_outflow_t_coef[-1][0] = self.eta_outflow_t_coef[-2][0]
+        self.eta_outflow_t_coef[-1][1] = self.eta_outflow_t_coef[-2][1]
 
 
     ##############################################
