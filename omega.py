@@ -725,6 +725,12 @@ class omega( chem_evol ):
         self.nb_timesteps = len(new_dt)
         self.history.timesteps = new_dt
 
+        # Update self.history.age
+        self.history.age = [0]
+        for ii in range(self.nb_timesteps):
+            self.history.age.append(self.history.age[-1] + new_dt[ii])
+        self.history.age = np.array(self.history.age)
+
         # If a timestep needs to be added to be synchronized with
         # the external program managing merger trees ...
         if self.t_merge > 0.0:
@@ -821,6 +827,12 @@ class omega( chem_evol ):
         # Update the timestep information
         self.nb_timesteps = len(new_dt)
         self.history.timesteps = new_dt
+
+        # Update self.history.age
+        self.history.age = [0]
+        for ii in range(self.nb_timesteps):
+            self.history.age.append(self.history.age[-1] + new_dt[ii])
+        self.history.age = np.array(self.history.age)
 
         # If a timestep needs to be added to be synchronized with
         # the external program managing merger trees ...
