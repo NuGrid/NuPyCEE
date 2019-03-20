@@ -89,7 +89,7 @@ global_path=global_path+'/'
 import read_yields as ry
 
 # Import the decay module for radioactive isotopes
-#import decay_module
+import decay_module
 
 
 class chem_evol(object):
@@ -648,11 +648,11 @@ class chem_evol(object):
         self.test_clayton = test_clayton
         self.use_decay_module = use_decay_module
         if self.use_decay_module:
-            print('In construction .. decay_module deactivated.')
-            return
-            #self.f_network = f_network
-            #self.f_format = f_format
-            #self.__initialize_decay_module()
+#            print('In construction .. decay_module deactivated.')
+#            return
+            self.f_network = f_network
+            self.f_format = f_format
+            self.__initialize_decay_module()
 
         # Normalization of the delayed extra sources
         if self.nb_delayed_extra > 0:
