@@ -80,10 +80,8 @@ global_path=global_path+'/'
 # Import the class that reads the input yield tables
 try:
     from . import read_yields as ry
-    from . import sygma
 except:
     import read_yields as ry
-    import sygma
 
 # Import the decay module for radioactive isotopes
 #import decay_module
