@@ -755,7 +755,7 @@ class chem_evol(object):
             self.__interpolate_massive_and_agb_m_from_t()
 
             # If radioactive isotopes are used ..
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 and len(self.table_radio) > 0:
 
                 # Interpolate the radioactive yields tables
                 self.__interpolate_massive_and_agb_yields(is_radio=True)
