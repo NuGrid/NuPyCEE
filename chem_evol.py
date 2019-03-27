@@ -1,3 +1,4 @@
+# coding=utf-8
 from __future__ import print_function
 
 '''
@@ -1058,9 +1059,9 @@ class chem_evol(object):
         '''
 
         # Declare the decay_info array
-        # decay_info[nb_unstable_iso][0] --> Unstable isotope
-        # decay_info[nb_unstable_iso][1] --> Stable isotope where it decays
-        # decay_info[nb_unstable_iso][2] --> Mean-live (ln2*half-life)[yr]
+        # decay_info[nb_radio_iso][0] --> Unstable isotope
+        # decay_info[nb_radio_iso][1] --> Stable isotope where it decays
+        # decay_info[nb_radio_iso][2] --> Mean-life (ln2*half-life)[yr]
         self.decay_info = []
 
         # Open the input file
@@ -1080,9 +1081,6 @@ class chem_evol(object):
         # Count the number of radioactive isotopes
         self.nb_radio_iso = len(self.decay_info)
         self.nb_new_radio_iso = len(self.decay_info)
-
-        # Close the input file
-        ddi.close()
 
 
     ##############################################
@@ -3100,7 +3098,7 @@ class chem_evol(object):
 
         '''
         Create an array to make the connection between radioactive isotopes
-        and the stable isotopes ther are decaying into.  For example, if Al-26
+        and the stable isotopes they are decaying into.  For example, if Al-26
         decays into Mg-26, the array will contain the Mg-26 index in the stable
         ymgal array.
 
@@ -4310,7 +4308,7 @@ class chem_evol(object):
         self.iso_decay_module = ['']*self.len_iso_module
         for i_iso in range(self.len_iso_module):
           if decay_module.iso.z[i_iso] == 0:
-            self.iso_decay_module[i_iso] = 'NN-1'
+            self.iso_decay_module[i_iso] = 'Nn-1'
           else:
             self.iso_decay_module[i_iso] = \
               self.element_names[decay_module.iso.z[i_iso]] + '-' + \

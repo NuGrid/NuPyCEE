@@ -1,3 +1,4 @@
+# coding=utf-8
 from __future__ import print_function
 
 '''
@@ -2257,7 +2258,7 @@ class omega( chem_evol ):
             self._evol_stars(i, f_esc_yields, mass_sampled, scale_cor)
 
             # Decay radioactive isotopes
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 and not self.use_external_integration:
                 if self.use_decay_module:
                     self._decay_radio_with_module(i)
                 else:
