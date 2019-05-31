@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 '''
-this is a test
+
 Chemical Evolution - chem_evol.py
 
 Functionality
@@ -67,13 +67,14 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from scipy.interpolate import interp1d
 from mpl_toolkits.mplot3d import Axes3D
-from imp import *
+from imp
 
 # Variable enabling to work in notebooks
 global notebookmode
 notebookmode=True
 
-# Set the working space to the current directory
+# Define where is the working directory
+# This is where the NuPyCEE code will be extracted
 global global_path
 try:
     if os.environ['SYGMADIR']:
@@ -82,8 +83,10 @@ except KeyError:
     global_path=os.getcwd()
 global_path=global_path+'/'
 
-# Import the class that reads the input yield tables
-import read_yields as ry
+# Import NuPyCEE codes
+yr = imp.load_source('read_yields', global_path+'read_yields.py')
+
+
 
 # Import the decay module for radioactive isotopes
 #import decay_module

@@ -76,13 +76,26 @@ Analysis functions: See the Sphinx documentation
 
 '''
 
-#standard packages
+# Standard packages
 import copy
 import math
 import random
+import os
+import imp
 
-# Import the class inherited by SYGMA
-import sygma
+# Define where is the working directory
+# This is where the NuPyCEE code will be extracted
+global global_path
+try:
+    if os.environ['SYGMADIR']:
+        global_path = os.environ['SYGMADIR']
+except KeyError:
+    global_path=os.getcwd()
+global_path=global_path+'/'
+
+# Import NuPyCEE codes
+sygma = imp.load_source('sygma', global_path+'sygma.py')
+chem_evol = imp.load_source('chem_evol', global_path+'chem_evol.py')
 from chem_evol import *
 
 
