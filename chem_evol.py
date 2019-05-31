@@ -84,9 +84,7 @@ except KeyError:
 global_path=global_path+'/'
 
 # Import NuPyCEE codes
-yr = imp.load_source('read_yields', global_path+'read_yields.py')
-
-
+ry = imp.load_source('read_yields', global_path+'read_yields.py')
 
 # Import the decay module for radioactive isotopes
 #import decay_module
