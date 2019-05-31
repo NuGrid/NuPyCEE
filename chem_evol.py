@@ -60,6 +60,7 @@ import random
 import os
 import sys
 import re
+import imp
 from pylab import polyfit
 from scipy.integrate import quad
 from scipy.integrate import dblquad
@@ -67,7 +68,6 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from scipy.interpolate import interp1d
 from mpl_toolkits.mplot3d import Axes3D
-from imp
 
 # Variable enabling to work in notebooks
 global notebookmode

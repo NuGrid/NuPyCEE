@@ -129,6 +129,7 @@ class sygma( chem_evol ):
     # Combine docstrings from chem_evol with sygma docstring
     __doc__ = __doc__+chem_evol.__doc__
 
+
     ##############################################
     #                Constructor                 #
     ##############################################
@@ -243,6 +244,8 @@ class sygma( chem_evol ):
                  use_decay_module=use_decay_module,\
                  f_network=f_network, f_format=f_format,\
                  high_mass_extrapolation=high_mass_extrapolation)
+
+        print('This is the correct SYGMA')
 
         if self.need_to_quit:
             return

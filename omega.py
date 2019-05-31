@@ -98,7 +98,6 @@ sygma = imp.load_source('sygma', global_path+'sygma.py')
 chem_evol = imp.load_source('chem_evol', global_path+'chem_evol.py')
 from chem_evol import *
 
-
 class omega( chem_evol ):
 
     '''
@@ -251,7 +250,6 @@ class omega( chem_evol ):
     #Combine docstrings from chem_evol with sygma docstring
     __doc__ = __doc__+chem_evol.__doc__
 
-
     ##############################################
     ##               Constructor                ##
     ##############################################
@@ -302,6 +300,7 @@ class omega( chem_evol ):
                  stellar_param_on=False, delayed_extra_log=False,\
                  delayed_extra_yields_log_int=False,\
                  delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
+                 yield_tables_dir = 'option_not_available_in_this_version', \
                  bhnsmerger_dtd_array=np.array([]), dt_in_SSPs=np.array([]), \
                  DM_array=np.array([]), nsmerger_dtd_array=np.array([]),\
                  sfh_array=np.array([]),ism_ini=np.array([]),\
@@ -329,6 +328,8 @@ class omega( chem_evol ):
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
                  ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
                  test_clayton=np.array([])):
+
+        print('This is the correct OMEGA')
 
         # Get the name of the instance
         import traceback
