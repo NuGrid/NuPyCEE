@@ -329,8 +329,6 @@ class omega( chem_evol ):
                  ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
                  test_clayton=np.array([])):
 
-        print('This is the correct OMEGA')
-
         # Get the name of the instance
         import traceback
         (filename,line_number,function_name,text)=traceback.extract_stack()[-2]

@@ -245,8 +245,6 @@ class sygma( chem_evol ):
                  f_network=f_network, f_format=f_format,\
                  high_mass_extrapolation=high_mass_extrapolation)
 
-        print('This is the correct SYGMA')
-
         if self.need_to_quit:
             return
 

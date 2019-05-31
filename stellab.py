@@ -71,8 +71,6 @@ class stellab():
     # Input paramters
     def __init__(self):
 
-        print('This is the correct Stellab')
-
         # read abundance data library via 
         # index file abundance_data_library.txt
         # creates self.paths, self.paths_s, self.cs, self.leg
