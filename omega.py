@@ -335,7 +335,8 @@ class omega( chem_evol ):
         self.inst_name = text[:text.find('=')].strip()
 
         # Announce the beginning of the simulation 
-        print ('OMEGA run in progress..')
+        if not print_off:
+            print ('OMEGA run in progress..')
         start_time = t_module.time()
         self.start_time = start_time
 
@@ -2344,7 +2345,8 @@ class omega( chem_evol ):
                 self.f_m_stel_tot.append(self.f_m_stel_tot[-1])
 
                 # Announce the end of the simulation
-                print ('   OMEGA run completed -',self._gettime())
+                if not self.print_off:
+                    print ('   OMEGA run completed -',self._gettime())
 
         # Error message
         else:
