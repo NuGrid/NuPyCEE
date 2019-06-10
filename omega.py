@@ -384,6 +384,7 @@ class omega( chem_evol ):
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
                  ytables_1a_in=ytables_1a_in, dt_in_SSPs=dt_in_SSPs, \
                  delayed_extra_log=delayed_extra_log, \
+                 print_off=print_off, \
                  nsmerger_dtd_array=nsmerger_dtd_array,\
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
                  ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
@@ -445,7 +446,6 @@ class omega( chem_evol ):
         self.DM_too_low = False
         self.skip_zero = skip_zero
         self.redshift_f = redshift_f
-        self.print_off = print_off
         self.long_range_ref = long_range_ref
         self.m_crit_on = m_crit_on
         self.norm_crit_m = norm_crit_m

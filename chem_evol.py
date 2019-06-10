@@ -480,6 +480,7 @@ class chem_evol(object):
              popIII_info_fast=True, out_follows_E_rate=False, \
              t_dtd_poly_split=-1.0, delayed_extra_log=False, \
              delayed_extra_yields_log_int=False, \
+             print_off=False, \
              delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
              pritchet_1a_dtd=[], ism_ini=np.array([]), ism_ini_radio=np.array([]),\
              nsmerger_dtd_array=np.array([]),\
@@ -617,6 +618,7 @@ class chem_evol(object):
         self.nb_delayed_extra = len(self.delayed_extra_dtd)
         self.pritchet_1a_dtd = pritchet_1a_dtd
         self.len_pritchet_1a_dtd = len(pritchet_1a_dtd)
+        self.print_off = print_off
 
         # Attributes associated with radioactive species
         self.table_radio = table_radio
@@ -3256,7 +3258,8 @@ class chem_evol(object):
 
             # Limit the SFR if there is not enough gas
             if self.sfrin > 1.0:
-                print ('Warning -- Not enough gas to sustain the SFH.', i)
+                if not self.print_off:
+                    print ('Warning -- Not enough gas to sustain the SFH.', i)
                 self.sfrin = 1.0
                 self.not_enough_gas = True
                 self.not_enough_gas_count += 1
