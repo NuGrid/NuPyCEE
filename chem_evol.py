@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 '''
-
+Hi Blanka
 Chemical Evolution - chem_evol.py
 
 Functionality
