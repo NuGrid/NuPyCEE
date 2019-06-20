@@ -633,7 +633,7 @@ class chem_evol(object):
         self.delayed_extra_yields_radio = delayed_extra_yields_radio
         self.delayed_extra_yields_norm_radio = delayed_extra_yields_norm_radio
         self.delayed_extra_yields_log_int_radio = delayed_extra_yields_log_int_radio
-        self.nb_delayed_extra_radio = len(self.delayed_extra_dtd_radio)
+        self.nb_delayed_extra_radio = len(self.delayed_extra_yields_radio)
         self.ytables_radio_in = ytables_radio_in
         self.radio_iso_in = radio_iso_in
         self.ytables_1a_radio_in = ytables_1a_radio_in
@@ -753,7 +753,7 @@ class chem_evol(object):
             self.__interpolate_massive_and_agb_m_from_t()
 
             # If radioactive isotopes are used ..
-            if self.len_decay_file > 0:
+            if self.radio_massive_agb_on:
 
                 # Interpolate the radioactive yields tables
                 self.__interpolate_massive_and_agb_yields(is_radio=True)
@@ -1498,7 +1498,7 @@ class chem_evol(object):
 
         # Radioactive isotopes (non-zero metallicity)
         # ===========================================
-        if self.len_decay_file > 0:
+        if self.radio_massive_agb_on:
         
             # Declare the array containing the coefficients for
             # the yields interpolation between masses (a_M, b_M)
@@ -3625,7 +3625,7 @@ class chem_evol(object):
                         self.__add_yields_in_mdot(nb_stars, the_yields, the_m_cen, i_cse, i)
 
                         # If there are radioactive isotopes
-                        if self.len_decay_file > 0:
+                        if self.radio_massive_agb_on:
 
                             # Get the yields for the central stellar mass
                             the_yields = self.get_interp_yields(the_m_cen, \
@@ -5376,8 +5376,13 @@ class chem_evol(object):
         for i_extra in range(0,self.nb_delayed_extra):
 
             # Get the yields and metallicity indexes of the considered source
-            Z_extra, yextra_low, yextra_up, iZ_low, iZ_up = \
-                self.__get_YZ_delayed_extra(i_extra)
+            if self.nb_delayed_extra_radio > 0:
+                Z_extra, yextra_low, yextra_up, yextra_low_radio, \
+                    yextra_up_radio, iZ_low, iZ_up = \
+                        self.__get_YZ_delayed_extra(i_extra, return_radio=True)
+            else:
+                Z_extra, yextra_low, yextra_up, iZ_low, iZ_up = \
+                    self.__get_YZ_delayed_extra(i_extra)
          
             # Initialize age of the latest SSP, which cumulate in loop
             tt = 0
@@ -5404,9 +5409,15 @@ class chem_evol(object):
               if timemax > tmin_extra:
 
                 # Get the total number of sources and yields (interpolated)
-                nb_sources_extra_tot, yields_extra_interp = \
-                    self.__get_nb_y_interp(timemin, timemax, i_extra, iZ_low, iZ_up,\
-                        yextra_low, yextra_up, Z_extra)
+                if self.nb_delayed_extra_radio > 0:
+                    nb_sources_extra_tot, yields_extra_interp, yields_extra_interp_radio = \
+                        self.__get_nb_y_interp(timemin, timemax, i_extra, iZ_low, iZ_up,\
+                            yextra_low, yextra_up, Z_extra, yextra_low_radio=yextra_low_radio,\
+                                yextra_up_radio=yextra_up_radio, return_radio=True)
+                else:
+                    nb_sources_extra_tot, yields_extra_interp = \
+                        self.__get_nb_y_interp(timemin, timemax, i_extra, iZ_low, iZ_up,\
+                            yextra_low, yextra_up, Z_extra)
 
                 # Calculate the number of sources in the current SSP (not per Msun)
                 self.delayed_extra_numbers[i_extra][j] += nb_sources_extra_tot
@@ -5416,11 +5427,17 @@ class chem_evol(object):
                     np.array(self.mdot_delayed_extra[i_extra][j]) + yields_extra_interp
                 self.mdot[j] = np.array(self.mdot[j]) + yields_extra_interp
 
+                # Add the radioactive contribution
+                if self.nb_delayed_extra_radio > 0:
+                    self.mdot_delayed_extra_radio[i_extra][j] = \
+                        np.array(self.mdot_delayed_extra_radio[i_extra][j]) + yields_extra_interp_radio
+                    self.mdot_radio[j] = np.array(self.mdot_radio[j]) + yields_extra_interp_radio
+
 
     #############################################
     #             Get YZ Delayed Extra          #
     #############################################
-    def __get_YZ_delayed_extra(self, i_extra):
+    def __get_YZ_delayed_extra(self, i_extra, return_radio=False):
 
         '''
         This function returns the yields, metallicities, and Z boundary indexes
@@ -5462,16 +5479,26 @@ class chem_evol(object):
             Z=Z_extra[iZ_low], quantity='Yields')
         yextra_up  = self.ytables_delayed_extra[i_extra].get( \
             Z=Z_extra[iZ_up],  quantity='Yields')
+        if return_radio:
+            yextra_low_radio = self.ytables_delayed_extra_radio[i_extra].get( \
+                Z=Z_extra[iZ_low], quantity='Yields')
+            yextra_up_radio  = self.ytables_delayed_extra_radio[i_extra].get( \
+                Z=Z_extra[iZ_up],  quantity='Yields')
 
         # Return the metallicities and the yields and Z boundaries
-        return Z_extra, yextra_low, yextra_up, iZ_low, iZ_up
+        if return_radio:
+            return Z_extra, yextra_low, yextra_up, yextra_low_radio, yextra_up_radio, iZ_low, iZ_up
+        else:
+            return Z_extra, yextra_low, yextra_up, iZ_low, iZ_up
+
 
 
     #############################################
     #               Get Nb Y Interp             #
     #############################################
     def __get_nb_y_interp(self, timemin, timemax, i_extra, iZ_low, iZ_up,\
-                          yextra_low, yextra_up, Z_extra):
+                          yextra_low, yextra_up, Z_extra, yextra_low_radio=[],\
+                          yextra_up_radio=[], return_radio=False):
 
         '''
         This function returns the yields, metallicities, and Z boundary indexes
@@ -5501,12 +5528,18 @@ class chem_evol(object):
         # Calculate the total ejecta (yields) for the lower Z
         ejecta_Z_low = np.array(nb_sources_low * self.m_locked *
             yextra_low * self.delayed_extra_yields_norm[i_extra][iZ_low])
+        if return_radio:
+            ejecta_Z_low_radio = np.array(nb_sources_low * self.m_locked *
+                yextra_low_radio * self.delayed_extra_yields_norm_radio[i_extra][iZ_low]) 
 
         # If we do not need to interpolate between Z
         if iZ_up == iZ_low:
 
             # Return the total number of sources and ejecta for the lower Z
-            return nb_sources_low * self.m_locked, ejecta_Z_low
+            if return_radio:
+                return nb_sources_low * self.m_locked, ejecta_Z_low, ejecta_Z_low_radio
+            else:
+                return nb_sources_low * self.m_locked, ejecta_Z_low
 
         # If we need to interpolate between Z
         else:
@@ -5518,9 +5551,12 @@ class chem_evol(object):
             # This needs to be before calculating ejecta_Z_up!
             nb_sources_up *= self.delayed_extra_dtd_A_norm[i_extra][iZ_up]
 
-            # Calculate the total ejecta (yields) for the lower Z
+            # Calculate the total ejecta (yields) for the upper Z
             ejecta_Z_up = np.array(nb_sources_up * self.m_locked *
                 yextra_up * self.delayed_extra_yields_norm[i_extra][iZ_up])
+            if return_radio:
+                ejecta_Z_up_radio = np.array(nb_sources_up * self.m_locked *
+                    yextra_up_radio * self.delayed_extra_yields_norm_radio[i_extra][iZ_up])
 
             # Interpolate the number of sources (N = aa*log10(Z) + bb)
             aa = (nb_sources_up - nb_sources_low) / \
@@ -5539,20 +5575,41 @@ class chem_evol(object):
                         ejecta_Z_up[i_iso_temp] = -50.0
                     else:
                         ejecta_Z_up[i_iso_temp] = np.log10(ejecta_Z_up[i_iso_temp])
+                if return_radio:
+                    for i_iso_temp in range(self.nb_radio_iso):
+                        if ejecta_Z_low_radio[i_iso_temp] == 0.0:
+                            ejecta_Z_low_radio[i_iso_temp] = -50.0
+                        else:
+                            ejecta_Z_low_radio[i_iso_temp] = np.log10(ejecta_Z_low_radio[i_iso_temp])
+                        if ejecta_Z_up_radio[i_iso_temp] == 0.0:
+                            ejecta_Z_up_radio[i_iso_temp] = -50.0
+                        else:
+                            ejecta_Z_up_radio[i_iso_temp] = np.log10(ejecta_Z_up_radio[i_iso_temp])
 
             # Interpolate the yields (Y = aa*log10(Z) + bb)
             aa = (ejecta_Z_up - ejecta_Z_low) / \
                  (np.log10(Z_extra[iZ_up]) - np.log10(Z_extra[iZ_low]))
             bb = ejecta_Z_up - aa * np.log10(Z_extra[iZ_up])
             ejecta_interp = aa * np.log10(self.zmetal) + bb
+            if return_radio:
+                aa = (ejecta_Z_up_radio - ejecta_Z_low_radio) / \
+                     (np.log10(Z_extra[iZ_up]) - np.log10(Z_extra[iZ_low]))
+                bb = ejecta_Z_up_radio - aa * np.log10(Z_extra[iZ_up])
+                ejecta_interp_radio = aa * np.log10(self.zmetal) + bb
 
             # Convert interpolated yields back into linear scale if needed ..
             if self.delayed_extra_yields_log_int:
                 for i_iso_temp in range(self.nb_isotopes):
                     ejecta_interp[i_iso_temp] = 10**(ejecta_interp[i_iso_temp])
+                if return_radio:
+                    for i_iso_temp in range(self.nb_radio_iso):
+                        ejecta_interp_radio[i_iso_temp] = 10**(ejecta_interp_radio[i_iso_temp])
 
             # Return the total number of sources and ejecta for the interpolation
-            return nb_sources_interp * self.m_locked, ejecta_interp
+            if return_radio:
+                return nb_sources_interp * self.m_locked, ejecta_interp, ejecta_interp_radio
+            else:
+                return nb_sources_interp * self.m_locked, ejecta_interp
 
 
     #############################################
@@ -7359,7 +7416,7 @@ class chem_evol(object):
 
           # Declare the SSP ejecta arrays [Z][dt][iso]
           self.ej_SSP = np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_isotopes))
-          if self.len_decay_file > 0:
+          if self.radio_massive_agb_on:
               self.ej_SSP_radio = \
                   np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_radio_iso))
 
@@ -7432,7 +7489,7 @@ class chem_evol(object):
 
               # Copy the ejecta arrays from the SYGMA simulation
               self.ej_SSP[i_ras] = sygma_inst.mdot
-              if self.len_decay_file > 0:
+              if self.radio_massive_agb_on:
                   self.ej_SSP_radio[i_ras] = sygma_inst.mdot_radio
 
               # If this is the last Z entry ..
