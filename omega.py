@@ -83,6 +83,7 @@ import math
 import random
 import os
 import imp
+import sys
 
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
@@ -95,7 +96,9 @@ except KeyError:
 global_path=global_path+'/'
 
 # Import NuPyCEE codes
-sygma = imp.load_source('sygma', global_path+'sygma.py')
+if not 'sygma' in sys.modules:
+    sygma = imp.load_source('sygma', global_path+'sygma.py')
+#if not 'chem_evol' in sys.modules:
 chem_evol = imp.load_source('chem_evol', global_path+'chem_evol.py')
 from chem_evol import *
 

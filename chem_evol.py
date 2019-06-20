@@ -79,8 +79,10 @@ except KeyError:
 global_path=global_path+'/'
 
 # Import NuPyCEE codes
-ry = imp.load_source('read_yields', global_path+'read_yields.py')
-sygma = imp.load_source('sygma', global_path+'sygma.py')
+if not 'ry' in sys.modules:
+    ry = imp.load_source('read_yields', global_path+'read_yields.py')
+if not 'sygma' in sys.modules:
+    sygma = imp.load_source('sygma', global_path+'sygma.py')
 
 
 # Import the decay module for radioactive isotopes

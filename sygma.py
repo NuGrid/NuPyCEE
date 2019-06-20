@@ -90,7 +90,7 @@ For example with artificial yields of only H-1, you can try
 # Import standard python packages
 import os
 import imp
-
+import sys
 
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
@@ -103,6 +103,7 @@ except KeyError:
 global_path=global_path+'/'
 
 # Import NuPyCEE codes
+#if not 'chem_evol' in sys.modules:
 chem_evol = imp.load_source('chem_evol', global_path+'chem_evol.py')
 from chem_evol import *
     

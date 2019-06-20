@@ -46,6 +46,7 @@ import numpy as np
 import math
 import os
 import imp
+import sys
 from matplotlib.lines import Line2D
 
 # Define where is the working directory
@@ -59,7 +60,8 @@ except KeyError:
 global_path=global_path+'/'
 
 # Import NuPyCEE codes
-ry = imp.load_source('read_yields', global_path+'read_yields.py')
+if not 'ry' in sys.modules:
+    ry = imp.load_source('read_yields', global_path+'read_yields.py')
 
 
 class stellab():
