@@ -87,15 +87,25 @@ For example with artificial yields of only H-1, you can try
 
 '''
 
-# Import the class inherited by SYGMA
-try:
-    from .chem_evol import *
-    from . import read_yields as ry
-except: # For the notebooks
-    from chem_evol import *
-    import read_yields as ry
-    
+# Import standard python packages
+import os
+import imp
 
+
+# Define where is the working directory
+# This is where the NuPyCEE code will be extracted
+global global_path
+try:
+    if os.environ['SYGMADIR']:
+        global_path = os.environ['SYGMADIR']
+except KeyError:
+    global_path=os.getcwd()
+global_path=global_path+'/'
+
+# Import NuPyCEE codes
+chem_evol = imp.load_source('chem_evol', global_path+'chem_evol.py')
+from chem_evol import *
+    
 
 class sygma( chem_evol ):
 

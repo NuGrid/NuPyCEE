@@ -55,6 +55,7 @@ import random
 import os
 import sys
 import re
+import imp
 from pylab import polyfit
 from scipy.integrate import quad
 from scipy.integrate import dblquad
@@ -62,13 +63,13 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from scipy.interpolate import interp1d
 from mpl_toolkits.mplot3d import Axes3D
-from imp import *
 
 # Variable enabling to work in notebooks
 global notebookmode
 notebookmode=True
 
-# Set the working space to the current directory
+# Define where is the working directory
+# This is where the NuPyCEE code will be extracted
 global global_path
 try:
     if os.environ['SYGMADIR']:
@@ -77,13 +78,10 @@ except KeyError:
     global_path=os.getcwd()
 global_path=global_path+'/'
 
-# Import the class that reads the input yield tables
-try:
-    from . import read_yields as ry
-    from . import sygma
-except:
-    import read_yields as ry
-    import sygma
+# Import NuPyCEE codes
+ry = imp.load_source('read_yields', global_path+'read_yields.py')
+sygma = imp.load_source('sygma', global_path+'sygma.py')
+
 
 # Import the decay module for radioactive isotopes
 #import decay_module

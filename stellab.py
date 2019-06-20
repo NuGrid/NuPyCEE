@@ -45,15 +45,11 @@ import matplotlib.ticker as tic
 import numpy as np
 import math
 import os
+import imp
 from matplotlib.lines import Line2D
 
-#import read_yields
-try:
-    from . import read_yields as ry
-except:
-    import read_yields as ry
-
-# Define workspace
+# Define where is the working directory
+# This is where the NuPyCEE code will be extracted
 global global_path
 try:
     if os.environ['SYGMADIR']:
@@ -61,6 +57,9 @@ try:
 except KeyError:
     global_path=os.getcwd()
 global_path=global_path+'/'
+
+# Import NuPyCEE codes
+ry = imp.load_source('read_yields', global_path+'read_yields.py')
 
 
 class stellab():
