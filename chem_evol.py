@@ -3606,7 +3606,7 @@ class chem_evol(object):
                         i_m_sampled += 1
 
                 # If the IMF is (in part) fully sampled ..
-                else:
+                if ((stochastic_IMF and mass_sampled_thresh > 0)) or not stochastic_IMF:
 
                     # For each IMF mass bin ..
                     for i_imf_bin in range(nb_dm):
