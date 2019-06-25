@@ -3289,7 +3289,7 @@ class chem_evol(object):
             # Calculate stellar ejecta .. if normal mode
             else:
                 self.__calculate_stellar_ejecta(i, f_esc_yields, \
-                    mass_sampled_thresh, mass_sampled, scale_cor)
+                    mass_sampled_thresh=mass_sampled_thresh, mass_sampled=mass_sampled, scale_cor=scale_cor)
 
         # If no star is forming during the current timestep ...
         else:
@@ -3529,8 +3529,8 @@ class chem_evol(object):
     ##############################################
     #          Calculate Stellar Ejecta          #
     ##############################################
-    def __calculate_stellar_ejecta(self, i, f_esc_yields, mass_sampled_thresh, \
-                        mass_sampled, scale_cor, dm_imf=0.25):
+    def __calculate_stellar_ejecta(self, i, f_esc_yields, mass_sampled_thresh=-1,\
+                    mass_sampled=np.array([]), scale_cor=np.array([]), dm_imf=0.25):
 
         '''
           For each upcoming timestep, including the current one,

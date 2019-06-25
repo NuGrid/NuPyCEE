@@ -384,7 +384,7 @@ class omega( chem_evol ):
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
                  ytables_1a_in=ytables_1a_in, dt_in_SSPs=dt_in_SSPs, \
                  delayed_extra_log=delayed_extra_log, \
-                 print_off=print_off, \
+                 print_off=print_off, mass_sampled_thresh=-1\
                  nsmerger_dtd_array=nsmerger_dtd_array,\
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
                  ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
@@ -628,7 +628,7 @@ class omega( chem_evol ):
         if not self.external_control:
 
             # Run the simulation
-            self.__run_simulation(mass_sampled, scale_cor)
+            self.__run_simulation(mass_sampled_thresh, mass_sampled, scale_cor)
 
 
     ##############################################
