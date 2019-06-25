@@ -298,7 +298,7 @@ class omega( chem_evol ):
                  out_follows_E_rate=False, yield_interp='lin',\
                  r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
                  stellar_param_on=False, delayed_extra_log=False,\
-                 delayed_extra_yields_log_int=False, mass_sampled_thresh=-1\
+                 delayed_extra_yields_log_int=False, mass_sampled_thresh=-1,\
                  delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
                  yield_tables_dir = 'option_not_available_in_this_version', \
                  bhnsmerger_dtd_array=np.array([]), dt_in_SSPs=np.array([]), \
@@ -384,7 +384,7 @@ class omega( chem_evol ):
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
                  ytables_1a_in=ytables_1a_in, dt_in_SSPs=dt_in_SSPs, \
                  delayed_extra_log=delayed_extra_log, \
-                 print_off=print_off\
+                 print_off=print_off,\
                  nsmerger_dtd_array=nsmerger_dtd_array,\
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
                  ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
