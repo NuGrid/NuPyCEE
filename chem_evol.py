@@ -3551,7 +3551,7 @@ class chem_evol(object):
                    specific mass interval will have the same yields
 
         '''
-
+        
         # Select the adequate IMF properties
         if self.zmetal <= self.Z_trans:
             the_A_imf = self.A_imf_pop3

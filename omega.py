@@ -2167,7 +2167,7 @@ class omega( chem_evol ):
             self.__cal_m_frac_stars(i, sfr_rs)
 
             # Run the timestep i (!need to be right after __cal_m_frac_stars!)
-            self._evol_stars(i, f_esc_yields, mass_sampled, scale_cor)
+            self._evol_stars(i, f_esc_yields, mass_sampled_thresh, mass_sampled, scale_cor)
 
             # Decay radioactive isotopes
             if self.len_decay_file > 0:
