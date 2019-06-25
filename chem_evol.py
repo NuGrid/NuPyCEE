@@ -6553,13 +6553,13 @@ class chem_evol(object):
 
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_power_law(mass)
+                return self.imfnorm * self.g1_power_law(mass)
             if inte == 1:
-                return quad(self.__g1_power_law, mmin, mmax)[0]
+                return quad(self.g1_power_law, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_power_law, mmin, mmax)[0]
+                return quad(self.g2_power_law, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_power_law, \
+                self.imfnorm = 1.0 / quad(self.g2_power_law, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         # Custom IMF with the file imf_input.py
@@ -6570,13 +6570,13 @@ class chem_evol(object):
             self.ci = ci
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_costum(mass)
+                return self.imfnorm * self.g1_costum(mass)
             if inte == 1:
-                return quad(self.__g1_costum, mmin, mmax)[0]
+                return quad(self.g1_costum, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_costum, mmin, mmax)[0]
+                return quad(self.g2_costum, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_costum, \
+                self.imfnorm = 1.0 / quad(self.g2_costum, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         # Chabrier IMF
@@ -6584,13 +6584,13 @@ class chem_evol(object):
 
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_chabrier(mass)
+                return self.imfnorm * self.g1_chabrier(mass)
             if inte == 1:
-                return quad(self.__g1_chabrier, mmin, mmax)[0]
+                return quad(self.g1_chabrier, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_chabrier, mmin, mmax)[0]
+                return quad(self.g2_chabrier, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_chabrier, \
+                self.imfnorm = 1.0 / quad(self.g2_chabrier, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         # Chabrier - Alpha custom - IMF
@@ -6598,13 +6598,13 @@ class chem_evol(object):
 
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_chabrier_alphaimf(mass)
+                return self.imfnorm * self.g1_chabrier_alphaimf(mass)
             if inte == 1:
-                return quad(self.__g1_chabrier_alphaimf, mmin, mmax)[0]
+                return quad(self.g1_chabrier_alphaimf, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_chabrier_alphaimf, mmin, mmax)[0]
+                return quad(self.g2_chabrier_alphaimf, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_chabrier_alphaimf, \
+                self.imfnorm = 1.0 / quad(self.g2_chabrier_alphaimf, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         # Kroupa 1993 - IMF
@@ -6612,13 +6612,13 @@ class chem_evol(object):
 
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_kroupa93_alphaimf(mass)
+                return self.imfnorm * self.g1_kroupa93_alphaimf(mass)
             if inte == 1:
-                return quad(self.__g1_kroupa93_alphaimf, mmin, mmax)[0]
+                return quad(self.g1_kroupa93_alphaimf, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_kroupa93_alphaimf, mmin, mmax)[0]
+                return quad(self.g2_kroupa93_alphaimf, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_kroupa93_alphaimf, \
+                self.imfnorm = 1.0 / quad(self.g2_kroupa93_alphaimf, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         # Kroupa IMF
@@ -6626,25 +6626,25 @@ class chem_evol(object):
 
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_kroupa(mass)
+                return self.imfnorm * self.g1_kroupa(mass)
             if inte == 1:
-                return self.__integrate_g1_kroupa(mmin, mmax)
+                return self.integrate_g1_kroupa(mmin, mmax)
             if inte == 2:
-                return quad(self.__g2_kroupa, mmin, mmax)[0]
+                return quad(self.g2_kroupa, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_kroupa, \
+                self.imfnorm = 1.0 / quad(self.g2_kroupa, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         elif self.imf_type == 'lognormal': # RJS
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_log_normal(mass)
+                return self.imfnorm * self.g1_log_normal(mass)
             if inte == 1:
-                return quad(self.__g1_log_normal, mmin, mmax)[0]
+                return quad(self.g1_log_normal, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_log_normal, mmin, mmax)[0]
+                return quad(self.g2_log_normal, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_log_normal, \
+                self.imfnorm = 1.0 / quad(self.g2_log_normal, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         # Ferrini, Pardi & Penco (1990)
@@ -6652,11 +6652,11 @@ class chem_evol(object):
 
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_fpp(mass)
+                return self.imfnorm * self.g1_fpp(mass)
             if inte == 1:
-                return quad(self.__g1_fpp, mmin, mmax)[0]
+                return quad(self.g1_fpp, mmin, mmax)[0]
             if inte == 2:
-                #return quad(self.__g2_fpp, mmin, mmax)[0]
+                #return quad(self.g2_fpp, mmin, mmax)[0]
  
                 #if mmin < 0.8:
                 #    print ('!!Error - Ferrini IMF not fitted below 0.8 Msun!!')
@@ -6684,14 +6684,14 @@ class chem_evol(object):
                 return imf_int
 
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_fpp, \
+                self.imfnorm = 1.0 / quad(self.g2_fpp, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
 
     ##############################################
     #                G1 Power Law                #
     ##############################################
-    def __g1_power_law(self, mass):
+    def g1_power_law(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -6716,7 +6716,7 @@ class chem_evol(object):
     ##############################################
     #                G2 Power Law                #
     ##############################################
-    def __g2_power_law(self, mass):
+    def g2_power_law(self, mass):
 
         '''
         This function returns the total mass of stars having a certain initial
@@ -6741,7 +6741,7 @@ class chem_evol(object):
     ##############################################
     #               G1 Log Normal                #
     ##############################################
-    def __g1_log_normal(self, mass):
+    def g1_log_normal(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -6762,7 +6762,7 @@ class chem_evol(object):
     ##############################################
     #                G2 Log Normal                #
     ##############################################
-    def __g2_log_normal(self, mass):
+    def g2_log_normal(self, mass):
 
         '''
         This function returns the total mass of stars having a certain initial
@@ -6782,7 +6782,7 @@ class chem_evol(object):
     ##############################################
     #                  G1 Costum                 #
     ##############################################
-    def __g1_costum(self, mass):
+    def g1_costum(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -6803,7 +6803,7 @@ class chem_evol(object):
     ##############################################
     #                  G2 Costum                 #
     ##############################################
-    def __g2_costum(self, mass):
+    def g2_costum(self, mass):
 
         '''
         This function returns the total mass of stars having a certain stellar
@@ -6824,7 +6824,7 @@ class chem_evol(object):
     ##############################################
     #                 G1 Chabrier                #
     ##############################################
-    def __g1_chabrier(self, mass):
+    def g1_chabrier(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -6848,7 +6848,7 @@ class chem_evol(object):
     ##############################################
     #                 G2 Chabrier                #
     ##############################################
-    def __g2_chabrier(self, mass):
+    def g2_chabrier(self, mass):
 
         '''
         This function returns the total mass of stars having a certain stellar
@@ -6871,7 +6871,7 @@ class chem_evol(object):
     ##############################################
     #            G1 Chabrier AlphaIMF            #
     ##############################################
-    def __g1_chabrier_alphaimf(self, mass):
+    def g1_chabrier_alphaimf(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -6895,7 +6895,7 @@ class chem_evol(object):
     ##############################################
     #            G2 Chabrier AlphaIMF            #
     ##############################################
-    def __g2_chabrier_alphaimf(self, mass):
+    def g2_chabrier_alphaimf(self, mass):
 
         '''
         This function returns the total mass of stars having a certain stellar
@@ -6918,7 +6918,7 @@ class chem_evol(object):
     ##############################################
     #            G1 Kroupa93 AlphaIMF            #
     ##############################################
-    def __g1_kroupa93_alphaimf(self, mass):
+    def g1_kroupa93_alphaimf(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -6943,7 +6943,7 @@ class chem_evol(object):
     ##############################################
     #            G2 Kroupa93 AlphaIMF            #
     ##############################################
-    def __g2_kroupa93_alphaimf(self, mass):
+    def g2_kroupa93_alphaimf(self, mass):
 
         '''
         This function returns the total mass of stars having a certain stellar
@@ -6968,7 +6968,7 @@ class chem_evol(object):
     ##############################################
     #                  G1 Kroupa                 #
     ##############################################
-    def __g1_kroupa(self, mass):
+    def g1_kroupa(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -6993,7 +6993,7 @@ class chem_evol(object):
     ##############################################
     #            Integrate G1 Kroupa             #
     ##############################################
-    def __integrate_g1_kroupa(self, mmin, mmax):
+    def integrate_g1_kroupa(self, mmin, mmax):
 
         '''
         This function returns the integration of the Kroupa (2001)
@@ -7035,7 +7035,7 @@ class chem_evol(object):
     ##############################################
     #                  G2 Kroupa                 #
     ##############################################
-    def __g2_kroupa(self, mass):
+    def g2_kroupa(self, mass):
 
         '''
         This function returns the total mass of stars having a certain stellar
@@ -7060,7 +7060,7 @@ class chem_evol(object):
     ##############################################
     #                   G1 FPP                   #
     ##############################################
-    def __g1_fpp(self, mass):
+    def g1_fpp(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -7081,7 +7081,7 @@ class chem_evol(object):
     ##############################################
     #                   G2 FPP                   #
     ##############################################
-    def __g2_fpp(self, mass):
+    def g2_fpp(self, mass):
 
         '''
         This function returns the total mass of stars having a certain stellar
