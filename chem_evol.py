@@ -3224,8 +3224,8 @@ class chem_evol(object):
     ##############################################
     #                  Evol Stars                #
     ##############################################
-    def _evol_stars(self, i, f_esc_yields=0.0, mass_sampled=np.array([]), \
-                    scale_cor=np.array([])):
+    def _evol_stars(self, i, f_esc_yields=0.0, mass_sampled_thresh=-1,\
+                    mass_sampled=np.array([]), scale_cor=np.array([])):
 
         '''
         This function executes a part of a single timestep with the simulation
@@ -3239,6 +3239,8 @@ class chem_evol(object):
           i : Index of the current timestep
           f_esc_yields: Fraction of non-contributing stellar ejecta
           mass_sampled : Stars sampled in the IMF by an external program
+          mass_sampled_thresh : Stellar mass above which the IMF will be sampled
+                                and below which the IMF will be full
           scale_cor : Envelope correction for the IMF
 
         '''
@@ -3286,7 +3288,8 @@ class chem_evol(object):
 
             # Calculate stellar ejecta .. if normal mode
             else:
-                self.__calculate_stellar_ejecta(i, f_esc_yields, mass_sampled, scale_cor)
+                self.__calculate_stellar_ejecta(i, f_esc_yields, \
+                    mass_sampled_thresh, mass_sampled, scale_cor)
 
         # If no star is forming during the current timestep ...
         else:
@@ -3526,8 +3529,8 @@ class chem_evol(object):
     ##############################################
     #          Calculate Stellar Ejecta          #
     ##############################################
-    def __calculate_stellar_ejecta(self, i, f_esc_yields, mass_sampled, \
-                                   scale_cor, dm_imf=0.25):
+    def __calculate_stellar_ejecta(self, i, f_esc_yields, mass_sampled_thresh, \
+                        mass_sampled, scale_cor, dm_imf=0.25):
 
         '''
           For each upcoming timestep, including the current one,
@@ -3602,16 +3605,21 @@ class chem_evol(object):
                         # Go to the next sampled mass
                         i_m_sampled += 1
 
-                # If the IMF is fully sampled ..
+                # If the IMF is (in part) fully sampled ..
                 else:
 
                     # For each IMF mass bin ..
                     for i_imf_bin in range(nb_dm):
 
-                        # Calculate lower, central, and upper masses of this bin
-                        the_m_low = m_lower + i_imf_bin * new_dm_imf
-                        the_m_cen = the_m_low + 0.5 * new_dm_imf
-                        the_m_upp = the_m_low + new_dm_imf
+                      # Calculate lower, central, and upper masses of this bin
+                      the_m_low = m_lower + i_imf_bin * new_dm_imf
+                      the_m_cen = the_m_low + 0.5 * new_dm_imf
+                      the_m_upp = the_m_low + new_dm_imf
+
+                      # Only calculate the full IMF below the threshold
+                      # Which could be set if the IMF is randomly sampled
+                      # for high-mass stars
+                      if the_m_upp <= mass_sampled_thresh:
 
                         # Get the number of stars in that mass bin
                         nb_stars = self.m_locked * the_A_imf *\

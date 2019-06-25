@@ -2089,7 +2089,7 @@ class omega( chem_evol ):
     ##############################################
     #                Run Simulation              #
     ##############################################
-    def __run_simulation(self, mass_sampled=np.array([]), \
+    def __run_simulation(self, mass_sampled_thresh=-1, mass_sampled=np.array([]), \
                          scale_cor=np.array([])):
 
         '''
@@ -2124,7 +2124,7 @@ class omega( chem_evol ):
 
             # Run a timestep using the input SFR
             self.run_step(i, self.sfr_input[i-1], \
-                mass_sampled=mass_sampled, scale_cor=scale_cor)
+                mass_sampled_thresh=mass_sampled_thresh, mass_sampled=mass_sampled, scale_cor=scale_cor)
             
         # Calculate the last SFR at the end point of the simulation
         if self.cl_SF_law and not self.open_box:
@@ -2135,8 +2135,8 @@ class omega( chem_evol ):
     #                   Run Step                 #
     ##############################################
     def run_step(self, i, sfr_rs, m_added = np.array([]), m_lost = 0.0, \
-                 no_in_out = False, f_esc_yields=0.0, mass_sampled=np.array([]),
-                 scale_cor=np.array([])):
+                 no_in_out = False, f_esc_yields=0.0, mass_sampled_thresh=-1,\
+                 mass_sampled=np.array([]), scale_cor=np.array([])):
 
         '''
         This function calculates the evolution of one single step in the

@@ -163,6 +163,7 @@ class sygma( chem_evol ):
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
                  stellar_param_on=False, t_dtd_poly_split=-1.0, \
+                 mass_sampled_thresh=-1,\
                  delayed_extra_yields_log_int=False, \
                  delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
                  stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
@@ -257,6 +258,7 @@ class sygma( chem_evol ):
         self.sfr = sfr
         self.mass_sampled = mass_sampled
         self.scale_cor = scale_cor
+        self.mass_sampled_thresh = mass_sampled_thresh
 
         # Get the SFR of every timestep
         self.sfrin_i = self.__sfr()
@@ -289,7 +291,7 @@ class sygma( chem_evol ):
             self.sfrin = self.sfrin_i[i-1]
 
             # Run the timestep i
-            self._evol_stars(i, 0.0, self.mass_sampled, self.scale_cor)
+            self._evol_stars(i, 0.0, self.mass_sampled_thresh, self.mass_sampled, self.scale_cor)
 
 #            if i == 1:
 #                self.ymgal_radio[i][2] = 1.0
