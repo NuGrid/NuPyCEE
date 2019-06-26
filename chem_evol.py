@@ -3224,7 +3224,7 @@ class chem_evol(object):
     ##############################################
     #                  Evol Stars                #
     ##############################################
-    def _evol_stars(self, i, f_esc_yields=0.0, mass_sampled_thresh=-1,\
+    def _evol_stars(self, i, f_esc_yields=0.0, mass_sampled_thresh=1.0e20,\
                     mass_sampled=np.array([]), scale_cor=np.array([])):
 
         '''
@@ -3529,7 +3529,7 @@ class chem_evol(object):
     ##############################################
     #          Calculate Stellar Ejecta          #
     ##############################################
-    def __calculate_stellar_ejecta(self, i, f_esc_yields, mass_sampled_thresh=-1,\
+    def __calculate_stellar_ejecta(self, i, f_esc_yields, mass_sampled_thresh=1.0e20,\
                     mass_sampled=np.array([]), scale_cor=np.array([]), dm_imf=0.25):
 
         '''
@@ -3590,6 +3590,8 @@ class chem_evol(object):
 
                     # For each sampled mass in that mass bin ..
                     m_upper = m_lower + new_dm_imf*nb_dm
+                    while mass_sampled_sort[i_m_sampled] > m_upper:
+                        i_m_sampled += 1
                     while i_m_sampled < nb_mass_sampled and \
                         mass_sampled_sort[i_m_sampled] >= m_lower and \
                             mass_sampled_sort[i_m_sampled] <= m_upper:
@@ -3606,7 +3608,7 @@ class chem_evol(object):
                         i_m_sampled += 1
 
                 # If the IMF is (in part) fully sampled ..
-                if ((stochastic_IMF and mass_sampled_thresh > 0)) or not stochastic_IMF:
+                if ((stochastic_IMF and mass_sampled_thresh < 1.0e10)) or not stochastic_IMF:
 
                     # For each IMF mass bin ..
                     for i_imf_bin in range(nb_dm):

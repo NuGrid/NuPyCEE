@@ -298,7 +298,7 @@ class omega( chem_evol ):
                  out_follows_E_rate=False, yield_interp='lin',\
                  r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
                  stellar_param_on=False, delayed_extra_log=False,\
-                 delayed_extra_yields_log_int=False, mass_sampled_thresh=-1,\
+                 delayed_extra_yields_log_int=False, mass_sampled_thresh=1.0e20,\
                  delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
                  yield_tables_dir = 'option_not_available_in_this_version', \
                  bhnsmerger_dtd_array=np.array([]), dt_in_SSPs=np.array([]), \
@@ -2089,7 +2089,7 @@ class omega( chem_evol ):
     ##############################################
     #                Run Simulation              #
     ##############################################
-    def __run_simulation(self, mass_sampled_thresh=-1, mass_sampled=np.array([]), \
+    def __run_simulation(self, mass_sampled_thresh=1.0e20, mass_sampled=np.array([]), \
                          scale_cor=np.array([])):
 
         '''
@@ -2135,7 +2135,7 @@ class omega( chem_evol ):
     #                   Run Step                 #
     ##############################################
     def run_step(self, i, sfr_rs, m_added = np.array([]), m_lost = 0.0, \
-                 no_in_out = False, f_esc_yields=0.0, mass_sampled_thresh=-1,\
+                 no_in_out = False, f_esc_yields=0.0, mass_sampled_thresh=1.0e20,\
                  mass_sampled=np.array([]), scale_cor=np.array([])):
 
         '''

@@ -163,7 +163,7 @@ class sygma( chem_evol ):
                  f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
                  stellar_param_on=False, t_dtd_poly_split=-1.0, \
-                 mass_sampled_thresh=-1,\
+                 mass_sampled_thresh=1.0e20,\
                  delayed_extra_yields_log_int=False, \
                  delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
                  stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
