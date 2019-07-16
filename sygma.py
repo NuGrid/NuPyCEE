@@ -86,9 +86,19 @@ For example with artificial yields of only H-1, you can try
 
 '''
 
-# Import the class inherited by SYGMA
-from chem_evol import *
+# Import standard python packages
+import os
+import imp
 
+
+# Define where is the working directory
+# This is where the NuPyCEE code will be extracted
+global_path = './NuPyCEE/'
+
+# Import NuPyCEE codes
+#chem_evol = imp.load_source('chem_evol', global_path+'chem_evol.py')
+#from chem_evol import *
+from NuPyCEE.chem_evol import *
 
 class sygma( chem_evol ):
 
@@ -164,6 +174,8 @@ class sygma( chem_evol ):
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
                  ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([])):
+
+        print('Andres - new sygma')
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \

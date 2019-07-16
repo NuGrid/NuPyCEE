@@ -64,6 +64,7 @@ import random
 import os
 import sys
 import re
+import imp
 from pylab import polyfit
 from scipy.integrate import quad
 from scipy.integrate import dblquad
@@ -71,26 +72,21 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from scipy.interpolate import interp1d
 from mpl_toolkits.mplot3d import Axes3D
-from imp import *
 
 # Variable enabling to work in notebooks
 global notebookmode
 notebookmode=True
 
-# Set the working space to the current directory
-global global_path
-try:
-    if os.environ['SYGMADIR']:
-        global_path = os.environ['SYGMADIR']
-except KeyError:
-    global_path=os.getcwd()
-global_path=global_path+'/'
+# Define where is the working directory
+global_path = './NuPyCEE/'
 
-# Import the class that reads the input yield tables
-import read_yields as ry
+# Import NuPyCEE codes
+import NuPyCEE.read_yields as ry
 
 # Import the decay module for radioactive isotopes
-import decay_module
+#decay_module = imp.load_source('decay_module', global_path+'decay_module.so')
+#import decay_module
+import NuPyCEE.decay_module as decay_module
 
 
 class chem_evol(object):
@@ -509,6 +505,8 @@ class chem_evol(object):
              ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
              test_clayton=np.array([])):
 
+        print('Andres - new chem evol')
+
         # Initialize the history class which keeps the simulation in memory
         self.history = self.__history()
         self.const = self.__const()
@@ -760,17 +758,6 @@ class chem_evol(object):
 
                 # Interpolate the radioactive yields tables
                 self.__interpolate_massive_and_agb_yields(is_radio=True)
-
-        # If SSPs needs to be pre-calculated ..
-        if self.pre_calculate_SSPs:
-
-            # Calculate all SSPs
-            self.__run_all_ssps()
-
-            # Create the arrays that will contain the interpolated isotopes
-            self.ej_SSP_int = np.zeros((self.nb_steps_table,self.nb_isotopes))
-            if self.len_decay_file > 0:
-                self.ej_SSP_int_radio = np.zeros((self.nb_steps_table,self.nb_radio_iso))
 
         # Initialisation of the composition of the gas reservoir
         ymgal = self._get_iniabu()
@@ -1501,7 +1488,7 @@ class chem_evol(object):
 
         # Radioactive isotopes (non-zero metallicity)
         # ===========================================
-        if self.len_decay_file > 0:
+        if self.len_decay_file > 0 and len(self.table_radio) > 0:
         
             # Declare the array containing the coefficients for
             # the yields interpolation between masses (a_M, b_M)
@@ -3479,18 +3466,18 @@ class chem_evol(object):
             #self.history.age.append(self.t)
             self.history.gas_mass.append(sum(self.ymgal[i]))
             self.history.ism_iso_yield.append(self.ymgal[i])
-            self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
-            self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
-            self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
-            self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
-            self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
+#            self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
+#            self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
+#            self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
+#            self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
+#            self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
             self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
             self.history.nsm_numbers.append(self.nsm_numbers[i-1])
             self.history.bhnsm_numbers.append(self.bhnsm_numbers[i-1])
             self.history.sn2_numbers.append(self.sn2_numbers[i-1])
             self.history.m_locked.append(self.m_locked)
-            self.history.m_locked_agb.append(self.m_locked_agb)
-            self.history.m_locked_massive.append(self.m_locked_massive)
+#            self.history.m_locked_agb.append(self.m_locked_agb)
+#            self.history.m_locked_massive.append(self.m_locked_massive)
 
 
     ##############################################
@@ -3518,16 +3505,16 @@ class chem_evol(object):
           for h in range(len(self.history.ism_iso_yield)):
             self.history.ism_elem_yield.append(\
                 self._iso_abu_to_elem(self.history.ism_iso_yield[h]))
-            self.history.ism_elem_yield_agb.append(\
-                self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h]))
-            self.history.ism_elem_yield_1a.append(\
-                self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h]))
-            self.history.ism_elem_yield_nsm.append(\
-                self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h]))
-            self.history.ism_elem_yield_bhnsm.append(\
-                self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h]))
-            self.history.ism_elem_yield_massive.append(\
-                self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h]))
+#            self.history.ism_elem_yield_agb.append(\
+#                self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h]))
+#            self.history.ism_elem_yield_1a.append(\
+#                self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h]))
+#            self.history.ism_elem_yield_nsm.append(\
+#                self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h]))
+#            self.history.ism_elem_yield_bhnsm.append(\
+#                self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h]))
+#            self.history.ism_elem_yield_massive.append(\
+#                self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h]))
 
 
 
@@ -3637,7 +3624,7 @@ class chem_evol(object):
                         self.__add_yields_in_mdot(nb_stars, the_yields, the_m_cen, i_cse, i)
 
                         # If there are radioactive isotopes
-                        if self.len_decay_file > 0:
+                        if self.len_decay_file > 0 and len(self.table_radio) > 0:
 
                             # Get the yields for the central stellar mass
                             the_yields = self.get_interp_yields(the_m_cen, \
@@ -7341,218 +7328,6 @@ class chem_evol(object):
 
         out = 'Run time: '+str(round((t_module.time() - self.start_time),2))+"s"
         return out
-
-
-    ##############################################
-    #                Run All SSPs                #
-    ##############################################
-    def __run_all_ssps(self):
-
-        '''
-        Create a SSP with SYGMA for each metallicity available in the yield tables.
-        Each SSP has a total mass of 1 Msun, is it can easily be re-normalized.
-
-        '''
-
-        # Copy the metallicities and put them in increasing order
-        self.Z_table_SSP = copy.deepcopy(self.ytables.metallicities)
-        self.Z_table_first_nzero = min(self.Z_table_SSP)
-        if self.popIII_info_fast and self.iniZ <= 0.0 and self.Z_trans > 0.0:
-            self.Z_table_SSP.append(0.0)
-        self.Z_table_SSP = sorted(self.Z_table_SSP)
-        self.nb_Z_table_SSP = len(self.Z_table_SSP)
-
-        # If the SSPs are not given as an input ..
-        if len(self.SSPs_in) == 0:
-
-          import sygma
-
-          # Define the SSP timesteps
-          len_dt_SSPs = len(self.dt_in_SSPs)
-          if len_dt_SSPs == 0:
-              dt_in_ras = self.history.timesteps
-              len_dt_SSPs = self.nb_timesteps
-          else:
-              dt_in_ras = self.dt_in_SSPs
-
-          # Declare the SSP ejecta arrays [Z][dt][iso]
-          self.ej_SSP = np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_isotopes))
-          if self.len_decay_file > 0:
-              self.ej_SSP_radio = \
-                  np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_radio_iso))
-
-          # For each metallicity ...
-          for i_ras in range(0,self.nb_Z_table_SSP):
-
-              # Use a dummy iniabu file if the metallicity is not zero
-              if self.Z_table_SSP[i_ras] == 0:
-                  iniabu_t = ''
-                  hardsetZ2 = self.hardsetZ
-              else:
-                  iniabu_t='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
-                  hardsetZ2 = self.Z_table_SSP[i_ras]
-
-              # Run a SYGMA simulation (1 Msun SSP)
-              sygma_inst = sygma.sygma(pre_calculate_SSPs=False, \
-                 imf_type=self.imf_type, alphaimf=self.alphaimf, \
-                 imf_bdys=self.history.imf_bdys, sn1a_rate=self.history.sn1a_rate, \
-                 iniZ=self.Z_table_SSP[i_ras], dt=self.history.dt, \
-                 special_timesteps=self.special_timesteps, \
-                 nsmerger_bdys=self.nsmerger_bdys, tend=self.history.tend, \
-                 mgal=1.0, transitionmass=self.transitionmass, \
-                 table=self.table, hardsetZ=hardsetZ2, \
-                 sn1a_on=self.sn1a_on, sn1a_table=self.sn1a_table, \
-                 sn1a_energy=self.sn1a_energy, ns_merger_on=self.ns_merger_on, \
-                 bhns_merger_on=self.bhns_merger_on, f_binary=self.f_binary, \
-                 f_merger=self.f_merger, t_merger_max=self.t_merger_max, \
-                 m_ej_nsm=self.m_ej_nsm, nsm_dtd_power=self.nsm_dtd_power,\
-                 m_ej_bhnsm=self.m_ej_bhnsm, bhnsmerger_table=self.bhnsmerger_table, \
-                 nsmerger_table=self.nsmerger_table, iniabu_table=iniabu_t, \
-                 extra_source_on=self.extra_source_on, nb_nsm_per_m=self.nb_nsm_per_m, \
-                 t_nsm_coal=self.t_nsm_coal, extra_source_table=self.extra_source_table, \
-                 f_extra_source=self.f_extra_source, \
-                 extra_source_mass_range=self.extra_source_mass_range, \
-                 extra_source_exclude_Z=self.extra_source_exclude_Z, \
-                 pop3_table=self.pop3_table, imf_bdys_pop3=self.imf_bdys_pop3, \
-                 imf_yields_range_pop3=self.imf_yields_range_pop3, \
-                 starbursts=self.starbursts, beta_pow=self.beta_pow, \
-                 gauss_dtd=self.gauss_dtd, exp_dtd=self.exp_dtd, \
-                 nb_1a_per_m=self.nb_1a_per_m, direct_norm_1a=self.direct_norm_1a, \
-                 imf_yields_range=self.imf_yields_range, \
-                 exclude_masses=self.exclude_masses, netyields_on=self.netyields_on, \
-                 wiersmamod=self.wiersmamod, yield_interp=self.yield_interp, \
-                 stellar_param_on=self.stellar_param_on, \
-                 t_dtd_poly_split=self.t_dtd_poly_split, \
-                 stellar_param_table=self.stellar_param_table, \
-                 tau_ferrini=self.tau_ferrini, delayed_extra_log=self.delayed_extra_log, \
-                 dt_in=dt_in_ras, nsmerger_dtd_array=self.nsmerger_dtd_array, \
-                 bhnsmerger_dtd_array=self.bhnsmerger_dtd_array, \
-                 poly_fit_dtd_5th=self.poly_fit_dtd_5th, \
-                 poly_fit_range=self.poly_fit_range, \
-                 delayed_extra_dtd=self.delayed_extra_dtd, \
-                 delayed_extra_dtd_norm=self.delayed_extra_dtd_norm, \
-                 delayed_extra_yields=self.delayed_extra_yields, \
-                 delayed_extra_yields_norm=self.delayed_extra_yields_norm, \
-                 table_radio=self.table_radio, decay_file=self.decay_file, \
-                 sn1a_table_radio=self.sn1a_table_radio, \
-                 bhnsmerger_table_radio=self.bhnsmerger_table_radio, \
-                 nsmerger_table_radio=self.nsmerger_table_radio, \
-                 delayed_extra_log_radio=self.delayed_extra_log_radio, \
-                 delayed_extra_yields_log_int_radio=self.delayed_extra_yields_log_int_radio, \
-                 ism_ini_radio=self.ism_ini_radio, \
-                 delayed_extra_dtd_radio=self.delayed_extra_dtd_radio, \
-                 delayed_extra_dtd_norm_radio=self.delayed_extra_dtd_norm_radio, \
-                 delayed_extra_yields_radio=self.delayed_extra_yields_radio, \
-                 delayed_extra_yields_norm_radio=self.delayed_extra_yields_norm_radio, \
-                 ytables_radio_in=self.ytables_radio_in, radio_iso_in=self.radio_iso_in, \
-                 ytables_1a_radio_in=self.ytables_1a_radio_in, \
-                 ytables_nsmerger_radio_in=self.ytables_nsmerger_radio_in)
-
-              # Copy the ejecta arrays from the SYGMA simulation
-              self.ej_SSP[i_ras] = sygma_inst.mdot
-              if self.len_decay_file > 0:
-                  self.ej_SSP_radio[i_ras] = sygma_inst.mdot_radio
-
-              # If this is the last Z entry ..
-              if i_ras == self.nb_Z_table_SSP - 1:
-
-                  # Keep in memory the number of timesteps in SYGMA
-                  self.nb_steps_table = len(sygma_inst.history.timesteps)
-                  self.dt_ssp = sygma_inst.history.timesteps
-
-                  # Keep the time of ssp in memory
-                  self.t_ssp = np.zeros(self.nb_steps_table)
-                  self.t_ssp[0] = self.dt_ssp[0]
-                  for i_ras in range(1,self.nb_steps_table):
-                      self.t_ssp[i_ras] = self.t_ssp[i_ras-1] + self.dt_ssp[i_ras]
-
-              # Clear the memory
-              del sygma_inst
-
-          # Calculate the interpolation coefficients (between metallicities)
-          self.__calculate_int_coef()
-
-        # If the SSPs are given as an input ..
-        else:
-
-            # Copy the SSPs
-            self.ej_SSP = self.SSPs_in[0]
-            self.nb_steps_table = len(self.ej_SSP[0])
-            self.ej_SSP_coef = self.SSPs_in[1]
-            self.dt_ssp = self.SSPs_in[2]
-            self.t_ssp = self.SSPs_in[3]
-            if len(self.SSPs_in) > 4:
-                self.ej_SSP_radio = self.SSPs_in[4]
-                self.ej_SSP_coef_radio = self.SSPs_in[5]
-                self.decay_info = self.SSPs_in[6]
-                self.len_decay_file = self.SSPs_in[7]
-                self.nb_radio_iso = len(self.decay_info)
-                self.nb_new_radio_iso = len(self.decay_info)
-            del self.SSPs_in
-
-
-    ##############################################
-    #            Calculate Int. Coef.            #
-    ##############################################
-    def __calculate_int_coef(self):
-
-        '''
-        Calculate the interpolation coefficients of each isotope between the
-        different metallicities for every timestep considered in the SYGMA
-        simulations.  ejecta = a * log(Z) + b
-
-        self.ej_x[Z][step][isotope][0 -> a, 1 -> b], where the Z index refers
-        to the lower metallicity boundary of the interpolation.
-
-        '''
-
-        # Declare the interpolation coefficients arrays
-        self.ej_SSP_coef = \
-            np.zeros((2,self.nb_Z_table_SSP,self.nb_steps_table,self.nb_isotopes))
-        if self.len_decay_file > 0:
-            self.ej_SSP_coef_radio = \
-                np.zeros((2,self.nb_Z_table_SSP,self.nb_steps_table,self.nb_radio_iso))
-
-        # For each metallicity interval ...
-        for i_cic in range(0,self.nb_Z_table_SSP-1):
-
-          # If the metallicity is not zero ...
-          if not self.Z_table_SSP[i_cic] == 0.0:
-
-            # Calculate the log(Z) for the boundary metallicities
-            logZ_low = np.log10(self.Z_table_SSP[i_cic])
-            logZ_up = np.log10(self.Z_table_SSP[i_cic+1])
-            dif_logZ_inv = 1.0 / (logZ_up - logZ_low)
-
-            # For each step ...
-            for j_cic in range(0,self.nb_steps_table):
-
-              # For every stable isotope ..
-              for k_cic in range(0,self.nb_isotopes):
-
-                # Copy the isotope mass for the boundary metallicities
-                iso_low = self.ej_SSP[i_cic][j_cic][k_cic]
-                iso_up = self.ej_SSP[i_cic+1][j_cic][k_cic]
-               
-                # Calculate the "a" and "b" coefficients
-                self.ej_SSP_coef[0][i_cic][j_cic][k_cic] = \
-                    (iso_up - iso_low) * dif_logZ_inv
-                self.ej_SSP_coef[1][i_cic][j_cic][k_cic] = iso_up - \
-                    self.ej_SSP_coef[0][i_cic][j_cic][k_cic] * logZ_up
-
-              # For every radioactive isotope ..
-              if self.len_decay_file > 0:
-                for k_cic in range(0,self.nb_radio_iso):
-
-                    # Copy the isotope mass for the boundary metallicities
-                    iso_low = self.ej_SSP_radio[i_cic][j_cic][k_cic]
-                    iso_up = self.ej_SSP_radio[i_cic+1][j_cic][k_cic]
-               
-                    # Calculate the "a" and "b" coefficients
-                    self.ej_SSP_coef_radio[0][i_cic][j_cic][k_cic] = \
-                        (iso_up - iso_low) * dif_logZ_inv
-                    self.ej_SSP_coef_radio[1][i_cic][j_cic][k_cic] = iso_up - \
-                        self.ej_SSP_coef_radio[0][i_cic][j_cic][k_cic] * logZ_up
 
 
     ##############################################

@@ -80,15 +80,22 @@ Analysis functions: See the Sphinx documentation
 
 '''
 
-#standard packages
+# Standard packages
 import copy
 import math
 import random
+import os
+import imp
 
-# Import the class inherited by SYGMA
-import sygma
-from chem_evol import *
+# Define where is the working directory
+# This is where the NuPyCEE code will be extracted
+global_path = './NuPyCEE/'
 
+# Import NuPyCEE codes
+#sygma = imp.load_source('sygma', global_path+'sygma.py')
+#chem_evol = imp.load_source('chem_evol', global_path+'chem_evol.py')
+import NuPyCEE.sygma as sygma
+from NuPyCEE.chem_evol import *
 
 class omega( chem_evol ):
 
@@ -327,6 +334,8 @@ class omega( chem_evol ):
         (filename,line_number,function_name,text)=traceback.extract_stack()[-2]
         self.inst_name = text[:text.find('=')].strip()
 
+        print('Andres - new omega')
+
         # Announce the beginning of the simulation 
         print ('OMEGA run in progress..')
         start_time = t_module.time()
@@ -352,7 +361,7 @@ class omega( chem_evol ):
                  extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
                  extra_source_mass_range=extra_source_mass_range, \
                  extra_source_exclude_Z=extra_source_exclude_Z,\
-                 pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
+                 pop3_table=pop3_table, \
                  imf_bdys_pop3=imf_bdys_pop3, \
                  imf_pop3_char_mass=imf_pop3_char_mass, \
                  total_ejecta_interp=total_ejecta_interp, \
@@ -366,7 +375,7 @@ class omega( chem_evol ):
                  tau_ferrini=tau_ferrini, t_dtd_poly_split=t_dtd_poly_split, \
                  t_merge=t_merge,popIII_info_fast=popIII_info_fast,\
                  out_follows_E_rate=out_follows_E_rate,\
-                 stellar_param_on=stellar_param_on,\
+                 stellar_param_on=stellar_param_on, pre_calculate_SSPs=pre_calculate_SSPs,\
                  use_external_integration=use_external_integration,\
                  ism_ini=ism_ini,ytables_in=ytables_in,\
                  delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
@@ -466,6 +475,18 @@ class omega( chem_evol ):
         self.len_m_gas_array = len(m_gas_array)
         self.beta_crit = beta_crit
         self.r_vir_array = r_vir_array
+        self.pre_calculate_SSPs = pre_calculate_SSPs
+
+        # If SSPs needs to be pre-calculated ..
+        if self.pre_calculate_SSPs:
+
+            # Calculate all SSPs
+            self.__run_all_ssps()
+
+            # Create the arrays that will contain the interpolated isotopes
+            self.ej_SSP_int = np.zeros((self.nb_steps_table,self.nb_isotopes))
+            if self.len_decay_file > 0:
+                self.ej_SSP_int_radio = np.zeros((self.nb_steps_table,self.nb_radio_iso))
 
         # If the IMF will randomly be sampled ...
         if self.imf_rnd_sampling:
@@ -1493,6 +1514,212 @@ class omega( chem_evol ):
 
 
     ##############################################
+    #                Run All SSPs                #
+    ##############################################
+    def __run_all_ssps(self):
+
+        '''
+        Create a SSP with SYGMA for each metallicity available in the yield tables.
+        Each SSP has a total mass of 1 Msun, is it can easily be re-normalized.
+
+        '''
+
+        # Copy the metallicities and put them in increasing order
+        self.Z_table_SSP = copy.deepcopy(self.ytables.metallicities)
+        self.Z_table_first_nzero = min(self.Z_table_SSP)
+        if self.popIII_info_fast and self.iniZ <= 0.0 and self.Z_trans > 0.0:
+            self.Z_table_SSP.append(0.0)
+        self.Z_table_SSP = sorted(self.Z_table_SSP)
+        self.nb_Z_table_SSP = len(self.Z_table_SSP)
+
+        # If the SSPs are not given as an input ..
+        if len(self.SSPs_in) == 0:
+
+          # Define the SSP timesteps
+          len_dt_SSPs = len(self.dt_in_SSPs)
+          if len_dt_SSPs == 0:
+              dt_in_ras = self.history.timesteps
+              len_dt_SSPs = self.nb_timesteps
+          else:
+              dt_in_ras = self.dt_in_SSPs
+
+          # Declare the SSP ejecta arrays [Z][dt][iso]
+          self.ej_SSP = np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_isotopes))
+          if self.len_decay_file > 0:
+              self.ej_SSP_radio = \
+                  np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_radio_iso))
+
+          # For each metallicity ...
+          for i_ras in range(0,self.nb_Z_table_SSP):
+
+              # Use a dummy iniabu file if the metallicity is not zero
+              if self.Z_table_SSP[i_ras] == 0:
+                  iniabu_t = ''
+                  hardsetZ2 = self.hardsetZ
+              else:
+                  iniabu_t='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+                  hardsetZ2 = self.Z_table_SSP[i_ras]
+
+              # Run a SYGMA simulation (1 Msun SSP)
+              sygma_inst = sygma.sygma(pre_calculate_SSPs=False, \
+                 imf_type=self.imf_type, alphaimf=self.alphaimf, \
+                 imf_bdys=self.history.imf_bdys, sn1a_rate=self.history.sn1a_rate, \
+                 iniZ=self.Z_table_SSP[i_ras], dt=self.history.dt, \
+                 special_timesteps=self.special_timesteps, \
+                 nsmerger_bdys=self.nsmerger_bdys, tend=self.history.tend, \
+                 mgal=1.0, transitionmass=self.transitionmass, \
+                 table=self.table, hardsetZ=hardsetZ2, \
+                 sn1a_on=self.sn1a_on, sn1a_table=self.sn1a_table, \
+                 sn1a_energy=self.sn1a_energy, ns_merger_on=self.ns_merger_on, \
+                 bhns_merger_on=self.bhns_merger_on, f_binary=self.f_binary, \
+                 f_merger=self.f_merger, t_merger_max=self.t_merger_max, \
+                 m_ej_nsm=self.m_ej_nsm, nsm_dtd_power=self.nsm_dtd_power,\
+                 m_ej_bhnsm=self.m_ej_bhnsm, bhnsmerger_table=self.bhnsmerger_table, \
+                 nsmerger_table=self.nsmerger_table, iniabu_table=iniabu_t, \
+                 extra_source_on=self.extra_source_on, nb_nsm_per_m=self.nb_nsm_per_m, \
+                 t_nsm_coal=self.t_nsm_coal, extra_source_table=self.extra_source_table, \
+                 f_extra_source=self.f_extra_source, \
+                 extra_source_mass_range=self.extra_source_mass_range, \
+                 extra_source_exclude_Z=self.extra_source_exclude_Z, \
+                 pop3_table=self.pop3_table, imf_bdys_pop3=self.imf_bdys_pop3, \
+                 imf_yields_range_pop3=self.imf_yields_range_pop3, \
+                 starbursts=self.starbursts, beta_pow=self.beta_pow, \
+                 gauss_dtd=self.gauss_dtd, exp_dtd=self.exp_dtd, \
+                 nb_1a_per_m=self.nb_1a_per_m, direct_norm_1a=self.direct_norm_1a, \
+                 imf_yields_range=self.imf_yields_range, \
+                 exclude_masses=self.exclude_masses, netyields_on=self.netyields_on, \
+                 wiersmamod=self.wiersmamod, yield_interp=self.yield_interp, \
+                 stellar_param_on=self.stellar_param_on, \
+                 t_dtd_poly_split=self.t_dtd_poly_split, \
+                 stellar_param_table=self.stellar_param_table, \
+                 tau_ferrini=self.tau_ferrini, delayed_extra_log=self.delayed_extra_log, \
+                 dt_in=dt_in_ras, nsmerger_dtd_array=self.nsmerger_dtd_array, \
+                 bhnsmerger_dtd_array=self.bhnsmerger_dtd_array, \
+                 poly_fit_dtd_5th=self.poly_fit_dtd_5th, \
+                 poly_fit_range=self.poly_fit_range, \
+                 delayed_extra_dtd=self.delayed_extra_dtd, \
+                 delayed_extra_dtd_norm=self.delayed_extra_dtd_norm, \
+                 delayed_extra_yields=self.delayed_extra_yields, \
+                 delayed_extra_yields_norm=self.delayed_extra_yields_norm, \
+                 table_radio=self.table_radio, decay_file=self.decay_file, \
+                 sn1a_table_radio=self.sn1a_table_radio, \
+                 bhnsmerger_table_radio=self.bhnsmerger_table_radio, \
+                 nsmerger_table_radio=self.nsmerger_table_radio, \
+                 ism_ini_radio=self.ism_ini_radio, \
+                 delayed_extra_yields_radio=self.delayed_extra_yields_radio, \
+                 delayed_extra_yields_norm_radio=self.delayed_extra_yields_norm_radio, \
+                 ytables_radio_in=self.ytables_radio_in, radio_iso_in=self.radio_iso_in, \
+                 ytables_1a_radio_in=self.ytables_1a_radio_in, \
+                 ytables_nsmerger_radio_in=self.ytables_nsmerger_radio_in)
+
+              # Copy the ejecta arrays from the SYGMA simulation
+              self.ej_SSP[i_ras] = sygma_inst.mdot
+              if self.len_decay_file > 0:
+                  self.ej_SSP_radio[i_ras] = sygma_inst.mdot_radio
+
+              # If this is the last Z entry ..
+              if i_ras == self.nb_Z_table_SSP - 1:
+
+                  # Keep in memory the number of timesteps in SYGMA
+                  self.nb_steps_table = len(sygma_inst.history.timesteps)
+                  self.dt_ssp = sygma_inst.history.timesteps
+
+                  # Keep the time of ssp in memory
+                  self.t_ssp = np.zeros(self.nb_steps_table)
+                  self.t_ssp[0] = self.dt_ssp[0]
+                  for i_ras in range(1,self.nb_steps_table):
+                      self.t_ssp[i_ras] = self.t_ssp[i_ras-1] + self.dt_ssp[i_ras]
+
+              # Clear the memory
+              del sygma_inst
+
+          # Calculate the interpolation coefficients (between metallicities)
+          self.__calculate_int_coef()
+
+        # If the SSPs are given as an input ..
+        else:
+
+            # Copy the SSPs
+            self.ej_SSP = self.SSPs_in[0]
+            self.nb_steps_table = len(self.ej_SSP[0])
+            self.ej_SSP_coef = self.SSPs_in[1]
+            self.dt_ssp = self.SSPs_in[2]
+            self.t_ssp = self.SSPs_in[3]
+            if len(self.SSPs_in) > 4:
+                self.ej_SSP_radio = self.SSPs_in[4]
+                self.ej_SSP_coef_radio = self.SSPs_in[5]
+                self.decay_info = self.SSPs_in[6]
+                self.len_decay_file = self.SSPs_in[7]
+                self.nb_radio_iso = len(self.decay_info)
+                self.nb_new_radio_iso = len(self.decay_info)
+            del self.SSPs_in
+
+
+    ##############################################
+    #            Calculate Int. Coef.            #
+    ##############################################
+    def __calculate_int_coef(self):
+
+        '''
+        Calculate the interpolation coefficients of each isotope between the
+        different metallicities for every timestep considered in the SYGMA
+        simulations.  ejecta = a * log(Z) + b
+
+        self.ej_x[Z][step][isotope][0 -> a, 1 -> b], where the Z index refers
+        to the lower metallicity boundary of the interpolation.
+
+        '''
+
+        # Declare the interpolation coefficients arrays
+        self.ej_SSP_coef = \
+            np.zeros((2,self.nb_Z_table_SSP,self.nb_steps_table,self.nb_isotopes))
+        if self.len_decay_file > 0:
+            self.ej_SSP_coef_radio = \
+                np.zeros((2,self.nb_Z_table_SSP,self.nb_steps_table,self.nb_radio_iso))
+
+        # For each metallicity interval ...
+        for i_cic in range(0,self.nb_Z_table_SSP-1):
+
+          # If the metallicity is not zero ...
+          if not self.Z_table_SSP[i_cic] == 0.0:
+
+            # Calculate the log(Z) for the boundary metallicities
+            logZ_low = np.log10(self.Z_table_SSP[i_cic])
+            logZ_up = np.log10(self.Z_table_SSP[i_cic+1])
+            dif_logZ_inv = 1.0 / (logZ_up - logZ_low)
+
+            # For each step ...
+            for j_cic in range(0,self.nb_steps_table):
+
+              # For every stable isotope ..
+              for k_cic in range(0,self.nb_isotopes):
+
+                # Copy the isotope mass for the boundary metallicities
+                iso_low = self.ej_SSP[i_cic][j_cic][k_cic]
+                iso_up = self.ej_SSP[i_cic+1][j_cic][k_cic]
+               
+                # Calculate the "a" and "b" coefficients
+                self.ej_SSP_coef[0][i_cic][j_cic][k_cic] = \
+                    (iso_up - iso_low) * dif_logZ_inv 
+                self.ej_SSP_coef[1][i_cic][j_cic][k_cic] = iso_up - \
+                    self.ej_SSP_coef[0][i_cic][j_cic][k_cic] * logZ_up
+
+              # For every radioactive isotope ..
+              if self.len_decay_file > 0:
+                for k_cic in range(0,self.nb_radio_iso):
+
+                    # Copy the isotope mass for the boundary metallicities
+                    iso_low = self.ej_SSP_radio[i_cic][j_cic][k_cic]
+                    iso_up = self.ej_SSP_radio[i_cic+1][j_cic][k_cic]
+               
+                    # Calculate the "a" and "b" coefficients
+                    self.ej_SSP_coef_radio[0][i_cic][j_cic][k_cic] = \
+                        (iso_up - iso_low) * dif_logZ_inv 
+                    self.ej_SSP_coef_radio[1][i_cic][j_cic][k_cic] = iso_up - \
+                        self.ej_SSP_coef_radio[0][i_cic][j_cic][k_cic] * logZ_up
+
+
+    ##############################################
     #              Calculate M_DM(t)             #
     ##############################################
     def __calculate_m_DM_t(self):
@@ -2405,13 +2632,8 @@ class omega( chem_evol ):
                     self._update_history_final()
 
                     # Add the evolution arrays to the history class
-                    self.history.m_DM_t = self.m_DM_t
                     self.history.m_tot_ISM_t = self.m_tot_ISM_t
-                    self.history.m_outflow_t = self.m_outflow_t
-                    self.history.m_inflow_t = self.m_inflow_t
                     self.history.eta_outflow_t = self.eta_outflow_t
-                    self.history.t_SF_t = self.t_SF_t
-                    self.history.redshift_t = self.redshift_t
 
                     # If external control ...
                     if self.external_control:
@@ -4014,7 +4236,7 @@ class omega( chem_evol ):
             age = self.history.age[:-1]
             outflow_plot = []
             for i_op in range(0,len(age)):
-                outflow_plot.append(self.history.m_outflow_t[i_op] / \
+                outflow_plot.append(self.m_outflow_t[i_op] / \
                     self.history.timesteps[i_op])
             outflow_plot[0] = 0.0
 
