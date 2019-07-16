@@ -327,7 +327,22 @@ class omega( chem_evol ):
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
                  ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
-                 test_clayton=np.array([])):
+                 test_clayton=np.array([]), inter_Z_points=np.array([]),\
+                 nb_inter_Z_points=np.array([]), y_coef_M=np.array([]),\
+                 y_coef_M_ej=np.array([]), y_coef_Z_aM=np.array([]),\
+                 y_coef_Z_bM=np.array([]), y_coef_Z_bM_ej=np.array([]),\
+                 tau_coef_M=np.array([]), tau_coef_M_inv=np.array([]),\
+                 tau_coef_Z_aM=np.array([]), tau_coef_Z_bM=np.array([]),\
+                 tau_coef_Z_aM_inv=np.array([]), tau_coef_Z_bM_inv=np.array([]),\
+                 y_coef_M_pop3=np.array([]), y_coef_M_ej_pop3=np.array([]),\
+                 tau_coef_M_pop3=np.array([]), tau_coef_M_pop3_inv=np.array([]),\
+                 inter_lifetime_points_pop3=np.array([]),\
+                 inter_lifetime_points_pop3_tree=np.array([]),\
+                 nb_inter_lifetime_points_pop3=np.array([]),\
+                 inter_lifetime_points=np.array([]), inter_lifetime_points_tree=np.array([]),\
+                 nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
+                 inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
+                 inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([])):
 
         # Get the name of the instance
         import traceback
@@ -409,7 +424,26 @@ class omega( chem_evol ):
                  test_clayton=test_clayton, radio_refinement=radio_refinement,\
                  use_decay_module=use_decay_module,\
                  f_network=f_network, f_format=f_format,\
-                 high_mass_extrapolation=high_mass_extrapolation)
+                 high_mass_extrapolation=high_mass_extrapolation,\
+                 inter_Z_points=inter_Z_points,\
+                 nb_inter_Z_points=nb_inter_Z_points, y_coef_M=y_coef_M,\
+                 y_coef_M_ej=y_coef_M_ej, y_coef_Z_aM=y_coef_Z_aM,\
+                 y_coef_Z_bM=y_coef_Z_bM, y_coef_Z_bM_ej=y_coef_Z_bM_ej,\
+                 tau_coef_M=tau_coef_M, tau_coef_M_inv=tau_coef_M_inv,\
+                 tau_coef_Z_aM=tau_coef_Z_aM, tau_coef_Z_bM=tau_coef_Z_bM,\
+                 tau_coef_Z_aM_inv=tau_coef_Z_aM_inv, tau_coef_Z_bM_inv=tau_coef_Z_bM_inv,\
+                 y_coef_M_pop3=y_coef_M_pop3, y_coef_M_ej_pop3=y_coef_M_ej_pop3,\
+                 tau_coef_M_pop3=tau_coef_M_pop3, tau_coef_M_pop3_inv=tau_coef_M_pop3_inv,\
+                 inter_lifetime_points_pop3=inter_lifetime_points_pop3,\
+                 inter_lifetime_points_pop3_tree=inter_lifetime_points_pop3_tree,\
+                 nb_inter_lifetime_points_pop3=nb_inter_lifetime_points_pop3,\
+                 inter_lifetime_points=inter_lifetime_points,\
+                 inter_lifetime_points_tree=inter_lifetime_points_tree,\
+                 nb_inter_lifetime_points=nb_inter_lifetime_points,\
+                 nb_inter_M_points_pop3=nb_inter_M_points_pop3,\
+                 inter_M_points_pop3_tree=inter_M_points_pop3_tree,\
+                 nb_inter_M_points=nb_inter_M_points, inter_M_points=inter_M_points,\
+                 y_coef_Z_aM_ej=y_coef_Z_aM_ej)
 
         # Quit if something bad happened in chem_evol ..
         if self.need_to_quit:
@@ -4401,7 +4435,7 @@ class omega( chem_evol ):
 
             #Copy data for x and y axis
             age = self.history.age
-            DM_plot = self.history.m_DM_t
+            DM_plot = self.m_DM_t
 
             #Plot data
             plt.plot(age,DM_plot,label=label,marker=marker,\

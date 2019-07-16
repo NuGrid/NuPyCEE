@@ -503,7 +503,22 @@ class chem_evol(object):
              delayed_extra_stochastic=np.array([]), \
              ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
              ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
-             test_clayton=np.array([])):
+             test_clayton=np.array([]), inter_Z_points=np.array([]),\
+             nb_inter_Z_points=np.array([]), y_coef_M=np.array([]),\
+             y_coef_M_ej=np.array([]), y_coef_Z_aM=np.array([]),\
+             y_coef_Z_bM=np.array([]), y_coef_Z_bM_ej=np.array([]),\
+             tau_coef_M=np.array([]), tau_coef_M_inv=np.array([]),\
+             tau_coef_Z_aM=np.array([]), tau_coef_Z_bM=np.array([]),\
+             tau_coef_Z_aM_inv=np.array([]), tau_coef_Z_bM_inv=np.array([]),\
+             y_coef_M_pop3=np.array([]), y_coef_M_ej_pop3=np.array([]),\
+             tau_coef_M_pop3=np.array([]), tau_coef_M_pop3_inv=np.array([]),\
+             inter_lifetime_points_pop3=np.array([]),\
+             inter_lifetime_points_pop3_tree=np.array([]),\
+             nb_inter_lifetime_points_pop3=np.array([]),\
+             inter_lifetime_points=np.array([]), inter_lifetime_points_tree=np.array([]),\
+             nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
+             inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
+             inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([])):
 
         print('Andres - new chem evol')
 
@@ -703,40 +718,67 @@ class chem_evol(object):
                 self.t_ce[i_init] = self.t_ce[i_init-1] + \
                     self.history.timesteps[i_init]
 
-        # Define the decay properties and read radioactive tables
+        # Define the decay properties
         if self.len_decay_file > 0:
             self.__define_decay_info()
-            self.__read_radio_tables()
 
         # If the yield tables have already been read previously ...
         if input_yields:
 
             # Assign the input yields and lifetimes
-            self.ytables = ytables_in
-            self.zm_lifetime_grid_nugrid = zm_lifetime_grid_nugrid_in
             self.history.isotopes = isotopes_in
             self.nb_isotopes = len(self.history.isotopes)
-            self.ytables_pop3 = ytables_pop3_in
-            self.zm_lifetime_grid_pop3 = zm_lifetime_grid_pop3_in
+            self.ytables = ytables_in
             self.ytables_1a = ytables_1a_in
             self.ytables_nsmerger = ytables_nsmerger_in
             self.extra_source_on = False
             self.ytables_extra = 0
+            self.inter_Z_points = inter_Z_points
+            self.nb_inter_Z_points = nb_inter_Z_points
+            self.y_coef_M = y_coef_M
+            self.y_coef_M_ej = y_coef_M_ej
+            self.y_coef_Z_aM = y_coef_Z_aM
+            self.y_coef_Z_bM = y_coef_Z_bM
+            self.y_coef_Z_bM_ej = y_coef_Z_bM_ej
+            self.tau_coef_M = tau_coef_M
+            self.tau_coef_M_inv = tau_coef_M_inv
+            self.tau_coef_Z_aM = tau_coef_Z_aM
+            self.tau_coef_Z_bM = tau_coef_Z_bM
+            self.tau_coef_Z_aM_inv = tau_coef_Z_aM_inv
+            self.tau_coef_Z_bM_inv = tau_coef_Z_bM_inv
+            self.y_coef_M_pop3 = y_coef_M_pop3
+            self.y_coef_M_ej_pop3 = y_coef_M_ej_pop3
+            self.tau_coef_M_pop3 = tau_coef_M_pop3
+            self.tau_coef_M_pop3_inv = tau_coef_M_pop3_inv
+            self.inter_lifetime_points_pop3 = inter_lifetime_points_pop3
+            self.inter_lifetime_points_pop3_tree = inter_lifetime_points_pop3_tree
+            self.nb_inter_lifetime_points_pop3 = nb_inter_lifetime_points_pop3
+            self.inter_lifetime_points = inter_lifetime_points
+            self.inter_lifetime_points_tree = inter_lifetime_points_tree
+            self.nb_inter_lifetime_points = nb_inter_lifetime_points
+            self.nb_inter_M_points_pop3 = nb_inter_M_points_pop3
+            self.inter_M_points_pop3_tree = inter_M_points_pop3_tree
+            self.nb_inter_M_points = nb_inter_M_points
+            self.inter_M_points = inter_M_points
+            self.y_coef_Z_aM_ej = y_coef_Z_aM_ej
 
             # Assign the input yields for radioactive isotopes
             if self.len_decay_file > 0:
-                self.ytables_radio = ytables_radio_in
-                self.radio_iso = radio_iso_in
-                self.nb_radio_iso = len(self.radio_iso)
-                self.nb_new_radio_iso = len(self.radio_iso)
                 self.ytables_1a_radio = ytables_1a_radio_in
                 self.ytables_nsmerger_radio = ytables_nsmerger_radio_in
+                self.y_coef_M_radio = y_coef_M_radio
+                self.y_coef_Z_aM_radio = y_coef_Z_aM_radio
+                self.y_coef_Z_bM_radio = y_coef_Z_bM_radio
 
         # If the yield tables need to be read from the files ...
         else:
 
             # Read of the yield tables
             self.__read_tables()
+
+            # Read radioactive tables
+            if self.len_decay_file > 0:
+                self.__read_radio_tables()
 
             # Declare the interpolation coefficient arrays
             self.__declare_interpolation_arrays()
