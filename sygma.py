@@ -88,16 +88,13 @@ For example with artificial yields of only H-1, you can try
 
 # Import standard python packages
 import os
-import imp
 
 
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
-global_path = './NuPyCEE/'
+nupy_path = os.path.dirname(os.path.realpath(__file__))
 
 # Import NuPyCEE codes
-#chem_evol = imp.load_source('chem_evol', global_path+'chem_evol.py')
-#from chem_evol import *
 from NuPyCEE.chem_evol import *
 
 class sygma( chem_evol ):
@@ -340,7 +337,7 @@ class sygma( chem_evol ):
             elif self.sfr == 'input':
 
                 # Open the input file, read all lines, and close the file
-                f1 = open(global_path+'sfr_input')
+                f1 = open(os.path.join(nupy_path, 'sfr_input'))
                 lines = f1.readlines()
                 f1.close()
 
@@ -440,7 +437,7 @@ class sygma( chem_evol ):
                 import random
                 randnum=random.randrange(10000,99999)
                 name=table_name+str(randnum)+'.txt'
-                #f1=open(global_path+'evol_tables/'+name,'w')
+                #f1=open(os.path.join(nupy_path, 'evol_tables', name),'w')
                 f1=open(name,'w')
                 f1.write(out)
                 f1.close()
@@ -454,7 +451,7 @@ class sygma( chem_evol ):
                 #test=
                 #return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
                 #if interact==False:
-                #return HTML("""<a href="""+global_path+"""/evol_tables/"""+name+""">Download</a>""")
+                #return HTML("""<a href="""+nupy_path+"""/evol_tables/"""+name+""">Download</a>""")
                 return HTML("""<a href="""+name+""">Download</a>""")
                 #else:
                 #        return name
@@ -605,7 +602,7 @@ class sygma( chem_evol ):
         import read_yields as ry
         import re
         import matplotlib.pyplot as plt
-        y_table=ry.read_nugrid_yields(global_path+table)
+        y_table=ry.read_nugrid_yields(os.path.join(nupy_path, table))
 
         plt.figure(fig)
 
@@ -668,7 +665,7 @@ class sygma( chem_evol ):
         import read_yields as ry
         import re
         import matplotlib.pyplot as plt
-        y_table=ry.read_nugrid_yields(global_path+table)
+        y_table=ry.read_nugrid_yields(os.path.join(nupy_path, table))
         plt.figure(fig)
         # find all available masses
         if len(masses)==0:
@@ -817,7 +814,7 @@ class sygma( chem_evol ):
         '''
 
         import matplotlib.pyplot as plt
-        iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
+        iniabu=ry.iniabu(os.path.join(nupy_path, netyields_iniabu))
         isonames=iniabu.names
         specie1=species.split('/')[0][1:]
         specie2=species.split('/')[1][:-1]
@@ -891,7 +888,7 @@ class sygma( chem_evol ):
         import re
         import matplotlib.pyplot as plt
 
-        y_table=ry.read_nugrid_yields(global_path+table)
+        y_table=ry.read_nugrid_yields(os.path.join(nupy_path, table))
         plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
 
@@ -907,9 +904,10 @@ class sygma( chem_evol ):
         ####Get solar metallicity elements, if necessary
         if specx or specy:
                 if len(solar_abu) ==0:
-                     iniabu_sol=ry.iniabu(global_path+'yield_tables/iniabu/iniab2.0E-02GN93.ppn')
+                     iniabu_sol=ry.iniabu(os.path.join(nupy_path, 'yield_tables',\
+                             'iniabu', 'iniab2.0E-02GN93.ppn'))
                 else:
-                     iniabu_sol=ry.iniabu(global_path+solar_abu)
+                     iniabu_sol=ry.iniabu(os.path.join(nupy_path, solar_abu))
                 isonames=iniabu_sol.names
 
                 ini_elems_frac_sol=[]
@@ -935,7 +933,7 @@ class sygma( chem_evol ):
         # for net yields need initial abundance of elements or isotopes
         if netyields:
 
-                iniabu=ry.iniabu(global_path+'/'+netyields_iniabu)
+                iniabu=ry.iniabu(os.path.join(nupy_path, netyields_iniabu))
                 isonames=iniabu.names
                 #get initial elements 
                 if True:
@@ -1704,9 +1702,10 @@ class sygma( chem_evol ):
 
         #Access solar abundance
         if len(solar_ab) > 0:
-            iniabu=ry.iniabu(global_path+solar_ab)
+            iniabu=ry.iniabu(os.path.join(nupy_path, solar_ab))
         else:
-            iniabu=ry.iniabu(global_path+'yield_tables/iniabu/iniab2.0E-02GN93.ppn')
+            iniabu=ry.iniabu(os.path.join(nupy_path, 'yield_tables', 'iniabu',\
+                    'iniab2.0E-02GN93.ppn'))
 
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
         elements,x_ini=self._iso_abu_to_elem(x_ini_iso)
@@ -2705,7 +2704,7 @@ class sygma( chem_evol ):
         y2_rsi = -1
 
         # Open the data file
-        with open(global_path+file_path, 'r') as data_file:
+        with open(os.path.join(nupy_path, file_path), 'r') as data_file:
 
             # For every line (for each isotope) ...
             for line_1_str in data_file:
@@ -2864,7 +2863,7 @@ class sygma( chem_evol ):
 
         '''
         if path == "":
-            path = global_path+'evol_tables/'
+            path = os.path.join(nupy_path, 'evol_tables')
 
         yields_evol=self.history.ism_iso_yield
         metal_evol=self.history.metallicity
@@ -2921,7 +2920,7 @@ class sygma( chem_evol ):
                 import random
                 randnum=random.randrange(10000,99999)
                 name=table_name+str(randnum)+'.txt'
-                #f1=open(global_path+'evol_tables/'+name,'w')
+                #f1=open(os.path.join(nupy_path, 'evol_tables', name),'w')
                 f1=open(name,'w')
                 f1.write(out)
                 f1.close()
@@ -2935,13 +2934,13 @@ class sygma( chem_evol ):
                 #test=
                 #return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
                 #if interact==False:
-                #return HTML("""<a href="""+global_path+"""/evol_tables/"""+name+""">Download</a>""")
+                #return HTML("""<a href="""+nupy_path+"""/evol_tables/"""+name+""">Download</a>""")
                 return HTML("""<a href="""+name+""">Download</a>""")
                 #else:
                 #        return name
         else:
                 print ('file '+table_name+' saved in subdirectory evol_tables.')
-                f1=open(path+table_name,'w')
+                f1=open(os.path.join(path, table_name),'w')
                 f1.write(out)
                 f1.close()
 

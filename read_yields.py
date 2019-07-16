@@ -272,7 +272,6 @@ class read_nugrid_yields():
         '''
         table=nugridtable
 
-        import os
         if '/' in table:
             self.label=table.split('/')[-1]
         else:

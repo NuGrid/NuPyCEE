@@ -85,15 +85,12 @@ import copy
 import math
 import random
 import os
-import imp
 
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
-global_path = './NuPyCEE/'
+nupy_path = os.path.dirname(os.path.realpath(__file__))
 
 # Import NuPyCEE codes
-#sygma = imp.load_source('sygma', global_path+'sygma.py')
-#chem_evol = imp.load_source('chem_evol', global_path+'chem_evol.py')
 import NuPyCEE.sygma as sygma
 from NuPyCEE.chem_evol import *
 
@@ -348,8 +345,6 @@ class omega( chem_evol ):
         import traceback
         (filename,line_number,function_name,text)=traceback.extract_stack()[-2]
         self.inst_name = text[:text.find('=')].strip()
-
-        print('Andres - new omega')
 
         # Announce the beginning of the simulation 
         print ('OMEGA run in progress..')
@@ -643,9 +638,10 @@ class omega( chem_evol ):
 
         # Read the primordial composition of the inflow gas
         if self.in_out_control or self.SF_law or self.DM_evolution:
-            prim_comp_table = 'yield_tables/iniabu/iniab_bb_walker91.txt'
-            self.prim_comp = ry.read_yield_sn1a_tables(global_path + \
-                prim_comp_table, self.history.isotopes)
+            prim_comp_table = os.path.join('yield_tables', 'iniabu',\
+                    'iniab_bb_walker91.txt')
+            self.prim_comp = ry.read_yield_sn1a_tables(os.path.join(nupy_path,\
+                    prim_comp_table), self.history.isotopes)
 
         # In construction .. need to avoid altering default setups ..
         # Assume the baryonic ratio for the initial gas reservoir, if needed
@@ -1311,7 +1307,7 @@ class omega( chem_evol ):
         m_stel_sfr_in = 0.0
 
         # Open the file containing the SFR vs time
-        with open(global_path+path_sfh_in, 'r') as sfr_file:
+        with open(os.path.join(nupy_path, path_sfh_in), 'r') as sfr_file:
 
             # Read the first line  (col 0 : t, col 1 : SFR)
             line_1_str = sfr_file.readline()
@@ -1978,7 +1974,8 @@ class omega( chem_evol ):
         '''
 
         # Open the file containing the coefficient of the 3rd order polynomial fit
-        with open(global_path+"m_dm_evolution/poly3_fits.txt", 'r') as m_dm_file:
+        with open(os.path.join(nupy_path, "m_dm_evolution", "poly3_fits.txt"),\
+                'r') as m_dm_file:
 
             # Read the first line
             line_str = m_dm_file.readline()
@@ -3272,9 +3269,10 @@ class omega( chem_evol ):
 
         #Access solar abundance
         if len(solar_ab) > 0:
-            iniabu=ry.iniabu(global_path+solar_ab)
+            iniabu=ry.iniabu(os.path.join(nupy_path, solar_ab))
         else:
-            iniabu=ry.iniabu(global_path+'yield_tables/iniabu/iniab2.0E-02GN93.ppn')
+            iniabu=ry.iniabu(os.path.join(nupy_path, 'yield_tables', 'iniabu',\
+                    'iniab2.0E-02GN93.ppn'))
 
         # If a solar normalization is used ..
         if len(solar_norm) > 0:
@@ -3310,7 +3308,8 @@ class omega( chem_evol ):
             sol_values_ab = []
 
             # Open the data file
-            with open(global_path+'stellab_data/solar_normalization/'+solar_norm+'.txt', 'r') as data_file:
+            with open(os.path.join(nupy_path, 'stellab_data',\
+                    'solar_normalization', solar_norm + '.txt'), 'r') as data_file:
 
                 # For every line (for each element) ...
                 i_elem = 0
@@ -4697,7 +4696,7 @@ class omega( chem_evol ):
         y = []
 
         #Access solar abundance
-        iniabu=ry.iniabu(global_path+solar_ab)
+        iniabu=ry.iniabu(os.path.join(nupy_path, solar_ab))
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
         elements,x_ini=self._iso_abu_to_elem(x_ini_iso)
 
@@ -4900,7 +4899,7 @@ class omega( chem_evol ):
         y2_rsi = -1
 
         # Open the data file
-        with open(global_path+file_path, 'r') as data_file:
+        with open(os.path.join(nupy_path, file_path), 'r') as data_file:
 
             # For every line (for each isotope) ...
             for line_1_str in data_file:
@@ -5090,10 +5089,11 @@ class omega( chem_evol ):
     #                 Get [X/Y]                  #
     ##############################################
     def __get_XY(self, axis_mdf = '[Fe/H]', \
-             solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn'):
+             solar_ab=os.path.join('yield_tables', 'iniabu',\
+             'iniab2.0E-02GN93.ppn')):
 
         # Access solar abundance
-        iniabu = ry.iniabu(global_path+solar_ab)
+        iniabu = ry.iniabu(os.path.join(nupy_path, solar_ab))
         x_ini_iso = iniabu.iso_abundance(self.history.isotopes)
 
         # Access 
@@ -5277,7 +5277,7 @@ class omega( chem_evol ):
                 iso_list.append(iso_list_raw[i])
 
         # Read the solar normalization
-        solar_file = ry.iniabu(global_path + solar_ab_m)
+        solar_file = ry.iniabu(os.path.join(nupy_path, solar_ab_m))
 
         # Make sure the wanted isotopes are available
         for i_iso in range(0, len(iso_list)):

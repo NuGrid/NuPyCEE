@@ -40,21 +40,13 @@ See the Sphinx documentation for more options
 # Import standard packages
 import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.ticker as tic
-import numpy as np
-import math
-import os
-import imp
-from matplotlib.lines import Line2D
 
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
-global_path = './NuPyCEE/'
+nupy_path = os.path.dirname(os.path.realpath(__file__))
 
 # Import NuPyCEE codes
 import NuPyCEE.read_yields as ry
-#ry = imp.load_source('read_yields', global_path+'read_yields.py')
-
 
 class stellab():
 
@@ -70,7 +62,8 @@ class stellab():
         # read abundance data library via 
         # index file abundance_data_library.txt
         # creates self.paths, self.paths_s, self.cs, self.leg
-        self.read_abundance_data_library(global_path+'/stellab_data/abundance_data_library.txt')
+        self.read_abundance_data_library(os.path.join(nupy_path, "stellab_data",\
+                "abundance_data_library.txt"))
 
         # Declaration of the name of available galaxies
         #self.galaxy_name = []
@@ -190,7 +183,7 @@ class stellab():
         self.ab.append([])
 
         # Open the data file
-        with open(global_path+file_path+'.txt', 'r') as data_file:
+        with open(os.path.join(nupy_path, file_path + ".txt"), "r") as data_file:
 
             # Read and split the first line (header)
             line_1_str = data_file.readline()
@@ -244,7 +237,7 @@ class stellab():
         self.solar.append([])
 
         # Open the data file
-        with open(global_path+file_path+'.txt', 'r') as data_file:
+        with open(os.path.join(nupy_path, file_path + ".txt"), "r") as data_file:
 
             # For every line (for each element) ...
             i_elem = 0
@@ -276,8 +269,8 @@ class stellab():
         self.sol_norm.append([])
 
         # Open the data file
-        with open(global_path+'stellab_data/solar_normalization/'+file_path+'.txt', 'r')\
-          as data_file:
+        with open(os.path.join(nupy_path, "stellab_data", "solar_normalization",\
+            file_path + ".txt"), "r") as data_file:
 
             # For every line (for each element) ...
             i_elem = 0

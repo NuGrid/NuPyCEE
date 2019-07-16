@@ -59,33 +59,20 @@ See sygma.py and omega.py
 import numpy as np
 import time as t_module
 import copy
-import math
-import random
 import os
 import sys
 import re
-import imp
 from pylab import polyfit
 from scipy.integrate import quad
 from scipy.integrate import dblquad
-from scipy.interpolate import interp1d
-from scipy.interpolate import UnivariateSpline
-from scipy.interpolate import interp1d
-from mpl_toolkits.mplot3d import Axes3D
-
-# Variable enabling to work in notebooks
-global notebookmode
-notebookmode=True
 
 # Define where is the working directory
-global_path = './NuPyCEE/'
+nupy_path = os.path.dirname(os.path.realpath(__file__))
 
 # Import NuPyCEE codes
 import NuPyCEE.read_yields as ry
 
 # Import the decay module for radioactive isotopes
-#decay_module = imp.load_source('decay_module', global_path+'decay_module.so')
-#import decay_module
 import NuPyCEE.decay_module as decay_module
 
 
@@ -519,8 +506,6 @@ class chem_evol(object):
              nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
              inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
              inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([])):
-
-        print('Andres - new chem evol')
 
         # Initialize the history class which keeps the simulation in memory
         self.history = self.__history()
@@ -1094,7 +1079,7 @@ class chem_evol(object):
         self.decay_info = []
 
         # Open the input file
-        with open(global_path + self.decay_file, 'r') as ddi:
+        with open(os.path.join(nupy_path, self.decay_file)) as ddi:
 
             # For each line in the input file ..
             for line in ddi:
@@ -1132,34 +1117,36 @@ class chem_evol(object):
         # Massive and AGB stars
         if len(self.table_radio) > 0:
             self.radio_massive_agb_on = True
-            self.ytables_radio = ry.read_nugrid_yields(global_path+self.table_radio,\
-                excludemass=self.exclude_masses, isotopes=self.radio_iso)
+            self.ytables_radio = ry.read_nugrid_yields(os.path.join(nupy_path,\
+                self.table_radio), excludemass=self.exclude_masses,\
+                isotopes=self.radio_iso)
 
         # SNe Ia
         sys.stdout.flush()
         if len(self.sn1a_table_radio) > 0:
             self.radio_sn1a_on = True
             self.ytables_1a_radio = ry.read_yield_sn1a_tables( \
-                global_path + self.sn1a_table_radio, self.radio_iso)
+                os.path.join(nupy_path, self.sn1a_table_radio), self.radio_iso)
 
         # NS mergers
         if len(self.nsmerger_table_radio) > 0:
             self.radio_nsmerger_on = True
             self.ytables_nsmerger_radio = ry.read_yield_sn1a_tables( \
-                global_path + self.nsmerger_table_radio, self.radio_iso)
+                os.path.join(nupy_path, self.nsmerger_table_radio), self.radio_iso)
 
         # BHNS mergers
         if len(self.bhnsmerger_table_radio) > 0:
             self.radio_bhnsmerger_on = True
             self.ytables_bhnsmerger_radio = ry.read_yield_sn1a_tables( \
-                global_path + self.bhnsmerger_table_radio, self.radio_iso)
+                os.path.join(nupy_path, self.bhnsmerger_table_radio), self.radio_iso)
 
         # Delayed extra sources
         if self.nb_delayed_extra_radio > 0:
             self.ytables_delayed_extra_radio = []
             for i_syt in range(0,self.nb_delayed_extra_radio):
               self.ytables_delayed_extra_radio.append(ry.read_yield_sn1a_tables( \
-              global_path + self.delayed_extra_yields_radio[i_syt], self.radio_iso))
+              os.path.join(nupy_path, self.delayed_extra_yields_radio[i_syt]),\
+              self.radio_iso))
 
 
     ##############################################
@@ -1178,7 +1165,8 @@ class chem_evol(object):
                 self.table, excludemass=self.exclude_masses)
         else:
             self.ytables = ry.read_nugrid_yields(\
-                global_path+self.table, excludemass=self.exclude_masses)
+                os.path.join(nupy_path, self.table),\
+                excludemass=self.exclude_masses)
 
         # Get the list of isotopes
         # The massive and AGB star yields set the list of isotopes
@@ -1190,28 +1178,29 @@ class chem_evol(object):
 
         # PopIII massive stars
         self.ytables_pop3 = ry.read_nugrid_yields( \
-            global_path+self.pop3_table, self.history.isotopes, \
+            os.path.join(nupy_path, self.pop3_table), self.history.isotopes, \
                 excludemass=self.exclude_masses)
 
         # SNe Ia
         #sys.stdout.flush()
         self.ytables_1a = ry.read_yield_sn1a_tables( \
-            global_path+self.sn1a_table, self.history.isotopes)
+            os.path.join(nupy_path, self.sn1a_table), self.history.isotopes)
 
         # Neutron star mergers
         self.ytables_nsmerger = ry.read_yield_sn1a_tables( \
-            global_path+self.nsmerger_table, self.history.isotopes)
+            os.path.join(nupy_path, self.nsmerger_table), self.history.isotopes)
 
         # Black hole neutron star mergers
         self.ytables_bhnsmerger = ry.read_yield_sn1a_tables( \
-            global_path+self.bhnsmerger_table, self.history.isotopes)
+            os.path.join(nupy_path, self.bhnsmerger_table), self.history.isotopes)
 
         # Delayed-extra sources
         if self.nb_delayed_extra > 0:
           self.ytables_delayed_extra = []
           for i_syt in range(0,self.nb_delayed_extra):
             self.ytables_delayed_extra.append(ry.read_yield_sn1a_tables( \
-            global_path+self.delayed_extra_yields[i_syt], self.history.isotopes))
+            os.path.join(nupy_path, self.delayed_extra_yields[i_syt]),\
+            self.history.isotopes))
 
         # Extra yields (on top of massive and AGB yields)
         if self.extra_source_on == True:
@@ -1220,17 +1209,19 @@ class chem_evol(object):
             self.ytables_extra =[]
             for ee in range(len(self.extra_source_table)):
 
-               #if absolute path don't apply global_path
+               #if absolute path don't apply nupy_path
                if self.extra_source_table[ee][0] == '/':
                    self.ytables_extra.append( ry.read_yield_sn1a_tables( \
                         self.extra_source_table[ee], self.history.isotopes))
                else:
                    self.ytables_extra.append( ry.read_yield_sn1a_tables( \
-                     global_path+self.extra_source_table[ee], self.history.isotopes))
+                     os.path.join(nupy_path, self.extra_source_table[ee]),\
+                     self.history.isotopes))
 
         # Read stellar parameter. stellar_param
         if self.stellar_param_on:
-            table_param=ry.read_nugrid_parameter(global_path + self.stellar_param_table)
+            table_param=ry.read_nugrid_parameter(os.path.join(nupy_path,\
+                    self.stellar_param_table))
             self.table_param=table_param
 
         # Get the list of mass and metallicities found in the yields tables
@@ -2851,7 +2842,7 @@ class chem_evol(object):
 
             # If an input iniabu table is provided ...
             if len(self.iniabu_table) > 0:
-                iniabu=ry.iniabu(global_path + self.iniabu_table)
+                iniabu=ry.iniabu(os.path.join(nupy_path, self.iniabu_table))
                 if self.iolevel >0:
                     print ('Use initial abundance of ', self.iniabu_table)
                 ymgal_gi = np.array(iniabu.iso_abundance(self.history.isotopes)) * \
@@ -2862,7 +2853,7 @@ class chem_evol(object):
                 # Get the primordial composition of Walker et al. (1991)
                 iniabu_table = 'yield_tables/iniabu/iniab_bb_walker91.txt'
                 ytables_bb = ry.read_yield_sn1a_tables( \
-                    global_path+iniabu_table, self.history.isotopes)
+                    os.path.join(nupy_path, iniabu_table), self.history.isotopes)
 
                 # Assign the composition to the gas reservoir
                 ymgal_gi = ytables_bb.get(quantity='Yields') * self.mgal
@@ -2876,7 +2867,7 @@ class chem_evol(object):
 
             # If an input iniabu table is provided ...
             if len(self.iniabu_table) > 0:
-                iniabu=ry.iniabu(global_path + self.iniabu_table)
+                iniabu=ry.iniabu(os.path.join(nupy_path, self.iniabu_table))
                 if self.iolevel > 0:
                     print ('Use initial abundance of ', self.iniabu_table)
 
@@ -2894,8 +2885,9 @@ class chem_evol(object):
                 # Pick the composition associated to the input iniZ
                 for metal in ini_Z:
                     if metal == float(self.iniZ):
-                        iniabu = ry.iniabu(global_path + \
-                        'yield_tables/iniabu/' + ini_list[ini_Z.index(metal)])
+                        iniabu = ry.iniabu(os.path.join(nupy_path,\
+                                "yield_tables", "iniabu",\
+                                ini_list[ini_Z.index(metal)]))
                         if self.iolevel>0:
                             print ('Use initial abundance of ', \
                             ini_list[ini_Z.index(metal)])
@@ -2903,7 +2895,7 @@ class chem_evol(object):
 
             # Input file for the initial composition ...
             #else:
-            #    iniabu=ry.iniabu(global_path + iniabu_table)
+            #    iniabu=ry.iniabu(nupy_path + iniabu_table) # TODO this might not work now. Use os.path.join
             #    print ('Use initial abundance of ', iniabu_table)
 
             # Assign the composition to the gas reservoir
@@ -4311,7 +4303,8 @@ class chem_evol(object):
 
         # Import and declare the decay module
         #import decay_module
-        decay_module.initialize(self.f_network, self.f_format, global_path)
+        decay_module.initialize(self.f_network, self.f_format,\
+                os.path.join(nupy_path, ""))
 
         # Declare the element names used to return the charge number Z
         # Index 0 needs to be NN!  H needs to be index 1!
@@ -6556,7 +6549,7 @@ class chem_evol(object):
         if self.imf_type=='input':
 
             # Load the file
-            ci = load_source('custom_imf', global_path + '/imf_input.py')
+            ci = load_source('custom_imf', os.path.join(nupy_path, 'imf_input.py'))
             self.ci = ci
             # Choose the right option
             if inte == 0:
