@@ -1550,7 +1550,7 @@ class chem_evol(object):
         '''
 
         # Initialize the array
-        self.inter_M_points_pop3 = copy.deepcopy(self.M_table_pop3)
+        self.inter_M_points_pop3 = copy.copy(self.M_table_pop3)
 
         # Add the lower and upper IMF yields range limits
         if not self.imf_yields_range_pop3[0] in self.M_table_pop3:
@@ -1587,7 +1587,7 @@ class chem_evol(object):
         '''
 
         # Initialize the array
-        self.inter_M_points = copy.deepcopy(self.M_table)
+        self.inter_M_points = copy.copy(self.M_table)
 
         # Add the lower and upper IMF yields range limits
         if not self.imf_yields_range[0] in self.M_table:
@@ -3039,7 +3039,7 @@ class chem_evol(object):
         mdot = np.zeros((nb_dt_gsa,nb_iso_gsa))
 
         # Gas reservoir
-        temp = copy.deepcopy(ymgal)
+        temp = copy.copy(ymgal)
         ymgal = np.zeros((nb_dt_gsa+1,nb_iso_gsa))
         ymgal[0] += np.array(temp)
 

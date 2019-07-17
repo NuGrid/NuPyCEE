@@ -7,7 +7,7 @@ GCE SYGMA (Stellar Yields for Galaxy Modelling Applications) module
 Functionality
 =============
 
-This tool allows the modeling of simple stellar populations.  Creating a SYGMA 
+This tool allows the modeling of simple stellar populations.  Creating a SYGMA
 instance runs the simulation while extensive analysis can be done with the plot_*
 functions found in the chem_evol_plot module.  See the DOC directory for a detailed
 documentation.
@@ -20,8 +20,8 @@ v0.1 NOV2013: C. Fryer, C. Ritter
 
 v0.2 JAN2014: C. Ritter
 
-v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg, 
-              M. Pignatari, S. Jones, K. Venn, P. A. Denissenkov & the 
+v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg,
+              M. Pignatari, S. Jones, K. Venn, P. A. Denissenkov & the
               NuGrid collaboration
 
 v0.4 FEB2015: C. Ritter, B. Cote
@@ -66,7 +66,7 @@ ejecta of a SSP via
 
 >>> s.write_evol_table(elements=['H','C','O'])
 
-Yield tables are available in the NUPYCEE subdirectory 
+Yield tables are available in the NUPYCEE subdirectory
 yield/textunderscore tables. Add your yield tables to
 this directory and SYGMA will be able to read the table
 if you have specified the $table$ variable. Only
@@ -105,8 +105,8 @@ class sygma( chem_evol ):
 
     sfr : string
         Description of the star formation, usually an instantaneous burst.
-        
-        Choices : 
+
+        Choices :
 
                 'input' - read and use the sfr_input file to set the percentage
                             of gas that is converted into stars at each timestep.
@@ -114,7 +114,7 @@ class sygma( chem_evol ):
                 'schmidt' - use an adapted Schmidt law (see Timmes95)
 
         Default value : 'input'
-    
+
     ================
     '''
     # Combine docstrings from chem_evol with sygma docstring
@@ -240,7 +240,7 @@ class sygma( chem_evol ):
         if self.need_to_quit:
             return
 
-        # Announce the beginning of the simulation 
+        # Announce the beginning of the simulation
         print ('SYGMA run in progress..')
         start_time = t_module.time()
         self.start_time = start_time
@@ -271,7 +271,7 @@ class sygma( chem_evol ):
         '''
         This function calculates the evolution of the ejecta released by simple
         stellar populations as a function of time.
-         
+
         '''
 
         # For every timestep i considered in the simulation ...
@@ -324,7 +324,7 @@ class sygma( chem_evol ):
 
         # For every timestep i considered in the simulation ...
         for i in range(1, self.nb_timesteps+1):
-            
+
             # If an array is used to generate starbursts ...
             if len(self.starbursts) > 0:
                 if len(self.starbursts) >= i:
@@ -355,7 +355,7 @@ class sygma( chem_evol ):
                         self.history.sfr.append(sfr_i[i-1])
                         break
 
-            # If the Schmidt law is used (see Timmes98) ... 
+            # If the Schmidt law is used (see Timmes98) ...
             elif self.sfr == 'schmidt':
 
                 # Calculate the mass of available gas
@@ -377,7 +377,7 @@ class sygma( chem_evol ):
     def write_stellar_param_table(self,table_name='gce_stellar_param_table.txt', path="evol_tables",interact=False):
 
         '''
-        Writes out evolution of stellar parameter such as luminosity and kinetic energy. 
+        Writes out evolution of stellar parameter such as luminosity and kinetic energy.
         Stellar parameter quantities are available via <sygma instance>.stellar_param_attrs.
 
         Table structure:
@@ -473,7 +473,7 @@ class sygma( chem_evol ):
         ----------
 
         quantity: string
- 
+
                 Name of stellar parameter of interest. Check for available parameter via <sygma instance>.stellar_param_attrs
 
         Examples
@@ -500,7 +500,7 @@ class sygma( chem_evol ):
         plt.figure(fig)
 
         plt.plot(age,quantity_evol,label=label,marker=marker,color=color,linestyle=shape,markevery=markevery)
- 
+
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         plt.ylabel('log-scaled '+quantity)
@@ -525,7 +525,7 @@ class sygma( chem_evol ):
 
              distinctive sources:
 
-             only agb stars ('agb'), 
+             only agb stars ('agb'),
 
              only SN1a ('SN1a')
 
@@ -584,7 +584,7 @@ class sygma( chem_evol ):
         xaxis : string
              if 'mini': use initial mass
              if 'time': use lifetime
-        iniZ  : float 
+        iniZ  : float
               Metallicity of interest
         masses: list
               List of initial masses to be plotted
@@ -648,7 +648,7 @@ class sygma( chem_evol ):
         ----------
 
         xaxis : string
-             if 'mini': use initial mass; if of the form [specie1/specie2] use spec. notation of 
+             if 'mini': use initial mass; if of the form [specie1/specie2] use spec. notation of
         yaxis : string
 
         iniZ : float
@@ -867,12 +867,12 @@ class sygma( chem_evol ):
         table : string
              table to plot data from; default sygma input table
         solar_abu : string
-             solar abundance for spectroscopic notation 
+             solar abundance for spectroscopic notation
              default: yield_tables/iniabu/iniab2.0E-02GN93.ppn (if empty string)
         netyields : bool
              if true assume net yields in table and add corresponding initial contribution to get total yields
         netyields_iniabu : string
-             initial abundance, only used in conjuction with net yields      
+             initial abundance, only used in conjuction with net yields
 
         Examples
         ----------
@@ -882,7 +882,7 @@ class sygma( chem_evol ):
         >>> s.plot_iso_ratio(yaxis='[C/Fe]')
         >>> s.plot_iso_ratio(xaxis='[Fe/H]',yaxis='[C/Fe]')
 
-        
+
         '''
         import read_yields as ry
         import re
@@ -935,7 +935,7 @@ class sygma( chem_evol ):
 
                 iniabu=ry.iniabu(os.path.join(nupy_path, netyields_iniabu))
                 isonames=iniabu.names
-                #get initial elements 
+                #get initial elements
                 if True:
                         ini_elems=[]
                         ini_elems_frac=[]
@@ -1016,7 +1016,7 @@ class sygma( chem_evol ):
                                                 ini_species_frac=ini_elems_frac
                                         if specx:
                                                 ini_species_frac_sol=ini_elems_frac_sol
-                                                ini_species_sol = ini_elems_sol 
+                                                ini_species_sol = ini_elems_sol
                                 if specy:
                                         x1_ini_sol=ini_species_frac_sol[ini_species_sol.index(x1)]
                                         x2_ini_sol=ini_species_frac_sol[ini_species_sol.index(x2)]
@@ -1089,7 +1089,7 @@ class sygma( chem_evol ):
                                                 ini_species_frac=ini_elems_frac
                                         if specy:
                                                 ini_species_frac_sol=ini_elems_frac_sol
-                                                ini_species_sol = ini_elems_sol 
+                                                ini_species_sol = ini_elems_sol
                                 if specy:
                                         y1_ini_sol=ini_species_frac_sol[ini_species_sol.index(y1)]
                                         y2_ini_sol=ini_species_frac_sol[ini_species_sol.index(y2)]
@@ -1140,14 +1140,14 @@ class sygma( chem_evol ):
         Mass ratio of two species indicated by species_ratio over time.
         Choice can either be elemental ratio or isotopic ratios.
         Masses of species are in solar masses.
-        Note: Similar to plot_mass but with ratios of masses. 
+        Note: Similar to plot_mass but with ratios of masses.
 
         Parameters
         ----------
 
 
         specie : string
-             ratio of element or isotope, e.g. 'C/O', 'C-12/O-12' 
+             ratio of element or isotope, e.g. 'C/O', 'C-12/O-12'
         xaxis  : string
              if 'age' : time evolution
              if '[Fe/H]' : use [Fe/H]
@@ -1167,10 +1167,10 @@ class sygma( chem_evol ):
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
         logy : bool
              if yes, choose yaxis in log scale
- 
+
         Examples
         ----------
 
@@ -1207,7 +1207,7 @@ class sygma( chem_evol ):
                y_temp.append(y1[k]/y2[k])
         y=y_temp
 
-        if xaxis == '[Fe/H]': 
+        if xaxis == '[Fe/H]':
             age,fe_h=self.plot_spectro(return_x_y=True,xaxis='age',yaxis='[Fe/H]')
             #match ages in x and age_dum
             y_temp=[]
@@ -1245,7 +1245,7 @@ class sygma( chem_evol ):
 
 
     def plot_mass(self,fig=0,specie='C',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,linewidth=2):
-    
+
         '''
         mass evolution (in Msun) of an element or isotope vs time.
         Note: Used in WENDI.
@@ -1340,7 +1340,7 @@ class sygma( chem_evol ):
         x=x[1:]
         y=y[1:]
         if multiplot==True:
-                return x,y  
+                return x,y
 
         #Reserved for plotting
         if not return_x_y:
@@ -1399,8 +1399,8 @@ class sygma( chem_evol ):
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
-       
+             to name the plot figure
+
         Examples
         ----------
 
@@ -1459,7 +1459,7 @@ class sygma( chem_evol ):
 
         #f.subplots_adjust(hspace=0.35)#0)
         #plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
-        return 
+        return
 
 
     def plot_massfrac(self,fig=2,xaxis='age',yaxis='O-16',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
@@ -1470,7 +1470,7 @@ class sygma( chem_evol ):
 
         Parameters
         ----------
-        xaxis : string 
+        xaxis : string
             either 'age' for time
         yaxis : string
             isotope name, in the same form as for xaxis
@@ -1492,13 +1492,13 @@ class sygma( chem_evol ):
         marker : string
              figure marker
         shape : string
-             line style 
+             line style
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
 
-        
+
         Examples
         ----------
 
@@ -1516,7 +1516,7 @@ class sygma( chem_evol ):
 
         plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
- 
+
         #Input X-axis
         if '-' in xaxis:
         #to test the different contributions
@@ -1667,11 +1667,11 @@ class sygma( chem_evol ):
         marker : string
              figure marker
         shape : string
-             line style 
+             line style
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
 
         Examples
         ----------
@@ -1830,7 +1830,7 @@ class sygma( chem_evol ):
                 if show_legend:
                     sub.plot(x,y,linestyle=shape,label=label,marker=marker,color=color,markevery=markevery,linewidth=linewidth)
                 else:
-                    sub.plot(x,y,linestyle=shape,marker=marker,color=color,markevery=markevery,linewidth=linewidth) 
+                    sub.plot(x,y,linestyle=shape,marker=marker,color=color,markevery=markevery,linewidth=linewidth)
 
         #If this function is supposed to plot ...
         else:
@@ -1991,7 +1991,7 @@ class sygma( chem_evol ):
         Plots either gas or star mass as fraction of total mass
         vs time.
         Note: Used in WENDI.
-    
+
         Parameters
         ----------
 
@@ -2023,11 +2023,11 @@ class sygma( chem_evol ):
         marker : string
              figure marker
         shape : string
-             line style 
+             line style
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
 
         Examples
         ----------
@@ -2158,7 +2158,7 @@ class sygma( chem_evol ):
         Parameters
         ----------
         rate : boolean
-            if true, calculate rate [1/century] 
+            if true, calculate rate [1/century]
             else calculate numbers
         fraction ; boolean
             if true, ignorate rate and calculate number fraction of SNIa per WD
@@ -2176,11 +2176,11 @@ class sygma( chem_evol ):
         marker : string
              figure marker
         shape : string
-             line style 
+             line style
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
 
         Examples
         ----------
@@ -2291,7 +2291,7 @@ class sygma( chem_evol ):
                 x=age1
                 y=ratio
                 self.__save_data(header=['age',label],data=[x,y])
-                return 
+                return
             else:
                     if len(rate_only)==0:
                             x=[age_sn1a,age_sn2]
@@ -2435,7 +2435,7 @@ class sygma( chem_evol ):
 
         '''
 	Plots yield contribution (Msun) of a certain mass range
-	versus initial mass. Each stellar ejecta in one mass range 
+	versus initial mass. Each stellar ejecta in one mass range
 	is represented by the same yields, yields from certain stellar simulation.
 	Be aware that a larger mass range means also a larger amount
 	of yield for that range.
@@ -2458,11 +2458,11 @@ class sygma( chem_evol ):
         marker : string
              figure marker
         shape : string
-             line style 
+             line style
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
 
         Examples
         ----------
@@ -2524,7 +2524,7 @@ class sygma( chem_evol ):
         ax1.yaxis.label.set_size(labelsize)
         ax1.xaxis.label.set_size(labelsize)
         #ax.xaxis.set_tick_params(width=2)
-        #ax.yaxis.set_tick_params(width=2)              
+        #ax.yaxis.set_tick_params(width=2)
         ax1.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
         ax1.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
         #Add that line below at some point
@@ -2818,7 +2818,7 @@ class sygma( chem_evol ):
             #out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
             out+='\n'
         #import os.path
-        #if os.path.isfile(filename) 
+        #if os.path.isfile(filename)
         #overwrite existing file for now
         f1=open(filename,'w')
         f1.write(out)

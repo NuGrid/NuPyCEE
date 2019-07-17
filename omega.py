@@ -29,7 +29,7 @@ v0.1 NOV2013: C. Fryer, C. Ritter
 v0.2 JAN2014: C. Ritter
 
 v0.3 APR2014: C. Ritter, J. F. Navarro, F. Herwig, C. Fryer, E. Starkenburg,
-              M. Pignatari, S. Jones, K. Venn1, P. A. Denissenkov & 
+              M. Pignatari, S. Jones, K. Venn1, P. A. Denissenkov &
               the NuGrid collaboration
 
 v0.4 FEB2015: C. Ritter, B. Cote
@@ -111,7 +111,7 @@ class omega( chem_evol ):
         Choices : 'milky_way', 'milky_way_cte', 'sculptor', 'carina', 'fornax',
         'none'
 
-        Default value : 'none' 
+        Default value : 'none'
 
         Special note : The 'milky_way_cte' option uses the Milky Way's
         characteristics, but with a constant star formation history.
@@ -142,7 +142,7 @@ class omega( chem_evol ):
 
     stellar_mass_0 : float
         Current stellar mass of the galaxy, in [Mo], at the end of the simulation.
-        
+
         Default value : -1.0 (you need to specify a value with unknown galaxies)
 
     in_out_control : boolean
@@ -211,14 +211,14 @@ class omega( chem_evol ):
         Current dark matter halo mass of the galaxy, in [Mo], at the end of the
         simulations.
 
-        Default value : 1.0e+11 
+        Default value : 1.0e+11
 
     t_star : float
         Used in : SF_law and DM_evolution modes
         Star formation timescale, in [yr], used in the Kennicutt-Schmidt law.
         Default value = -1.0 (deactivated)
 
-        Special note : A positive value activates the use of this parameter, 
+        Special note : A positive value activates the use of this parameter,
         which bypasses the f_dyn parameter.
 
     DM_evolution : boolean
@@ -227,7 +227,7 @@ class omega( chem_evol ):
         an evolution in the total mass of the galaxy as function of time.  With
         this prescription, the mass-loading factor has a mass dependency.  The
         mass_loading parameter then only represents the final value at the end
-        of the simulation. 
+        of the simulation.
 
         Default value : False (deactivated)
 
@@ -238,7 +238,7 @@ class omega( chem_evol ):
         factor is proportional to M_vir**(-exp_ml/3), where M_vir is the sum of
         dark and baryonic matter.
 
-        Default value : 2.0    
+        Default value : 2.0
 
     ================
     '''
@@ -346,7 +346,7 @@ class omega( chem_evol ):
         (filename,line_number,function_name,text)=traceback.extract_stack()[-2]
         self.inst_name = text[:text.find('=')].strip()
 
-        # Announce the beginning of the simulation 
+        # Announce the beginning of the simulation
         print ('OMEGA run in progress..')
         start_time = t_module.time()
         self.start_time = start_time
@@ -999,10 +999,10 @@ class omega( chem_evol ):
 
             # Set the current dark and stellar masses (corrected for mass loss)
             self.m_DM_0 = 1.0e12
-            self.stellar_mass_0 = 5.0e10 
+            self.stellar_mass_0 = 5.0e10
 
             # Read Chiappini et al. (2001) SFH
-            if self.galaxy == 'milky_way': 
+            if self.galaxy == 'milky_way':
                 self.__copy_sfr_input('stellab_data/milky_way_data/sfh_mw_cmr01.txt')
 
             # Read constant SFH
@@ -1043,7 +1043,7 @@ class omega( chem_evol ):
             self.__copy_sfr_input('stellab_data/carina_data/sfh_deBoer14.txt')
 
         # Interpolate the last timestep
-        if len(self.sfr_input) > 3:  
+        if len(self.sfr_input) > 3:
             aa = (self.sfr_input[-2] - self.sfr_input[-3])/\
                  self.history.timesteps[-2]
             bb = self.sfr_input[-2]- (self.history.tend-self.history.timesteps[-1])*aa
@@ -1062,7 +1062,7 @@ class omega( chem_evol ):
         See copy_sfr_input() for more info.
 
         '''
-   
+
         # Variable to keep track of the OMEGA's timestep
         i_dt_csa = 0
         t_csa = 0.0
@@ -1137,7 +1137,7 @@ class omega( chem_evol ):
         stellar mass.
 
         '''
-   
+
         # Get the average return gas fraction of SSPs
         if self.mass_frac_SSP == -1.0:
             f_ej = 0.35
@@ -1276,18 +1276,18 @@ class omega( chem_evol ):
         Note
         ====
 
-          The input file does not need to have constant time step lengths, and 
-          does not need to have the same number of timesteps as the number of 
+          The input file does not need to have constant time step lengths, and
+          does not need to have the same number of timesteps as the number of
           OMEGA timesteps.
 
         Important
         =========
 
           In OMEGA and SYGMA, t += timestep[i] is the first thing done in the main
-          loop.  The loop calculates what happened between the previous t and the 
+          loop.  The loop calculates what happened between the previous t and the
           new t.  This means the mass of stars formed must be SFR(previous t) *
-          timestep[i].  Therefore, sfr_input[i] IS NOT the SFR at time t += 
-          timestep[i], but rather the SFR at previous time which is used for the 
+          timestep[i].  Therefore, sfr_input[i] IS NOT the SFR at time t +=
+          timestep[i], but rather the SFR at previous time which is used for the
           current step i.
 
         Argument
@@ -1318,7 +1318,7 @@ class omega( chem_evol ):
 
                 # Extract data
                 parts_2 = [float(x) for x in line_2_str.split()]
- 
+
                 # Calculate the interpolation coefficients (SFR = a*t + b)
                 a_csi = (parts_2[1] - parts_1[1]) / (parts_2[0] - parts_1[0])
                 b_csi = parts_1[1] - a_csi * parts_1[0]
@@ -1350,7 +1350,7 @@ class omega( chem_evol ):
                     # Exit the loop if the array is full
                     if i_dt_csi >= nb_dt_csi:
                         break
-               
+
                 # Exit the loop if the array is full
                 if i_dt_csi >= nb_dt_csi:
                     break
@@ -1384,14 +1384,14 @@ class omega( chem_evol ):
     def __generate_rand_sfh(self):
 
         '''
-        This function generates a random SFH. This should only be used for 
+        This function generates a random SFH. This should only be used for
         testing purpose in order to look at how the uncertainty associated to the
         SFH can affects the results.
 
         The self.rand_sfh sets the maximum ratio between the maximum and the
         minimum values for the SFR.  This parameter sets how "bursty" or constant
         a SFH is.  self.rand_sfh = 1 means a constant SFH.
-         
+
         '''
 
         # Variable to keep track of the total stellar mass from the random SFH
@@ -1555,7 +1555,7 @@ class omega( chem_evol ):
         '''
 
         # Copy the metallicities and put them in increasing order
-        self.Z_table_SSP = copy.deepcopy(self.ytables.metallicities)
+        self.Z_table_SSP = copy.copy(self.ytables.metallicities)
         self.Z_table_first_nzero = min(self.Z_table_SSP)
         if self.popIII_info_fast and self.iniZ <= 0.0 and self.Z_trans > 0.0:
             self.Z_table_SSP.append(0.0)
@@ -1727,10 +1727,10 @@ class omega( chem_evol ):
                 # Copy the isotope mass for the boundary metallicities
                 iso_low = self.ej_SSP[i_cic][j_cic][k_cic]
                 iso_up = self.ej_SSP[i_cic+1][j_cic][k_cic]
-               
+
                 # Calculate the "a" and "b" coefficients
                 self.ej_SSP_coef[0][i_cic][j_cic][k_cic] = \
-                    (iso_up - iso_low) * dif_logZ_inv 
+                    (iso_up - iso_low) * dif_logZ_inv
                 self.ej_SSP_coef[1][i_cic][j_cic][k_cic] = iso_up - \
                     self.ej_SSP_coef[0][i_cic][j_cic][k_cic] * logZ_up
 
@@ -1741,10 +1741,10 @@ class omega( chem_evol ):
                     # Copy the isotope mass for the boundary metallicities
                     iso_low = self.ej_SSP_radio[i_cic][j_cic][k_cic]
                     iso_up = self.ej_SSP_radio[i_cic+1][j_cic][k_cic]
-               
+
                     # Calculate the "a" and "b" coefficients
                     self.ej_SSP_coef_radio[0][i_cic][j_cic][k_cic] = \
-                        (iso_up - iso_low) * dif_logZ_inv 
+                        (iso_up - iso_low) * dif_logZ_inv
                     self.ej_SSP_coef_radio[1][i_cic][j_cic][k_cic] = iso_up - \
                         self.ej_SSP_coef_radio[0][i_cic][j_cic][k_cic] * logZ_up
 
@@ -1968,7 +1968,7 @@ class omega( chem_evol ):
 
         '''
         This function calculates and returns the fit coefficients for the
-        interpolation of the evolution of the dark matter mass as a function 
+        interpolation of the evolution of the dark matter mass as a function
         of time.
 
         '''
@@ -2086,11 +2086,11 @@ class omega( chem_evol ):
 
             # If m_crit_t is wanted ...
             if self.m_crit_on:
-                
+
                 # Calculate the critical mass (Croton et al. 2006 .. modified)
                 self.m_crit_t[i_ctst] = the_constant * (0.1/2000.0) * \
                     (self.v_vir_DM_t[i_ctst] * self.r_vir_DM_t[i_ctst])**self.beta_crit
-                     
+
             # If m_crit_t is not wanted ...
             else:
 
@@ -2161,7 +2161,7 @@ class omega( chem_evol ):
     def __calculate_m_tot_ISM_t(self):
 
         '''
-        This function calculates the mass of the gas reservoir at every 
+        This function calculates the mass of the gas reservoir at every
         timestep using a classical star formation law.
 
         '''
@@ -2272,7 +2272,7 @@ class omega( chem_evol ):
     def __calculate_outflow_t(self):
 
         '''
-        This function calculates the mass-loading factor and the mass of outflow 
+        This function calculates the mass-loading factor and the mass of outflow
         at every timestep.
 
         '''
@@ -2300,7 +2300,7 @@ class omega( chem_evol ):
                     self.eta_outflow_t[i_ceo] = self.mass_loading
                     self.m_outflow_t[i_ceo] = self.eta_outflow_t[i_ceo] * \
                         self.sfr_input[i_ceo] * self.history.timesteps[i_ceo]
-                  
+
             # If the mass of the dark matter halo is evolving
             else:
 
@@ -2361,7 +2361,7 @@ class omega( chem_evol ):
 
             M_dot_ini has an extra slot in the isotopes for the time,
             which is t = 0.0 for i_ext = 0.
-         
+
         '''
 
         # For every merging galaxy (every branch of a merger tree)
@@ -2406,7 +2406,7 @@ class omega( chem_evol ):
                 while t_cur < t_ext:
 
                     # Calculate the overlap time between ext. and cur. bins
-                    dt_trans = t_cur - max([t_ext_prev, t_cur_prev]) 
+                    dt_trans = t_cur - max([t_ext_prev, t_cur_prev])
 
                     # Calculate the mass fraction that needs to be transfered
                     f_dt = dt_trans / (t_ext - t_ext_prev)
@@ -2437,7 +2437,7 @@ class omega( chem_evol ):
 
           mass_sampled : Stars sampled in the IMF by an external program.
           scale_cor : Envelope correction for the IMF.
-         
+
         '''
 
 #        if self.len_decay_file > 0:
@@ -2449,7 +2449,7 @@ class omega( chem_evol ):
             # If the IMF must be sampled ...
             if self.imf_rnd_sampling and self.m_pop_max >= \
                (self.sfr_input[i-1] * self.history.timesteps[i-1]):
-                
+
                 # Get the sampled masses
                 mass_sampled = self._get_mass_sampled(\
                     self.sfr_input[i-1] * self.history.timesteps[i-1])
@@ -2461,7 +2461,7 @@ class omega( chem_evol ):
             # Run a timestep using the input SFR
             self.run_step(i, self.sfr_input[i-1], \
                 mass_sampled=mass_sampled, scale_cor=scale_cor)
-            
+
         # Calculate the last SFR at the end point of the simulation
         if self.cl_SF_law and not self.open_box:
             self.history.sfr_abs[-1] = self.sfe_gcs * sum(self.ymgal[i])
@@ -2489,7 +2489,7 @@ class omega( chem_evol ):
           f_esc_yields: Fraction of non-contributing stellar ejecta
           mass_sampled : Stars sampled in the IMF by an external program.
           scale_cor : Envelope correction for the IMF.
-         
+
         '''
 
         # Make sure that the the number of timestep is not exceeded
@@ -2540,7 +2540,7 @@ class omega( chem_evol ):
                         f_lost = 1.0
                         if not self.print_off:
                             print ('!!Warning -- Remove more mass than available!!')
-                
+
                     # Remove the mass for each isotope
                     f_lost_2 = (1.0 - f_lost)
                     self.ymgal[i] = f_lost_2 * self.ymgal[i]
@@ -2593,7 +2593,7 @@ class omega( chem_evol ):
                                         m_inflow_current
                             for k_op in range(0, self.nb_isotopes):
                                 self.ymgal[i][k_op] += ym_inflow[k_op]
-                
+
                     # Calculate the fraction of gas removed by the outflow
                     if not (m_tot_current + m_inflow_current) == 0.0:
                         if self.len_m_gas_array > 0:
@@ -2671,7 +2671,7 @@ class omega( chem_evol ):
                     for i_tot in range(0,len(self.history.timesteps)):
                         self.m_stel_tot += self.history.sfr_abs[i_tot] * \
                             self.history.timesteps[i_tot]
-                    if self.m_stel_tot > 0.0:            
+                    if self.m_stel_tot > 0.0:
                         self.m_stel_tot = 1.0 / self.m_stel_tot
                     self.f_m_stel_tot = []
                     m_temp = 0.0
@@ -2709,7 +2709,7 @@ class omega( chem_evol ):
         # Initialization of the sampling arrays
         mass_sampled_gms = []
         m_tot_temp = 0.0
-    
+
         # Define the sampling precision in Msun
         precision = 0.01 * m_pop * self.m_frac_massive_rdm
 
@@ -2717,17 +2717,17 @@ class omega( chem_evol ):
         m_low_imf = self.transitionmass
         m_up_imf  = self.imf_bdys[1]
         dm_temp = m_up_imf - m_low_imf
-    
+
         # While the total stellar mass is not formed ...
         while abs(m_tot_temp - m_pop) > precision:
- 
+
             # Choose randomly a (m,nb) coordinate
             rand_m = m_low_imf + np.random.random_sample()*dm_temp
             rand_y = np.random.random_sample()
-        
+
             # If the coordinate is below the IMF curve
             if rand_y <= (self.A_rdm * rand_m**(-2.3)):
-            
+
                 # Add the stellar mass only if it doesn't
                 # form to much mass compared to m_pop
                 if (m_tot_temp + rand_m) - m_pop <= precision:
@@ -2836,7 +2836,7 @@ class omega( chem_evol ):
         Argument
         ========
 
-          i : Index of the timestep. 
+          i : Index of the timestep.
           m_tot_current : Total mass of the gas reservoir at step i
 
         '''
@@ -2869,7 +2869,7 @@ class omega( chem_evol ):
                 m_inflow_current = 0.0
             else:
 
-                # Calculate the mass of the inflow 
+                # Calculate the mass of the inflow
                 m_inflow_current = self.m_tot_ISM_t[i] - \
                     m_tot_current + self.m_outflow_t[i-1]
 
@@ -2898,7 +2898,7 @@ class omega( chem_evol ):
 
 
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,show_legend=True):
-    
+
         '''
         mass evolution (in Msun) of an element or isotope vs time.
 
@@ -2928,9 +2928,9 @@ class omega( chem_evol ):
         color : string
              color of line
         fig : string,float
-             to name the plot figure    
+             to name the plot figure
         show_legend : boolean
-             Default True. Show or not the legend   
+             Default True. Show or not the legend
 
         Examples
         ----------
@@ -2993,7 +2993,7 @@ class omega( chem_evol ):
         x=x[1:]
         y=y[1:]
         if multiplot==True:
-                return x,y  
+                return x,y
 
         #Reserved for plotting
         if not return_x_y:
@@ -3032,7 +3032,7 @@ class omega( chem_evol ):
 
         Parameters
         ----------
-        xaxis : string 
+        xaxis : string
             either 'age' for time
             or isotope name, in the form e.g. 'C-12'
         yaxis : string
@@ -3055,13 +3055,13 @@ class omega( chem_evol ):
         marker : string
              figure marker
         shape : string
-             line style 
+             line style
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
 
-        
+
         Examples
         ----------
 
@@ -3078,7 +3078,7 @@ class omega( chem_evol ):
         shape,marker,color=self.__msc(source,shape,marker,color)
 
         plt.figure(fig, figsize=(fsize[0],fsize[1]))
- 
+
         #Input X-axis
         if '-' in xaxis:
         #to test the different contributions
@@ -3228,11 +3228,11 @@ class omega( chem_evol ):
         marker : string
              figure marker
         shape : string
-             line style 
+             line style
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
 
         Examples
         ----------
@@ -3507,7 +3507,7 @@ class omega( chem_evol ):
                 if show_legend:
                     sub.plot(x,y,linestyle=shape,label=label,marker=marker,color=color,markevery=markevery,linewidth=linewidth)
                 else:
-                    sub.plot(x,y,linestyle=shape,marker=marker,color=color,markevery=markevery,linewidth=linewidth) 
+                    sub.plot(x,y,linestyle=shape,marker=marker,color=color,markevery=markevery,linewidth=linewidth)
 
           #If this function is supposed to plot ...
           else:
@@ -3537,7 +3537,7 @@ class omega( chem_evol ):
         '''
         Plots either gas or star mass in fraction of total mass
         vs time.
-        
+
         Parameters
         ----------
 
@@ -3568,11 +3568,11 @@ class omega( chem_evol ):
         marker : string
              figure marker
         shape : string
-             line style 
+             line style
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
 
         Examples
         ----------
@@ -3702,7 +3702,7 @@ class omega( chem_evol ):
         Parameters
         ----------
         rate : boolean
-            if true, calculate rate [1/century] 
+            if true, calculate rate [1/century]
             else calculate numbers
         fraction ; boolean
             if true, ignorate rate and calculate number fraction of SNIa per WD
@@ -3720,11 +3720,11 @@ class omega( chem_evol ):
         marker : string
              figure marker
         shape : string
-             line style 
+             line style
         color : string
              color of line
         fig : string,float
-             to name the plot figure       
+             to name the plot figure
 
         Examples
         ----------
@@ -3836,7 +3836,7 @@ class omega( chem_evol ):
                 x=age1
                 y=ratio
                 self.save_data(header=['age',label],data=[x,y])
-                return 
+                return
             else:
                     if len(rate_only)==0:
                             x=[age_sn1a,age_sn2]
@@ -3901,7 +3901,7 @@ class omega( chem_evol ):
             #out+=( ' &'+ '{:.3E}'.format(mtot_gas[t]))
             out+='\n'
         #import os.path
-        #if os.path.isfile(filename) 
+        #if os.path.isfile(filename)
         #overwrite existing file for now
         f1=open(filename,'w')
         f1.write(out)
@@ -3978,7 +3978,7 @@ class omega( chem_evol ):
             age=self.history.age
             #sfr_plot = self.history.m_locked / self.history.timesteps
             sfr_plot = self.history.sfr_abs
-            
+
             #Label and display axis
             plt.xlabel('Age [yrs]')
             plt.ylabel('SFR [Mo/yr]')
@@ -4172,7 +4172,7 @@ class omega( chem_evol ):
 
         #Plot only if in the open box scenario
         if self.open_box:
- 
+
             #Define visual aspects
             shape,marker,color=self.__msc(source,shape,marker,color)
             plt.figure(fig, figsize=(fsize[0],fsize[1]))
@@ -4375,7 +4375,7 @@ class omega( chem_evol ):
             bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
-        This function plots the dark matter halo mass of the galaxy as a 
+        This function plots the dark matter halo mass of the galaxy as a
         function of time.
 
         Parameters
@@ -4635,7 +4635,7 @@ class omega( chem_evol ):
              If False (default), show the plot.  If True, return two arrays containing
              the X and Y axis data, respectively.
         grain_notation : boolean
-             If False (default), show mass ratio.  If True, show ratio in the delta notation 
+             If False (default), show mass ratio.  If True, show ratio in the delta notation
         xaxis : string
              X axis, either 'age', an abundance ratio such as '[Fe/H]', or an
              isotopic ratio such as 'C-12/C-13'.
@@ -4838,7 +4838,7 @@ class omega( chem_evol ):
                 if xaxis_ratio:
                     x.append(yields_evol[k][idx_1]/yields_evol[k][idx_2])
                 y.append(yields_evol[k][idy_1]/yields_evol[k][idy_2])
-  
+
         # Make sure the length of array are the same when xaxis = '[X/Y]'
         too_much = len(y)-len(x)
         y = y[too_much:]
@@ -4948,7 +4948,7 @@ class omega( chem_evol ):
              Path to the solar abundances used to normalize abundance ratios.
         sigma_gauss : float
              Each point in the MDF can be associated with a gaussian. This implies
-             that in reality, the metallicity should have a certain dispersion 
+             that in reality, the metallicity should have a certain dispersion
              when stars form at each timestep (instead of using only a single
              average value).  The sigma_guass parameter sets the sigma value eac
              gaussian function.
@@ -5031,10 +5031,10 @@ class omega( chem_evol ):
                  mdf_x[i+1] < x_all[i_sim+1]:
                   mdf_y[i] += (mdf_x[i+1] - x_all[i_sim]) * f_mlocked
 
-              # Bin is totaly within the boundarie of the simulation 
+              # Bin is totaly within the boundarie of the simulation
               elif x_all[i_sim] <= mdf_x[i] and \
                 mdf_x[i+1] < x_all[i_sim+1]:
-                  mdf_y[i] += (mdf_x[i+1] - mdf_x[i]) * f_mlocked 
+                  mdf_y[i] += (mdf_x[i+1] - mdf_x[i]) * f_mlocked
 
               # Bin is overlaping the uper-boundary of the simulation
               elif x_all[i_sim] <= mdf_x[i] and \
@@ -5092,7 +5092,7 @@ class omega( chem_evol ):
         iniabu = ry.iniabu(os.path.join(nupy_path, solar_ab))
         x_ini_iso = iniabu.iso_abundance(self.history.isotopes)
 
-        # Access 
+        # Access
         elements, x_ini = self._iso_abu_to_elem(x_ini_iso)
         yields_evol = self.history.ism_elem_yield
 
@@ -5164,7 +5164,7 @@ class omega( chem_evol ):
         if norm:
             cte = 1.0 / max(mdf_y_ga)
             for i in range(0, len(mdf_y_ga)):
-                mdf_y_ga[i] = mdf_y_ga[i] * cte       
+                mdf_y_ga[i] = mdf_y_ga[i] * cte
 
         return mdf_x, mdf_y_ga
 
@@ -5188,7 +5188,7 @@ class omega( chem_evol ):
         ----------
         age : float
              Time passed since the beginning of the simulation at which abundance distribution is taken.
-             Default: Time until the formation of the pre-solar cloud. 
+             Default: Time until the formation of the pre-solar cloud.
         solar_norm: boolean
              If True, the abundances will be divide by the solar abundances.
              If False, there is no normalization.
@@ -5292,7 +5292,7 @@ class omega( chem_evol ):
         # Copy the list of selected elements
         if len(list_elem) > 0 and len(list_iso) == 0:
              print ('The list_elem option is not implemented yet..')
-        #    if elements are selected 
+        #    if elements are selected
         if True:  # Shoul be else once the list_elem is implemented..
             elem_sol_temp = self._iso_abu_to_elem(iso_sol, iso_list=iso_list)
             elem_names = elem_sol_temp[0]  # Name of element
@@ -5303,11 +5303,11 @@ class omega( chem_evol ):
 
         # Define the iso array [element][0 -> A; 1 -> abundance]
         iso_array_sol = []
-    
+
         # For all isotopes found in the solar file
         i_Z_index = -1
         for i_iso in range(0,len(solar_file.names)):
-    
+
             # Extract the name (in lower cases) and the A number
             name_temp = ''
             A_temp = ''
@@ -5319,7 +5319,7 @@ class omega( chem_evol ):
             A_temp = int(A_temp)
             iso_temp = name_temp + '-' + str(A_temp)
             name_temp_upper = name_temp.title()
-    
+
             # If the isotope or element is considered ..
             considered = False
             #if len(list_elem) > 0 and len(list_iso) == 0:
@@ -5349,7 +5349,7 @@ class omega( chem_evol ):
 
         print ('Extract abundance from closest available time ','{:.3E}'.format(ages[i_sim]),' yrs')
         print (self.history.metallicity[i_sim])
-    
+
 
         # Get the mass of elements and isotopes at the desired time
         ymgal_el_sim  = self.history.ism_elem_yield[i_sim]
@@ -5364,11 +5364,11 @@ class omega( chem_evol ):
 
         # For each selected element and isotope ..
         for i_Z_index in range(0,len(iso_array_sol)):
-    
+
             # Get the mass of the current element
             i_Z_sim = self.history.elements.index(iso_array_sol[i_Z_index][3][0])
             elem_m_frac_sim.append(ymgal_el_sim[i_Z_sim]/ism_mass_sim)
-    
+
             # For isotope having the same Z number ..
             for i_iso_index in range(0,len(iso_array_sol[i_Z_index][0])):
                 i_iso_sim = self.history.isotopes.index(iso_array_sol[i_Z_index][2][i_iso_index])
@@ -5568,5 +5568,5 @@ class omega( chem_evol ):
         f.write('Final metallicity (Z): ' + str(self.history.metallicity[-1]) + '\n')
 
         # Close the output file
-        f.close() 
+        f.close()
 
