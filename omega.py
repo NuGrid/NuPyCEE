@@ -2389,9 +2389,7 @@ class omega( chem_evol ):
                     f_dt = dt_trans / (t_ext - t_ext_prev)
 
                     # Transfer all isotopes in the current mdot array
-                    for i_iso in range(0,self.nb_isotopes):
-                        self.mdot[i_cur][i_iso] += \
-                            self.mdot_ini[i_merg][i_ext][i_iso] * f_dt
+                    self.mdot[i_cur] += self.mdot_ini[i_merg][i_ext] * f_dt
 
                     # Move to the next external bin
                     i_ext += 1
@@ -2414,9 +2412,7 @@ class omega( chem_evol ):
                     f_dt = dt_trans / (t_ext - t_ext_prev)
 
                     # Transfer all isotopes in the current mdot array
-                    for i_iso in range(0,self.nb_isotopes):
-                        self.mdot[i_cur][i_iso] += \
-                            self.mdot_ini[i_merg][i_ext][i_iso] * f_dt
+                    self.mdot[i_cur] += self.mdot_ini[i_merg][i_ext] * f_dt
 
                     # Move to the next current bin
                     i_cur += 1
@@ -4598,7 +4594,7 @@ class omega( chem_evol ):
 
             #Copy data for x and y axis
             age = self.history.age
-            redshift_plot = self.history.redshift_t
+            redshift_plot = self.redshift_t
 
             #Plot data
             plt.plot(age,redshift_plot,label=label,marker=marker,\

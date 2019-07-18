@@ -663,6 +663,7 @@ class chem_evol(object):
             self.p1 = 0.08**(-0.3 + 1.3)
             self.p2 = 0.5**(-1.3 + 2.3)
             self.p3 = 1**(-2.3 +2.3)
+            self.p1_p2 = self.p1 * self.p2
 
         # Define the broken power-law of Ferrini IMF approximation
         self.norm_fer  = [3.1,1.929,1.398,0.9113,0.538,0.3641,0.2972,\
@@ -3556,7 +3557,7 @@ class chem_evol(object):
     #          Calculate Stellar Ejecta          #
     ##############################################
     def __calculate_stellar_ejecta(self, i, f_esc_yields, mass_sampled, \
-                                   scale_cor, dm_imf=0.25):
+                                   scale_cor, dm_imf=0.5):
 
         '''
           For each upcoming timestep, including the current one,
@@ -6970,7 +6971,7 @@ class chem_evol(object):
         elif mass < 0.5:
             return self.p1 * mass**(-1.3)
         else:
-            return self.p1 * self.p2 * mass**(-2.3)
+            return self.p1_p2 * mass**(-2.3)
 
 
     ##############################################
@@ -7033,11 +7034,14 @@ class chem_evol(object):
 
         # Select the right mass regime
         if mass < 0.08:
-            return self.p0 * mass * mass**(-0.3)
+            #return self.p0 * mass * mass**(-0.3)
+             return self.p0 * mass**(0.7)
         elif mass < 0.5:
-            return self.p1 * mass * mass**(-1.3)
+#            return self.p1 * mass * mass**(-1.3)
+            return self.p1 * mass**(-0.3)
         else:
-            return self.p1 * self.p2 * mass * mass**(-2.3)
+#            return self.p1 * self.p2 * mass * mass**(-2.3)
+            return self.p1_p2 * mass**(-1.3)
 
 
     ##############################################
