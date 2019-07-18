@@ -1,5 +1,6 @@
 # coding=utf-8
-from __future__ import print_function
+from __future__ import (division, print_function, absolute_import,
+                        unicode_literals)
 
 '''
 
@@ -262,7 +263,7 @@ class omega( chem_evol ):
                  ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=30.0e6,\
                  high_mass_extrapolation='copy',\
                  table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
-                 use_decay_module=False,\
+                 use_decay_module=False, yield_tables_dir='',\
                  f_network='isotopes_modified.prn', f_format=1,\
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  bhnsmerger_table_radio='', nsmerger_table_radio='',\
@@ -297,7 +298,6 @@ class omega( chem_evol ):
                  r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
                  stellar_param_on=False, delayed_extra_log=False,\
                  delayed_extra_yields_log_int=False,\
-                 delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
                  bhnsmerger_dtd_array=np.array([]), dt_in_SSPs=np.array([]), \
                  DM_array=np.array([]), nsmerger_dtd_array=np.array([]),\
                  sfh_array=np.array([]),ism_ini=np.array([]),\
@@ -319,11 +319,11 @@ class omega( chem_evol ):
                  m_tot_ISM_t_in=np.array([]), m_inflow_X_array=np.array([]),\
                  delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
                  delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]),\
-                 delayed_extra_dtd_radio=np.array([]), delayed_extra_dtd_norm_radio=np.array([]), \
                  delayed_extra_yields_radio=np.array([]), \
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
                  ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
+                 omega_0=0.32, omega_b_0=0.05, lambda_0=0.68, H_0=67.11,\
                  test_clayton=np.array([]), inter_Z_points=np.array([]),\
                  nb_inter_Z_points=np.array([]), y_coef_M=np.array([]),\
                  y_coef_M_ej=np.array([]), y_coef_Z_aM=np.array([]),\
@@ -346,8 +346,10 @@ class omega( chem_evol ):
         (filename,line_number,function_name,text)=traceback.extract_stack()[-2]
         self.inst_name = text[:text.find('=')].strip()
 
-        # Announce the beginning of the simulation
-        print ('OMEGA run in progress..')
+        # Announce the beginning of the simulation 
+        if not print_off:
+            print ('OMEGA run in progress..')
+
         start_time = t_module.time()
         self.start_time = start_time
 
@@ -385,12 +387,11 @@ class omega( chem_evol ):
                  tau_ferrini=tau_ferrini, t_dtd_poly_split=t_dtd_poly_split, \
                  t_merge=t_merge,popIII_info_fast=popIII_info_fast,\
                  out_follows_E_rate=out_follows_E_rate,\
-                 stellar_param_on=stellar_param_on, pre_calculate_SSPs=pre_calculate_SSPs,\
                  use_external_integration=use_external_integration,\
+                 stellar_param_on=stellar_param_on, pre_calculate_SSPs=pre_calculate_SSPs,\
+                 print_off=print_off, yield_tables_dir=yield_tables_dir, \
                  ism_ini=ism_ini,ytables_in=ytables_in,\
                  delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
-                 delayed_extra_log_radio=delayed_extra_log_radio,\
-                 delayed_extra_yields_log_int_radio=delayed_extra_yields_log_int_radio,\
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
@@ -409,8 +410,6 @@ class omega( chem_evol ):
                  delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
                  delayed_extra_yields=delayed_extra_yields,\
                  delayed_extra_yields_norm=delayed_extra_yields_norm,\
-                 delayed_extra_dtd_radio=delayed_extra_dtd_radio,\
-                 delayed_extra_dtd_norm_radio=delayed_extra_dtd_norm_radio,\
                  delayed_extra_yields_radio=delayed_extra_yields_radio,\
                  delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
                  ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
@@ -551,11 +550,17 @@ class omega( chem_evol ):
         #self.H_0       = 71.9    # Hubble constant [km s^-1 Mpc^-1]
 
         # Set cosmological parameters - as in Wise et al. 2012
-        self.omega_0   = 0.266   # Current mass density parameter
-        self.omega_b_0 = 0.0449  # Current baryonic mass density parameter
-        self.lambda_0  = 0.734   # Current dark energy density parameter
-        self.H_0       = 71.0    # Hubble constant [km s^-1 Mpc^-1]
-
+        #self.omega_0   = 0.266   # Current mass density parameter
+        #self.omega_b_0 = 0.0449  # Current baryonic mass density parameter
+        #self.lambda_0  = 0.734   # Current dark energy density parameter
+        #self.H_0       = 71.0    # Hubble constant [km s^-1 Mpc^-1]
+        
+        # Set cosmological parameters - default is Planck 2013 (used in Caterpillar)
+        self.omega_0   = omega_0   # Current mass density parameter
+        self.omega_b_0 = omega_b_0 # Current baryonic mass density parameter
+        self.lambda_0  = lambda_0  # Current dark energy density parameter
+        self.H_0       = H_0       # Hubble constant [km s^-1 Mpc^-1]
+        
         # Look for errors in the input parameters
         self.__check_inputs_omega()
 
@@ -622,7 +627,7 @@ class omega( chem_evol ):
                  nb_1a_per_m=nb_1a_per_m, Z_trans=Z_trans, f_arfo=f_arfo, \
                  imf_yields_range=imf_yields_range,exclude_masses=exclude_masses,\
                  netyields_on=netyields_on,wiersmamod=wiersmamod)
-                self.mass_frac_SSP += sum(s_inst.ymgal[-1])
+                self.mass_frac_SSP += np.sum(s_inst.ymgal[-1])
 
             # Calculate the average mass fraction returned
             self.mass_frac_SSP = self.mass_frac_SSP / len(Z)
@@ -648,7 +653,7 @@ class omega( chem_evol ):
 #        if len(self.ism_ini) == 0 and not self.SF_law and not self.DM_evolution:
 #          if self.bar_ratio and not self.cl_SF_law:
 #            scale_m_tot = self.m_DM_0 * self.omega_b_0 / \
-#            (self.omega_0*sum(self.ymgal[0]))
+#            (self.omega_0*np.sum(self.ymgal[0]))
 #            for k_cm in range(len(self.ymgal[0])):
 #                self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
 
@@ -663,7 +668,7 @@ class omega( chem_evol ):
 
         # Copy the outflow-vs-SFR array and re-initialize for delayed outflow
         if out_follows_E_rate:
-            self.outflow_test = sum(self.m_outflow_t)
+            self.outflow_test = np.sum(self.m_outflow_t)
             self.m_outflow_t_vs_SFR = copy.copy(self.m_outflow_t)
             for i_ofer in range(0,self.nb_timesteps):
                 self.m_outflow_t[i_ofer] = 0.0
@@ -1177,7 +1182,7 @@ class omega( chem_evol ):
         if not self.not_enough_gas:
 
           # Scale the initial mass of all isotopes
-          scale_m_tot = m_gas_ini / sum(self.ymgal[0])
+          scale_m_tot = m_gas_ini / np.sum(self.ymgal[0])
           for k_cm in range(len(self.ymgal[0])):
               self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
 
@@ -2204,7 +2209,7 @@ class omega( chem_evol ):
             self.m_tot_ISM_t[0] = self.mgal
 
         # Scale the initial gas reservoir that was already set
-        scale_m_tot = self.m_tot_ISM_t[0] / sum(self.ymgal[0])
+        scale_m_tot = self.m_tot_ISM_t[0] / np.sum(self.ymgal[0])
         for k_cm in range(len(self.ymgal[0])):
             self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
 
@@ -2464,7 +2469,7 @@ class omega( chem_evol ):
 
         # Calculate the last SFR at the end point of the simulation
         if self.cl_SF_law and not self.open_box:
-            self.history.sfr_abs[-1] = self.sfe_gcs * sum(self.ymgal[i])
+            self.history.sfr_abs[-1] = self.sfe_gcs * np.sum(self.ymgal[i])
 
 
     ##############################################
@@ -2544,6 +2549,8 @@ class omega( chem_evol ):
                     # Remove the mass for each isotope
                     f_lost_2 = (1.0 - f_lost)
                     self.ymgal[i] = f_lost_2 * self.ymgal[i]
+
+                    # Radioactive isotopes lost
                     if self.len_decay_file > 0:
                         self.ymgal_radio[i] = f_lost_2 * self.ymgal_radio[i]
                     if not self.pre_calculate_SSPs:
@@ -2761,7 +2768,7 @@ class omega( chem_evol ):
 
         # If the SFR is calculated from a star formation law (closed box)
         if self.cl_SF_law and not self.open_box:
-            self.history.sfr_abs[i-1] = self.sfe_gcs * sum(self.ymgal[i-1])
+            self.history.sfr_abs[i-1] = self.sfe_gcs * np.sum(self.ymgal[i-1])
             self.sfrin = self.history.sfr_abs[i-1] * self.history.timesteps[i-1]
 
         else:
@@ -3094,9 +3101,9 @@ class omega( chem_evol ):
             x=[]
             for k in range(1,len(yields_evol)):
                if norm=='no':
-                   x.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
+                   x.append(yields_evol[k][iso_idx]/np.sum(yields_evol[k]))
                if norm=='ini':
-                   x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
+                   x.append(yields_evol[k][iso_idx]/np.sum(yields_evol[k])/yields_evol[0][iso_idx])
             plt.xlabel('log-scaled X('+xaxis+')')
             plt.xscale('log')
         elif 'age' == xaxis:
@@ -3120,9 +3127,9 @@ class omega( chem_evol ):
             x=[]
             for k in range(1,len(yields_evol)):
                 if norm=='no':
-                    x.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
+                    x.append(yields_evol[k][iso_idx]/np.sum(yields_evol[k]))
                 if norm=='ini':
-                    x.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
+                    x.append(yields_evol[k][iso_idx]/np.sum(yields_evol[k])/yields_evol[0][iso_idx])
                     print (yields_evol[0][iso_idx])
 
             plt.xlabel('log-scaled X('+xaxis+')')
@@ -3147,12 +3154,12 @@ class omega( chem_evol ):
                 x_age=x
                 x=[]
             for k in range(1,len(yields_evol)):
-                if sum(yields_evol[k]) ==0:
+                if np.sum(yields_evol[k]) ==0:
                     continue
                 if norm=='no':
-                    y.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
+                    y.append(yields_evol[k][iso_idx]/np.sum(yields_evol[k]))
                 if norm=='ini':
-                    y.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
+                    y.append(yields_evol[k][iso_idx]/np.sum(yields_evol[k])/yields_evol[0][iso_idx])
 
                 x.append(x_age[k])
             plt.ylabel('X('+yaxis+')')
@@ -3178,12 +3185,12 @@ class omega( chem_evol ):
                 x_age=x
                 x=[]
             for k in range(1,len(yields_evol)):
-                if sum(yields_evol[k]) ==0:
+                if np.sum(yields_evol[k]) ==0:
                     continue
                 if norm=='no':
-                    y.append(yields_evol[k][iso_idx]/sum(yields_evol[k]))
+                    y.append(yields_evol[k][iso_idx]/np.sum(yields_evol[k]))
                 if norm=='ini':
-                    y.append(yields_evol[k][iso_idx]/sum(yields_evol[k])/yields_evol[0][iso_idx])
+                    y.append(yields_evol[k][iso_idx]/np.sum(yields_evol[k])/yields_evol[0][iso_idx])
 
                 x.append(x_age[k])
             #plt.yscale('log')
@@ -3327,6 +3334,7 @@ class omega( chem_evol ):
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
         elements = self.history.elements
         x_ini = self._iso_abu_to_elem(x_ini_iso)
+
         #to test the different contributions
         if source == 'all':
             yields_evol=self.history.ism_elem_yield
@@ -3374,11 +3382,11 @@ class omega( chem_evol ):
 
             x=[]
             for k in range(0,len(yields_evol)):
-                if sum(yields_evol[k]) ==0:
+                if np.sum(yields_evol[k]) ==0:
                     continue
                 #in case no contribution during timestep
-                x1=yields_evol[k][elem_idx1]/sum(yields_evol[k])
-                x2=yields_evol[k][elem_idx2]/sum(yields_evol[k])
+                x1=yields_evol[k][elem_idx1]/np.sum(yields_evol[k])
+                x2=yields_evol[k][elem_idx2]/np.sum(yields_evol[k])
                 if x1 <= 0.0 or x2 <= 0.0:
                     spec = -30.0
                 else:
@@ -3426,11 +3434,11 @@ class omega( chem_evol ):
             x_age=x
             x=[]
         for k in range(0,len(yields_evol)):
-            if sum(yields_evol[k]) ==0:
+            if np.sum(yields_evol[k]) ==0:
                 continue
             #in case no contribution during timestep
-            x1=yields_evol[k][elem_idx1]/sum(yields_evol[k])
-            x2=yields_evol[k][elem_idx2]/sum(yields_evol[k])
+            x1=yields_evol[k][elem_idx1]/np.sum(yields_evol[k])
+            x2=yields_evol[k][elem_idx2]/np.sum(yields_evol[k])
             if x1 <= 0.0 or x2 <= 0.0:
                 spec = -30.0
             else:
@@ -3628,7 +3636,7 @@ class omega( chem_evol ):
                 yields_evol=self.history.ism_elem_yield_massive
             gas_evol=[]
             for k in range(len(yields_evol)):
-                gas_evol.append(sum(yields_evol[k]))
+                gas_evol.append(np.sum(yields_evol[k]))
 
         ism_gasm=[]
         star_m=[]
@@ -4029,7 +4037,7 @@ class omega( chem_evol ):
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
         #print ('Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:')
-        #print (sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive))
+        #print (np.sum(self.history.m_locked),np.sum(self.history.m_locked_agb),np.sum(self.history.m_locked_massive))
 
 
     def __time_to_z(self,time,Hubble_0,Omega_lambda,Omega_m):
@@ -4694,7 +4702,8 @@ class omega( chem_evol ):
         #Access solar abundance
         iniabu=ry.iniabu(os.path.join(nupy_path, solar_ab))
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
-        elements,x_ini=self._iso_abu_to_elem(x_ini_iso)
+        elements = self.history.elements
+        x_ini=self._iso_abu_to_elem(x_ini_iso)
 
         # Get the wanted source
         if source == 'all':
@@ -4734,11 +4743,11 @@ class omega( chem_evol ):
             elem_idx2=self.history.elements.index(xaxis_elem2)
 
             for k in range(0,len(yields_evol_el)):
-                if sum(yields_evol_el[k]) == 0:
+                if np.sum(yields_evol_el[k]) == 0:
                     continue
                 #in case no contribution during timestep
-                x1=yields_evol_el[k][elem_idx1]/sum(yields_evol_el[k])
-                x2=yields_evol_el[k][elem_idx2]/sum(yields_evol_el[k])
+                x1=yields_evol_el[k][elem_idx1]/np.sum(yields_evol_el[k])
+                x2=yields_evol_el[k][elem_idx2]/np.sum(yields_evol_el[k])
                 spec=np.log10(x1/x2) - np.log10(x_elem1_ini/x_elem2_ini)
                 x.append(spec)
         else:
@@ -5092,8 +5101,10 @@ class omega( chem_evol ):
         iniabu = ry.iniabu(os.path.join(nupy_path, solar_ab))
         x_ini_iso = iniabu.iso_abundance(self.history.isotopes)
 
-        # Access
-        elements, x_ini = self._iso_abu_to_elem(x_ini_iso)
+        # Access 
+        elements = self.history.elements
+        x_ini = self._iso_abu_to_elem(x_ini_iso)
+     
         yields_evol = self.history.ism_elem_yield
 
         # Isolate the X and Y in [X/Y]
@@ -5112,8 +5123,8 @@ class omega( chem_evol ):
         x_no_inf = []
         # Calculate [X/Y] at each timestep
         for k in range(0,len(yields_evol)):
-            x1 = yields_evol[k][elem_idx1] / sum(yields_evol[k])
-            x2 = yields_evol[k][elem_idx2] / sum(yields_evol[k])
+            x1 = yields_evol[k][elem_idx1] / np.sum(yields_evol[k])
+            x2 = yields_evol[k][elem_idx2] / np.sum(yields_evol[k])
             spec = np.log10(x1/x2) - np.log10(x_elem1_ini/x_elem2_ini)
             if np.isfinite(spec):
                 x_no_inf.append(spec)
@@ -5172,7 +5183,8 @@ class omega( chem_evol ):
     ##############################################
     #                 Plot Abun                  #
     ##############################################
-    def plot_abun(self, fig=20, age=9.2e9,\
+        '''
+        def plot_abun(self, fig=20, age=9.2e9,\
         solar_norm=False, iso_on=False,\
         list_elem=[], list_iso=[],return_x_y=False, over_plot_solar=False,\
         solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn', species_labels=True,f_y_annotate=0.9,\
@@ -5180,6 +5192,7 @@ class omega( chem_evol ):
         fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,\
         legend_fontsize=14, markersize=5):
 
+        '''
         '''
         This function plots the abundance distribution in mass
         fraction at any given point in time or at any given metallicity.
@@ -5254,6 +5267,7 @@ class omega( chem_evol ):
              Size of the markers
              Default: markersize=5
 
+        '''
         '''
 
         import matplotlib
@@ -5354,7 +5368,7 @@ class omega( chem_evol ):
         # Get the mass of elements and isotopes at the desired time
         ymgal_el_sim  = self.history.ism_elem_yield[i_sim]
         ymgal_iso_sim = self.history.ism_iso_yield[i_sim]
-        ism_mass_sim = sum(ymgal_el_sim)
+        ism_mass_sim = np.sum(ymgal_el_sim)
 
         # Define the predicted element and isotope mass fractions
         elem_m_frac_sim = []
@@ -5471,6 +5485,7 @@ class omega( chem_evol ):
             ax=plt.gca()
             self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,\
                rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize, markersize=markersize)
+        '''
 
 
     ##############################################
@@ -5560,8 +5575,8 @@ class omega( chem_evol ):
         # Write galaxy properties
         f.write('\nGalaxy properties\n')
         f.write('=================\n')
-        f.write('Initial mass of gas: '+str("%.4g" % sum(self.ymgal[0]))+' [Msun]\n')
-        f.write('Final mass of gas: '+str("%.4g" % sum(self.ymgal[-1]))+' [Msun]\n')
+        f.write('Initial mass of gas: '+str("%.4g" % np.sum(self.ymgal[0]))+' [Msun]\n')
+        f.write('Final mass of gas: '+str("%.4g" % np.sum(self.ymgal[-1]))+' [Msun]\n')
         f.write('Final CC/Ia SN ratio: '+\
                  str("%.4g" % (self.history.sn2_numbers[-1]/\
                  self.history.sn1a_numbers[-1])+'\n'))

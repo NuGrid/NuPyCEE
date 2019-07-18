@@ -1,5 +1,6 @@
 # coding=utf-8
-from __future__ import print_function
+from __future__ import (division, print_function, absolute_import,
+                        unicode_literals)
 
 '''
 
@@ -46,7 +47,7 @@ JAN2019: B. Cote
 - Re-included radioactive isotopes with the new (improved) yield treatment
 
 FEB2019: A. Yagüe, B. Cote
-- Optimized to code to run faster
+- Optimized to code to run faster (integration method)
 
 Usage
 =====
@@ -175,7 +176,7 @@ class chem_evol(object):
 
         Default value : 0.0
 
-    Z_trans : floatRJS
+    Z_trans : float
         Variable used when interpolating stellar yields as a function of Z.
         Transition Z below which PopIII yields are used, and above which default
         yields are used.
@@ -286,6 +287,13 @@ class chem_evol(object):
         Path pointing toward the table of initial abuncances in mass fraction.
 
         Default value : 'yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+
+    yield_tables_dir : string
+        Path to a custom directory that includes yields.
+        !! It needs to point to the directory where the yields directory is !!
+        This will bypass the default yields directory.
+
+        Default value : '' --> Deactivated
 
     yield_interp : string
         if 'None' : no yield interpolation, no interpolation of total ejecta
@@ -461,6 +469,7 @@ class chem_evol(object):
              exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=0.0, \
              f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
              netyields_on=False,wiersmamod=False,yield_interp='lin',\
+             print_off=False, yield_tables_dir='',\
              total_ejecta_interp=True, tau_ferrini=False,\
              input_yields=False,t_merge=-1.0,stellar_param_on=False,\
              stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',\
@@ -540,7 +549,7 @@ class chem_evol(object):
         self.popIII_info_fast = popIII_info_fast
         self.imf_bdys_pop3=imf_bdys_pop3
         self.imf_yields_range_pop3=imf_yields_range_pop3
-        self.imf_pop3_char_mass=imf_pop3_char_mass # RJS
+        self.imf_pop3_char_mass=imf_pop3_char_mass
         self.high_mass_extrapolation = high_mass_extrapolation
         self.extra_source_on = extra_source_on
         self.f_extra_source= f_extra_source
@@ -620,6 +629,8 @@ class chem_evol(object):
         self.pritchet_1a_dtd = pritchet_1a_dtd
         self.len_pritchet_1a_dtd = len(pritchet_1a_dtd)
         self.use_external_integration = use_external_integration
+        self.yield_tables_dir = yield_tables_dir
+        self.print_off = print_off
 
         # Attributes associated with radioactive species
         self.table_radio = table_radio
@@ -647,8 +658,6 @@ class chem_evol(object):
         self.test_clayton = test_clayton
         self.use_decay_module = use_decay_module
         if self.use_decay_module:
-#            print('In construction .. decay_module deactivated.')
-#            return
             self.f_network = f_network
             self.f_format = f_format
             self.__initialize_decay_module()
@@ -833,7 +842,7 @@ class chem_evol(object):
 
         # Create empty arrays if on the fast mode
         if self.pre_calculate_SSPs:
-            self.history.gas_mass.append(sum(ymgal[0]))
+            self.history.gas_mass.append(np.sum(ymgal[0]))
             self.history.ism_iso_yield.append(ymgal[0])
             self.history.m_locked = []
             self.history.m_locked_agb = []
@@ -843,7 +852,7 @@ class chem_evol(object):
 
         # Add the initialized arrays to the history class
         else:
-            self.history.gas_mass.append(sum(ymgal[0]))
+            self.history.gas_mass.append(np.sum(ymgal[0]))
             self.history.ism_iso_yield.append(ymgal[0])
             self.history.ism_iso_yield_agb.append(ymgal_agb[0])
             self.history.ism_iso_yield_1a.append(ymgal_1a[0])
@@ -906,6 +915,16 @@ class chem_evol(object):
             self.mdot_nsm_radio = mdot_nsm_radio
             self.mdot_bhnsm_radio = mdot_bhnsm_radio
             self.mdot_delayed_extra_radio = mdot_delayed_extra_radio
+
+        # Declare non-metals for the getmetallicity function
+        self.nonmetals = ['H-','He-','Li-']
+        self.i_nonmetals = []
+        for i_iso in range(self.nb_isotopes):
+            if 'H-' in self.history.isotopes[i_iso] or\
+               'He-' in self.history.isotopes[i_iso] or\
+               'Li-' in self.history.isotopes[i_iso]:
+                self.i_nonmetals.append(i_iso)
+        self.len_i_nonmetals = len(self.i_nonmetals)
 
         # Set the initial time and metallicity
         zmetal = self._getmetallicity(0)
@@ -3493,13 +3512,13 @@ class chem_evol(object):
         if self.pre_calculate_SSPs:
             self.history.metallicity.append(self.zmetal)
             #self.history.age.append(self.t)
-            self.history.gas_mass.append(sum(self.ymgal[i]))
+            self.history.gas_mass.append(np.sum(self.ymgal[i]))
             self.history.ism_iso_yield.append(self.ymgal[i])
             self.history.m_locked.append(self.m_locked)
         else:
             self.history.metallicity.append(self.zmetal)
             #self.history.age.append(self.t)
-            self.history.gas_mass.append(sum(self.ymgal[i]))
+            self.history.gas_mass.append(np.sum(self.ymgal[i]))
             self.history.ism_iso_yield.append(self.ymgal[i])
 #            self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
 #            self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
@@ -4324,19 +4343,23 @@ class chem_evol(object):
             'Sg', 'Bh', 'Hs', 'Mt', 'Uun', 'Uuu', 'Uub', 'zzz', \
             'Uuq']
 
-        # Number is isotope entry in the fortran decay module
+        # Number of isotope entry in the fortran decay module
         self.len_iso_module = len(decay_module.iso.z)
 
         # Find the isotope name associated with each isotope entry
+        # Isolate the mass number A
         self.iso_decay_module = ['']*self.len_iso_module
+        self.A_mass_iso_decay_module = np.zeros(self.len_iso_module)
         for i_iso in range(self.len_iso_module):
           if decay_module.iso.z[i_iso] == 0:
             self.iso_decay_module[i_iso] = 'Nn-1'
+            self.A_mass_iso_decay_module[i_iso] = 1.0
           else:
             self.iso_decay_module[i_iso] = \
               self.element_names[decay_module.iso.z[i_iso]] + '-' + \
                 str(decay_module.iso.z[i_iso]+decay_module.iso.n[i_iso])
-
+            self.A_mass_iso_decay_module[i_iso] = \
+              float(decay_module.iso.z[i_iso]+decay_module.iso.n[i_iso])
         # Year to second conversion
         self.yr_to_sec = 3.154e+7
 
@@ -4408,6 +4431,7 @@ class chem_evol(object):
         '''
 
         # Get the initial abundances of radioactive isotopes
+        # This is in number of particles, not mass
         init_abun = self.__get_init_abun_decay(i)
 
         # Call the decay module
@@ -4417,6 +4441,9 @@ class chem_evol(object):
         need_resize = False
         for i_iso in range(self.len_iso_module):
             if decay_module.iso.abundance[i_iso] > 0.0 or init_abun[i_iso] > 0.0:
+
+                # Convert number of particles into masses
+                decay_module.iso.abundance[i_iso] *= self.A_mass_iso_decay_module[i_iso]
 
                 # Replace the unstable component by the decayed product
                 if self.iso_decay_module[i_iso] in self.radio_iso:
@@ -4473,7 +4500,8 @@ class chem_evol(object):
             i_temp = self.iso_decay_module.index(self.radio_iso[i_iso])
 
             # Copy the mass of the isotope
-            init_abun_temp[i_temp] = copy.deepcopy(self.ymgal_radio[i][i_iso])
+            init_abun_temp[i_temp] = self.ymgal_radio[i][i_iso] / \
+                                     self.A_mass_iso_decay_module[i_temp]
 
         # Return the initial abundance
         return init_abun_temp
@@ -5417,8 +5445,13 @@ class chem_evol(object):
         for i_extra in range(0,self.nb_delayed_extra):
 
             # Get the yields and metallicity indexes of the considered source
-            Z_extra, yextra_low, yextra_up, iZ_low, iZ_up = \
-                self.__get_YZ_delayed_extra(i_extra)
+            if self.len_decay_file > 0:
+                Z_extra, yextra_low, yextra_up, yextra_low_radio, \
+                    yextra_up_radio, iZ_low, iZ_up = \
+                        self.__get_YZ_delayed_extra(i_extra, return_radio=True)
+            else:
+                Z_extra, yextra_low, yextra_up, iZ_low, iZ_up = \
+                    self.__get_YZ_delayed_extra(i_extra)
          
             # Initialize age of the latest SSP, which cumulate in loop
             tt = 0
@@ -5445,9 +5478,15 @@ class chem_evol(object):
               if timemax > tmin_extra:
 
                 # Get the total number of sources and yields (interpolated)
-                nb_sources_extra_tot, yields_extra_interp = \
-                    self.__get_nb_y_interp(timemin, timemax, i_extra, iZ_low, iZ_up,\
-                        yextra_low, yextra_up, Z_extra)
+                if self.len_decay_file > 0:
+                    nb_sources_extra_tot, yields_extra_interp, yields_extra_interp_radio = \
+                        self.__get_nb_y_interp(timemin, timemax, i_extra, iZ_low, iZ_up,\
+                            yextra_low, yextra_up, Z_extra, yextra_low_radio=yextra_low_radio,\
+                                yextra_up_radio=yextra_up_radio, return_radio=True)
+                else:
+                    nb_sources_extra_tot, yields_extra_interp = \
+                        self.__get_nb_y_interp(timemin, timemax, i_extra, iZ_low, iZ_up,\
+                            yextra_low, yextra_up, Z_extra)
 
                 # Calculate the number of sources in the current SSP (not per Msun)
                 self.delayed_extra_numbers[i_extra][j] += nb_sources_extra_tot
@@ -5457,11 +5496,17 @@ class chem_evol(object):
                     np.array(self.mdot_delayed_extra[i_extra][j]) + yields_extra_interp
                 self.mdot[j] = np.array(self.mdot[j]) + yields_extra_interp
 
+                # Add the radioactive contribution
+                if self.len_decay_file > 0:
+                    self.mdot_delayed_extra_radio[i_extra][j] = \
+                        np.array(self.mdot_delayed_extra_radio[i_extra][j]) + yields_extra_interp_radio
+                    self.mdot_radio[j] = np.array(self.mdot_radio[j]) + yields_extra_interp_radio
+
 
     #############################################
     #             Get YZ Delayed Extra          #
     #############################################
-    def __get_YZ_delayed_extra(self, i_extra):
+    def __get_YZ_delayed_extra(self, i_extra, return_radio=False):
 
         '''
         This function returns the yields, metallicities, and Z boundary indexes
@@ -5503,16 +5548,25 @@ class chem_evol(object):
             Z=Z_extra[iZ_low], quantity='Yields')
         yextra_up  = self.ytables_delayed_extra[i_extra].get( \
             Z=Z_extra[iZ_up],  quantity='Yields')
+        if return_radio:
+            yextra_low_radio = self.ytables_delayed_extra_radio[i_extra].get( \
+                Z=Z_extra[iZ_low], quantity='Yields')
+            yextra_up_radio  = self.ytables_delayed_extra_radio[i_extra].get( \
+                Z=Z_extra[iZ_up],  quantity='Yields')
 
         # Return the metallicities and the yields and Z boundaries
-        return Z_extra, yextra_low, yextra_up, iZ_low, iZ_up
+        if return_radio:
+            return Z_extra, yextra_low, yextra_up, yextra_low_radio, yextra_up_radio, iZ_low, iZ_up
+        else:
+            return Z_extra, yextra_low, yextra_up, iZ_low, iZ_up
 
 
     #############################################
     #               Get Nb Y Interp             #
     #############################################
     def __get_nb_y_interp(self, timemin, timemax, i_extra, iZ_low, iZ_up,\
-                          yextra_low, yextra_up, Z_extra):
+                          yextra_low, yextra_up, Z_extra, yextra_low_radio=[],\
+                          yextra_up_radio=[], return_radio=False):
 
         '''
         This function returns the yields, metallicities, and Z boundary indexes
@@ -5542,12 +5596,18 @@ class chem_evol(object):
         # Calculate the total ejecta (yields) for the lower Z
         ejecta_Z_low = np.array(nb_sources_low * self.m_locked *
             yextra_low * self.delayed_extra_yields_norm[i_extra][iZ_low])
+        if return_radio:
+            ejecta_Z_low_radio = np.array(nb_sources_low * self.m_locked *
+                yextra_low_radio * self.delayed_extra_yields_norm_radio[i_extra][iZ_low])
 
         # If we do not need to interpolate between Z
         if iZ_up == iZ_low:
 
             # Return the total number of sources and ejecta for the lower Z
-            return nb_sources_low * self.m_locked, ejecta_Z_low
+            if return_radio:
+                return nb_sources_low * self.m_locked, ejecta_Z_low, ejecta_Z_low_radio
+            else:
+                return nb_sources_low * self.m_locked, ejecta_Z_low
 
         # If we need to interpolate between Z
         else:
@@ -5559,9 +5619,12 @@ class chem_evol(object):
             # This needs to be before calculating ejecta_Z_up!
             nb_sources_up *= self.delayed_extra_dtd_A_norm[i_extra][iZ_up]
 
-            # Calculate the total ejecta (yields) for the lower Z
+            # Calculate the total ejecta (yields) for the upper Z
             ejecta_Z_up = np.array(nb_sources_up * self.m_locked *
                 yextra_up * self.delayed_extra_yields_norm[i_extra][iZ_up])
+            if return_radio:
+                ejecta_Z_up_radio = np.array(nb_sources_up * self.m_locked *
+                    yextra_up_radio * self.delayed_extra_yields_norm_radio[i_extra][iZ_up])
 
             # Interpolate the number of sources (N = aa*log10(Z) + bb)
             aa = (nb_sources_up - nb_sources_low) / \
@@ -5580,20 +5643,41 @@ class chem_evol(object):
                         ejecta_Z_up[i_iso_temp] = -50.0
                     else:
                         ejecta_Z_up[i_iso_temp] = np.log10(ejecta_Z_up[i_iso_temp])
+                if return_radio:
+                    for i_iso_temp in range(self.nb_radio_iso):
+                        if ejecta_Z_low_radio[i_iso_temp] == 0.0:
+                            ejecta_Z_low_radio[i_iso_temp] = -50.0
+                        else:
+                            ejecta_Z_low_radio[i_iso_temp] = np.log10(ejecta_Z_low_radio[i_iso_temp])
+                        if ejecta_Z_up_radio[i_iso_temp] == 0.0:
+                            ejecta_Z_up_radio[i_iso_temp] = -50.0
+                        else:
+                            ejecta_Z_up_radio[i_iso_temp] = np.log10(ejecta_Z_up_radio[i_iso_temp])
 
             # Interpolate the yields (Y = aa*log10(Z) + bb)
             aa = (ejecta_Z_up - ejecta_Z_low) / \
                  (np.log10(Z_extra[iZ_up]) - np.log10(Z_extra[iZ_low]))
             bb = ejecta_Z_up - aa * np.log10(Z_extra[iZ_up])
             ejecta_interp = aa * np.log10(self.zmetal) + bb
+            if return_radio:
+                aa = (ejecta_Z_up_radio - ejecta_Z_low_radio) / \
+                     (np.log10(Z_extra[iZ_up]) - np.log10(Z_extra[iZ_low]))
+                bb = ejecta_Z_up_radio - aa * np.log10(Z_extra[iZ_up])
+                ejecta_interp_radio = aa * np.log10(self.zmetal) + bb
 
             # Convert interpolated yields back into linear scale if needed ..
             if self.delayed_extra_yields_log_int:
                 for i_iso_temp in range(self.nb_isotopes):
                     ejecta_interp[i_iso_temp] = 10**(ejecta_interp[i_iso_temp])
+                if return_radio:
+                    for i_iso_temp in range(self.nb_radio_iso):
+                        ejecta_interp_radio[i_iso_temp] = 10**(ejecta_interp_radio[i_iso_temp])
 
             # Return the total number of sources and ejecta for the interpolation
-            return nb_sources_interp * self.m_locked, ejecta_interp
+            if return_radio:
+                return nb_sources_interp * self.m_locked, ejecta_interp, ejecta_interp_radio
+            else:
+                return nb_sources_interp * self.m_locked, ejecta_interp
 
 
     #############################################
@@ -6619,7 +6703,7 @@ class chem_evol(object):
                 self.imfnorm = 1.0 / quad(self.__g2_kroupa, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
-        elif self.imf_type == 'lognormal': # RJS
+        elif self.imf_type == 'lognormal':
             # Choose the right option
             if inte == 0:
                 return self.imfnorm * self.__g1_log_normal(mass)
@@ -7034,13 +7118,10 @@ class chem_evol(object):
 
         # Select the right mass regime
         if mass < 0.08:
-            #return self.p0 * mass * mass**(-0.3)
              return self.p0 * mass**(0.7)
         elif mass < 0.5:
-#            return self.p1 * mass * mass**(-1.3)
             return self.p1 * mass**(-0.3)
         else:
-#            return self.p1 * self.p2 * mass * mass**(-2.3)
             return self.p1_p2 * mass**(-1.3)
 
 
@@ -7165,7 +7246,7 @@ class chem_evol(object):
         # Calculate the isotope mass fractions of the gas reservoir
         X_ymgal_t = []
         for p in range(len(ymgal_t)):
-            X_ymgal_t.append(ymgal_t[p] / sum(ymgal_t))
+            X_ymgal_t.append(ymgal_t[p] / np.sum(ymgal_t))
  
         if not Z_gridpoint==0: #X0 is not in popIII tables and not necessary for popIII setting
              # Get the initial abundances used for the stellar model calculation
@@ -7304,15 +7385,9 @@ class chem_evol(object):
         if self.hardsetZ >= 0:
             zmetal = self.hardsetZ
             return zmetal
-        
-        # Calculate the total mass and the mass of metals
-        mgastot = 0.e0
-        mmetal = 0.e0
-        nonmetals = ['H-1','H-2','H-3','He-3','He-4','Li-6','Li-7']
-        for k in range(len(self.history.isotopes)):
-            mgastot = mgastot + self.ymgal[i][k]
-            if not self.history.isotopes[k] in nonmetals:
-                mmetal = mmetal + self.ymgal[i][k]
+
+        # Calculate the total mass 
+        mgastot = np.sum(self.ymgal[i])
 
         # In the case where there is no gas left
         if mgastot == 0.0:
@@ -7320,18 +7395,10 @@ class chem_evol(object):
 
         # If gas left, calculate the mass fraction of metals
         else:
-            zmetal = mmetal / mgastot
-
-        # Output information
-        if self.iolevel > 0:
-            error = 0
-            for k in range(len(self.ymgal[i])):
-                if self.ymgal[i][k] < 0:
-                    print ('check current ymgal[i] ISM mass')
-                    print ('ymgal[i][k]<0',self.ymgal[i][k],self.history.isotopes[k])
-                    error = 1
-                if error == 1:
-                    sys.exit('ERROR: zmetal<0 in getmetal routine')
+            m_non_metal = 0.0
+            for i_nm in range(self.len_i_nonmetals):
+                m_non_metal += self.ymgal[i][self.i_nonmetals[i_nm]]
+            zmetal = 1.0 - m_non_metal / mgastot
 
         # Return the metallicity of the gas reservoir
         return zmetal

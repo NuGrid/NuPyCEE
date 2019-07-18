@@ -1,4 +1,5 @@
-from __future__ import print_function
+from __future__ import (division, print_function, absolute_import,
+                        unicode_literals)
 
 '''
 
@@ -89,7 +90,6 @@ For example with artificial yields of only H-1, you can try
 # Import standard python packages
 import os
 
-
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
 nupy_path = os.path.dirname(os.path.realpath(__file__))
@@ -130,7 +130,7 @@ class sygma( chem_evol ):
                  ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  bhnsmerger_table_radio='', nsmerger_table_radio='',\
-                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t03.txt',sn1a_energy=1e51,\
+                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_i99_W7.txt',sn1a_energy=1e51,\
                  ns_merger_on=False, bhns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
                  t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
                  m_ej_bhnsm=2.5e-02, \
@@ -141,7 +141,7 @@ class sygma( chem_evol ):
                  f_extra_source=[1.0], pre_calculate_SSPs=False, \
                  extra_source_mass_range=[[8,30]], \
                  extra_source_exclude_Z=[[]], \
-                 total_ejecta_interp=True,\
+                 total_ejecta_interp=True, yield_tables_dir='',\
                  high_mass_extrapolation='copy',\
                  radio_refinement=100, use_decay_module=False,\
                  f_network='isotopes_modified.prn', f_format=1,\
@@ -154,7 +154,6 @@ class sygma( chem_evol ):
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
                  stellar_param_on=False, t_dtd_poly_split=-1.0, \
                  delayed_extra_yields_log_int=False, \
-                 delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
                  stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
                  tau_ferrini=False, delayed_extra_log=False, dt_in=np.array([]),\
                  nsmerger_dtd_array=np.array([]), bhnsmerger_dtd_array=np.array([]),\
@@ -166,7 +165,6 @@ class sygma( chem_evol ):
                  ytables_nsmerger_in=np.array([]), dt_split_info=np.array([]),\
                  delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
                  delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]), \
-                 delayed_extra_dtd_radio=np.array([]), delayed_extra_dtd_norm_radio=np.array([]), \
                  delayed_extra_yields_radio=np.array([]), ism_ini_radio=np.array([]), \
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
@@ -188,7 +186,7 @@ class sygma( chem_evol ):
                  f_binary=f_binary, f_merger=f_merger, \
                  bhns_merger_on=bhns_merger_on,
                  m_ej_bhnsm=m_ej_bhnsm, bhnsmerger_table=bhnsmerger_table, \
-                 nsm_dtd_power=nsm_dtd_power, \
+                 nsm_dtd_power=nsm_dtd_power, yield_tables_dir=yield_tables_dir, \
                  total_ejecta_interp=total_ejecta_interp, \
                  t_merger_max=t_merger_max, m_ej_nsm = m_ej_nsm, \
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
@@ -208,9 +206,6 @@ class sygma( chem_evol ):
                  netyields_on=netyields_on,wiersmamod=wiersmamod,\
                  yield_interp=yield_interp, tau_ferrini=tau_ferrini,\
                  delayed_extra_log=delayed_extra_log,\
-                 delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
-                 delayed_extra_log_radio=delayed_extra_log_radio,\
-                 delayed_extra_yields_log_int_radio=delayed_extra_yields_log_int_radio,\
                  ytables_in=ytables_in, nsmerger_dtd_array=nsmerger_dtd_array, \
                  bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
@@ -225,8 +220,6 @@ class sygma( chem_evol ):
                  delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
                  delayed_extra_yields=delayed_extra_yields,\
                  delayed_extra_yields_norm=delayed_extra_yields_norm,\
-                 delayed_extra_dtd_radio=delayed_extra_dtd_radio,\
-                 delayed_extra_dtd_norm_radio=delayed_extra_dtd_norm_radio,\
                  delayed_extra_yields_radio=delayed_extra_yields_radio,\
                  delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
                  ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
@@ -599,7 +592,6 @@ class sygma( chem_evol ):
 
         '''
 
-        import read_yields as ry
         import re
         import matplotlib.pyplot as plt
         y_table=ry.read_nugrid_yields(os.path.join(nupy_path, table))
@@ -662,7 +654,6 @@ class sygma( chem_evol ):
 
         '''
 
-        import read_yields as ry
         import re
         import matplotlib.pyplot as plt
         y_table=ry.read_nugrid_yields(os.path.join(nupy_path, table))
@@ -884,7 +875,6 @@ class sygma( chem_evol ):
 
 
         '''
-        import read_yields as ry
         import re
         import matplotlib.pyplot as plt
 
@@ -1708,7 +1698,8 @@ class sygma( chem_evol ):
                     'iniab2.0E-02GN93.ppn'))
 
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
-        elements,x_ini=self._iso_abu_to_elem(x_ini_iso)
+        elements = self.history.elements
+        x_ini=self._iso_abu_to_elem(x_ini_iso)
         #to test the different contributions
         if source == 'all':
             yields_evol=self.history.ism_elem_yield
