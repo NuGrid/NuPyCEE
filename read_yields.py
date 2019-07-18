@@ -273,7 +273,6 @@ class read_nugrid_yields():
         '''
         table=nugridtable
 
-        import os
         if '/' in table:
             self.label=table.split('/')[-1]
         else:
@@ -368,9 +367,9 @@ class read_nugrid_yields():
             for t in range(2,len(yield_data[-1])):
                 if column_titles[t] == 'A' or column_titles[t] =='Z':
                     yield_data[-1][t].append(int(line.split('&')[t+1].strip()))
-
                 else:
                     yield_data[-1][t].append(float(line.split('&')[t+1].strip()))
+
         #choose only isotoopes and right order
         ######reading finished
         #In [43]: tablesN.col_attrs
@@ -431,6 +430,7 @@ class read_nugrid_yields():
             i+=1
         #define  header
         self.header_attrs={}
+        #print(header1)
         for h in header1:
             self.header_attrs[h.split(':')[0][1:].strip()]=h.split(':')[1].strip()
         self.data_cols=column_titles #previous data_attrs
@@ -478,7 +478,7 @@ class read_nugrid_yields():
             to write out modification into new file.
 
             M: initial mass to be modified
-            Z: initial Z to 
+            Z: initial Z to
             specie: quantity (e.g. yield) of specie will be modified
 
         '''
@@ -592,8 +592,8 @@ class read_nugrid_yields():
 
                 M: float
                         Stellar mass in Msun
-                        default: 0 
-                Z: float 
+                        default: 0
+                Z: float
                         Stellar metallicity (e.g. 0.02)
                 quantity: string
                         table attribute or data column/data_cols
@@ -610,7 +610,7 @@ class read_nugrid_yields():
                 >>> table1.get(M=2.0,Z=0.02,quantity='Yields')
 
                 >>> table1.get(Z=0.02,quantity='masses')
- 
+
 
 
 
@@ -786,7 +786,7 @@ class read_nugrid_yields():
                                 prodf=prodfac[isotopes.index(isotopes[h])]
                                 origin_yields[-1].append(yields[isotopes.index(isotopes[h])])
                                 if isotopes[h].split('-')[0] in elem_prim:
-                                        #primary 
+                                        #primary
                                         mout1=(prodf-1.)*(inix_scale*mtot_eject) + (inix*mtot_eject)
                                         #check if amount destroyed was more than it was initial there
                                         if mout1<0:
@@ -922,7 +922,7 @@ class read_yield_sn1a_tables():
                 quantity: if 'Yields' return yields
                           if 'Isotopes' return all isotopes available
                           Default: 'Yields'
-                specie: specie in yield table. Only with quantity='Yields' 
+                specie: specie in yield table. Only with quantity='Yields'
         '''
 
         if quantity=='Yields':
@@ -1223,10 +1223,10 @@ def write_single_table(filename,headers,data,dcols=['Isotopes','Yields','Z','A']
         Also all the lengths of that columns must all be the same.
         Input:
         filename: The file where this data will be written.
-        Headers: A list of Header strings or if the file being written 
+        Headers: A list of Header strings or if the file being written
                  is of type trajectory, this is a List of strings
-                 that contain header attributes and their associated 
-                 values which are seperated by a '='. 
+                 that contain header attributes and their associated
+                 values which are seperated by a '='.
         dcols: A list of data attributes
         data:  A list of lists (or of numpy arrays).
         header_char  the character that indicates a header lines

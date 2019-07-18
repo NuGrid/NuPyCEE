@@ -41,27 +41,13 @@ See the Sphinx documentation for more options
 # Import standard packages
 import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.ticker as tic
-import numpy as np
-import math
-import os
-from matplotlib.lines import Line2D
 
-#import read_yields
-try:
-    from . import read_yields as ry
-except:
-    import read_yields as ry
+# Define where is the working directory
+# This is where the NuPyCEE code will be extracted
+nupy_path = os.path.dirname(os.path.realpath(__file__))
 
-# Define workspace
-global global_path
-try:
-    if os.environ['SYGMADIR']:
-        global_path = os.environ['SYGMADIR']
-except KeyError:
-    global_path=os.getcwd()
-global_path=global_path+'/'
-
+# Import NuPyCEE codes
+import NuPyCEE.read_yields as ry
 
 class stellab():
 
@@ -74,10 +60,11 @@ class stellab():
     def __init__(self):
 
 
-        # read abundance data library via 
+        # read abundance data library via
         # index file abundance_data_library.txt
         # creates self.paths, self.paths_s, self.cs, self.leg
-        self.read_abundance_data_library(global_path+'/stellab_data/abundance_data_library.txt')
+        self.read_abundance_data_library(os.path.join(nupy_path, "stellab_data",\
+                "abundance_data_library.txt"))
 
         # Declaration of the name of available galaxies
         #self.galaxy_name = []
@@ -141,17 +128,17 @@ class stellab():
 
         # open index file
         f=open(filename)
-        lines=f.readlines()  
+        lines=f.readlines()
         f.close()
 
         # Declaration of the name of available galaxies
-       
+
         # name of galaxy
         self.galaxy_name = []
         # color + symbol
         self.cs=[]
         # legend
-        self.leg=[] 
+        self.leg=[]
         # path to the stellar abundances file
         self.paths = []
         for k in range(len(lines)):
@@ -197,7 +184,7 @@ class stellab():
         self.ab.append([])
 
         # Open the data file
-        with open(global_path+file_path+'.txt', 'r') as data_file:
+        with open(os.path.join(nupy_path, file_path + ".txt"), "r") as data_file:
 
             # Read and split the first line (header)
             line_1_str = data_file.readline()
@@ -251,7 +238,7 @@ class stellab():
         self.solar.append([])
 
         # Open the data file
-        with open(global_path+file_path+'.txt', 'r') as data_file:
+        with open(os.path.join(nupy_path, file_path + ".txt"), "r") as data_file:
 
             # For every line (for each element) ...
             i_elem = 0
@@ -283,8 +270,8 @@ class stellab():
         self.sol_norm.append([])
 
         # Open the data file
-        with open(global_path+'stellab_data/solar_normalization/'+file_path+'.txt', 'r')\
-          as data_file:
+        with open(os.path.join(nupy_path, "stellab_data", "solar_normalization",\
+            file_path + ".txt"), "r") as data_file:
 
             # For every line (for each element) ...
             i_elem = 0
@@ -368,12 +355,12 @@ class stellab():
                    overplot=False, return_xy=False, show_err=False, \
                    show_mean_err=False, stat=False, flat=False,abundistr=False,show_legend=True, \
                    sub=1, sub_plot=False, alpha=1.0, lw=1.0):
- 
+
         '''
         This function plots observational data with the spectroscopic notation:
         [X/Y] = log10(n_X/n_Y) - log10(n_X/n_Y)_solar where 'n_X' and 'n_Y' are
         the number densities of elements X and Y.
-        
+
         Parameters
         ---------
 
@@ -384,7 +371,7 @@ class stellab():
 
             Choices : 'milky_way', 'sculptor', 'carina', 'fornax'
 
-            Default value : 'milky_way' 
+            Default value : 'milky_way'
 
         xaxis : string
 
@@ -403,7 +390,7 @@ class stellab():
             Common solar normalization used to scale all the data.  Use the
             list_solar_norm() function for a list of available normalizations.
             When not specified, each data uses the solar normalization of the
-            reference paper.  
+            reference paper.
 
             Example : norm='Anders_Grevesse_1989'
 
@@ -605,7 +592,7 @@ class stellab():
                                     self.ab[i_ds][i_star][i_num][0] - \
                                       self.ab[i_ds][i_star][i_denom][0]
                                   ret_star_i_tmp.append(i_star)
-    
+
                       # If a multiplication is needed to recover the input ratio ..
                       # Want [A/C] with nominator [A/B] and denominator [B/C]
                       else:
@@ -615,7 +602,7 @@ class stellab():
                               xy_plot[i_x_y][i_star] = \
                                 self.ab[i_ds][i_star][i_num][0] + \
                                   self.ab[i_ds][i_star][i_denom][0]
-                              ret_star_i_tmp.append(i_star) 
+                              ret_star_i_tmp.append(i_star)
 
               # If a re-normalization is needed ...
               if re_norm and ok_for_plot:
@@ -692,20 +679,20 @@ class stellab():
                         if show_legend:
                           if sub_plot:
                             sub.errorbar(xy_plot[0], xy_plot[1], \
-                            xerr=err_plot[0], yerr=err_plot[1], 
+                            xerr=err_plot[0], yerr=err_plot[1],
                             fmt=self.cs[i_ds][0], ecolor=self.cs[i_ds][1], \
                             color=self.cs[i_ds][1], label=leg_temp, markersize=ms, \
                             alpha=alpha, linewidth=lw)
                           else:
                             plt.errorbar(xy_plot[0], xy_plot[1], \
-                            xerr=err_plot[0], yerr=err_plot[1], 
+                            xerr=err_plot[0], yerr=err_plot[1],
                             fmt=self.cs[i_ds][0], ecolor=self.cs[i_ds][1], \
                             color=self.cs[i_ds][1], label=leg_temp, markersize=ms, \
                             alpha=alpha, linewidth=lw)
                         else:
                           if sub_plot:
                             sub.errorbar(xy_plot[0], xy_plot[1], \
-                            xerr=err_plot[0], yerr=err_plot[1], 
+                            xerr=err_plot[0], yerr=err_plot[1],
                             fmt=self.cs[i_ds][0], ecolor=self.cs[i_ds][1], \
                             color=self.cs[i_ds][1], markersize=ms, alpha=alpha, \
                             linewidth=lw)
@@ -775,9 +762,9 @@ class stellab():
         # Provide a standard plot
         if not return_xy:
 
-            # If plot median, 68%, 95%, 
+            # If plot median, 68%, 95%,
             if stat:
- 
+
                 # Build the x_bin
                 x_bin = []
                 y_bin = []
@@ -796,7 +783,7 @@ class stellab():
                             if x_bin[xb] <= xy_plot_all[0][xi][xxi] < x_bin[xb+1]:
                               if xy_plot_all[1][xi][xxi] > -10.0:
                                 y_bin[xb].append(xy_plot_all[1][xi][xxi])
-                
+
                 y_stat = []
                 for i in range(0,7):
                     y_stat.append([])
@@ -829,7 +816,7 @@ class stellab():
                         y_stat[4][i] -= y_stat[3][i]
                         y_stat[5][i] -= y_stat[3][i]
                         y_stat[6][i] -= y_stat[3][i]
-                        y_stat[3][i] = 0.0 
+                        y_stat[3][i] = 0.0
 
                 del x_bin[-1]
                 plt.fill_between(x_bin,y_stat[0],y_stat[-1],color='0.95')
@@ -855,13 +842,13 @@ class stellab():
         # Return the data if the option is choosen
         else:
             if show_mean_err and show_err:
-              if sum_count > 0:                
+              if sum_count > 0:
                 return ret_x, ret_y, ret_x_err, ret_y_err, \
                        sum_x/sum_count, sum_y/sum_count
               else:
                 return ret_x, ret_y, ret_x_err, ret_y_err, sum_count, sum_count
             if abundistr:
-                return ret_x, ret_y, ret_x_err, ret_y_err,ret_star_i 
+                return ret_x, ret_y, ret_x_err, ret_y_err,ret_star_i
 
             return ret_x, ret_y
 
@@ -1073,7 +1060,7 @@ class stellab():
 
         galaxy : string
 
-            Name of the target galaxy for which data sets will be displayed.  
+            Name of the target galaxy for which data sets will be displayed.
             If empty includes data sets of all available galaxies.
 
             Choices : 'milky_way', 'sculptor', 'carina', 'fornax'
@@ -1108,19 +1095,19 @@ class stellab():
         obs : string
             Star data set
         '''
-    
+
         overplot=False
-        
+
         # get the elements available
 
         # Get the indexes for the wanted references
         i_obs = self.__get_i_data_set([obs])
         i_ds=i_obs[0]
-        elements = self.elem_list[i_ds]    
+        elements = self.elem_list[i_ds]
         print ('Number of elements available in dataset: ',elements)
         # get [X/Fe] for each element
         abunds_y=[]
-        abunds_y_err=[] 
+        abunds_y_err=[]
         eles_found=[]
         num_stars=0
         star_ids=[]
@@ -1138,14 +1125,14 @@ class stellab():
             if k==0:
                 star_ids=ret_star_i
                 star_fe_h=ret_x
-            else:  
+            else:
                 star_ids_tmp=[]
                 star_fe_h_tmp=[]
                 for h in range(len(star_ids)):
                     if star_ids[h] in ret_star_i:
                         star_ids_tmp.append(star_ids[h])
                         star_fe_h_tmp.append(star_fe_h[h])
-                star_ids=star_ids_tmp 
+                star_ids=star_ids_tmp
                 star_fe_h=star_fe_h_tmp
 
         # get [Fe/H] values
@@ -1177,7 +1164,7 @@ class stellab():
                    show_mean_err=False, stat=False, flat=False, show_legend=True, \
                    sub=1, sub_plot=False, alpha=1.0, lw=1.0,iolevel=0):
 
- 
+
         '''
         Plots abundance distribution [Elements/Fe] vs Z
 
@@ -1186,22 +1173,22 @@ class stellab():
 
         elements : array
         find_elements : array
-            Plot only  
+            Plot only
         '''
-        
+
         overplot=False
-        
+
         # get the elements available
 
         # Get the indexes for the wanted references
         i_obs = self.__get_i_data_set([obs])
         i_ds=i_obs[0]
-        elements = self.elem_list[i_ds]   
+        elements = self.elem_list[i_ds]
         if iolevel>0:
             print ('Number of elements available in dataset: ',elements)
         # get [X/Fe] for each element
         abunds_y=[]
-        abunds_y_err=[] 
+        abunds_y_err=[]
         eles_found=[]
         num_stars=0
         for k in range(len(elements)):
@@ -1214,7 +1201,7 @@ class stellab():
                    sub=1, sub_plot=False, alpha=1.0, lw=1.0,abundistr=True)
 
             if star_idx in ret_star_i:
-               idx=ret_star_i.index(star_idx)  
+               idx=ret_star_i.index(star_idx)
                #ret_x[idx]
                abunds_y.append(ret_y[idx])
                #ret_x_err[idx]
@@ -1225,8 +1212,8 @@ class stellab():
                num_stars=len(ret_star_i)
         if iolevel>0:
             print ('Number of stars available in dataset: ',num_stars)
-        err_on = show_err                
-        self.__plot_distr(fig,eles_found,abunds_y,abunds_y_err,err_on,elem_label_on,shape,color,label,marker,markersize,fsize) 
+        err_on = show_err
+        self.__plot_distr(fig,eles_found,abunds_y,abunds_y_err,err_on,elem_label_on,shape,color,label,marker,markersize,fsize)
 
 
     def __plot_distr(self,fig, elements,abunds,abunds_err,err_on,label_on,shape,color,label,marker,markersize,fsize):
@@ -1239,8 +1226,8 @@ class stellab():
 
         elements : array
             list of elements to be plotted
-        abunds : array 
-            abundances as [X/Fe] 
+        abunds : array
+            abundances as [X/Fe]
         label_on : boolean
             if true plots the element label for each element
 
@@ -1258,18 +1245,18 @@ class stellab():
         idx_sorted=sorted(range(len(Z_numbers)),key=lambda x:Z_numbers[x])
         for k in range(len(idx_sorted)):
            Z_numbers_sort.append(Z_numbers[idx_sorted[k]])
-           abunds_sort.append(abunds[idx_sorted[k]]) 
+           abunds_sort.append(abunds[idx_sorted[k]])
 
         plt.ylabel('[X/Fe]')
         plt.xlabel('charge number Z')
         plt.plot(Z_numbers_sort, abunds_sort, linestyle=shape,\
                          color=color,label=label,marker=marker,markersize=markersize)
 
-        ## plot element labels 
+        ## plot element labels
         if label_on:
             for i_ele in range(len(elements)):
                 plt.annotate(elements[i_ele],(Z_numbers[i_ele],abunds[i_ele]), \
-                    xytext=(-2,0),textcoords='offset points',horizontalalignment='right', verticalalignment='top') 
+                    xytext=(-2,0),textcoords='offset points',horizontalalignment='right', verticalalignment='top')
 
 
         #err on
@@ -1311,11 +1298,11 @@ class stellab():
         for k in range(len(data)):
             for h in range(len(data[k])):
                 out = out + '{:.3E}'.format(data[k][h]) + ' '
-            out = out + '\n'    
+            out = out + '\n'
 
         f1=open(filename,'w')
         f1.write(out)
         f1.close()
         print ('file ',filename,' created.')
-        
+
 
