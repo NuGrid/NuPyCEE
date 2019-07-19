@@ -13,7 +13,7 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy 
+#  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy 
   - pip install runipy matplotlib
 script:
   - python -m regression_tests.selftest
