@@ -170,8 +170,6 @@ class sygma( chem_evol ):
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
                  ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([])):
 
-        print('Andres - new sygma')
-
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
                  imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \

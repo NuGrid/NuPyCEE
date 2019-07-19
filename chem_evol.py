@@ -73,9 +73,6 @@ nupy_path = os.path.dirname(os.path.realpath(__file__))
 # Import NuPyCEE codes
 import NuPyCEE.read_yields as ry
 
-# Import the decay module for radioactive isotopes
-import NuPyCEE.decay_module as decay_module
-
 
 class chem_evol(object):
 
@@ -657,7 +654,11 @@ class chem_evol(object):
         self.radio_refinement = radio_refinement
         self.test_clayton = test_clayton
         self.use_decay_module = use_decay_module
+
+        # Initialize decay module
         if self.use_decay_module:
+            import NuPyCEE.decay_module as decay_module
+            self.decay_module = decay_module
             self.f_network = f_network
             self.f_format = f_format
             self.__initialize_decay_module()
@@ -4322,8 +4323,7 @@ class chem_evol(object):
         '''
 
         # Import and declare the decay module
-        #import decay_module
-        decay_module.initialize(self.f_network, self.f_format,\
+        self.decay_module.initialize(self.f_network, self.f_format,\
                 os.path.join(nupy_path, ""))
 
         # Declare the element names used to return the charge number Z
@@ -4344,22 +4344,22 @@ class chem_evol(object):
             'Uuq']
 
         # Number of isotope entry in the fortran decay module
-        self.len_iso_module = len(decay_module.iso.z)
+        self.len_iso_module = len(self.decay_module.iso.z)
 
         # Find the isotope name associated with each isotope entry
         # Isolate the mass number A
         self.iso_decay_module = ['']*self.len_iso_module
         self.A_mass_iso_decay_module = np.zeros(self.len_iso_module)
         for i_iso in range(self.len_iso_module):
-          if decay_module.iso.z[i_iso] == 0:
+          if self.decay_module.iso.z[i_iso] == 0:
             self.iso_decay_module[i_iso] = 'Nn-1'
             self.A_mass_iso_decay_module[i_iso] = 1.0
           else:
             self.iso_decay_module[i_iso] = \
-              self.element_names[decay_module.iso.z[i_iso]] + '-' + \
-                str(decay_module.iso.z[i_iso]+decay_module.iso.n[i_iso])
+              self.element_names[self.decay_module.iso.z[i_iso]] + '-' + \
+                str(self.decay_module.iso.z[i_iso]+self.decay_module.iso.n[i_iso])
             self.A_mass_iso_decay_module[i_iso] = \
-              float(decay_module.iso.z[i_iso]+decay_module.iso.n[i_iso])
+              float(self.decay_module.iso.z[i_iso]+self.decay_module.iso.n[i_iso])
         # Year to second conversion
         self.yr_to_sec = 3.154e+7
 
@@ -4435,26 +4435,26 @@ class chem_evol(object):
         init_abun = self.__get_init_abun_decay(i)
 
         # Call the decay module
-        decay_module.run_decay(dt_decay*self.yr_to_sec, 1, init_abun)
+        self.decay_module.run_decay(dt_decay*self.yr_to_sec, 1, init_abun)
 
         # For each relevant isotope in the decay module ..
         need_resize = False
         for i_iso in range(self.len_iso_module):
-            if decay_module.iso.abundance[i_iso] > 0.0 or init_abun[i_iso] > 0.0:
+            if self.decay_module.iso.abundance[i_iso] > 0.0 or init_abun[i_iso] > 0.0:
 
                 # Convert number of particles into masses
-                decay_module.iso.abundance[i_iso] *= self.A_mass_iso_decay_module[i_iso]
+                self.decay_module.iso.abundance[i_iso] *= self.A_mass_iso_decay_module[i_iso]
 
                 # Replace the unstable component by the decayed product
                 if self.iso_decay_module[i_iso] in self.radio_iso:
                     k_temp = self.radio_iso.index(self.iso_decay_module[i_iso])
                     self.ymgal_radio[i][k_temp] = \
-                        copy.deepcopy(decay_module.iso.abundance[i_iso])
+                        copy.deepcopy(self.decay_module.iso.abundance[i_iso])
 
                 # Add decayed product to the stable component
                 elif self.iso_decay_module[i_iso] in self.history.isotopes:
                     k_temp = self.history.isotopes.index(self.iso_decay_module[i_iso])
-                    self.ymgal[i][k_temp] += decay_module.iso.abundance[i_iso]
+                    self.ymgal[i][k_temp] += self.decay_module.iso.abundance[i_iso]
 
                 # If this is a new so-far-unacounted isotope ..
                 else:
@@ -4466,7 +4466,7 @@ class chem_evol(object):
                     self.ymgal_radio = np.concatenate((self.ymgal_radio,\
                         np.zeros((1,self.nb_timesteps+1)).T), axis=1)
                     self.ymgal_radio[i][-1] = \
-                        copy.deepcopy(decay_module.iso.abundance[i_iso])
+                        copy.deepcopy(self.decay_module.iso.abundance[i_iso])
                     need_resize = True
  
         # Resize all radioactive arrays

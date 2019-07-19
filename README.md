@@ -25,26 +25,20 @@ This is a code repository containing the simple stellar population code SYGMA (S
 ### Installation Instructions
 
 * Create the directory where you want to download the codes.
-* Go in that directory with a terminal and clone the GitHub repository.
+* Go in that directory with a terminal and clone the GitHub repository:
 	* `git clone https://github.com/NuGrid/NuPyCEE.git`
-* Go into the NuPyCEE directory and install the codes.
-	* `python setup.py develop`
-	* **Note**: Use the Python version you will be working with.
-* Set the path to access stellar yields and STELLAB data. This is the path where you are currently in (inside NuPyCEE).
-	* `export SYGMADIR="your_path_to_NuPyCEE"`
-	* **Example**: `export SYGMADIR="benoitcote/gce_code/NuPyCEE"`
-* Update the python path to locate NuPyCEE. This is the path to the directory just before the NuPyCEE directory.
+* From the same directory which contains the cloned NuPyCEE directory, you can import the codes in Python mode by typing:
+	* `from NuPyCEE import omega`
+	* `from NuPyCEE import sygma`
+	* `from NuPyCEE import stellab`
+* If you want to import the NuPyCEE codes from anywhere else within your work space, you have to update your Python path using a terminal:
 	* `export PYTHONPATH="your_path_to_before_NuPyCEE:$PYTHONPATH"`
-	* **Important**: Do not forget `:$PYTHONPATH` at the end, otherwise the python path will be overwritten.
 	* **Example**: `export PYTHONPATH="benoitcote/gce_code:$PYTHONPATH"`
-* **Note**: All `export` commands should be put into your bash file. With MAC, it is the .bash_profile file in your home directory. Otherwise, you will need to define the paths each time you open a terminal.
-
-* When in Python mode, you can import the code by typing `from NuPyCEE import omega`, `from NuPyCEE import sygma` and `from NuPyCEE import stellab`.
+	* **Important**: Do not forget `:$PYTHONPATH` at the end, otherwise the python path will be overwritten.
+	* **Note**: All `export` commands should be put into your bash file. With MAC, it is the .bash_profile file in your home directory. Otherwise, you will need to define the paths each time you open a terminal.
 
 ### Installation of the Decay Module for Using Radioactive Isotopes
 
 * In the NuPyCEE folder, type the following
 	* `f2py -c decay_module.f95 -m decay_module`
 	* **Note**: Use the f2py version that will be compatible with your Python version.
-* In `chem_evol.py`, uncomment the following line `#import decay_module`.
-
