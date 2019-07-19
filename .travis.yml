@@ -17,8 +17,8 @@ install:
   - pip install runipy matplotlib
 script:
   - python -m regression_tests.selftest
-  - cd regression_tests
-  - bash run_notebooks.sh
+#  - cd regression_tests
+#  - bash run_notebooks.sh
 #  - python -m regression_tests/setup_notebooks.py
 #  - runipy regression_tests/SYGMA_SSP_h_yield_input.ipynb True
 #  - runipy regression_tests/Plotting_functions.ipynb True
