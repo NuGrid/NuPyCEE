@@ -490,7 +490,6 @@ class chem_evol(object):
              poly_fit_range=np.array([]), SSPs_in=np.array([]),\
              delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
              delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]), \
-             delayed_extra_dtd_radio=np.array([]), delayed_extra_dtd_norm_radio=np.array([]), \
              delayed_extra_yields_radio=np.array([]), \
              delayed_extra_yields_norm_radio=np.array([]), \
              delayed_extra_stochastic=np.array([]), \
@@ -637,12 +636,10 @@ class chem_evol(object):
         self.decay_file = decay_file
         self.len_decay_file = len(decay_file)
         self.delayed_extra_log_radio = delayed_extra_log_radio
-        self.delayed_extra_dtd_radio = delayed_extra_dtd_radio
-        self.delayed_extra_dtd_norm_radio = delayed_extra_dtd_norm_radio
         self.delayed_extra_yields_radio = delayed_extra_yields_radio
         self.delayed_extra_yields_norm_radio = delayed_extra_yields_norm_radio
         self.delayed_extra_yields_log_int_radio = delayed_extra_yields_log_int_radio
-        self.nb_delayed_extra_radio = len(self.delayed_extra_dtd_radio)
+        self.nb_delayed_extra_radio = len(self.delayed_extra_yields_radio)
         self.ytables_radio_in = ytables_radio_in
         self.radio_iso_in = radio_iso_in
         self.ytables_1a_radio_in = ytables_1a_radio_in
