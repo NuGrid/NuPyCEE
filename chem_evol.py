@@ -321,7 +321,7 @@ class chem_evol(object):
         if true reads in additional stellar parameter given in table stellar_param_table.
 
         Default : true in sygma and false in omega
-        
+
     stellar_param_table: string
         Path pointoing toward the table hosting the evolution of stellar parameter
         derived from stellar evolution calculations.
@@ -401,7 +401,7 @@ class chem_evol(object):
         [ number_of_times ][ 0-time, 1-rate ].
 
         Defalut value : np.array([]), deactivated
-        
+
     delayed_extra_dtd_norm : multi-D Numpy array --> [nb_sources]
         Total number of delayed sources occurring per Msun formed,
         for each source and each metallicity.
@@ -972,7 +972,7 @@ class chem_evol(object):
         the simulation if needed.
 
         '''
-        
+
         self.need_to_quit = False
         # Total duration of the simulation
         if self.history.tend > 1.5e10:
@@ -999,7 +999,7 @@ class chem_evol(object):
         #if self.imf_yields_range[0] < 1:
         #    print ('Error - imf_yields_range lower boundary must be >= 1.')
             #self.need_to_quit = True
-        
+
         #if (self.imf_yields_range[0] >= self.imf_bdys[1]) or \
         #   (self.imf_yields_range[0] <= self.imf_bdys[0]) or \
          #  (self.imf_yields_range[1] >= self.imf_bdys[1]):
@@ -1036,7 +1036,7 @@ class chem_evol(object):
                (self.imf_yields_range_pop3[1] <= self.imf_bdys_pop3[0]):
                 print ('Error - imf_yields_range_pop3 must be within imf_bdys_pop3.')
                 self.need_to_quit = True
-              
+
             if self.netyields_on == True and self.Z_trans > 0.0:
                 print ('Error - net yields setting not usable with PopIII at the moment.')
                 self.need_to_quit = True
@@ -1481,7 +1481,7 @@ class chem_evol(object):
         # which there will be interpolations
         self.inter_Z_points = sorted(self.Z_table)
         self.nb_inter_Z_points = len(self.inter_Z_points)
-        
+
         # Declare the array containing the coefficients for
         # the yields interpolation between masses (a_M, b_M)
         self.y_coef_M = np.zeros((2, self.nb_Z_table,\
@@ -1540,7 +1540,7 @@ class chem_evol(object):
         # Radioactive isotopes (non-zero metallicity)
         # ===========================================
         if self.len_decay_file > 0 and len(self.table_radio) > 0:
-        
+
             # Declare the array containing the coefficients for
             # the yields interpolation between masses (a_M, b_M)
             self.y_coef_M_radio = np.zeros((2, self.nb_Z_table,\
@@ -1928,7 +1928,7 @@ class chem_evol(object):
 
                 # Keep the lower-boundary yields (stable)
                 yields_upp = yields_upp_stable
-            
+
             # Scale lowest massive star yields for the lower boundary
             yields_low = self.scale_yields_to_M_ej(\
                 self.inter_M_points[i_M+i_M_add], self.inter_M_points[i_M+1],\
@@ -3518,11 +3518,11 @@ class chem_evol(object):
             #self.history.age.append(self.t)
             self.history.gas_mass.append(np.sum(self.ymgal[i]))
             self.history.ism_iso_yield.append(self.ymgal[i])
-#            self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
-#            self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
-#            self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
-#            self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
-#            self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
+            self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
+            self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
+            self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
+            self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
+            self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
             self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
             self.history.nsm_numbers.append(self.nsm_numbers[i-1])
             self.history.bhnsm_numbers.append(self.bhnsm_numbers[i-1])
@@ -3557,16 +3557,16 @@ class chem_evol(object):
           for h in range(len(self.history.ism_iso_yield)):
             self.history.ism_elem_yield.append(\
                 self._iso_abu_to_elem(self.history.ism_iso_yield[h]))
-#            self.history.ism_elem_yield_agb.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h]))
-#            self.history.ism_elem_yield_1a.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h]))
-#            self.history.ism_elem_yield_nsm.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h]))
-#            self.history.ism_elem_yield_bhnsm.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h]))
-#            self.history.ism_elem_yield_massive.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h]))
+            self.history.ism_elem_yield_agb.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h]))
+            self.history.ism_elem_yield_1a.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h]))
+            self.history.ism_elem_yield_nsm.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h]))
+            self.history.ism_elem_yield_bhnsm.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h]))
+            self.history.ism_elem_yield_massive.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h]))
 
 
 
@@ -4128,7 +4128,7 @@ class chem_evol(object):
         the input stellar yields, given the mass bin implied for the
         considered timestep and the stellar masses sampled by an external
         program.
-   
+
         Argument
         ========
 
@@ -4184,7 +4184,7 @@ class chem_evol(object):
         or reduce the number of stars in a particular mass bin, without
         creating a new IMF.  It returns the scalefactor_factor, that will
         be multiplied to scalefactor (e.g., 1.0 --> no correction)
-   
+
         Argument
         ========
 
@@ -4455,7 +4455,7 @@ class chem_evol(object):
 
                 # If this is a new so-far-unacounted isotope ..
                 else:
-                       
+
                     # Add the new isotope name
                     self.radio_iso.append(self.iso_decay_module[i_iso])
 
@@ -4465,7 +4465,7 @@ class chem_evol(object):
                     self.ymgal_radio[i][-1] = \
                         copy.deepcopy(self.decay_module.iso.abundance[i_iso])
                     need_resize = True
- 
+
         # Resize all radioactive arrays
         if need_resize:
             self.nb_new_radio_iso = len(self.radio_iso)
@@ -4512,7 +4512,7 @@ class chem_evol(object):
         '''
         This function calculates the contribution of SNe Ia in the stellar ejecta,
         and adds it to the mdot array.
-   
+
         Argument
         ========
 
@@ -4618,7 +4618,7 @@ class chem_evol(object):
                     # Calculate the number of SNe Ia and white dwarfs (per Mo)
             #        wd_number = 0.0 # Could be calculated if needed
             #        n1a = self.__pritchet_dtd(timemin, timemax)
-                    
+
             # For other DTDs ...
             else:
 
@@ -4639,7 +4639,7 @@ class chem_evol(object):
 
                   # For an exponential SN Ia rate ...
                   if self.history.sn1a_rate == 'exp':
-       
+
                       # Calculate the number of SNe Ia and white dwarfs (per Mo)
                       n1a, wd_number = self.__efolding(timemin, timemax)
 
@@ -4769,10 +4769,10 @@ class chem_evol(object):
         '''
         This function returns the number of neutron star mergers occurring within a given time
         interval using the Dominik et al. (2012) delay-time distribution function.
-        
+
         Arguments
         =========
-        
+
             timemin : Lower boundary of time interval.
             timemax : Upper boundary of time interval.
 
@@ -4780,7 +4780,7 @@ class chem_evol(object):
 
         # If an input DTD array is provided ...
         if self.len_nsmerger_dtd_array > 0:
-            
+
             # Find the lower and upper Z boundaries
             if self.zmetal <= self.Z_nsmerger[0]:
                 i_Z_low = 0
@@ -4797,7 +4797,7 @@ class chem_evol(object):
 
             # Get the number of NSMs at the lower Z boundary
             nb_NSMs_low = self.__get_nb_nsm_array(timemin, timemax, i_Z_low)
-            
+
             # Return the number of NSM .. if no interpolation is needed
             if i_Z_up == i_Z_low:
                 return nb_NSMs_low
@@ -5065,7 +5065,7 @@ class chem_evol(object):
         '''
         This function returns the number of NSMs that occur within
         a specific time interval for the input DTD array.
-        
+
         Arguments
         =========
 
@@ -5079,7 +5079,7 @@ class chem_evol(object):
         nb_NSMs_temp = 0.0
         if timemin < max(self.nsmerger_dtd_array[i_Z_temp][0]) and \
            timemax > min(self.nsmerger_dtd_array[i_Z_temp][0]):
-                
+
             # Find the lower time boundary of the first input interval
             i_t_low = 0
             while timemin > self.nsmerger_dtd_array[i_Z_temp][0][i_t_low+1]:
@@ -5110,7 +5110,7 @@ class chem_evol(object):
         This function returns the rate of neutron star mergers occurring at a given
         stellar lifetime. It uses the delay time distribution
         of Dominik et al. (2012).
-        
+
         Arguments
         =========
 
@@ -5150,7 +5150,7 @@ class chem_evol(object):
 
         Arguments
         =========
-        
+
             lifetime_min : minimum stellar lifetime
 
         '''
@@ -5264,10 +5264,10 @@ class chem_evol(object):
         This function returns the number of BH-NS mergers, per units of stellar mass
         formed, occurring within a given time interval using a delay-time distribution
         function.
-        
+
         Arguments
         =========
-        
+
             timemin : Lower boundary of time interval.
             timemax : Upper boundary of time interval.
 
@@ -5275,7 +5275,7 @@ class chem_evol(object):
 
         # If an input DTD array is provided ...
         if self.len_bhnsmerger_dtd_array > 0:
-            
+
             # Find the lower and upper Z boundaries
             if self.zmetal <= self.Z_bhnsmerger[0]:
                 i_Z_low = 0
@@ -5292,7 +5292,7 @@ class chem_evol(object):
 
             # Get the number of BHNSMs at the lower Z boundary
             nb_BHNSMs_low = self.__get_nb_bhnsm_array(timemin, timemax, i_Z_low)
-            
+
             # Return the number of BHNSM .. if no interpolation is needed
             if i_Z_up == i_Z_low:
                 return nb_BHNSMs_low
@@ -5319,7 +5319,7 @@ class chem_evol(object):
         '''
         This function returns the number of BHNSMs that occur within
         a specific time interval for the input DTD array.
-        
+
         Arguments
         =========
 
@@ -5333,7 +5333,7 @@ class chem_evol(object):
         nb_BHNSMs_temp = 0.0
         if timemin < max(self.bhnsmerger_dtd_array[i_Z_temp][0]) and \
            timemax > min(self.bhnsmerger_dtd_array[i_Z_temp][0]):
-                
+
             # Find the lower time boundary of the first input interval
             i_t_low = 0
             while timemin > self.bhnsmerger_dtd_array[i_Z_temp][0][i_t_low+1]:
@@ -5374,7 +5374,7 @@ class chem_evol(object):
                 if max(self.bhnsmerger_dtd_array[i_dtd][0]) < self.history.tend:
                     self.bhnsmerger_dtd_array[i_dtd][0].append(2.*self.history.tend)
                     self.bhnsmerger_dtd_array[i_dtd][1].append(0.0)
-        
+
         # Ensure normalization only occurs once
         self.bhnsm_normalized = True
 
@@ -5449,7 +5449,7 @@ class chem_evol(object):
             else:
                 Z_extra, yextra_low, yextra_up, iZ_low, iZ_up = \
                     self.__get_YZ_delayed_extra(i_extra)
-         
+
             # Initialize age of the latest SSP, which cumulate in loop
             tt = 0
 
@@ -5769,7 +5769,7 @@ class chem_evol(object):
               # Integrate
               N_ided = (b_ided / (a_ided+1.0)) * \
                   (t_max_temp**(a_ided+1.0) - t_min_temp**(a_ided+1.0))
-           
+
           # If a power law with an index of -1
           else:
 
@@ -5807,7 +5807,7 @@ class chem_evol(object):
         This function returns the number of SNe Ia occuring within a given time
         interval using the Vogelsberger et al. (2013) delay-time distribution
         function.
-   
+
         Arguments
         =========
 
@@ -5881,7 +5881,7 @@ class chem_evol(object):
         '''
         This function returns the lower mass boundary of the SN Ia progenitors
         from a given stellar population age.
-   
+
         Arguments
         =========
 
@@ -5910,7 +5910,7 @@ class chem_evol(object):
         This function returns the number of white dwarfs, at a given time, which
         had stars of a given initial mass as progenitors.  The number is
         normalized to a stellar population having a total mass of 1 Mo.
-   
+
         Arguments
         =========
 
@@ -5918,7 +5918,7 @@ class chem_evol(object):
           t : Age of the considered stellar population
 
         '''
-   
+
         # Calculate the stellar mass associated to the lifetime t
         mlim = self.get_interp_lifetime_mass(t, self.zmetal, is_mass=False)
 
@@ -5948,7 +5948,7 @@ class chem_evol(object):
         This function returns the rate of SNe Ia, at a given stellar population
         age, coming from stars having a given initial mass.  It uses the delay-
         time distribution of Maoz & Mannucci (2012).
-   
+
         Arguments
         =========
 
@@ -5971,7 +5971,7 @@ class chem_evol(object):
         This function returns the rate of SNe Ia, at a given stellar population
         age, coming from all the possible progenitors.  It uses the delay-time
         distribution of Maoz & Mannucci (2012).
-   
+
         Arguments
         =========
 
@@ -5992,7 +5992,7 @@ class chem_evol(object):
         This function returns the total number of SNe Ia (per Mo formed) and
         white dwarfs for a given time interval.  It uses the delay-time
         distribution of Maoz & Mannucci (2012).
-   
+
         Arguments
         =========
 
@@ -6099,7 +6099,7 @@ class chem_evol(object):
         This function returns the rate of SNe Ia, at a given stellar population
         age, coming from stars having a given initial mass. It uses the exponential
         delay-time distribution of Wiersma et al. (2009).
-   
+
         Arguments
         =========
 
@@ -6127,7 +6127,7 @@ class chem_evol(object):
         This function returns the total number of SNe Ia (per Mo formed) and
         white dwarfs for a given time interval.  It uses the exponential delay-
         time distribution of Wiersma et al. (2009).
-   
+
         Arguments
         =========
 
@@ -6165,7 +6165,7 @@ class chem_evol(object):
 
         '''
         This function normalizes the SN Ia rate of a gaussian.
-   
+
         Argument
         ========
 
@@ -6202,7 +6202,7 @@ class chem_evol(object):
         This function returns the rate of SNe Ia, at a given stellar population
         age, coming from stars having a given initial mass.  It uses a gaussian
         delay-time distribution similar to Wiersma09.
-   
+
         Arguments
         =========
 
@@ -6229,7 +6229,7 @@ class chem_evol(object):
         This function returns the total number of SNe Ia (per Mo formed) and
         white dwarfs for a given time interval.  It uses the gaussian delay-
         time distribution of Wiersma et al. (2009).
-   
+
         Arguments
         =========
 
@@ -6263,7 +6263,7 @@ class chem_evol(object):
 
         '''
         This function normalizes the SN Ia rate of a gaussian (similar to Wiersma09).
-   
+
         Argument
         ========
 
@@ -6295,7 +6295,7 @@ class chem_evol(object):
 
         '''
         This function normalizes the SN Ia rate of Maoz or any power law.
-   
+
         Argument
         ========
 
@@ -6354,7 +6354,7 @@ class chem_evol(object):
         This function returns the total number of SNe Ia (per Mo formed) for
         a given time interval.  It uses an input DTD polynomial function of
         any order.
-   
+
         Arguments
         =========
 
@@ -6430,7 +6430,7 @@ class chem_evol(object):
                     t_up_int**(exp_poly+1.0) / (exp_poly+1.0)
                 int_poly_low += self.poly_fit_dtd_5th[i_npf] * \
                     t_low_int**(exp_poly+1.0) / (exp_poly+1.0)
- 
+
         # Return the number of SNe Ia n this time bin
         if (int_poly_up - int_poly_low) < 0.0: # can happen since it's a fit
             return 0.0
@@ -6498,7 +6498,7 @@ class chem_evol(object):
         Finds and returns the list of indices for isotopes of
         element 'elem'. Also returns a list of the indices for
         H and He to facility metallicity calculations.
-        
+
         Arguments
         =========
 
@@ -6515,7 +6515,7 @@ class chem_evol(object):
         i_iso_list = []
         # Declare the list of isotope indexes associated with H and He
         i_H_He_list = []
-        
+
         # Find the isotopes associated with this element
         for i_iso in range(self.nb_isotopes):
             if self.history.isotopes[i_iso].split('-')[0] == elem:
@@ -6532,7 +6532,7 @@ class chem_evol(object):
         '''
         Compute the metal fraction for a list of elements.
         The metal fraction is defined as mass_element/mass_metals.
-        
+
         Arguments
         =========
 
@@ -6549,11 +6549,11 @@ class chem_evol(object):
         i_iso_list as a single number
 
         '''
-        
+
         # Get the list of isotopes indices for element elem
         # along with a list of indices for H and He
         i_iso_list, i_H_He_list = self._i_elem_lists(elem)
-        
+
         if len(i_iso_list) == 0:
             print("Element {} not found. Returning -1".format(elem))
         if t_step > self.nb_timesteps:
@@ -6561,21 +6561,21 @@ class chem_evol(object):
             return -1.0
         if t_step == -1:
             t_step = self.nb_timesteps
-        
+
         # Calculate the total mass of gas at that timestep
         m_tot   = self.ymgal[t_step].sum()
         m_Z_tot = m_tot
         # Calculate the total mass of metals at that timestep
         for i_iso in range(len(i_H_He_list)):
             m_Z_tot = m_Z_tot - self.ymgal[t_step][i_H_He_list[i_iso]]
-            
+
         # Make sure there is something in the gas reservoir ..
         if m_Z_tot > 0.0:
             # Sum the mass of each isotope associated with the desired element
             m_tot_elem = 0.0
             for i_iso in range(len(i_iso_list)):
                 m_tot_elem += self.ymgal[t_step][ i_iso_list[i_iso] ]
-            
+
             # Calculate the mass fraction of metals
             return m_tot_elem / m_Z_tot
         else:
@@ -6722,7 +6722,7 @@ class chem_evol(object):
                 return quad(self.__g1_fpp, mmin, mmax)[0]
             if inte == 2:
                 #return quad(self.__g2_fpp, mmin, mmax)[0]
- 
+
                 #if mmin < 0.8:
                 #    print ('!!Error - Ferrini IMF not fitted below 0.8 Msun!!')
 
@@ -7244,7 +7244,7 @@ class chem_evol(object):
         X_ymgal_t = []
         for p in range(len(ymgal_t)):
             X_ymgal_t.append(ymgal_t[p] / np.sum(ymgal_t))
- 
+
         if not Z_gridpoint==0: #X0 is not in popIII tables and not necessary for popIII setting
              # Get the initial abundances used for the stellar model calculation
              X0 = ytables.get(Z=Z_gridpoint, M=m_stars[0], quantity='X0')
@@ -7373,7 +7373,7 @@ class chem_evol(object):
 
         Argument
         ========
-        
+
           i : Index of the timestep
 
         '''
@@ -7383,7 +7383,7 @@ class chem_evol(object):
             zmetal = self.hardsetZ
             return zmetal
 
-        # Calculate the total mass 
+        # Calculate the total mass
         mgastot = np.sum(self.ymgal[i])
 
         # In the case where there is no gas left
@@ -7523,7 +7523,7 @@ class chem_evol(object):
             # Break is the end of the simulation is reached
             if (i_sim + 1) == self.nb_timesteps:
                 break
-            
+
 
     ##############################################
     #             Interpolate SSP Ej.            #

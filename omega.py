@@ -346,7 +346,7 @@ class omega( chem_evol ):
         (filename,line_number,function_name,text)=traceback.extract_stack()[-2]
         self.inst_name = text[:text.find('=')].strip()
 
-        # Announce the beginning of the simulation 
+        # Announce the beginning of the simulation
         if not print_off:
             print ('OMEGA run in progress..')
 
@@ -554,13 +554,13 @@ class omega( chem_evol ):
         #self.omega_b_0 = 0.0449  # Current baryonic mass density parameter
         #self.lambda_0  = 0.734   # Current dark energy density parameter
         #self.H_0       = 71.0    # Hubble constant [km s^-1 Mpc^-1]
-        
+
         # Set cosmological parameters - default is Planck 2013 (used in Caterpillar)
         self.omega_0   = omega_0   # Current mass density parameter
         self.omega_b_0 = omega_b_0 # Current baryonic mass density parameter
         self.lambda_0  = lambda_0  # Current dark energy density parameter
         self.H_0       = H_0       # Hubble constant [km s^-1 Mpc^-1]
-        
+
         # Look for errors in the input parameters
         self.__check_inputs_omega()
 
@@ -5101,10 +5101,10 @@ class omega( chem_evol ):
         iniabu = ry.iniabu(os.path.join(nupy_path, solar_ab))
         x_ini_iso = iniabu.iso_abundance(self.history.isotopes)
 
-        # Access 
+        # Access
         elements = self.history.elements
         x_ini = self._iso_abu_to_elem(x_ini_iso)
-     
+
         yields_evol = self.history.ism_elem_yield
 
         # Isolate the X and Y in [X/Y]
