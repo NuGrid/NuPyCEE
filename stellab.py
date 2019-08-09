@@ -41,6 +41,7 @@ See the Sphinx documentation for more options
 # Import standard packages
 import matplotlib
 import matplotlib.pyplot as plt
+import os
 
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
