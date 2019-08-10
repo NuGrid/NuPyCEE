@@ -701,7 +701,7 @@ H Mfinal: 1.066E+00
 &Ge-73    &1.438E-07 &32&73
 &Ge-74    &7.018E-07 &32&74
 H Table: (M=13.0,Z=0.02)
-H Lifetime: 1.934E+07
+H Lifetime: 1.694e+07
 H Mfinal: 1.600E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &6.160E+00 &1 &1 
@@ -788,7 +788,7 @@ H Mfinal: 1.600E+00
 &Ge-73    &1.060E-06 &32&73
 &Ge-74    &4.340E-06 &32&74
 H Table: (M=15.0,Z=0.02)
-H Lifetime: 1.385E+07
+H Lifetime: 1.366e+07
 H Mfinal: 1.500E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &6.790E+00 &1 &1 
@@ -875,7 +875,7 @@ H Mfinal: 1.500E+00
 &Ge-73    &3.510E-07 &32&73
 &Ge-74    &2.310E-06 &32&74
 H Table: (M=18.0,Z=0.02)
-H Lifetime: 9.589E+06
+H Lifetime: 1.072e+07
 H Mfinal: 1.580E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &7.530E+00 &1 &1 
@@ -962,7 +962,7 @@ H Mfinal: 1.580E+00
 &Ge-73    &4.450E-07 &32&73
 &Ge-74    &7.070E-06 &32&74
 H Table: (M=20.0,Z=0.02)
-H Lifetime: 9.589E+06
+H Lifetime: 9.484e+06
 H Mfinal: 1.660E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &7.930E+00 &1 &1 
@@ -1049,7 +1049,7 @@ H Mfinal: 1.660E+00
 &Ge-73    &2.605E-06 &32&73
 &Ge-74    &2.265E-05 &32&74
 H Table: (M=25.0,Z=0.02)
-H Lifetime: 7.580E+06
+H Lifetime: 7.645e+06
 H Mfinal: 1.890E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &8.410E+00 &1 &1 
@@ -1136,7 +1136,7 @@ H Mfinal: 1.890E+00
 &Ge-73    &1.525E-05 &32&73
 &Ge-74    &1.820E-04 &32&74
 H Table: (M=30.0,Z=0.02)
-H Lifetime: 7.580E+06
+H Lifetime: 6.716e+06
 H Mfinal: 2.575E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &8.750E+00 &1 &1 
@@ -1223,7 +1223,7 @@ H Mfinal: 2.575E+00
 &Ge-73    &7.870E-07 &32&73
 &Ge-74    &4.085E-05 &32&74
 H Table: (M=40.0,Z=0.02)
-H Lifetime: 7.580E+06
+H Lifetime: 5.992e+06
 H Mfinal: 2.440E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &3.550E+00 &1 &1 
@@ -2006,7 +2006,7 @@ H Mfinal: 1.164E+00
 &Ge-73    &8.163E-09 &32&73
 &Ge-74    &3.995E-08 &32&74
 H Table: (M=13.0,Z=0.004)
-H Lifetime: 1.980E+07
+H Lifetime: 1.718e+07
 H Mfinal: 1.610E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &6.370E+00 &1 &1 
@@ -2093,7 +2093,7 @@ H Mfinal: 1.610E+00
 &Ge-73    &1.520E-07 &32&73
 &Ge-74    &1.030E-06 &32&74
 H Table: (M=15.0,Z=0.004)
-H Lifetime: 1.435E+07
+H Lifetime: 1.396e+07
 H Mfinal: 1.500E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &7.110E+00 &1 &1 
@@ -2180,7 +2180,7 @@ H Mfinal: 1.500E+00
 &Ge-73    &7.930E-08 &32&73
 &Ge-74    &5.170E-07 &32&74
 H Table: (M=18.0,Z=0.004)
-H Lifetime: 1.004E+07
+H Lifetime: 1.103e+07
 H Mfinal: 1.610E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &7.470E+00 &1 &1 
@@ -2267,7 +2267,7 @@ H Mfinal: 1.610E+00
 &Ge-73    &1.080E-06 &32&73
 &Ge-74    &1.080E-05 &32&74
 H Table: (M=20.0,Z=0.004)
-H Lifetime: 1.004E+07
+H Lifetime: 9.774e+06
 H Mfinal: 1.995E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &8.950E+00 &1 &1 
@@ -2354,7 +2354,7 @@ H Mfinal: 1.995E+00
 &Ge-73    &3.745E-07 &32&73
 &Ge-74    &3.565E-06 &32&74
 H Table: (M=25.0,Z=0.004)
-H Lifetime: 7.944E+06
+H Lifetime: 7.858e+06
 H Mfinal: 1.825E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &1.020E+01 &1 &1 
@@ -2441,7 +2441,7 @@ H Mfinal: 1.825E+00
 &Ge-73    &1.825E-06 &32&73
 &Ge-74    &1.970E-05 &32&74
 H Table: (M=30.0,Z=0.004)
-H Lifetime: 7.944E+06
+H Lifetime: 6.843e+06
 H Mfinal: 3.305E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &1.010E+01 &1 &1 
@@ -2528,7 +2528,7 @@ H Mfinal: 3.305E+00
 &Ge-73    &5.165E-06 &32&73
 &Ge-74    &9.600E-05 &32&74
 H Table: (M=40.0,Z=0.004)
-H Lifetime: 7.944E+06
+H Lifetime: 5.939e+06
 H Mfinal: 3.660E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &1.030E+01 &1 &1 
@@ -3311,7 +3311,7 @@ H Mfinal: 1.259E+00
 &Ge-73    &1.280E-09 &32&73
 &Ge-74    &6.194E-09 &32&74
 H Table: (M=13.0,Z=0.001)
-H Lifetime: 1.964E+07
+H Lifetime: 1.718e+07
 H Mfinal: 1.650E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &6.440E+00 &1 &1 
@@ -3398,7 +3398,7 @@ H Mfinal: 1.650E+00
 &Ge-73    &2.400E-07 &32&73
 &Ge-74    &2.860E-06 &32&74
 H Table: (M=15.0,Z=0.001)
-H Lifetime: 1.432E+07
+H Lifetime: 1.396e+07
 H Mfinal: 1.530E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &7.450E+00 &1 &1 
@@ -3485,7 +3485,7 @@ H Mfinal: 1.530E+00
 &Ge-73    &2.180E-08 &32&73
 &Ge-74    &1.890E-07 &32&74
 H Table: (M=18.0,Z=0.001)
-H Lifetime: 1.008E+07
+H Lifetime: 1.103e+07
 H Mfinal: 1.700E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &8.460E+00 &1 &1 
@@ -3572,7 +3572,7 @@ H Mfinal: 1.700E+00
 &Ge-73    &3.050E-08 &32&73
 &Ge-74    &2.620E-07 &32&74
 H Table: (M=20.0,Z=0.001)
-H Lifetime: 1.008E+07
+H Lifetime: 9.774e+06
 H Mfinal: 2.045E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &8.430E+00 &1 &1 
@@ -3659,7 +3659,7 @@ H Mfinal: 2.045E+00
 &Ge-73    &3.525E-07 &32&73
 &Ge-74    &3.650E-06 &32&74
 H Table: (M=25.0,Z=0.001)
-H Lifetime: 7.989E+06
+H Lifetime: 7.858e+06
 H Mfinal: 2.030E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &9.800E+00 &1 &1 
@@ -3746,7 +3746,7 @@ H Mfinal: 2.030E+00
 &Ge-73    &6.800E-07 &32&73
 &Ge-74    &8.595E-06 &32&74
 H Table: (M=30.0,Z=0.001)
-H Lifetime: 7.989E+06
+H Lifetime: 6.843e+06
 H Mfinal: 2.315E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &1.110E+01 &1 &1 
@@ -3833,7 +3833,7 @@ H Mfinal: 2.315E+00
 &Ge-73    &1.275E-06 &32&73
 &Ge-74    &1.555E-05 &32&74
 H Table: (M=40.0,Z=0.001)
-H Lifetime: 7.989E+06
+H Lifetime: 5.939e+06
 H Mfinal: 4.345E+00
 &Isotopes &Yields    &Z &A 
 &H-1      &1.290E+01 &1 &1 
