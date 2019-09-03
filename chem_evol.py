@@ -794,6 +794,12 @@ class chem_evol(object):
                 # Interpolate the radioactive yields tables
                 self.__interpolate_massive_and_agb_yields(is_radio=True)
 
+        # Check whether the initial metallicity is available
+        if (not self.iniZ in self.ytables.metallicities) and (self.iniZ > 0.0):
+            print ('Error - iniZ must be an available metallicity in the grid of stellar yields.')
+            self.need_to_quit = True
+            return
+
         # Initialisation of the composition of the gas reservoir
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
@@ -974,6 +980,7 @@ class chem_evol(object):
         '''
         
         self.need_to_quit = False
+
         # Total duration of the simulation
         if self.history.tend > 1.5e10:
             print ('Error - tend must be less than or equal to 1.5e10 years.')
@@ -3518,11 +3525,11 @@ class chem_evol(object):
             #self.history.age.append(self.t)
             self.history.gas_mass.append(np.sum(self.ymgal[i]))
             self.history.ism_iso_yield.append(self.ymgal[i])
-#            self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
-#            self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
-#            self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
-#            self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
-#            self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
+            self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
+            self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
+            self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
+            self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
+            self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
             self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
             self.history.nsm_numbers.append(self.nsm_numbers[i-1])
             self.history.bhnsm_numbers.append(self.bhnsm_numbers[i-1])
@@ -3557,16 +3564,16 @@ class chem_evol(object):
           for h in range(len(self.history.ism_iso_yield)):
             self.history.ism_elem_yield.append(\
                 self._iso_abu_to_elem(self.history.ism_iso_yield[h]))
-#            self.history.ism_elem_yield_agb.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h]))
-#            self.history.ism_elem_yield_1a.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h]))
-#            self.history.ism_elem_yield_nsm.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h]))
-#            self.history.ism_elem_yield_bhnsm.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h]))
-#            self.history.ism_elem_yield_massive.append(\
-#                self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h]))
+            self.history.ism_elem_yield_agb.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_agb[h]))
+            self.history.ism_elem_yield_1a.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h]))
+            self.history.ism_elem_yield_nsm.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h]))
+            self.history.ism_elem_yield_bhnsm.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h]))
+            self.history.ism_elem_yield_massive.append(\
+                self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h]))
 
 
 
