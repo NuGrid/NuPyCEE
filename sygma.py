@@ -2419,7 +2419,7 @@ class sygma( chem_evol ):
         #print ('Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:')
         #print (sum(self.history.m_locked),sum(self.history.m_locked_agb),sum(self.history.m_locked_massive))
 
-    def plot_mass_range_contributions(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14, histtype="stepfilled"):
+    def plot_mass_range_contributions(self,fig=7,specie='C',label='',shape='-',marker='o',color='r',extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14, histtype="stepfilled"):
 
 
         '''
@@ -2434,10 +2434,6 @@ class sygma( chem_evol ):
         ----------
         specie : string
             Element or isotope name in the form 'C' or 'C-12'
-	prodfac : boolean
-	    if true, calculate stellar production factor for each mass range.
-	    It is the final stellar yield divided by the initial (IMF-weighted)
-	    total mass (ISM+stars) in that region.
 	rebin : change the bin size to uniform mass intervals of size 'rebin'
 	        default 0, bin size is defined by ranges of (stellar) yield inputs	
 	log : boolean
@@ -2455,230 +2451,99 @@ class sygma( chem_evol ):
 
         Examples
         ----------
-        >>> s.plot_mass_range_contribution(element='C')
+        >>> s.plot_mass_range_contribution(specie='C')
 
         '''
 
         import matplotlib.pyplot as plt
         figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
+        the_upp = plt.gca().get_ylim()[1]
 
-        #e.g. for testing: ratio
-        #ratio, e.g. C/Fe
-        if '/' in specie:
-                specie1=specie.split('/')[0]
-                mean_val,bin_bdys,y1,color,label=self.__plot_mass_range_contributions_single(fig,specie1,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
-                specie2=specie.split('/')[1]
-                mean_val,bin_bdys,y2,color,label=self.__plot_mass_range_contributions_single(fig,specie2,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
-
-                y=np.array(y1)/np.array(y2)
-                label=specie
-        #to get the total mass
-        if 'all' in specie:
-                eles=self.history.elements
-                for k in range(len(eles)):
-                        specie=eles[k]
-                        ytmp=0
-                        mean_val,bin_bdys,ytmp,color,labeltmp=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
-                        if k==0:
-                                y=np.array(ytmp)
-                        else:
-                                y= y+np.array(ytmp)
-        #default, mass, C, C-12
+        # Get the isotopes index to collect the specie
+        iso_index = []
+        if not specie in self.history.isotopes and not specie in self.history.elements:
+            print('Error.',specie,'not in the list of available isotopes.')
+            return
+        if '-' in specie:
+            iso_index.append(self.history.isotopes.index(specie))
         else:
-                mean_val,bin_bdys,y,color,label=self.__plot_mass_range_contributions_single(fig,specie,prodfac,rebin,time,label,shape,marker,color,markevery,extralabel,log,fsize,fontsize,rspace,bspace,labelsize,legend_fontsize)
+            for i_iso in range(self.nb_isotopes):
+                if self.history.isotopes[i_iso].split('-')[0] == specie:
+                    iso_index.append(i_iso)
 
-
-
-        if prodfac==True:
-                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,label=label,ec='black', histtype=histtype)
+        # Set the IMF binning
+        dm = 1.0
+        if self.iniZ == 0.0:
+            the_bdys = self.imf_yields_range_pop3
         else:
-                p1 =plt.hist(mean_val, bins=bin_bdys,weights=y,facecolor=color,color=color,alpha=0.5,bottom=0.001,label=label,ec='black', histtype=histtype)
+            the_bdys = self.imf_yields_range
+        m_arr = []
+        the_m = the_bdys[0]
+        while the_m < the_bdys[1]:
+            m_arr.append(the_m)
+            the_m += dm
+            m_arr.append(the_m - dm*0.00001)
+
+        # Normalize the IMF to the mgal value
+        if self.iniZ == 0.0:
+            A_imf = self.mgal / self._imf(self.imf_bdys_pop3[0], self.imf_bdys_pop3[1], 2)
+        else:
+            A_imf = self.mgal / self._imf(self.imf_bdys[0], self.imf_bdys[1], 2)
+
+        # Define the mass resolution to represent each mass bin
+        y_res = 10
+        dm_yields = dm / float(y_res)
+
+        # Fill the mass ejected
+        m_arr_y = []
+        the_m = the_bdys[0]+dm_yields*0.5
+        right_hist = True
+        for i_m in range(len(m_arr)):
+            m_arr_y.append(0.0)
+            if right_hist:
+                for i_res in range(y_res):
+                    if self.get_interp_lifetime_mass(the_m, self.iniZ) <= self.history.tend:
+                        nb_stars = A_imf * self._imf(the_m-dm_yields*0.5, the_m+dm_yields*0.5, 1)
+                        the_yields = self.get_interp_yields(the_m, self.iniZ)
+                        for i_iso in iso_index:
+                            m_arr_y[i_m] += the_yields[i_iso] * nb_stars
+                    the_m += dm_yields
+            else:
+                 m_arr_y[i_m] = copy.deepcopy(m_arr_y[i_m-1])
+            if right_hist:
+                right_hist = False
+            else:
+                right_hist = True
+
+        # Plot
+        m_arr_y_zero = np.zeros(len(m_arr_y))
+        p1 = plt.fill_between(m_arr, m_arr_y_zero, m_arr_y, color=color,alpha=0.5, label=label)
+
         #'''
         if len(label)>0:
                 plt.legend()
         ax1=plt.gca()
-        ax1.set_xlabel('initial mass [M$_{\odot}$]')
-        if prodfac==False:
-                ax1.set_ylabel('IMF-weighted yield [M$_{\odot}$]')
-        else:
-                ax1.set_ylabel('production factor')
+
+        #ax1.set_ylim(bottom=0)
+        ax1.set_xlabel('Initial mass [M$_{\odot}$]')
+        ax1.set_ylabel('IMF-weighted yield [M$_{\odot}$]')
         if log==True:
                 ax1.set_yscale('log')
         lwtickboth=[6,2]
         lwtickmajor=[10,3]
-        plt.xlim(min(bin_bdys),max(bin_bdys))
+        plt.xlim(the_bdys[0],the_bdys[1])
         plt.legend(loc=2,prop={'size':legend_fontsize})
         plt.rcParams.update({'font.size': fontsize})
         ax1.yaxis.label.set_size(labelsize)
         ax1.xaxis.label.set_size(labelsize)
-        #ax.xaxis.set_tick_params(width=2)
-        #ax.yaxis.set_tick_params(width=2)
         ax1.tick_params(length=lwtickboth[0],width=lwtickboth[1],which='both')
         ax1.tick_params(length=lwtickmajor[0],width=lwtickmajor[1],which='major')
-        #Add that line below at some point
-        #ax.xaxis.set_tick_params(width=2)
-        #ax.yaxis.set_tick_params(width=2)
         ax1.legend(loc='center left', bbox_to_anchor=(1.01, 0.5),markerscale=0.8,fontsize=legend_fontsize)
-        #self.__save_data(header=['Mean mass','mass bdys (bins)','Yield'],data=[mean_val,bin_bdys,y])
         plt.subplots_adjust(right=rspace)
         plt.subplots_adjust(bottom=bspace)
 
-        #print [mean_val,bin_bdys,y]
         return
-
-    def __plot_mass_range_contributions_single(self,fig=7,specie='C',prodfac=False,rebin=1,time=-1,label='',shape='-',marker='o',color='r',markevery=20,extralabel=False,log=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
-
-        '''
-        Internal plotting function for function plot_mass_range_contributions
-        '''
-        import matplotlib.pyplot as plt
-
-        if len(label)==0:
-            label=specie
-
-
-        contribution=[]
-        #find starburst corresponding to time
-        if time>0:
-                age1=self.history.age
-                if time in age1:
-                        age_idx=age1.index(time)
-                else:
-                        age_idx=min(range(len(age1)), key=lambda i: abs(age1[i]-time))
-                        print ('Age not found, choose closest age',age1[age_idx])
-                mass_ranges=self.history.imf_mass_ranges[age_idx]
-                contribution=self.history.imf_mass_ranges_contribution[age_idx]
-                mtots=self.history.imf_mass_ranges_mtot[age_idx]
-        #take sum of all star bursts
-        else:
-
-                firstTime=True
-                for k in range(len(self.history.imf_mass_ranges)):
-                        mass_ranges1=self.history.imf_mass_ranges[k]
-                        if len(mass_ranges1)>0 and firstTime==True:
-                                mass_ranges=self.history.imf_mass_ranges[k]
-                                contribution=list(self.history.imf_mass_ranges_contribution[k])
-                                mtots=self.history.imf_mass_ranges_mtot[k]
-                                firstTime=False
-                        elif len(mass_ranges1)>0 and (not len(self.history.imf_mass_ranges[k]) == len(mass_ranges)):
-                                print ('Error: Different mass range intervalls used: cannot combine them')
-                                print ('Choose a specific staburst via time')
-                                return 0
-                        elif len(mass_ranges1)>0:
-                                mtots=np.array(mtots)+np.array(self.history.imf_mass_ranges_mtot[k])
-                                #carries all isotopes, hence an array: self.history.imf_mass_ranges_contribution[k][h]
-                                for h in range(len(self.history.imf_mass_ranges_contribution[k])):
-                                        contribution[h]= np.array(contribution[h])+np.array(self.history.imf_mass_ranges_contribution[k][h])
-
-
-        isotopes=self.history.isotopes
-        iso_idx_array=[]
-        x_iso_ism_ini=np.array(self.history.ism_iso_yield[0])/self.history.mgal
-        #get the element specific indices
-        for k in range(len(isotopes)):
-            if not '-' in specie:
-                specie=specie+'-'
-            if specie in isotopes[k]:
-                iso_idx_array.append(isotopes.index(isotopes[k]))
-        #get the sum of yields for each isotope and mass range
-        y=[0]*len(contribution)
-        for k in range(len(contribution)):
-            yields=0 #[0]*len(contribution[k])
-            x_ini=0
-            for iso_idx in iso_idx_array:
-                yields+= np.array(contribution[k][iso_idx])
-                x_ini+=x_iso_ism_ini[iso_idx]
-            if prodfac==True:
-                if x_ini ==0:
-                        print ('Initial abundance not available!')
-                        print ('Cannot plot production factor.')
-                        return 0
-                y[k]=np.array(yields)/(mtots[k]*x_ini)
-            else:
-                y[k]=yields
-
-        #masses1=[]
-        #for m in range(len(mass_ranges)):
-        #    masses1.append( (mass_ranges[m][0]+mass_ranges[m][1])/2.)
-        #masses_idx= sorted(range(len(masses1)),key=lambda x:masses1[x])
-
-        #for idx in masses_idx:
-        #    masses.append(masses1[idx])
-        #    yields.append(yields1[idx])
-        #'''
-        #for histo
-        bin_bdys=[]
-        mean_val=[]
-        #bin_bdys.append(1)
-        bin_values=[]
-        #rebin the plot using the bin size rebin
-        if rebin >0:
-                #_imf(self,mmin,mmax,inte,mass=0,iolevel=0)
-                mass=mass_ranges[0][0]
-                mmax=mass_ranges[-1][1]
-                bin_bdys1=[]
-                while True:
-                        bin_min=round(mass,5)
-                        mass+=rebin
-                        bin_max=round(mass,5)
-                        if (mmax==0):
-                                break
-                        if bin_max>mmax:
-                                bin_max=mmax
-                                mass=mmax
-                                mmax=0
-                        bin_bdys1.append([bin_min,bin_max])
-                        bin_values.append(0)
-                        for k in range(len(mass_ranges)):
-                                if (mass_ranges[k][1]<=bin_min) or (mass_ranges[k][0]>=bin_max):
-                                        continue
-                                #if mass range inside bin
-                                elif (mass_ranges[k][0]>=bin_min) and (mass_ranges[k][1]<=bin_max):
-                                        bin_values[-1]+=y[k]
-                                        #print ('bin includes mass range',y[k])
-                                        continue
-                                #if mass range includes bin:
-                                elif (mass_ranges[k][0]<=bin_min) and (mass_ranges[k][1]>=bin_max):
-                                        #normalization to bin mass
-                                        h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
-                                        y1=h*self._imf(bin_min,bin_max,inte=2)
-                                        bin_values[-1]+=y1
-                                        #print ('mass range inlcudes bin ',bin_min,bin_max,y1)
-
-                                #if upper part of bin is not in mass range
-                                elif (mass_ranges[k][1]<bin_max):
-                                        #normalization to bin mass
-                                        h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
-                                        y1=h*self._imf(bin_min,mass_ranges[k][1],inte=2)
-                                        bin_values[-1]+=y1
-                                        #print ('add upper half from ',bin_min,mass_ranges[k][1],y1)
-                                #if lower part of bin is not in mass range
-                                elif mass_ranges[k][0]>bin_min:
-                                        #normalization to bin mass
-                                        h=y[k]/self._imf(mass_ranges[k][0],mass_ranges[k][1],inte=2)
-                                        y1=h*self._imf(mass_ranges[k][0],bin_max,inte=2)
-                                        #print ('add lower half from ',mass_ranges[k][0],bin_max,y1)
-                                        bin_values[-1]+=y1
-                        #if bin_values[-1]==0:
-                        #        print ('Note that no values are found in bin range:',bin_min,'-',bin_max)
-                                #return 0
-                        if mmax==bin_max:
-                                break
-        #        print (bin_bdys1)
-#                print (bin_values)
-                mass_ranges=bin_bdys1
-                y=bin_values
-
-
-        for k in range(len(mass_ranges)):
-                #yields1.append(yields[k]) #
-                if k==0:
-                        bin_bdys.append(mass_ranges[k][0])
-                bin_bdys.append(mass_ranges[k][1])
-                mean_val.append( (mass_ranges[k][0] + mass_ranges[k][1])/2.)
-
-        return mean_val,bin_bdys,y,color,label
 
 
     ##############################################
