@@ -2455,11 +2455,6 @@ class sygma( chem_evol ):
 
         '''
 
-        import matplotlib.pyplot as plt
-        figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
-
-        the_upp = plt.gca().get_ylim()[1]
-
         # Get the isotopes index to collect the specie
         iso_index = []
         if not specie in self.history.isotopes and not specie in self.history.elements:
@@ -2471,6 +2466,9 @@ class sygma( chem_evol ):
             for i_iso in range(self.nb_isotopes):
                 if self.history.isotopes[i_iso].split('-')[0] == specie:
                     iso_index.append(i_iso)
+
+        import matplotlib.pyplot as plt
+        figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
 
         # Set the IMF binning
         dm = 1.0
