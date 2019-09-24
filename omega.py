@@ -4522,7 +4522,7 @@ class omega( chem_evol ):
 
             #Copy data for x and y axis
             age = self.history.age
-            t_SF_plot = self.history.t_SF_t
+            t_SF_plot = self.t_SF_t
 
             #Plot data
             plt.plot(age,t_SF_plot,label=label,marker=marker,\
