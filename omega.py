@@ -2903,6 +2903,291 @@ class omega( chem_evol ):
 ######################## Here start the analysis methods ######################################
 ###############################################################################################
 
+#### trueman edits
+
+    def mass_frac_plot(self,fig=0,species=['all'],sources=['agb','massive','1a'],\
+                      cycle=-1, solar_ref='Asplund_et_al_2009',yscale='log'):
+
+        '''
+        fractional contribution from each stellar source towards the galactic total relative to solar
+
+        Parameters
+        ----------
+
+        species : array of strings 
+             isotope or element name,
+             e.g. ['H-1','He-4','Fe','Fe-56']
+             default = ['all']
+        sources : array of strings
+             specifies the stellar sources to plot, 
+             e.g. ['agb','massive','1a']
+        cycle : float
+             specifies cycle number to plot, 
+             e.g. 'cycle=-1' will plot last cycle
+        solar_ref : string
+             the solar abundances used as a reference
+             default is Asplund et al. 2009
+             'Asplund_et_al_2009'
+             'Anders_Grevesse_1989'
+             'Grevesse_Noels_1993'
+             'Grevesse_Sauval_1998'
+             'Lodders_et_al_2009'
+        yscale: string
+             choose y axis scale
+             'log' or 'linear'
+ 
+        Examples
+        ---------
+
+        >>> s.plot(['all']['agb','massive','1a'],
+               cycle=-1, solar_ref='Lodders', yscale='log')
+
+        '''
+    
+        import numpy as np
+        import matplotlib
+        import matplotlib.pyplot as plt
+        from matplotlib.patches import Patch    
+        
+        f = open(os.path.join(nupy_path, 'stellab_data',\
+            'solar_normalization', str(solar_ref) + '.txt'), 'r')
+        
+        g = open(os.path.join(nupy_path, 'stellab_data',\
+        'solar_normalization', 'element_mass.txt'), 'r')
+        
+        h = open(os.path.join(nupy_path, 'stellab_data',\
+        'solar_normalization', 'Asplund_et_al_2009_iso.txt'), 'r')
+        
+        lines=f.readlines()
+        lines_g=g.readlines()
+        lines_h=h.readlines()
+        ele_mass = []
+        ele_nam = []
+        abu_sol = []
+        ele_sol = []
+        iso_nam =[]
+        iso_frac =[]
+        
+        # items taken from Asplund
+        # keys = element symbol, values = logarithmic solar abundnace 
+        for i in lines:
+            ele_sol.append(i.split()[1])
+            abu_sol.append(float(i.split()[2]))
+        f.close()
+        sol_dict = dict(zip(ele_sol, abu_sol))
+        
+        # items taken from online data table 
+        # keys = element symbol, values = element mass number
+        for j in lines_g:
+            ele_mass.append(float(j.split()[0]))
+            ele_nam.append(j.split()[2])
+        g.close()
+        ele_dict = dict(zip(ele_nam, ele_mass))
+        
+        # items taken from Asplund
+        # keys = isotope symbol, values = relative number fraction of isotope
+        for k in lines_h:
+            iso_nam.append(k.split()[0])
+            iso_frac.append(float(k.split()[1])/100)
+        h.close()
+        iso_frac_dict = dict(zip(iso_nam, iso_frac))
+        
+        # Create a dictionary with keys = element symbol
+        # and vals = solar mass fraction
+        ele_mass_frac = {}
+        for ele,mass in ele_dict.items():
+            for el,abu in sol_dict.items():
+                if ele == el:
+                    ele_mass_frac.update([(ele,10**(abu-12)*mass*0.7381)])
+        
+        # Normalise the above dictionary so that mass fractions
+        # sum to unity
+        tot_mass_frac = sum(ele_mass_frac.values())
+        for ele,frac in ele_mass_frac.items():
+            sol_dict.update([(ele,frac/tot_mass_frac)]) 
+        
+        # Create a dictionary with keys = isotope
+        # vals = (mass fraction)/(isotope mass)
+        new = {}
+        for ele,mass in ele_dict.items():
+            for iso,frac in iso_frac_dict.items():
+                if ele == iso.split('-',1)[0]:
+                    new.update([(iso,frac/mass)])
+        
+        # Create a dictionary with keys = isotope
+        # vals = contribution towards total element mass fraction from each isotope
+        weighted_iso_frac={}
+        for ele,frac in sol_dict.items():
+            for iso,fracs in new.items():
+                if ele == iso.split('-',1)[0]:
+                    weighted_iso_frac.update([
+        (iso,frac*fracs*float(iso.split('-',1)[-1]))])            
+        
+        species_mass_frac_sol_dict = weighted_iso_frac
+        species_mass_frac_sol_dict.update(sol_dict)
+        
+        # Remove species which have no solar mass data
+        remove_keys = []
+        for key,val in species_mass_frac_sol_dict.items():
+            if val < 10e-30:
+                remove_keys.append(key)
+        
+        for i in remove_keys:
+            if i in species_mass_frac_sol_dict:
+                del species_mass_frac_sol_dict[i]
+        
+        iso_mass_gal = dict(zip(self.history.isotopes, self.ymgal[cycle]))
+        ele_dum=[]
+        for iso,mass in iso_mass_gal.items(): # create a list of the elements
+            ele = (iso.split('-',1)[0])       # from list of isotopes
+            ele_dum.append(ele)
+        
+        elements = np.unique(ele_dum)
+        ele_mass_gal = np.zeros(len(elements))
+        i=0
+        
+        # add the mass contribution from each isotope to
+        # make the total element mass
+        for el in elements:
+            for iso,mass in iso_mass_gal.items():
+                mass = float(mass)
+                if el == iso.split('-', 1)[0]:
+                    ele_mass_gal[i] += mass
+            i+=1
+        
+        # create a dictionary which has keys = element/isotope and
+        # vals = mass of species
+        ele_mass_gal_dict = dict(zip(elements, ele_mass_gal))
+        species_mass_gal = iso_mass_gal
+        species_mass_gal.update(ele_mass_gal_dict)
+        
+        iso_mass_agb = dict(zip(self.history.isotopes, self.ymgal_agb[cycle]/sum(self.ymgal[cycle])))
+        
+        ele_mass_agb = np.zeros(len(elements))
+        i=0
+        
+        for el in elements:
+            for iso,mass in iso_mass_agb.items():
+                mass = float(mass)
+                if el == iso.split('-',1)[0]:
+                    ele_mass_agb[i] += mass
+            i+=1     
+        ele_mass_agb_dict = dict(zip(elements, ele_mass_agb))
+        species_mass_agb = iso_mass_agb
+        species_mass_agb.update(ele_mass_agb_dict)
+        
+        # This dictionary contains the mass fraction contribution toward the total
+        # by AGB's for each species
+        species_frac_agb = {k: species_mass_agb[k] / species_mass_gal[k] 
+        for k in species_mass_agb if k in species_mass_gal}
+        
+        iso_mass_massive = dict(zip(self.history.isotopes, self.ymgal_massive[cycle]/sum(self.ymgal[cycle])))
+        
+        ele_mass_massive = np.zeros(len(elements))
+        i=0
+        
+        for el in elements:
+            for iso,mass in iso_mass_massive.items():
+                mass = float(mass)
+                if el == iso.split('-',1)[0]:
+                    ele_mass_massive[i] += mass
+            i+=1     
+        ele_mass_massive_dict = dict(zip(elements, ele_mass_massive))
+        species_mass_massive = iso_mass_massive
+        species_mass_massive.update(ele_mass_massive_dict)
+        
+        # This dictionary contains the mass fraction contribution toward the total
+        # by SN1a's for each species
+        species_frac_massive = {k: species_mass_massive[k] / species_mass_gal[k] 
+        for k in species_mass_massive if k in species_mass_gal}
+        
+        iso_mass_1a = dict(zip(self.history.isotopes, self.ymgal_1a[cycle]/sum(self.ymgal[cycle])))
+        
+        ele_mass_1a = np.zeros(len(elements))
+        i=0
+        
+        for el in elements:
+            for iso,mass in iso_mass_1a.items():
+                mass = float(mass)
+                if el == iso.split('-',1)[0]:
+                    ele_mass_1a[i] += mass
+            i+=1     
+        ele_mass_1a_dict = dict(zip(elements, ele_mass_1a))
+        species_mass_1a = iso_mass_1a
+        species_mass_1a.update(ele_mass_1a_dict)
+        
+        # This dictionary contains the mass fraction contribution toward the total
+        # by SN1a's for each species
+        species_frac_1a = {k: species_mass_1a[k] / species_mass_gal[k] 
+        for k in species_mass_1a if k in species_mass_gal}
+        
+        iso_mass_bhnsm = dict(zip(self.history.isotopes, self.ymgal_bhnsm[cycle]/sum(self.ymgal[cycle])))
+        
+        ele_mass_bhnsm = np.zeros(len(elements))
+        i=0
+        
+        for el in elements:
+            for iso,mass in iso_mass_bhnsm.items():
+                mass = float(mass)
+                if el == iso.split('-',1)[0]:
+                    ele_mass_bhnsm[i] += mass
+            i+=1     
+        ele_mass_bhnsm_dict = dict(zip(elements, ele_mass_bhnsm))
+        species_mass_bhnsm = iso_mass_bhnsm
+        species_mass_bhnsm.update(ele_mass_bhnsm_dict)
+        
+        
+        map_str_dic = {
+        "agb":species_mass_agb,
+        "1a":species_mass_1a,
+        "massive":species_mass_massive,
+        "bhnsm":species_mass_bhnsm
+        }
+        
+        source_proper_name = {
+        "agb":'AGB',
+        "1a":'SN1a',
+        "massive":'Massive Stars',    
+        "bhnsm":'Black hole-neutron star merger'
+        }
+        
+        colors = ['blue', 'orange', 'grey','navy','green']
+        
+        if species == ['all']:
+            species = species_mass_frac_sol_dict.keys()
+        
+        bar_bottom=[]
+        for spec in species:
+            bar_bottom.append(0)
+        
+        h=0
+        j=0
+        labels=[]
+        for source in sources:
+            labels.append(source_proper_name[source])
+            ii=0
+            for spe in species:
+                if spe in species_mass_agb:
+                    source_frac = map_str_dic[source][spe]
+                    val = source_frac/species_mass_frac_sol_dict[spe]
+                    plt.bar(spe, val,bottom=bar_bottom[ii], color=colors[j])
+                    bar_bottom[ii]+=val
+                    ii+=1  
+            j+=1
+            legend_elements = [Patch(facecolor='blue',
+            label='AGBs'),
+            Patch(facecolor='orange',
+            label='Massive Stars'),
+            Patch(facecolor='grey',
+            label='SN1a')]
+            plt.legend(handles=legend_elements)
+            plt.axhline(y=1, ls='--', color='k')
+            plt.title('Galaxy Age: '+str(round(self.history.age[cycle]/10**6, 1))+' Myr')
+            plt.xticks(rotation=90, fontsize=12)
+            plt.yscale(yscale)
+            plt.ylabel('$X/X_{\odot}$')
+            plt.tick_params(right=True)
+        
 
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,show_legend=True):
 
