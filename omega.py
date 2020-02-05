@@ -3163,8 +3163,11 @@ class omega( chem_evol ):
         h=0
         j=0
         labels=[]
+        legend_elements=[]
         for source in sources:
             labels.append(source_proper_name[source])
+            legend_elements.append(Patch(facecolor=colors[j],
+                                    label=labels[j]))
             ii=0
             for spe in species:
                 if spe in species_mass_agb:
@@ -3174,19 +3177,13 @@ class omega( chem_evol ):
                     bar_bottom[ii]+=val
                     ii+=1  
             j+=1
-            legend_elements = [Patch(facecolor='blue',
-            label='AGBs'),
-            Patch(facecolor='orange',
-            label='Massive Stars'),
-            Patch(facecolor='grey',
-            label='SN1a')]
-            plt.legend(handles=legend_elements)
-            plt.axhline(y=1, ls='--', color='k')
-            plt.title('Galaxy Age: '+str(round(self.history.age[cycle]/10**6, 1))+' Myr')
-            plt.xticks(rotation=90, fontsize=12)
-            plt.yscale(yscale)
-            plt.ylabel('$X/X_{\odot}$')
-            plt.tick_params(right=True)
+        plt.legend(handles=legend_elements)
+        plt.axhline(y=1, ls='--', color='k')
+        plt.title('Galaxy Age: '+str(round(self.history.age[cycle]/10**6, 1))+' Myr')
+        plt.xticks(rotation=90, fontsize=12)
+        plt.yscale(yscale)
+        plt.ylabel('$X/X_{\odot}$')
+        plt.tick_params(right=True)
         
 
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,show_legend=True):
