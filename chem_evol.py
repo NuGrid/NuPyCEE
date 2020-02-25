@@ -3840,7 +3840,7 @@ class chem_evol(object):
                 while M_giy > self.inter_M_points[i_M_low+1]:
                     i_M_low += 1
             else:
-                i_M_low = self.inter_M_points_pop3_tree.search_left(M_giy)
+                i_M_low = self.inter_M_points_tree.search_left(M_giy)
 
             # If the metallicity is below the lowest Z available ..
             if Z_giy <= self.inter_Z_points[0]:
