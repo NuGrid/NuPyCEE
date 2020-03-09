@@ -2906,7 +2906,7 @@ class omega( chem_evol ):
     ##############################################
     #              Get Isolation Time            #
     ##############################################
-    def get_isolation_time(self, isotope, value, time_sun):
+    def get_isolation_time(self, isotope, value, time_sun, reac_dictionary = None):
 
         '''
         Return the isolation time in years for the desired isotope
@@ -2922,6 +2922,32 @@ class omega( chem_evol ):
         the needed amount of time is the isolation time returned.
 
         '''
+
+        # Build the reac_dictionary if it's not provided
+        if reac_dictionary is None and self.len_decay_file > 0:
+            reac_dictionary = {}
+
+            # The information stored in decay_info is...
+            # decay_info[nb_radio_iso][0] --> Unstable isotope
+            # decay_info[nb_radio_iso][1] --> Stable isotope where it decays
+            # decay_info[nb_radio_iso][2] --> Mean-life (half-life/ln2)[yr]
+
+            # Build the network
+            for elem in self.decay_info:
+
+                # Get names for reaction
+                targ = elem[0]; prod = elem[1]; rate = 1 / elem[2]
+
+                # Add reaction, create a lambda object
+                reaction = lambda: None
+                reaction.target = targ
+                reaction.products = [prod]
+                reaction.rate = rate
+
+                if targ in reac_dictionary:
+                    reac_dictionary[targ].append(reaction)
+                else:
+                    reac_dictionary[targ] = [reaction]
 
         # Check whether this is an isotope or a ratio of isotopes
         splt = isotope.split("/")
@@ -2939,7 +2965,7 @@ class omega( chem_evol ):
             indx = radioList.index(isotope)
             gas = np.transpose(self.ymgal_radio)[indx]
 
-            for reac in self.reac_dictionary[isotope]:
+            for reac in reac_dictionary[isotope]:
                 rate += reac.rate
 
         elif isotope in stableList:
@@ -2955,7 +2981,7 @@ class omega( chem_evol ):
                 indx2 = radioList.index(isotope2)
                 gas2 = np.transpose(self.ymgal_radio)[indx2]
 
-                for reac in self.reac_dictionary[isotope2]:
+                for reac in reac_dictionary[isotope2]:
                     rate2 += reac.rate
 
             elif isotope2 in stableList:
