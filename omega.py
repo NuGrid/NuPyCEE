@@ -2948,6 +2948,11 @@ class omega( chem_evol ):
                     reac_dictionary[targ].append(reaction)
                 else:
                     reac_dictionary[targ] = [reaction]
+        else:
+            s = "This routine needs either a reac_dictionary passed from"
+            s += "OMEGA+ or the decay information written in the decay file."
+            print(s)
+            return None
 
         # Check whether this is an isotope or a ratio of isotopes
         splt = isotope.split("/")
