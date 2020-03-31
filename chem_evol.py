@@ -7643,37 +7643,43 @@ class chem_evol(object):
             # Store x, y
             ym1 = y_arr[indx - 1]
             xm1 = x_arr[indx - 1]
-
-            him1 = (x0 - xm1)
-            sim1 = (y0 - ym1)/him1
-
-            # Pi0 calculation
-            pi0 = (sim1*hi0 + si0*him1)/(him1 + hi0)
-
-            # Derivative
-            deriv0 = np.sign(sim1) + np.sign(si0)
-            deriv0 = deriv0*min(abs(sim1), abs(si0), 0.5*abs(pi0))
         else:
-            # We are in the lowest extreme
-            deriv0 = 0
+            # We are in the lowest extreme, create an extra point
+            dx = x_arr[indx + 1] - x_arr[indx]
+            dy = y_arr[indx + 1] - y_arr[indx]
+            xm1 = x_arr[indx] - dx*1e-5
+            ym1 = y_arr[indx + 1] - dy/dx*1e-5
+
+        him1 = (x0 - xm1)
+        sim1 = (y0 - ym1)/him1
+
+        # Pi0 calculation
+        pi0 = (sim1*hi0 + si0*him1)/(him1 + hi0)
+
+        # Derivative
+        deriv0 = np.sign(sim1) + np.sign(si0)
+        deriv0 = deriv0*min(abs(sim1), abs(si0), 0.5*abs(pi0))
 
         # Calculate sip1, pip1 and derivp1
         if indx < len(x_arr) - 2:
             yp2 = y_arr[indx + 2]
             xp2 = x_arr[indx + 2]
-
-            hip1 = (xp2 - xp1)
-            sip1 = (yp2 - yp1)/hip1
-
-            # Pip1 calculation
-            pip1 = (si0*hip1 + sip1*hi0)/(hi0 + hip1)
-
-            # Derivative
-            derivp1 = np.sign(si0) + np.sign(sip1)
-            derivp1 = derivp1*min(abs(si0), abs(sip1), 0.5*abs(pip1))
         else:
-            # We are in the highest extreme
-            derivp1 = 0
+            # We are in the highest extreme, create an extra point
+            dx = x_arr[indx + 1] - x_arr[indx]
+            dy = y_arr[indx + 1] - y_arr[indx]
+            xp2 = x_arr[indx + 1] + dx*1e-5
+            yp2 = y_arr[indx + 1] + dy/dx*1e-5
+
+        hip1 = (xp2 - xp1)
+        sip1 = (yp2 - yp1)/hip1
+
+        # Pip1 calculation
+        pip1 = (si0*hip1 + sip1*hi0)/(hi0 + hip1)
+
+        # Derivative
+        derivp1 = np.sign(si0) + np.sign(sip1)
+        derivp1 = derivp1*min(abs(si0), abs(sip1), 0.5*abs(pip1))
 
         # Now calculate coefficients (ci = deriv0; di = y0)
         ai = (deriv0 + derivp1 - 2*si0)/(hi0*hi0)
