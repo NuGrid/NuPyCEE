@@ -2903,6 +2903,127 @@ class omega( chem_evol ):
 ######################## Here start the analysis methods ######################################
 ###############################################################################################
 
+    ##############################################
+    #              Get Isolation Time            #
+    ##############################################
+    def get_isolation_time(self, isotope, value, time_sun, reac_dictionary = None):
+
+        '''
+        Return the isolation time in years for the desired isotope
+        or ratio of isotopes.
+
+        Parameters
+        ----------
+        -isotope: A string with the isotope name or ratio. For
+        example: 'Fe-60/Al-26'
+        -value: The decayed value of the isotope or ratio.
+        -time_sun: The galaxy time in years when the ISM value
+        should be taken. This value is then decayed to value and
+        the needed amount of time is the isolation time returned.
+
+        '''
+
+        # Build the reac_dictionary if it's not provided
+        if reac_dictionary is None and self.len_decay_file > 0:
+            reac_dictionary = {}
+
+            # The information stored in decay_info is...
+            # decay_info[nb_radio_iso][0] --> Unstable isotope
+            # decay_info[nb_radio_iso][1] --> Stable isotope where it decays
+            # decay_info[nb_radio_iso][2] --> Mean-life (half-life/ln2)[yr]
+
+            # Build the network
+            for elem in self.decay_info:
+
+                # Get names for reaction
+                targ = elem[0]; prod = elem[1]; rate = 1 / elem[2]
+
+                # Add reaction, create a lambda object
+                reaction = lambda: None
+                reaction.target = targ
+                reaction.products = [prod]
+                reaction.rate = rate
+
+                if targ in reac_dictionary:
+                    reac_dictionary[targ].append(reaction)
+                else:
+                    reac_dictionary[targ] = [reaction]
+        else:
+            s = "This routine needs either a reac_dictionary passed from"
+            s += "OMEGA+ or the decay information written in the decay file."
+            print(s)
+            return None
+
+        # Check whether this is an isotope or a ratio of isotopes
+        splt = isotope.split("/")
+        if len(splt) == 1:
+            isotope2 = None
+        else:
+            isotope, isotope2 = splt
+
+        # Get indices and decay rates for isotopes
+        stableList = list(self.history.isotopes)
+        radioList = list(self.radio_iso)
+
+        rate = 0
+        if isotope in radioList:
+            indx = radioList.index(isotope)
+            gas = np.transpose(self.ymgal_radio)[indx]
+
+            for reac in reac_dictionary[isotope]:
+                rate += reac.rate
+
+        elif isotope in stableList:
+            indx = stableList.index(isotope)
+            gas = np.transpose(self.ymgal)[indx]
+        else:
+            print("Isotope {} not in omega".format(isotope))
+            return None
+
+        rate2 = 0
+        if isotope2 is not None:
+            if isotope2 in radioList:
+                indx2 = radioList.index(isotope2)
+                gas2 = np.transpose(self.ymgal_radio)[indx2]
+
+                for reac in reac_dictionary[isotope2]:
+                    rate2 += reac.rate
+
+            elif isotope2 in stableList:
+                indx2 = stableList.index(isotope2)
+                gas2 = np.transpose(self.ymgal)[indx2]
+            else:
+                print("Isotope {} not in omega".format(isotope2))
+                return None
+
+        # Calculate the equivalent rate
+        # (doesn't matter what situation, always works)
+        rateEq = rate - rate2
+
+        # Look for the lowest time index
+        timesArr = self.history.age
+        for ii in range(len(self.history.age)):
+            if timesArr[ii] >= time_sun:
+                i1 = ii - 1
+                i2 = ii
+                break
+
+        # Take the value of the isotopes at the time time_sun
+        lt1 = np.log(timesArr[i1]); lt2 = np.log(timesArr[i2])
+        lg1 = np.log(gas[i1]); lg2 = np.log(gas[i2])
+        mm = (lg2 - lg1)/(lt2 - lt1)
+        valueISM = np.exp(mm*(np.log(time_sun) - lt1) + lg1)
+        if isotope2 is not None:
+            lg1 = np.log(gas2[i1]); lg2 = np.log(gas2[i2])
+            mm = (lg2 - lg1)/(lt2 - lt1)
+            valueISM2 = np.exp(mm*(np.log(time_sun) - lt1) + lg1)
+
+            valueISM /= valueISM2
+
+        # Now just return the isolation time
+        return -np.log(value/valueISM)/rateEq
+
+
 #### trueman edits
 
     def mass_frac_plot(self,fig=0,species=['all'],sources=['agb','massive','1a'],\
@@ -2914,15 +3035,15 @@ class omega( chem_evol ):
         Parameters
         ----------
 
-        species : array of strings 
+        species : array of strings
              isotope or element name,
              e.g. ['H-1','He-4','Fe','Fe-56']
              default = ['all']
         sources : array of strings
-             specifies the stellar sources to plot, 
+             specifies the stellar sources to plot,
              e.g. ['agb','massive','1a']
         cycle : float
-             specifies cycle number to plot, 
+             specifies cycle number to plot,
              e.g. 'cycle=-1' will plot last cycle
         solar_ref : string
              the solar abundances used as a reference
@@ -2947,7 +3068,7 @@ class omega( chem_evol ):
         import numpy as np
         import matplotlib
         import matplotlib.pyplot as plt
-        from matplotlib.patches import Patch    
+        from matplotlib.patches import Patch
         
         f = open(os.path.join(nupy_path, 'stellab_data',\
             'solar_normalization', str(solar_ref) + '.txt'), 'r')
@@ -2969,14 +3090,14 @@ class omega( chem_evol ):
         iso_frac =[]
         
         # items taken from Asplund
-        # keys = element symbol, values = logarithmic solar abundnace 
+        # keys = element symbol, values = logarithmic solar abundnace
         for i in lines:
             ele_sol.append(i.split()[1])
             abu_sol.append(float(i.split()[2]))
         f.close()
         sol_dict = dict(zip(ele_sol, abu_sol))
         
-        # items taken from online data table 
+        # items taken from online data table
         # keys = element symbol, values = element mass number
         for j in lines_g:
             ele_mass.append(float(j.split()[0]))
@@ -3004,7 +3125,7 @@ class omega( chem_evol ):
         # sum to unity
         tot_mass_frac = sum(ele_mass_frac.values())
         for ele,frac in ele_mass_frac.items():
-            sol_dict.update([(ele,frac/tot_mass_frac)]) 
+            sol_dict.update([(ele,frac/tot_mass_frac)])
         
         # Create a dictionary with keys = isotope
         # vals = (mass fraction)/(isotope mass)
@@ -3021,7 +3142,7 @@ class omega( chem_evol ):
             for iso,fracs in new.items():
                 if ele == iso.split('-',1)[0]:
                     weighted_iso_frac.update([
-        (iso,frac*fracs*float(iso.split('-',1)[-1]))])            
+        (iso,frac*fracs*float(iso.split('-',1)[-1]))])
         
         species_mass_frac_sol_dict = weighted_iso_frac
         species_mass_frac_sol_dict.update(sol_dict)
@@ -3071,14 +3192,14 @@ class omega( chem_evol ):
                 mass = float(mass)
                 if el == iso.split('-',1)[0]:
                     ele_mass_agb[i] += mass
-            i+=1     
+            i+=1
         ele_mass_agb_dict = dict(zip(elements, ele_mass_agb))
         species_mass_agb = iso_mass_agb
         species_mass_agb.update(ele_mass_agb_dict)
         
         # This dictionary contains the mass fraction contribution toward the total
         # by AGB's for each species
-        species_frac_agb = {k: species_mass_agb[k] / species_mass_gal[k] 
+        species_frac_agb = {k: species_mass_agb[k] / species_mass_gal[k]
         for k in species_mass_agb if k in species_mass_gal}
         
         iso_mass_massive = dict(zip(self.history.isotopes, self.ymgal_massive[cycle]/sum(self.ymgal[cycle])))
@@ -3091,14 +3212,14 @@ class omega( chem_evol ):
                 mass = float(mass)
                 if el == iso.split('-',1)[0]:
                     ele_mass_massive[i] += mass
-            i+=1     
+            i+=1
         ele_mass_massive_dict = dict(zip(elements, ele_mass_massive))
         species_mass_massive = iso_mass_massive
         species_mass_massive.update(ele_mass_massive_dict)
         
         # This dictionary contains the mass fraction contribution toward the total
         # by SN1a's for each species
-        species_frac_massive = {k: species_mass_massive[k] / species_mass_gal[k] 
+        species_frac_massive = {k: species_mass_massive[k] / species_mass_gal[k]
         for k in species_mass_massive if k in species_mass_gal}
         
         iso_mass_1a = dict(zip(self.history.isotopes, self.ymgal_1a[cycle]/sum(self.ymgal[cycle])))
@@ -3111,14 +3232,14 @@ class omega( chem_evol ):
                 mass = float(mass)
                 if el == iso.split('-',1)[0]:
                     ele_mass_1a[i] += mass
-            i+=1     
+            i+=1
         ele_mass_1a_dict = dict(zip(elements, ele_mass_1a))
         species_mass_1a = iso_mass_1a
         species_mass_1a.update(ele_mass_1a_dict)
         
         # This dictionary contains the mass fraction contribution toward the total
         # by SN1a's for each species
-        species_frac_1a = {k: species_mass_1a[k] / species_mass_gal[k] 
+        species_frac_1a = {k: species_mass_1a[k] / species_mass_gal[k]
         for k in species_mass_1a if k in species_mass_gal}
         
         iso_mass_bhnsm = dict(zip(self.history.isotopes, self.ymgal_bhnsm[cycle]/sum(self.ymgal[cycle])))
@@ -3131,7 +3252,7 @@ class omega( chem_evol ):
                 mass = float(mass)
                 if el == iso.split('-',1)[0]:
                     ele_mass_bhnsm[i] += mass
-            i+=1     
+            i+=1
         ele_mass_bhnsm_dict = dict(zip(elements, ele_mass_bhnsm))
         species_mass_bhnsm = iso_mass_bhnsm
         species_mass_bhnsm.update(ele_mass_bhnsm_dict)
@@ -3147,7 +3268,7 @@ class omega( chem_evol ):
         source_proper_name = {
         "agb":'AGB',
         "1a":'SN1a',
-        "massive":'Massive Stars',    
+        "massive":'Massive Stars',
         "bhnsm":'Black hole-neutron star merger'
         }
         
@@ -3175,7 +3296,7 @@ class omega( chem_evol ):
                     val = source_frac/species_mass_frac_sol_dict[spe]
                     plt.bar(spe, val,bottom=bar_bottom[ii], color=colors[j])
                     bar_bottom[ii]+=val
-                    ii+=1  
+                    ii+=1
             j+=1
         plt.legend(handles=legend_elements)
         plt.axhline(y=1, ls='--', color='k')
@@ -5866,4 +5987,3 @@ class omega( chem_evol ):
 
         # Close the output file
         f.close()
-
