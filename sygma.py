@@ -168,7 +168,8 @@ class sygma( chem_evol ):
                  delayed_extra_yields_radio=np.array([]), ism_ini_radio=np.array([]), \
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
-                 ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([])):
+                 ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),
+                 yield_modifier=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
@@ -226,7 +227,8 @@ class sygma( chem_evol ):
                  radio_refinement=radio_refinement,\
                  use_decay_module=use_decay_module,\
                  f_network=f_network, f_format=f_format,\
-                 high_mass_extrapolation=high_mass_extrapolation)
+                 high_mass_extrapolation=high_mass_extrapolation,
+                 yield_modifier=yield_modifier)
 
         if self.need_to_quit:
             return

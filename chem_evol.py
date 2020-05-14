@@ -390,6 +390,14 @@ class chem_evol(object):
 
         Default value : 2.5e-02
 
+    yield_modifier : list of arrays --> [[iso, M, Z, type, modifier],[...]]
+        When used, modifies all isotopes yields for the given M and Z by 
+        multiplying by a given factor (type="multiply") or replacing the 
+        yield by a new value (type="replace"). Modifier will be either the 
+        factor or value depending on type.
+
+        Default value : [] --> Deactivated
+
     Delayed extra source
     Adding source that requires delay-time distribution (DTD) functions
     -------------------------------------------------------------------
@@ -510,7 +518,8 @@ class chem_evol(object):
              inter_lifetime_points=np.array([]), inter_lifetime_points_tree=np.array([]),\
              nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
              inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
-             inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([])):
+             inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
+             yield_modifier=np.array([])):
 
         # Initialize the history class which keeps the simulation in memory
         self.history = self.__history()
@@ -772,6 +781,41 @@ class chem_evol(object):
             # Read radioactive tables
             if self.len_decay_file > 0:
                 self.__read_radio_tables()
+
+            # Modify the yields (ttrueman edit) 
+            if len(yield_modifier) > 0:
+                iso = [i[0] for i in yield_modifier]
+                M = [i[1] for i in yield_modifier]
+                Z = [i[2] for i in yield_modifier]
+                modifier = [i[3] for i in yield_modifier]
+                val = [i[4] for i in yield_modifier]
+
+                for j,specie in enumerate(iso):
+                    if Z[j] not in self.Z_table or M[j] not in self.M_table:
+                        print('Z = %sZ or M_sun = %s is not in yield table'%(Z[j],M[j]))
+                        print('ERROR: No modifications will be performed on %s'%iso[j])
+                        break
+                    if specie in self.history.isotopes:
+                        if modifier[j]  == "replace":
+                            self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
+                                    value=val[j])
+                        if modifier[j]  == "multiply":
+                            original = self.ytables.get(M=M[j],Z=Z[j],
+                                    specie=iso[j],quantity="yields")
+                            self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
+                                    value=original*val[j])
+                    elif self.len_decay_file > 0 and specie in self.radio_iso:
+                        if modifier[j]  == "replace":
+                            self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
+                                    value=val[j])
+                        if modifier[j]  == "multiply":
+                            original = self.ytables_radio.get(M=M[j],Z=Z[j],
+                                    specie=iso[j],quantity="yields")
+                            self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
+                                    value=original*val[j])
+                    else:
+                        print("ERROR 404: Isotope not found")
+
 
             # Declare the interpolation coefficient arrays
             self.__declare_interpolation_arrays()
@@ -7605,7 +7649,7 @@ class chem_evol(object):
     ##############################################
     #          Interpolation routine             #
     ##############################################
-    def __interpolation(self, x_arr, y_arr, xx, indx):
+    def interpolation(x_arr, y_arr, xx, indx, interp_list):
 
         '''
         This function
@@ -7614,6 +7658,14 @@ class chem_evol(object):
         ========
 
         '''
+
+        # Get the dimensions and catch non-numpy arrays
+        try:
+            dimensions = len(y_arr.shape)
+        except AttributeError:
+            raise Exception("The interpolation routine uses numpy arrays")
+        except:
+            raise
 
         # Return if last extreme
         if indx == len(x_arr) - 1:
@@ -7624,10 +7676,18 @@ class chem_evol(object):
             raise Exception("Interpolating outside of range!")
 
         # Return the calculation with coefficients if exists
-        if self.interp_list[indx] is not None:
-            coefs = self.interp_list[indx]
-            deltx = xx - x_arr[indx]
-            return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
+        if dimensions == 1:
+            if interp_list[indx] is not None:
+                coefs = interp_list[indx]
+                deltx = xx - x_arr[indx]
+                return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
+        elif dimensions == 2:
+            if interp_list[indx][0] is not None:
+                coefs = interp_list[indx]
+                deltx = xx - x_arr[indx]
+                return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
+        else:
+            raise Exception("Current support for up to 2-d in interpolation method")
 
         # If not, we have to calculate the coefficients for this region
         x0 = x_arr[indx]; xp1 = x_arr[indx + 1]
@@ -7658,7 +7718,12 @@ class chem_evol(object):
 
         # Derivative
         deriv0 = np.sign(sim1) + np.sign(si0)
-        deriv0 = deriv0*min(abs(sim1), abs(si0), 0.5*abs(pi0))
+        if dimensions == 1:
+            deriv0 = deriv0*min(abs(sim1), abs(si0), 0.5*abs(pi0))
+        elif dimensions == 2:
+            deriv0 = deriv0*np.minimum(abs(sim1),\
+                    np.minimum(abs(si0), 0.5*abs(pi0)))
+
 
         # Calculate sip1, pip1 and derivp1
         if indx < len(x_arr) - 2:
@@ -7679,14 +7744,18 @@ class chem_evol(object):
 
         # Derivative
         derivp1 = np.sign(si0) + np.sign(sip1)
-        derivp1 = derivp1*min(abs(si0), abs(sip1), 0.5*abs(pip1))
+        if dimensions == 1:
+            derivp1 = derivp1*min(abs(si0), abs(sip1), 0.5*abs(pip1))
+        elif dimensions == 2:
+            derivp1 = derivp1*np.minimum(abs(si0), \
+                    np.minimum(abs(sip1), 0.5*abs(pip1)))
 
         # Now calculate coefficients (ci = deriv0; di = y0)
         ai = (deriv0 + derivp1 - 2*si0)/(hi0*hi0)
         bi = (3*si0 - 2*deriv0 - derivp1)/hi0
 
-        self.interp_list[indx] = (ai, bi, deriv0)
-        return self.__interpolation(x_arr, y_arr, xx, indx)
+        interp_list[indx] = (ai, bi, deriv0)
+        return interpolation(x_arr, y_arr, xx, indx, interp_list)
 
 
     ##############################################
