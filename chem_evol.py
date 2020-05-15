@@ -793,28 +793,33 @@ class chem_evol(object):
                 for j,specie in enumerate(iso):
                     if Z[j] not in self.Z_table or M[j] not in self.M_table:
                         print('Z = %sZ or M_sun = %s is not in yield table'%(Z[j],M[j]))
-                        print('ERROR: No modifications will be performed on %s'%iso[j])
+                        print('No modifications will be performed on %s'%iso[j],"\n")
                         break
-                    if specie in self.history.isotopes:
-                        if modifier[j]  == "replace":
-                            self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
-                                    value=val[j])
-                        if modifier[j]  == "multiply":
-                            original = self.ytables.get(M=M[j],Z=Z[j],
-                                    specie=iso[j],quantity="yields")
-                            self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
-                                    value=original*val[j])
-                    elif self.len_decay_file > 0 and specie in self.radio_iso:
-                        if modifier[j]  == "replace":
-                            self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
-                                    value=val[j])
-                        if modifier[j]  == "multiply":
-                            original = self.ytables_radio.get(M=M[j],Z=Z[j],
-                                    specie=iso[j],quantity="yields")
-                            self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
-                                    value=original*val[j])
-                    else:
-                        print("ERROR 404: Isotope not found")
+                        if specie in self.history.isotopes:
+                            if modifier[j]  == "replace":
+                                self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
+                                        value=val[j])
+                            if modifier[j]  == "multiply":
+                                original = self.ytables.get(M=M[j],Z=Z[j],
+                                        specie=iso[j],quantity="yields")
+                                self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
+                                        value=original*val[j])
+                        elif self.len_decay_file > 0:
+                            if specie in self.radio_iso:
+                                if modifier[j]  == "replace":
+                                    self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
+                                            value=val[j])
+                                if modifier[j]  == "multiply":
+                                    original = self.ytables_radio.get(M=M[j],Z=Z[j],
+                                            specie=iso[j],quantity="yields")
+                                    self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
+                                            value=original*val[j])
+                            else:
+                                print("ERROR 404: %s not found in list of isotopes"%specie,
+                                        "\n")
+                        else:
+                            print("ERROR 404: %s not found in list of isotopes"%specie,
+                                    "\n")
 
 
             # Declare the interpolation coefficient arrays
