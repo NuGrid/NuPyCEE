@@ -129,12 +129,10 @@ class sygma( chem_evol ):
                  nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8.0, iolevel=0, \
                  ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  table_radio='', decay_file='', sn1a_table_radio='',\
-                 bhnsmerger_table_radio='', nsmerger_table_radio='',\
+                 nsmerger_table_radio='',\
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_i99_W7.txt',sn1a_energy=1e51,\
-                 ns_merger_on=False, bhns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
+                 ns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
                  t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
-                 m_ej_bhnsm=2.5e-02, \
-                 bhnsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
                  nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', iniabu_table='', \
                  extra_source_on=False, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0, \
                  extra_source_table=['yield_tables/extra_source.txt'], \
@@ -156,7 +154,7 @@ class sygma( chem_evol ):
                  delayed_extra_yields_log_int=False, \
                  stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
                  tau_ferrini=False, delayed_extra_log=False, dt_in=np.array([]),\
-                 nsmerger_dtd_array=np.array([]), bhnsmerger_dtd_array=np.array([]),\
+                 nsmerger_dtd_array=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
                  isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
                  zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]), \
@@ -178,12 +176,10 @@ class sygma( chem_evol ):
                  ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table,sn1a_energy=sn1a_energy,\
                  table_radio=table_radio, decay_file=decay_file,\
-                 sn1a_table_radio=sn1a_table_radio, bhnsmerger_table_radio=bhnsmerger_table_radio,\
+                 sn1a_table_radio=sn1a_table_radio, \
                  nsmerger_table_radio=nsmerger_table_radio,\
                  ns_merger_on=ns_merger_on, nsmerger_table=nsmerger_table, \
                  f_binary=f_binary, f_merger=f_merger, \
-                 bhns_merger_on=bhns_merger_on,
-                 m_ej_bhnsm=m_ej_bhnsm, bhnsmerger_table=bhnsmerger_table, \
                  nsm_dtd_power=nsm_dtd_power, yield_tables_dir=yield_tables_dir, \
                  total_ejecta_interp=total_ejecta_interp, \
                  t_merger_max=t_merger_max, m_ej_nsm = m_ej_nsm, \
@@ -205,7 +201,6 @@ class sygma( chem_evol ):
                  yield_interp=yield_interp, tau_ferrini=tau_ferrini,\
                  delayed_extra_log=delayed_extra_log,\
                  ytables_in=ytables_in, nsmerger_dtd_array=nsmerger_dtd_array, \
-                 bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
                  zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
                  isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
                  zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
