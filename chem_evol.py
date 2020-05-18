@@ -6422,13 +6422,13 @@ class chem_evol(object):
             self.ci = ci
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_costum(mass)
+                return self.imfnorm * self.__g1_custom(mass)
             if inte == 1:
-                return quad(self.__g1_costum, mmin, mmax)[0]
+                return quad(self.__g1_custom, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_costum, mmin, mmax)[0]
+                return quad(self.__g2_custom, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_costum, \
+                self.imfnorm = 1.0 / quad(self.__g2_custom, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         # Chabrier IMF
@@ -6632,9 +6632,9 @@ class chem_evol(object):
 
 
     ##############################################
-    #                  G1 Costum                 #
+    #                  G1 Custom                 #
     ##############################################
-    def __g1_costum(self, mass):
+    def __g1_custom(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -6653,9 +6653,9 @@ class chem_evol(object):
 
 
     ##############################################
-    #                  G2 Costum                 #
+    #                  G2 Custom                 #
     ##############################################
-    def __g2_costum(self, mass):
+    def __g2_custom(self, mass):
 
         '''
         This function returns the total mass of stars having a certain stellar
