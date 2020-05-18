@@ -440,7 +440,7 @@ class chem_evol(object):
     def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
              sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30, \
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
-             ini_alpha=True, \
+             ini_alpha=True, is_sygma=False, \
              table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
              use_decay_module=False, f_network='isotopes_modified.prn', f_format=1, \
              table_radio='', decay_file='', sn1a_table_radio='',\
@@ -791,7 +791,11 @@ class chem_evol(object):
             return
 
         # Initialisation of the composition of the gas reservoir
-        ymgal = self._get_iniabu()
+        if is_sygma:
+            ymgal = np.zeros(self.nb_isotopes)
+            ymgal[0] = copy.deepcopy(self.mgal)
+        else:
+            ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
 
         # Initialisation of the storing arrays
@@ -914,7 +918,11 @@ class chem_evol(object):
         self.len_i_nonmetals = len(self.i_nonmetals)
 
         # Set the initial time and metallicity
-        zmetal = self._getmetallicity(0)
+        
+        if is_sygma:
+            zmetal = copy.deepcopy(self.iniZ)
+        else:
+            zmetal = self._getmetallicity(0)
         self.history.metallicity.append(zmetal)
         self.t = 0
         self.history.age = np.zeros(self.nb_timesteps+1)
@@ -934,6 +942,7 @@ class chem_evol(object):
         if iolevel > 0:
             print ('### Start with initial metallicity of ','{:.4E}'.format(zmetal))
             print ('###############################')
+
 
     ##############################################
     #             Get elem-to-iso Main           #

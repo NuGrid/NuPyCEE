@@ -169,7 +169,7 @@ class sygma( chem_evol ):
                  ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
-        chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
+        chem_evol.__init__(self, is_sygma=True, imf_type=imf_type, alphaimf=alphaimf, \
                  imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \
                  special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
                  nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
@@ -297,63 +297,11 @@ class sygma( chem_evol ):
 
         '''
 
-        # Declaration of the array containing the mass fraction converted
-        # into stars at every timestep i.
-        if self.sfr == 'input':
-            sfr_i = []
-        else:
-            sfr_i = np.zeros(self.nb_timesteps+1)
-
-        # Output information
-        if self.iolevel >= 3:
-            print ('Entering sfr routine')
-
-        # For every timestep i considered in the simulation ...
-        for i in range(1, self.nb_timesteps+1):
-
-            # If an array is used to generate starbursts ...
-            if len(self.starbursts) > 0:
-                if len(self.starbursts) >= i:
-
-                    # Use the input value
-                    sfr_i[i] = self.starbursts[i-1]
-                    self.history.sfr.append(sfr_i[i-1])
-
-            # If an input file is read for the SFR ...
-            elif self.sfr == 'input':
-
-                # Open the input file, read all lines, and close the file
-                f1 = open(os.path.join(nupy_path, 'sfr_input'))
-                lines = f1.readlines()
-                f1.close()
-
-                # The number of lines needs to be at least equal to the
-                # number of timesteps
-                if self.nb_timesteps > (len(lines)):
-                    print ('Error - SFR input file does not' \
-                          'provide enough timesteps')
-                    return
-
-                # Copy the SFR (mass fraction) of every timestep
-                for k in range(len(lines)):
-                    if k == (i-1):
-                        sfr_i.append(float(lines[k]))
-                        self.history.sfr.append(sfr_i[i-1])
-                        break
-
-            # If the Schmidt law is used (see Timmes98) ...
-            elif self.sfr == 'schmidt':
-
-                # Calculate the mass of available gas
-                mgas = sum(ymgal[i-1])
-
-                # Calculate the SFR according to the current gas fraction
-                B = 2.8 * self.mgal * (mgas / self.mgal)**2    # [Mo/Gyr]
-                sfr_i[i] = (B/mgas) * (timesteps[i-1] / 1.e9) # mass fraction
-                self.history.sfr.append(sfr_i[i-1])
-
         # Return the SFR (mass fraction) of every timestep
+        sfr_i = np.zeros(self.nb_timesteps+1)
+        sfr_i[0] = 1.0
         return sfr_i
+
 
 ###############################################################################################
 ######################## Here start the analysis methods ######################################
