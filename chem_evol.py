@@ -7385,7 +7385,7 @@ class chem_evol(object):
     ##############################################
     #          Interpolation routine             #
     ##############################################
-    def __interpolation(self, x_arr, y_arr, xx, indx, interp_list):
+    def interpolation(self, x_arr, y_arr, xx, indx, interp_list, return_coefs=False):
 
         '''
         This function interpolates with the Steffen 1990 algorithm, adding
@@ -7402,6 +7402,8 @@ class chem_evol(object):
             interp_list: list holding the interpolation coefficients.
                 it should have the same size and dimensions as y_arr and
                 initialized to None.
+            return_coefs: If True, return the calculated interp_list[indx]
+                instead of returning the interpolated y_arr
 
         '''
 
@@ -7423,17 +7425,19 @@ class chem_evol(object):
 
         # Return the calculation with coefficients if exists
         if dimensions == 1:
-            if interp_list[indx] is not None:
-                coefs = interp_list[indx]
-                deltx = xx - x_arr[indx]
-                return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
+            coefCheck = interp_list[indx]
         elif dimensions == 2:
-            if interp_list[indx][0] is not None:
-                coefs = interp_list[indx]
-                deltx = xx - x_arr[indx]
-                return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
+            coefCheck = interp_list[indx][0]
         else:
             raise Exception("Current support for up to 2-d in interpolation method")
+
+        if coefCheck is not None:
+            if return_coefs:
+                return interp_list[indx]
+            else:
+                coefs = interp_list[indx]
+                deltx = xx - x_arr[indx]
+                return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
 
         # If not, we have to calculate the coefficients for this region
         x0 = x_arr[indx]; xp1 = x_arr[indx + 1]
@@ -7470,7 +7474,6 @@ class chem_evol(object):
             deriv0 = deriv0*np.minimum(abs(sim1),\
                     np.minimum(abs(si0), 0.5*abs(pi0)))
 
-
         # Calculate sip1, pip1 and derivp1
         if indx < len(x_arr) - 2:
             yp2 = y_arr[indx + 2]
@@ -7501,7 +7504,7 @@ class chem_evol(object):
         bi = (3*si0 - 2*deriv0 - derivp1)/hi0
 
         interp_list[indx] = (ai, bi, deriv0)
-        return self.__interpolation(x_arr, y_arr, xx, indx, interp_list)
+        return self.interpolation(x_arr, y_arr, xx, indx, interp_list)
 
 
     ##############################################
@@ -7547,6 +7550,9 @@ class chem_evol(object):
             self.t_m_bdys = []
 
 
+    ##############################################
+    #               Const CLASS                #
+    ##############################################
     class __const():
 
         '''
