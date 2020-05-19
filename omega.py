@@ -507,6 +507,7 @@ class omega( chem_evol ):
 
             # Create the arrays that will contain the interpolated isotopes
             self.ej_SSP_int = np.zeros((self.nb_steps_table,self.nb_isotopes))
+            # TODO - Check SSP compatibility
             if self.len_decay_file > 0:
                 self.ej_SSP_int_radio = np.zeros((self.nb_steps_table,self.nb_radio_iso))
 
@@ -810,7 +811,7 @@ class omega( chem_evol ):
         self._get_storing_arrays(ymgal, len(self.history.isotopes))
 
         # Update/redeclare all the arrays (unstable isotopes)
-        if self.len_decay_file > 0:
+        if self.len_decay_file > 0 or self.use_decay_module:
             ymgal_radio = np.zeros(self.nb_radio_iso)
 
             # Initialisation of the storing arrays for radioactive isotopes
@@ -913,7 +914,7 @@ class omega( chem_evol ):
         self._get_storing_arrays(ymgal, len(self.history.isotopes))
 
         # Update/redeclare all the arrays (unstable isotopes)
-        if self.len_decay_file > 0:
+        if self.len_decay_file > 0 or self.use_decay_module:
             ymgal_radio = np.zeros(self.nb_radio_iso)
 
             # Initialisation of the storing arrays for radioactive isotopes
@@ -1574,6 +1575,7 @@ class omega( chem_evol ):
 
           # Declare the SSP ejecta arrays [Z][dt][iso]
           self.ej_SSP = np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_isotopes))
+          # TODO - Check SSP compatibility
           if self.len_decay_file > 0:
               self.ej_SSP_radio = \
                   np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_radio_iso))
@@ -1640,6 +1642,7 @@ class omega( chem_evol ):
 
               # Copy the ejecta arrays from the SYGMA simulation
               self.ej_SSP[i_ras] = sygma_inst.mdot
+              # TODO - Check SSP compatibility
               if self.len_decay_file > 0:
                   self.ej_SSP_radio[i_ras] = sygma_inst.mdot_radio
 
@@ -1665,7 +1668,7 @@ class omega( chem_evol ):
         # If the SSPs are given as an input ..
         else:
 
-            # Copy the SSPs
+            # Copy the SSPs - TODO check when SSPs are checked
             self.ej_SSP = self.SSPs_in[0]
             self.nb_steps_table = len(self.ej_SSP[0])
             self.ej_SSP_coef = self.SSPs_in[1]
@@ -1699,6 +1702,7 @@ class omega( chem_evol ):
         # Declare the interpolation coefficients arrays
         self.ej_SSP_coef = \
             np.zeros((2,self.nb_Z_table_SSP,self.nb_steps_table,self.nb_isotopes))
+        # TODO - Check SSP compatibility
         if self.len_decay_file > 0:
             self.ej_SSP_coef_radio = \
                 np.zeros((2,self.nb_Z_table_SSP,self.nb_steps_table,self.nb_radio_iso))
@@ -1731,6 +1735,7 @@ class omega( chem_evol ):
                     self.ej_SSP_coef[0][i_cic][j_cic][k_cic] * logZ_up
 
               # For every radioactive isotope ..
+              # TODO - Check SSP compatibility
               if self.len_decay_file > 0:
                 for k_cic in range(0,self.nb_radio_iso):
 
@@ -2436,9 +2441,6 @@ class omega( chem_evol ):
 
         '''
 
-#        if self.len_decay_file > 0:
-#            print ('Warning, radioactive isotopes are missing in the outflows')
-
         # For every timestep i considered in the simulation ...
         for i in range(1, self.nb_timesteps+1):
 
@@ -2508,10 +2510,10 @@ class omega( chem_evol ):
             self._evol_stars(i, f_esc_yields, mass_sampled, scale_cor)
 
             # Decay radioactive isotopes
-            if self.len_decay_file > 0 and not self.use_external_integration:
+            if not self.use_external_integration:
                 if self.use_decay_module:
                     self._decay_radio_with_module(i)
-                else:
+                elif self.len_decay_file > 0:
                     self._decay_radio(i)
 
             # Delay outflow is needed (following SNe rather than SFR) ...
@@ -2542,7 +2544,7 @@ class omega( chem_evol ):
                     self.ymgal[i] = f_lost_2 * self.ymgal[i]
 
                     # Radioactive isotopes lost
-                    if self.len_decay_file > 0:
+                    if self.len_decay_file > 0 or self.use_decay_module:
                         self.ymgal_radio[i] = f_lost_2 * self.ymgal_radio[i]
                     if not self.pre_calculate_SSPs:
                         self.ymgal_agb[i] = f_lost_2 * self.ymgal_agb[i]
@@ -2553,7 +2555,7 @@ class omega( chem_evol ):
                             self.ymgal_delayed_extra[iiii][i] = \
                                 f_lost_2 * self.ymgal_delayed_extra[iiii][i]
                         # Radioactive isotopes lost
-                        if self.len_decay_file > 0:
+                        if self.len_decay_file > 0 or self.use_decay_module:
                             if self.radio_massive_agb_on:
                                 self.ymgal_massive_radio[i] = f_lost_2 * self.ymgal_massive_radio[i]
                                 self.ymgal_agb_radio[i] = f_lost_2 * self.ymgal_agb_radio[i]
@@ -2619,7 +2621,7 @@ class omega( chem_evol ):
 
                     # Remove mass from the ISM because of the outflow
                     self.ymgal[i] *= (1.0 - frac_rem)
-                    if self.len_decay_file > 0:
+                    if self.len_decay_file > 0 or self.use_decay_module:
                         self.ymgal_radio[i]  *= (1.0 - frac_rem)
                     if not self.pre_calculate_SSPs:
                         self.ymgal_agb[i] *= (1.0 - frac_rem)
@@ -2629,7 +2631,7 @@ class omega( chem_evol ):
                         for iiii in range(0,self.nb_delayed_extra):
                             self.ymgal_delayed_extra[iiii][i] *= (1.0 - frac_rem)
                         # Radioactive isotopes lost
-                        if self.len_decay_file > 0:
+                        if self.len_decay_file > 0 or self.use_decay_module:
                             if self.radio_massive_agb_on:
                                 self.ymgal_massive_radio[i] *= (1.0 - frac_rem)
                                 self.ymgal_agb_radio[i] *= (1.0 - frac_rem)
@@ -2909,35 +2911,36 @@ class omega( chem_evol ):
         '''
 
         # Build the reac_dictionary if it's not provided
-        if reac_dictionary is None and self.len_decay_file > 0:
-            reac_dictionary = {}
+        if reac_dictionary is None:
+            if self.len_decay_file > 0:
+                reac_dictionary = {}
 
-            # The information stored in decay_info is...
-            # decay_info[nb_radio_iso][0] --> Unstable isotope
-            # decay_info[nb_radio_iso][1] --> Stable isotope where it decays
-            # decay_info[nb_radio_iso][2] --> Mean-life (half-life/ln2)[yr]
+                # The information stored in decay_info is...
+                # decay_info[nb_radio_iso][0] --> Unstable isotope
+                # decay_info[nb_radio_iso][1] --> Stable isotope where it decays
+                # decay_info[nb_radio_iso][2] --> Mean-life (half-life/ln2)[yr]
 
-            # Build the network
-            for elem in self.decay_info:
+                # Build the network
+                for elem in self.decay_info:
 
-                # Get names for reaction
-                targ = elem[0]; prod = elem[1]; rate = 1 / elem[2]
+                    # Get names for reaction
+                    targ = elem[0]; prod = elem[1]; rate = 1 / elem[2]
 
-                # Add reaction, create a lambda object
-                reaction = lambda: None
-                reaction.target = targ
-                reaction.products = [prod]
-                reaction.rate = rate
+                    # Add reaction, create a lambda object
+                    reaction = lambda: None
+                    reaction.target = targ
+                    reaction.products = [prod]
+                    reaction.rate = rate
 
-                if targ in reac_dictionary:
-                    reac_dictionary[targ].append(reaction)
-                else:
-                    reac_dictionary[targ] = [reaction]
-        else:
-            s = "This routine needs either a reac_dictionary passed from"
-            s += "OMEGA+ or the decay information written in the decay file."
-            print(s)
-            return None
+                    if targ in reac_dictionary:
+                        reac_dictionary[targ].append(reaction)
+                    else:
+                        reac_dictionary[targ] = [reaction]
+            else:
+                s = "This routine needs either a reac_dictionary passed from "
+                s += "OMEGA+ or the decay information written in the decay file."
+                print(s)
+                return None
 
         # Check whether this is an isotope or a ratio of isotopes
         splt = isotope.split("/")
