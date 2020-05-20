@@ -523,6 +523,9 @@ class chem_evol(object):
         self.history = self.__history()
         self.const = self.__const()
 
+        # Define elements for ordering
+        self.__define_elements()
+
         # If we need to assume the current baryonic ratio ...
         if mgal < 0.0:
 
@@ -966,7 +969,7 @@ class chem_evol(object):
         self.len_i_nonmetals = len(self.i_nonmetals)
 
         # Set the initial time and metallicity
-        
+
         if is_sygma:
             zmetal = copy.deepcopy(self.iniZ)
         else:
@@ -1209,6 +1212,222 @@ class chem_evol(object):
 
 
     ##############################################
+    #  Read yield table to add isotopes in set   #
+    ##############################################
+    def __table_isotopes_in_set(self, allIsotopes, path):
+
+        '''
+        Simply read the isotopes in path and add them to the set "allIsotopes"
+
+        '''
+
+        # Open the file in path
+        with open(path, "r") as fread:
+            for line in fread:
+                # Make sure we are not taking a header
+                if line[0] == "H" or "Isotopes" in line:
+                    continue
+
+                # Retrieve the isotope name and add it to the set
+                isoName = line.split("&")[1].strip()
+                allIsotopes.add(isoName)
+
+
+    ##############################################
+    #      Select suitable path for path sent.   #
+    ##############################################
+    def __select_path(self, table_path):
+        '''
+        Take care of absolute paths
+
+        '''
+
+        if table_path[0] == '/':
+            return table_path
+        else:
+            return os.path.join(nupy_path, table_path)
+
+    ##############################################
+    #              Define Elements               #
+    ##############################################
+    def __define_elements(self):
+
+        '''
+
+        Define the dictionaries storing information about
+        chemical elements
+
+        '''
+
+        # Atomic number of elements
+        self.element_Z_number = dict()
+        self.element_Z_number["H"]  = 1
+        self.element_Z_number["He"] = 2
+        self.element_Z_number["Li"] = 3
+        self.element_Z_number["Be"] = 4
+        self.element_Z_number["B"]  = 5
+        self.element_Z_number["C"]  = 6
+        self.element_Z_number["N"]  = 7
+        self.element_Z_number["O"]  = 8
+        self.element_Z_number["F"]  = 9
+        self.element_Z_number["Ne"] = 10
+        self.element_Z_number["Na"] = 11
+        self.element_Z_number["Mg"] = 12
+        self.element_Z_number["Al"] = 13
+        self.element_Z_number["Si"] = 14
+        self.element_Z_number["P"]  = 15
+        self.element_Z_number["S"]  = 16
+        self.element_Z_number["Cl"] = 17
+        self.element_Z_number["Ar"] = 18
+        self.element_Z_number["K"]  = 19
+        self.element_Z_number["Ca"] = 20
+        self.element_Z_number["Sc"] = 21
+        self.element_Z_number["Ti"] = 22
+        self.element_Z_number["V"]  = 23
+        self.element_Z_number["Cr"] = 24
+        self.element_Z_number["Mn"] = 25
+        self.element_Z_number["Fe"] = 26
+        self.element_Z_number["Co"] = 27
+        self.element_Z_number["Ni"] = 28
+        self.element_Z_number["Cu"] = 29
+        self.element_Z_number["Zn"] = 30
+        self.element_Z_number["Ga"] = 31
+        self.element_Z_number["Ge"] = 32
+        self.element_Z_number["As"] = 33
+        self.element_Z_number["Se"] = 34
+        self.element_Z_number["Br"] = 35
+        self.element_Z_number["Kr"] = 36
+        self.element_Z_number["Rb"] = 37
+        self.element_Z_number["Sr"] = 38
+        self.element_Z_number["Y"]  = 39
+        self.element_Z_number["Zr"] = 40
+        self.element_Z_number["Nb"] = 41
+        self.element_Z_number["Mo"] = 42
+        self.element_Z_number["Tc"] = 43
+        self.element_Z_number["Ru"] = 44
+        self.element_Z_number["Rh"] = 45
+        self.element_Z_number["Pd"] = 46
+        self.element_Z_number["Ag"] = 47
+        self.element_Z_number["Cd"] = 48
+        self.element_Z_number["In"] = 49
+        self.element_Z_number["Sn"] = 50
+        self.element_Z_number["Sb"] = 51
+        self.element_Z_number["Te"] = 52
+        self.element_Z_number["I"]  = 53
+        self.element_Z_number["Xe"] = 54
+        self.element_Z_number["Cs"] = 55
+        self.element_Z_number["Ba"] = 56
+        self.element_Z_number["La"] = 57
+        self.element_Z_number["Ce"] = 58
+        self.element_Z_number["Pr"] = 59
+        self.element_Z_number["Nd"] = 60
+        self.element_Z_number["Pm"] = 61
+        self.element_Z_number["Sm"] = 62
+        self.element_Z_number["Eu"] = 63
+        self.element_Z_number["Gd"] = 64
+        self.element_Z_number["Tb"] = 65
+        self.element_Z_number["Dy"] = 66
+        self.element_Z_number["Ho"] = 67
+        self.element_Z_number["Er"] = 68
+        self.element_Z_number["Tm"] = 69
+        self.element_Z_number["Yb"] = 70
+        self.element_Z_number["Lu"] = 71
+        self.element_Z_number["Hf"] = 72
+        self.element_Z_number["Ta"] = 73
+        self.element_Z_number["W"]  = 74
+        self.element_Z_number["Re"] = 75
+        self.element_Z_number["Os"] = 76
+        self.element_Z_number["Ir"] = 77
+        self.element_Z_number["Pt"] = 78
+        self.element_Z_number["Au"] = 79
+        self.element_Z_number["Hg"] = 80
+        self.element_Z_number["Tl"] = 81
+        self.element_Z_number["Pb"] = 82
+        self.element_Z_number["Bi"] = 83
+        self.element_Z_number["Po"] = 84
+        self.element_Z_number["At"] = 85
+        self.element_Z_number["Rn"] = 86
+        self.element_Z_number["Fr"] = 87
+        self.element_Z_number["Ra"] = 88
+        self.element_Z_number["Ac"] = 89
+        self.element_Z_number["Th"] = 90
+        self.element_Z_number["Pa"] = 91
+        self.element_Z_number["U"]  = 92
+        self.element_Z_number["Np"] = 93
+        self.element_Z_number["Pu"] = 94
+        self.element_Z_number["Am"] = 95
+        self.element_Z_number["Cm"] = 96
+        self.element_Z_number["Bk"] = 97
+        self.element_Z_number["Cf"] = 98
+        self.element_Z_number["Es"] = 99
+        self.element_Z_number["Fm"] = 100
+        self.element_Z_number["Md"] = 101
+        self.element_Z_number["No"] = 102
+        self.element_Z_number["Lr"] = 103
+        self.element_Z_number["Rf"] = 104
+        self.element_Z_number["Db"] = 105
+        self.element_Z_number["Sg"] = 106
+        self.element_Z_number["Bh"] = 107
+        self.element_Z_number["Hs"] = 108
+        self.element_Z_number["Mt"] = 109
+        self.element_Z_number["Ds"] = 110
+        self.element_Z_number["Rg"] = 111
+        self.element_Z_number["Cn"] = 112
+        self.element_Z_number["Nh"] = 113
+        self.element_Z_number["Fl"] = 114
+        self.element_Z_number["Mc"] = 115
+        self.element_Z_number["Lv"] = 116
+        self.element_Z_number["Ts"] = 117
+        self.element_Z_number["Og"] = 118
+
+        # List of elements in order of apperance in the periodic table
+        self.elem_list_periodic_table = ["H", "He", "Li", "Be", "B", "C", "N", "O", \
+                "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", \
+                "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", \
+                "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", \
+                "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", \
+                "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", \
+                "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", \
+                "Bi", "Po", "At", "Rn" "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", \
+                "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", \
+                "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"]
+
+    ##############################################
+    #              Sort Isotope List             #
+    ##############################################
+    def __sort_isotope_list(self, iso_list):
+
+        '''
+
+        Sort list of isotopes by atomic number, then by mass number
+
+        '''
+
+        # Define the list of sorted isotopes
+        nb_iso_temp = len(iso_list)
+        iso_list_sorted = []
+
+        # For each element in the periodic table ..
+        for elem in self.elem_list_periodic_table:
+
+            # Collect mass numbers for the isotopes of that element
+            A_temp = []
+            for iso in iso_list:
+                split = iso.split("-")
+                if split[0] == elem:
+                    A_temp.append(split[1])
+
+            # Sort the mass number
+            A_temp = sorted(A_temp)
+
+            # Add the isotopes
+            for the_A in A_temp:
+                iso_list_sorted.append(elem+"-"+the_A)
+
+        # Return the sorted list
+        return iso_list_sorted
+
+    ##############################################
     #                 Read Tables                #
     ##############################################
     def __read_tables(self):
@@ -1218,44 +1437,67 @@ class chem_evol(object):
 
         '''
 
-        # Massive stars and AGB stars
-        if self.table[0] == '/':
-            self.ytables = ry.read_nugrid_yields(\
-                self.table, excludemass=self.exclude_masses)
-        else:
-            self.ytables = ry.read_nugrid_yields(\
-                os.path.join(nupy_path, self.table),\
-                excludemass=self.exclude_masses)
-
         # Get the list of isotopes
-        # The massive and AGB star yields set the list of isotopes
-        M_temp = float(self.ytables.table_mz[0].split(',')[0].split('=')[1])
-        Z_temp = float(self.ytables.table_mz[0].split(',')[1].split('=')[1][:-1])
-        self.history.isotopes = self.ytables.get(\
-            Z=Z_temp, M=M_temp, quantity='Isotopes')
+        allIsotopes = set()
+
+        # Massive stars and AGB stars
+        path = self.__select_path(self.table)
+        self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Pop III massive stars
+        path = self.__select_path(self.pop3_table)
+        self.__table_isotopes_in_set(allIsotopes, path)
+        # SNe Ia
+        path = self.__select_path(self.sn1a_table)
+        self.__table_isotopes_in_set(allIsotopes, path)
+        # Neutron star mergers
+        path = self.__select_path(self.nsmerger_table)
+        self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Delayed-extra sources
+        if self.nb_delayed_extra > 0:
+          for i_syt in range(0,self.nb_delayed_extra):
+            path = self.__select_path(self.delayed_extra_yields[i_syt])
+            self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Extra yields (on top of massive and AGB yields)
+        if self.extra_source_on == True:
+            for ee in range(len(self.extra_source_table)):
+                path = self.__select_path(self.extra_source_table[ee])
+                self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Store the isotopes
+        isotope_list = list(allIsotopes)
+        self.history.isotopes = self.__sort_isotope_list(isotope_list)
         self.nb_isotopes = len(self.history.isotopes)
 
+        # Get the list of isotopes
+        # Massive stars and AGB stars
+        path = self.__select_path(self.table)
+        self.ytables = ry.read_nugrid_yields(path, self.history.isotopes, \
+                                           excludemass=self.exclude_masses)
+
         # PopIII massive stars
-        self.ytables_pop3 = ry.read_nugrid_yields( \
-            os.path.join(nupy_path, self.pop3_table), self.history.isotopes, \
-                excludemass=self.exclude_masses)
+        path = self.__select_path(self.pop3_table)
+        self.ytables_pop3 = ry.read_nugrid_yields(path, self.history.isotopes, \
+                                                excludemass=self.exclude_masses)
 
         # SNe Ia
-        #sys.stdout.flush()
-        self.ytables_1a = ry.read_yield_sn1a_tables( \
-            os.path.join(nupy_path, self.sn1a_table), self.history.isotopes)
+        path = self.__select_path(self.sn1a_table)
+        self.ytables_1a = ry.read_yield_sn1a_tables(path, self.history.isotopes)
 
         # Neutron star mergers
-        self.ytables_nsmerger = ry.read_yield_sn1a_tables( \
-            os.path.join(nupy_path, self.nsmerger_table), self.history.isotopes)
+        path = self.__select_path(self.nsmerger_table)
+        self.ytables_nsmerger = ry.read_yield_sn1a_tables(path, \
+                                                    self.history.isotopes)
 
         # Delayed-extra sources
         if self.nb_delayed_extra > 0:
           self.ytables_delayed_extra = []
           for i_syt in range(0,self.nb_delayed_extra):
-            self.ytables_delayed_extra.append(ry.read_yield_sn1a_tables( \
-            os.path.join(nupy_path, self.delayed_extra_yields[i_syt]),\
-            self.history.isotopes))
+            path = self.__select_path(self.delayed_extra_yields[i_syt])
+            self.ytables_delayed_extra.append(ry.read_yield_sn1a_tables(path, \
+                                                        self.history.isotopes))
 
         # Extra yields (on top of massive and AGB yields)
         if self.extra_source_on == True:
@@ -1265,18 +1507,14 @@ class chem_evol(object):
             for ee in range(len(self.extra_source_table)):
 
                #if absolute path don't apply nupy_path
-               if self.extra_source_table[ee][0] == '/':
-                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
-                        self.extra_source_table[ee], self.history.isotopes))
-               else:
-                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
-                     os.path.join(nupy_path, self.extra_source_table[ee]),\
-                     self.history.isotopes))
+               path = self.__select_path(self.extra_source_table[ee])
+               self.ytables_extra.append(ry.read_yield_sn1a_tables(path,\
+                                                    self.history.isotopes))
 
         # Read stellar parameter. stellar_param
         if self.stellar_param_on:
-            table_param=ry.read_nugrid_parameter(os.path.join(nupy_path,\
-                    self.stellar_param_table))
+            path = self.__select_path(self.stellar_param_table)
+            table_param=ry.read_nugrid_parameter(path)
             self.table_param=table_param
 
         # Get the list of mass and metallicities found in the yields tables
