@@ -3693,7 +3693,9 @@ class chem_evol(object):
 
                         # Add yields in the stellar ejecta array.  We do this at
                         # each mass bin to distinguish between AGB and massive.
-                        self.__add_yields_in_mdot(nb_stars, the_yields, the_m_cen, i_cse, i)
+                        self.__add_yields_in_mdot(nb_stars, the_yields, \
+                                the_m_cen, i_cse, i, lower_mass = the_m_low, \
+                                upper_mass = the_m_upp)
 
                         # If there are radioactive isotopes
                         if self.len_decay_file > 0 and len(self.table_radio) > 0:
@@ -4045,7 +4047,8 @@ class chem_evol(object):
     #            Add Yields in Mdot              #
     ##############################################
     def __add_yields_in_mdot(self, nb_stars, the_yields, the_m_cen, \
-                             i_cse, i, is_radio=False):
+                             i_cse, i, lower_mass = None, upper_mass = None, \
+                             is_radio=False):
 
         '''
         Add the IMF-weighted stellar yields in the ejecta "mdot" arrays.
@@ -4059,6 +4062,10 @@ class chem_evol(object):
           the_m_cen : Central stellar mass of the IMF bin
           i_cse : Index of the "future" timestep (see __calculate_stellar_ejecta)
           i : Index of the timestep where the stars originally formed
+          lower_mass: lower limit of the imf mass bin
+          upper_mass: upper limit of the imf mass bin
+              both the upper and lower limit must be provided to calculate the
+              fractional number of SNe before the imf cut-off
 
         '''
 
@@ -4090,11 +4097,23 @@ class chem_evol(object):
                 self.mdot_agb[i_cse] += the_tot_yields
 
             # Count the number of core-collapse SNe
-            if the_m_cen > self.transitionmass:
-                self.sn2_numbers[i_cse] += nb_stars
-                if self.out_follows_E_rate:
-                    self.ssp_nb_cc_sne[i_cse-i-1] += nb_stars
-#                    self.ssp_nb_cc_sne[i_cse-i+1] += nb_stars
+
+            # Calculate the fraction of imf above transitionmass
+            # But only if upper_mass and lower_mass are provided
+            if upper_mass is not None and lower_mass is not None:
+                if upper_mass > self.transitionmass:
+                    ratio = upper_mass - max(self.transitionmass, lower_mass)
+                    ratio /= upper_mass - lower_mass
+                else:
+                    ratio = 0
+            elif the_m_cen > self.transitionmass:
+                ratio = 1
+            else:
+                ratio = 0
+
+            self.sn2_numbers[i_cse] += round(nb_stars*ratio)
+            if self.out_follows_E_rate:
+                self.ssp_nb_cc_sne[i_cse-i-1] += round(nb_stars*ratio)
 
             # Sum the total number of stars born in the timestep
             # where the stars originally formed
