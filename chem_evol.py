@@ -870,7 +870,7 @@ class chem_evol(object):
             ymgal_1a_radio, ymgal_nsm_radio, \
             ymgal_delayed_extra_radio, mdot_massive_radio, mdot_agb_radio,\
             mdot_1a_radio, mdot_nsm_radio,\
-            mdot_delayed_extra_radio, dummy, dummy, dummy, dummy, dummy, \
+            mdot_delayed_extra_radio, dummy, dummy, dummy, dummy, \
             dummy, dummy, dummy = \
             self._get_storing_arrays(ymgal_radio, self.nb_radio_iso)
 
