@@ -390,6 +390,14 @@ class chem_evol(object):
 
         Default value : 2.5e-02
 
+    yield_modifier : list of arrays --> [[iso, M, Z, type, modifier],[...]]
+        When used, modifies all isotopes yields for the given M and Z by 
+        multiplying by a given factor (type="multiply") or replacing the 
+        yield by a new value (type="replace"). Modifier will be either the 
+        factor or value depending on type.
+
+        Default value : [] --> Deactivated
+
     Delayed extra source
     Adding source that requires delay-time distribution (DTD) functions
     -------------------------------------------------------------------
@@ -508,7 +516,8 @@ class chem_evol(object):
              inter_lifetime_points=np.array([]), inter_lifetime_points_tree=np.array([]),\
              nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
              inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
-             inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([])):
+             inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
+             yield_modifier=np.array([])):
 
         # Initialize the history class which keeps the simulation in memory
         self.history = self.__history()
@@ -762,6 +771,45 @@ class chem_evol(object):
             # Read radioactive tables
             if self.len_decay_file > 0:
                 self.__read_radio_tables()
+
+            # Modify the yields (ttrueman edit) 
+            if len(yield_modifier) > 0:
+                iso = [i[0] for i in yield_modifier]
+                M = [i[1] for i in yield_modifier]
+                Z = [i[2] for i in yield_modifier]
+                modifier = [i[3] for i in yield_modifier]
+                val = [i[4] for i in yield_modifier]
+
+                for j,specie in enumerate(iso):
+                    if Z[j] not in self.Z_table or M[j] not in self.M_table:
+                        print('Z = %s or M_sun = %s is not in yield table'%(Z[j],M[j]))
+                        print('No modifications will be performed on %s'%iso[j],"\n")
+                    elif specie in self.history.isotopes:
+                        if modifier[j]  == "replace":
+                            self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
+                                    value=val[j])
+                        if modifier[j]  == "multiply":
+                            original = self.ytables.get(M=M[j],Z=Z[j],
+                                    specie=iso[j],quantity="yields")
+                            self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
+                                    value=original*val[j])
+                    elif self.len_decay_file > 0:
+                        if specie in self.radio_iso:
+                            if modifier[j]  == "replace":
+                                self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
+                                        value=val[j])
+                            if modifier[j]  == "multiply":
+                                original = self.ytables_radio.get(M=M[j],Z=Z[j],
+                                        specie=iso[j],quantity="yields")
+                                self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
+                                        value=original*val[j])
+                        else:
+                            print("ERROR 404: %s not found in list of isotopes"%specie,
+                                    "\n")
+                    else:
+                        print("ERROR 404: %s not found in list of isotopes"%specie,
+                                "\n")
+
 
             # Declare the interpolation coefficient arrays
             self.__declare_interpolation_arrays()
@@ -7410,6 +7458,14 @@ class chem_evol(object):
         # Get the dimensions and catch non-numpy arrays
         try:
             dimensions = y_arr.ndim
+        except AttributeError:
+            raise Exception("The interpolation routine uses numpy arrays")
+        except:
+            raise
+
+        # Get the dimensions and catch non-numpy arrays
+        try:
+            dimensions = len(y_arr.shape)
         except AttributeError:
             raise Exception("The interpolation routine uses numpy arrays")
         except:

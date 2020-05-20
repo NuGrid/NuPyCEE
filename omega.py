@@ -337,7 +337,8 @@ class omega( chem_evol ):
                  inter_lifetime_points=np.array([]), inter_lifetime_points_tree=np.array([]),\
                  nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
                  inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
-                 inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([])):
+                 inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
+                 yield_modifier=np.array([])):
 
         # Get the name of the instance
         import traceback
@@ -431,7 +432,7 @@ class omega( chem_evol ):
                  nb_inter_M_points_pop3=nb_inter_M_points_pop3,\
                  inter_M_points_pop3_tree=inter_M_points_pop3_tree,\
                  nb_inter_M_points=nb_inter_M_points, inter_M_points=inter_M_points,\
-                 y_coef_Z_aM_ej=y_coef_Z_aM_ej)
+                 y_coef_Z_aM_ej=y_coef_Z_aM_ej, yield_modifier=yield_modifier)
 
         # Quit if something bad happened in chem_evol ..
         if self.need_to_quit:
@@ -1636,7 +1637,8 @@ class omega( chem_evol ):
                  delayed_extra_yields_norm_radio=self.delayed_extra_yields_norm_radio, \
                  ytables_radio_in=self.ytables_radio_in, radio_iso_in=self.radio_iso_in, \
                  ytables_1a_radio_in=self.ytables_1a_radio_in, \
-                 ytables_nsmerger_radio_in=self.ytables_nsmerger_radio_in)
+                 ytables_nsmerger_radio_in=self.ytables_nsmerger_radio_in,
+                 yield_modifier=yield_modifier)
 
               # Copy the ejecta arrays from the SYGMA simulation
               self.ej_SSP[i_ras] = sygma_inst.mdot
