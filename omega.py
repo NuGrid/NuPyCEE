@@ -266,14 +266,12 @@ class omega( chem_evol ):
                  use_decay_module=False, yield_tables_dir='',\
                  f_network='isotopes_modified.prn', f_format=1,\
                  table_radio='', decay_file='', sn1a_table_radio='',\
-                 bhnsmerger_table_radio='', nsmerger_table_radio='',\
+                 nsmerger_table_radio='',\
                  hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[],\
                  sn1a_table='yield_tables/sn1a_i99_W7.txt',\
                  ns_merger_on=False, f_binary=1.0, f_merger=0.0008,\
                  t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, \
                  nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
-                 bhns_merger_on=False, m_ej_bhnsm=2.5e-02, \
-                 bhnsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
                  iniabu_table='', extra_source_on=False, \
                  extra_source_table=['yield_tables/extra_source.txt'], \
                  f_extra_source=[1.0], pre_calculate_SSPs=False, \
@@ -298,7 +296,7 @@ class omega( chem_evol ):
                  r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
                  stellar_param_on=False, delayed_extra_log=False,\
                  delayed_extra_yields_log_int=False,\
-                 bhnsmerger_dtd_array=np.array([]), dt_in_SSPs=np.array([]), \
+                 dt_in_SSPs=np.array([]), \
                  DM_array=np.array([]), nsmerger_dtd_array=np.array([]),\
                  sfh_array=np.array([]),ism_ini=np.array([]),\
                  ism_ini_radio=np.array([]),\
@@ -364,11 +362,8 @@ class omega( chem_evol ):
                  ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
                  nsmerger_table=nsmerger_table, t_merger_max=t_merger_max,\
                  m_ej_nsm = m_ej_nsm, nb_nsm_per_m=nb_nsm_per_m, t_nsm_coal=t_nsm_coal, \
-                 bhns_merger_on=bhns_merger_on, m_ej_bhnsm=m_ej_bhnsm, \
-                 bhnsmerger_table=bhnsmerger_table, \
                  table_radio=table_radio, decay_file=decay_file,\
                  sn1a_table_radio=sn1a_table_radio, \
-                 bhnsmerger_table_radio=bhnsmerger_table_radio,\
                  nsmerger_table_radio=nsmerger_table_radio,\
                  iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
                  extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
@@ -399,7 +394,6 @@ class omega( chem_evol ):
                  ytables_1a_in=ytables_1a_in, dt_in_SSPs=dt_in_SSPs, \
                  delayed_extra_log=delayed_extra_log, \
                  nsmerger_dtd_array=nsmerger_dtd_array,\
-                 bhnsmerger_dtd_array=bhnsmerger_dtd_array, \
                  ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
                  dt_split_info=dt_split_info,ej_massive=ej_massive,\
                  ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
@@ -807,11 +801,11 @@ class omega( chem_evol ):
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
-        self.ymgal_1a, self.ymgal_nsm, self.ymgal_bhnsm, \
+        self.ymgal_1a, self.ymgal_nsm, \
         self.ymgal_delayed_extra, self.mdot_massive, \
-        self.mdot_agb, self.mdot_1a, self.mdot_nsm, self.mdot_bhnsm, \
+        self.mdot_agb, self.mdot_1a, self.mdot_nsm, \
         self.mdot_delayed_extra, \
-        self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, self.bhnsm_numbers,\
+        self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, \
         self.delayed_extra_numbers, self.imf_mass_ranges, \
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal, len(self.history.isotopes))
@@ -823,9 +817,9 @@ class omega( chem_evol ):
             # Initialisation of the storing arrays for radioactive isotopes
             self.mdot_radio, self.ymgal_radio, self.ymgal_massive_radio, \
             self.ymgal_agb_radio, self.ymgal_1a_radio, self.ymgal_nsm_radio, \
-            self.ymgal_bhnsm_radio, self.ymgal_delayed_extra_radio, \
+            self.ymgal_delayed_extra_radio, \
             self.mdot_massive_radio, self.mdot_agb_radio, self.mdot_1a_radio, \
-            self.mdot_nsm_radio, self.mdot_bhnsm_radio,\
+            self.mdot_nsm_radio, \
             self.mdot_delayed_extra_radio, dummy, dummy, dummy, dummy, dummy, \
             dummy, dummy, dummy = \
             self._get_storing_arrays(ymgal_radio, self.nb_radio_iso)
@@ -910,11 +904,11 @@ class omega( chem_evol ):
         ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
         self.mdot, self.ymgal, self.ymgal_massive, self.ymgal_agb, \
-        self.ymgal_1a, self.ymgal_nsm, self.ymgal_bhnsm, \
+        self.ymgal_1a, self.ymgal_nsm, \
         self.ymgal_delayed_extra, self.mdot_massive, \
-        self.mdot_agb, self.mdot_1a, self.mdot_nsm, self.mdot_bhnsm, \
+        self.mdot_agb, self.mdot_1a, self.mdot_nsm, \
         self.mdot_delayed_extra, \
-        self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, self.bhnsm_numbers,\
+        self.sn1a_numbers, self.sn2_numbers, self.nsm_numbers, \
         self.delayed_extra_numbers, self.imf_mass_ranges, \
         self.imf_mass_ranges_contribution, self.imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal, len(self.history.isotopes))
@@ -926,9 +920,9 @@ class omega( chem_evol ):
             # Initialisation of the storing arrays for radioactive isotopes
             self.mdot_radio, self.ymgal_radio, self.ymgal_massive_radio, \
             self.ymgal_agb_radio, self.ymgal_1a_radio, self.ymgal_nsm_radio, \
-            self.ymgal_bhnsm_radio, self.ymgal_delayed_extra_radio, \
+            self.ymgal_delayed_extra_radio, \
             self.mdot_massive_radio, self.mdot_agb_radio, self.mdot_1a_radio, \
-            self.mdot_nsm_radio, self.mdot_bhnsm_radio,\
+            self.mdot_nsm_radio, \
             self.mdot_delayed_extra_radio, dummy, dummy, dummy, dummy, dummy, \
             dummy, dummy, dummy = \
             self._get_storing_arrays(ymgal_radio, self.nb_radio_iso)
@@ -1607,10 +1601,9 @@ class omega( chem_evol ):
                  table=self.table, hardsetZ=hardsetZ2, \
                  sn1a_on=self.sn1a_on, sn1a_table=self.sn1a_table, \
                  sn1a_energy=self.sn1a_energy, ns_merger_on=self.ns_merger_on, \
-                 bhns_merger_on=self.bhns_merger_on, f_binary=self.f_binary, \
+                 f_binary=self.f_binary, \
                  f_merger=self.f_merger, t_merger_max=self.t_merger_max, \
                  m_ej_nsm=self.m_ej_nsm, nsm_dtd_power=self.nsm_dtd_power,\
-                 m_ej_bhnsm=self.m_ej_bhnsm, bhnsmerger_table=self.bhnsmerger_table, \
                  nsmerger_table=self.nsmerger_table, iniabu_table=iniabu_t, \
                  extra_source_on=self.extra_source_on, nb_nsm_per_m=self.nb_nsm_per_m, \
                  t_nsm_coal=self.t_nsm_coal, extra_source_table=self.extra_source_table, \
@@ -1630,7 +1623,6 @@ class omega( chem_evol ):
                  stellar_param_table=self.stellar_param_table, \
                  tau_ferrini=self.tau_ferrini, delayed_extra_log=self.delayed_extra_log, \
                  dt_in=dt_in_ras, nsmerger_dtd_array=self.nsmerger_dtd_array, \
-                 bhnsmerger_dtd_array=self.bhnsmerger_dtd_array, \
                  poly_fit_dtd_5th=self.poly_fit_dtd_5th, \
                  poly_fit_range=self.poly_fit_range, \
                  delayed_extra_dtd=self.delayed_extra_dtd, \
@@ -1639,7 +1631,6 @@ class omega( chem_evol ):
                  delayed_extra_yields_norm=self.delayed_extra_yields_norm, \
                  table_radio=self.table_radio, decay_file=self.decay_file, \
                  sn1a_table_radio=self.sn1a_table_radio, \
-                 bhnsmerger_table_radio=self.bhnsmerger_table_radio, \
                  nsmerger_table_radio=self.nsmerger_table_radio, \
                  ism_ini_radio=self.ism_ini_radio, \
                  delayed_extra_yields_radio=self.delayed_extra_yields_radio, \
@@ -2559,7 +2550,6 @@ class omega( chem_evol ):
                         self.ymgal_agb[i] = f_lost_2 * self.ymgal_agb[i]
                         self.ymgal_1a[i] = f_lost_2 * self.ymgal_1a[i]
                         self.ymgal_nsm[i] = f_lost_2 * self.ymgal_nsm[i]
-                        self.ymgal_bhnsm[i] = f_lost_2 * self.ymgal_bhnsm[i]
                         self.ymgal_massive[i] = f_lost_2 * self.ymgal_massive[i]
                         for iiii in range(0,self.nb_delayed_extra):
                             self.ymgal_delayed_extra[iiii][i] = \
@@ -2573,8 +2563,6 @@ class omega( chem_evol ):
                                 self.ymgal_1a_radio[i] = f_lost_2 * self.ymgal_1a_radio[i]
                             if self.radio_nsmerger_on:
                                 self.ymgal_nsm_radio[i] = f_lost_2 * self.ymgal_nsm_radio[i]
-                            if self.radio_bhnsmerger_on:
-                                self.ymgal_bhnsm_radio[i] = f_lost_2 * self.ymgal_bhnsm_radio[i]
                             for iiii in range(0,self.nb_delayed_extra_radio):
                                 self.ymgal_delayed_extra_radio[iiii][i] = \
                                     f_lost_2 * self.ymgal_delayed_extra_radio[iiii][i]
@@ -2639,7 +2627,6 @@ class omega( chem_evol ):
                         self.ymgal_agb[i] *= (1.0 - frac_rem)
                         self.ymgal_1a[i] *= (1.0 - frac_rem)
                         self.ymgal_nsm[i] *= (1.0 - frac_rem)
-                        self.ymgal_bhnsm[i] *= (1.0 - frac_rem)
                         self.ymgal_massive[i] *= (1.0 - frac_rem)
                         for iiii in range(0,self.nb_delayed_extra):
                             self.ymgal_delayed_extra[iiii][i] *= (1.0 - frac_rem)
@@ -2652,8 +2639,6 @@ class omega( chem_evol ):
                                 self.ymgal_1a_radio[i] *= (1.0 - frac_rem)
                             if self.radio_nsmerger_on:
                                 self.ymgal_nsm_radio[i] *= (1.0 - frac_rem)
-                            if self.radio_bhnsmerger_on:
-                                self.ymgal_bhnsm_radio[i] *= (1.0 - frac_rem)
                             for iiii in range(0,self.nb_delayed_extra_radio):
                                 self.ymgal_delayed_extra_radio[iiii][i] *= (1.0 - frac_rem)
 
@@ -3242,36 +3227,18 @@ class omega( chem_evol ):
         # This dictionary contains the mass fraction contribution toward the total
         # by SN1a's for each species
         species_frac_1a = {k: species_mass_1a[k] / species_mass_gal[k]
-        for k in species_mass_1a if k in species_mass_gal}
-        
-        iso_mass_bhnsm = dict(zip(self.history.isotopes, self.ymgal_bhnsm[cycle]/sum(self.ymgal[cycle])))
-        
-        ele_mass_bhnsm = np.zeros(len(elements))
-        i=0
-        
-        for el in elements:
-            for iso,mass in iso_mass_bhnsm.items():
-                mass = float(mass)
-                if el == iso.split('-',1)[0]:
-                    ele_mass_bhnsm[i] += mass
-            i+=1
-        ele_mass_bhnsm_dict = dict(zip(elements, ele_mass_bhnsm))
-        species_mass_bhnsm = iso_mass_bhnsm
-        species_mass_bhnsm.update(ele_mass_bhnsm_dict)
-        
+        for k in species_mass_1a if k in species_mass_gal}        
         
         map_str_dic = {
         "agb":species_mass_agb,
         "1a":species_mass_1a,
         "massive":species_mass_massive,
-        "bhnsm":species_mass_bhnsm
         }
         
         source_proper_name = {
         "agb":'AGB',
         "1a":'SN1a',
         "massive":'Massive Stars',
-        "bhnsm":'Black hole-neutron star merger'
         }
         
         colors = ['blue', 'orange', 'grey','navy','green']

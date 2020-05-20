@@ -448,17 +448,16 @@ class chem_evol(object):
     def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
              sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30, \
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
-             ini_alpha=True, \
+             ini_alpha=True, is_sygma=False, \
              table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
              use_decay_module=False, f_network='isotopes_modified.prn', f_format=1, \
              table_radio='', decay_file='', sn1a_table_radio='',\
-             bhnsmerger_table_radio='', nsmerger_table_radio='',\
+             nsmerger_table_radio='',\
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
-             sn1a_energy=1e51, ns_merger_on=False, bhns_merger_on=False,\
+             sn1a_energy=1e51, ns_merger_on=False, \
              f_binary=1.0, f_merger=0.0008, t_merger_max=1.3e10,\
              m_ej_nsm = 2.5e-02, nb_nsm_per_m=-1.0, \
-             t_nsm_coal=-1.0, m_ej_bhnsm=2.5e-02, nsm_dtd_power=[],\
-             bhnsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
+             t_nsm_coal=-1.0, nsm_dtd_power=[],\
              nsmerger_table = 'yield_tables/r_process_arnould_2007.txt',\
              iniabu_table='', extra_source_on=False, \
              extra_source_table=['yield_tables/extra_source.txt'], \
@@ -484,7 +483,6 @@ class chem_evol(object):
              delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
              pritchet_1a_dtd=[], ism_ini=np.array([]), ism_ini_radio=np.array([]),\
              nsmerger_dtd_array=np.array([]),\
-             bhnsmerger_dtd_array=np.array([]),\
              ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
              isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
              zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
@@ -566,7 +564,6 @@ class chem_evol(object):
         self.iniabu_table = iniabu_table
         self.sn1a_table = sn1a_table
         self.nsmerger_table = nsmerger_table
-        self.bhnsmerger_table = bhnsmerger_table
         self.extra_source_table = extra_source_table
         self.pop3_table = pop3_table
         self.hardsetZ = hardsetZ
@@ -576,16 +573,12 @@ class chem_evol(object):
         self.sn1a_on = sn1a_on
         self.sn1a_energy=sn1a_energy
         self.ns_merger_on = ns_merger_on
-        self.bhns_merger_on = bhns_merger_on
         self.nsmerger_dtd_array = nsmerger_dtd_array
         self.len_nsmerger_dtd_array = len(nsmerger_dtd_array)
-        self.bhnsmerger_dtd_array = bhnsmerger_dtd_array
-        self.len_bhnsmerger_dtd_array = len(bhnsmerger_dtd_array)
         self.f_binary = f_binary
         self.f_merger = f_merger
         self.t_merger_max = t_merger_max
         self.m_ej_nsm = m_ej_nsm
-        self.m_ej_bhnsm = m_ej_bhnsm
         self.nb_nsm_per_m = nb_nsm_per_m
         self.t_nsm_coal = t_nsm_coal
         self.nsm_dtd_power = nsm_dtd_power
@@ -602,7 +595,6 @@ class chem_evol(object):
         self.exp_dtd=exp_dtd
         self.normalized = False # To avoid normalizing SN Ia rate more than once
         self.nsm_normalized = False # To avoid normalizing NS merger rate more than once
-        self.bhnsm_normalized = False # To avoid normalizing BHNS merger rate more than once
         self.f_arfo = f_arfo
         self.imf_yields_range = imf_yields_range
         self.exclude_masses=exclude_masses
@@ -640,7 +632,6 @@ class chem_evol(object):
         # Attributes associated with radioactive species
         self.table_radio = table_radio
         self.sn1a_table_radio = sn1a_table_radio
-        self.bhnsmerger_table_radio = bhnsmerger_table_radio
         self.nsmerger_table_radio = nsmerger_table_radio
         self.decay_file = decay_file
         self.len_decay_file = len(decay_file)
@@ -656,7 +647,6 @@ class chem_evol(object):
         self.radio_massive_agb_on = False
         self.radio_sn1a_on = False
         self.radio_nsmerger_on = False
-        self.radio_bhnsmerger_on = False
         self.radio_refinement = radio_refinement
         self.test_clayton = test_clayton
         self.use_decay_module = use_decay_module
@@ -849,14 +839,18 @@ class chem_evol(object):
             return
 
         # Initialisation of the composition of the gas reservoir
-        ymgal = self._get_iniabu()
+        if is_sygma:
+            ymgal = np.zeros(self.nb_isotopes)
+            ymgal[0] = copy.deepcopy(self.mgal)
+        else:
+            ymgal = self._get_iniabu()
         self.len_ymgal = len(ymgal)
 
         # Initialisation of the storing arrays
-        mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, ymgal_bhnsm,\
+        mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm,\
         ymgal_delayed_extra, mdot_massive, mdot_agb, mdot_1a, mdot_nsm,\
-        mdot_bhnsm, mdot_delayed_extra, sn1a_numbers, sn2_numbers, nsm_numbers,\
-        bhnsm_numbers, delayed_extra_numbers, imf_mass_ranges, \
+        mdot_delayed_extra, sn1a_numbers, sn2_numbers, nsm_numbers,\
+        delayed_extra_numbers, imf_mass_ranges, \
         imf_mass_ranges_contribution, imf_mass_ranges_mtot = \
         self._get_storing_arrays(ymgal, len(self.history.isotopes))
 
@@ -873,9 +867,9 @@ class chem_evol(object):
 
             # Initialisation of the storing arrays for radioactive isotopes
             mdot_radio, ymgal_radio, ymgal_massive_radio, ymgal_agb_radio,\
-            ymgal_1a_radio, ymgal_nsm_radio, ymgal_bhnsm_radio,\
+            ymgal_1a_radio, ymgal_nsm_radio, \
             ymgal_delayed_extra_radio, mdot_massive_radio, mdot_agb_radio,\
-            mdot_1a_radio, mdot_nsm_radio, mdot_bhnsm_radio,\
+            mdot_1a_radio, mdot_nsm_radio,\
             mdot_delayed_extra_radio, dummy, dummy, dummy, dummy, dummy, \
             dummy, dummy, dummy = \
             self._get_storing_arrays(ymgal_radio, self.nb_radio_iso)
@@ -909,11 +903,9 @@ class chem_evol(object):
             self.history.ism_iso_yield_agb.append(ymgal_agb[0])
             self.history.ism_iso_yield_1a.append(ymgal_1a[0])
             self.history.ism_iso_yield_nsm.append(ymgal_nsm[0])
-            self.history.ism_iso_yield_bhnsm.append(ymgal_bhnsm[0])
             self.history.ism_iso_yield_massive.append(ymgal_massive[0])
             self.history.sn1a_numbers.append(0)
             self.history.nsm_numbers.append(0)
-            self.history.bhnsm_numbers.append(0)
             self.history.sn2_numbers.append(0)
             self.history.m_locked = []
             self.history.m_locked_agb = []
@@ -934,17 +926,14 @@ class chem_evol(object):
         self.ymgal_agb = ymgal_agb
         self.ymgal_1a = ymgal_1a
         self.ymgal_nsm = ymgal_nsm
-        self.ymgal_bhnsm = ymgal_bhnsm
         self.ymgal_delayed_extra = ymgal_delayed_extra
         self.mdot_massive = mdot_massive
         self.mdot_agb = mdot_agb
         self.mdot_1a = mdot_1a
         self.mdot_nsm = mdot_nsm
-        self.mdot_bhnsm = mdot_bhnsm
         self.mdot_delayed_extra = mdot_delayed_extra
         self.sn1a_numbers = sn1a_numbers
         self.nsm_numbers = nsm_numbers
-        self.bhnsm_numbers = bhnsm_numbers
         self.delayed_extra_numbers = delayed_extra_numbers
         self.sn2_numbers = sn2_numbers
         self.imf_mass_ranges = imf_mass_ranges
@@ -959,13 +948,11 @@ class chem_evol(object):
             self.ymgal_agb_radio = ymgal_agb_radio
             self.ymgal_1a_radio = ymgal_1a_radio
             self.ymgal_nsm_radio = ymgal_nsm_radio
-            self.ymgal_bhnsm_radio = ymgal_bhnsm_radio
             self.ymgal_delayed_extra_radio = ymgal_delayed_extra_radio
             self.mdot_massive_radio = mdot_massive_radio
             self.mdot_agb_radio = mdot_agb_radio
             self.mdot_1a_radio = mdot_1a_radio
             self.mdot_nsm_radio = mdot_nsm_radio
-            self.mdot_bhnsm_radio = mdot_bhnsm_radio
             self.mdot_delayed_extra_radio = mdot_delayed_extra_radio
 
         # Declare non-metals for the getmetallicity function
@@ -979,7 +966,11 @@ class chem_evol(object):
         self.len_i_nonmetals = len(self.i_nonmetals)
 
         # Set the initial time and metallicity
-        zmetal = self._getmetallicity(0)
+        
+        if is_sygma:
+            zmetal = copy.deepcopy(self.iniZ)
+        else:
+            zmetal = self._getmetallicity(0)
         self.history.metallicity.append(zmetal)
         self.t = 0
         self.history.age = np.zeros(self.nb_timesteps+1)
@@ -999,6 +990,7 @@ class chem_evol(object):
         if iolevel > 0:
             print ('### Start with initial metallicity of ','{:.4E}'.format(zmetal))
             print ('###############################')
+
 
     ##############################################
     #             Get elem-to-iso Main           #
@@ -1120,7 +1112,7 @@ class chem_evol(object):
 
         # Use of radioactive isotopes
         if self.len_decay_file > 0 and (len(self.table_radio) == 0 and \
-           len(self.sn1a_table_radio) == 0 and len(self.bhnsmerger_table_radio) == 0 and \
+           len(self.sn1a_table_radio) == 0 and \
            len(self.nsmerger_table_radio) == 0 and self.nb_delayed_extra_radio == 0):
             print ('Error -  At least one radioactive yields table must '+\
                   'be defined when using radioactive isotopes.')
@@ -1207,12 +1199,6 @@ class chem_evol(object):
             self.ytables_nsmerger_radio = ry.read_yield_sn1a_tables( \
                 os.path.join(nupy_path, self.nsmerger_table_radio), self.radio_iso)
 
-        # BHNS mergers
-        if len(self.bhnsmerger_table_radio) > 0:
-            self.radio_bhnsmerger_on = True
-            self.ytables_bhnsmerger_radio = ry.read_yield_sn1a_tables( \
-                os.path.join(nupy_path, self.bhnsmerger_table_radio), self.radio_iso)
-
         # Delayed extra sources
         if self.nb_delayed_extra_radio > 0:
             self.ytables_delayed_extra_radio = []
@@ -1262,10 +1248,6 @@ class chem_evol(object):
         # Neutron star mergers
         self.ytables_nsmerger = ry.read_yield_sn1a_tables( \
             os.path.join(nupy_path, self.nsmerger_table), self.history.isotopes)
-
-        # Black hole neutron star mergers
-        self.ytables_bhnsmerger = ry.read_yield_sn1a_tables( \
-            os.path.join(nupy_path, self.bhnsmerger_table), self.history.isotopes)
 
         # Delayed-extra sources
         if self.nb_delayed_extra > 0:
@@ -3120,18 +3102,15 @@ class chem_evol(object):
         ymgal_agb = []
         ymgal_1a = []
         ymgal_nsm = []
-        ymgal_bhnsm = []
         ymgal_delayed_extra = []
         if self.pre_calculate_SSPs:
             mdot_massive = copy.deepcopy(mdot)
             mdot_agb     = []
             mdot_1a      = copy.deepcopy(mdot)
             mdot_nsm     = []
-            mdot_bhnsm   = []
             mdot_delayed_extra = []
             sn1a_numbers = []
             nsm_numbers = []
-            bhnsm_numbers = []
             sn2_numbers  = []
             self.wd_sn1a_range  = []
             self.wd_sn1a_range1 = []
@@ -3142,7 +3121,6 @@ class chem_evol(object):
                 ymgal_massive.append(np.zeros(nb_iso_gsa))
                 ymgal_agb.append(np.zeros(nb_iso_gsa))
                 ymgal_1a.append(np.zeros(nb_iso_gsa))
-                ymgal_bhnsm.append(np.zeros(nb_iso_gsa))
                 ymgal_nsm.append(np.zeros(nb_iso_gsa))
             for iiii in range(0,self.nb_delayed_extra):
                 ymgal_delayed_extra.append([])
@@ -3152,7 +3130,6 @@ class chem_evol(object):
             mdot_agb     = copy.deepcopy(mdot)
             mdot_1a      = copy.deepcopy(mdot)
             mdot_nsm     = copy.deepcopy(mdot)
-            mdot_bhnsm   = copy.deepcopy(mdot)
             mdot_delayed_extra = []
             for iiii in range(0,self.nb_delayed_extra):
                 mdot_delayed_extra.append(copy.deepcopy(mdot))
@@ -3160,7 +3137,6 @@ class chem_evol(object):
             # Number of SNe Ia, core-collapse SNe, and neutron star mergers
             sn1a_numbers = np.zeros(nb_dt_gsa)
             nsm_numbers = np.zeros(nb_dt_gsa)
-            bhnsm_numbers = np.zeros(nb_dt_gsa)
             sn2_numbers = np.zeros(nb_dt_gsa)
             self.wd_sn1a_range = np.zeros(nb_dt_gsa)
             self.wd_sn1a_range1 = np.zeros(nb_dt_gsa)
@@ -3178,9 +3154,9 @@ class chem_evol(object):
         imf_mass_ranges_mtot = [[]] * (nb_dt_gsa + 1)
 
         # Return all the arrays
-        return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm, ymgal_bhnsm,\
-               ymgal_delayed_extra, mdot_massive, mdot_agb, mdot_1a, mdot_nsm, mdot_bhnsm,\
-               mdot_delayed_extra, sn1a_numbers, sn2_numbers, nsm_numbers, bhnsm_numbers,\
+        return mdot, ymgal, ymgal_massive, ymgal_agb, ymgal_1a, ymgal_nsm,\
+               ymgal_delayed_extra, mdot_massive, mdot_agb, mdot_1a, mdot_nsm,\
+               mdot_delayed_extra, sn1a_numbers, sn2_numbers, nsm_numbers,\
                delayed_extra_numbers, imf_mass_ranges, imf_mass_ranges_contribution,\
                imf_mass_ranges_mtot
 
@@ -3455,7 +3431,6 @@ class chem_evol(object):
             self.ymgal_agb[i] = f_lock_remain * self.ymgal_agb[i-1]
             self.ymgal_1a[i] = f_lock_remain * self.ymgal_1a[i-1]
             self.ymgal_nsm[i] = f_lock_remain * self.ymgal_nsm[i-1]
-            self.ymgal_bhnsm[i] = f_lock_remain * self.ymgal_bhnsm[i-1]
             self.m_locked += self.sfrin * sum(self.ymgal[i-1])
             for iiii in range(0,self.nb_delayed_extra):
                 self.ymgal_delayed_extra[iiii][i] = \
@@ -3472,8 +3447,6 @@ class chem_evol(object):
                     self.ymgal_1a_radio[i] = f_lock_remain * self.ymgal_1a_radio[i-1]
                 if self.radio_nsmerger_on:
                     self.ymgal_nsm_radio[i] = f_lock_remain * self.ymgal_nsm_radio[i-1]
-                if self.radio_bhnsmerger_on:
-                    self.ymgal_bhnsm_radio[i] = f_lock_remain * self.ymgal_bhnsm_radio[i-1]
                 for iiii in range(0,self.nb_delayed_extra_radio):
                     self.ymgal_delayed_extra_radio[iiii][i] = \
                         f_lock_remain * self.ymgal_delayed_extra_radio[iiii][i-1]
@@ -3511,7 +3484,6 @@ class chem_evol(object):
             self.ymgal_1a[i] += self.mdot_1a[i-1]
             self.ymgal_massive[i] += self.mdot_massive[i-1]
             self.ymgal_nsm[i] += self.mdot_nsm[i-1]
-            self.ymgal_bhnsm[i] += self.mdot_bhnsm[i-1]
             if self.nb_delayed_extra > 0:
                 for iiii in range(0,self.nb_delayed_extra):
                     self.ymgal_delayed_extra[iiii][i] += \
@@ -3532,9 +3504,6 @@ class chem_evol(object):
               if self.radio_nsmerger_on:
                   self.ymgal_nsm_radio[i] += \
                        self.mdot_nsm_radio[i-1]
-              if self.radio_bhnsmerger_on:
-                  self.ymgal_bhnsm_radio[i] += \
-                       self.mdot_bhnsm_radio[i-1]
               for iiii in range(0,self.nb_delayed_extra_radio):
                   self.ymgal_delayed_extra_radio[iiii][i] += \
                           self.mdot_delayed_extra_radio[iiii][i-1]
@@ -3576,11 +3545,9 @@ class chem_evol(object):
             self.history.ism_iso_yield_agb.append(self.ymgal_agb[i])
             self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
             self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
-            self.history.ism_iso_yield_bhnsm.append(self.ymgal_bhnsm[i])
             self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
             self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
             self.history.nsm_numbers.append(self.nsm_numbers[i-1])
-            self.history.bhnsm_numbers.append(self.bhnsm_numbers[i-1])
             self.history.sn2_numbers.append(self.sn2_numbers[i-1])
             self.history.m_locked.append(self.m_locked)
 #            self.history.m_locked_agb.append(self.m_locked_agb)
@@ -3618,8 +3585,6 @@ class chem_evol(object):
                 self._iso_abu_to_elem(self.history.ism_iso_yield_1a[h]))
             self.history.ism_elem_yield_nsm.append(\
                 self._iso_abu_to_elem(self.history.ism_iso_yield_nsm[h]))
-            self.history.ism_elem_yield_bhnsm.append(\
-                self._iso_abu_to_elem(self.history.ism_iso_yield_bhnsm[h]))
             self.history.ism_elem_yield_massive.append(\
                 self._iso_abu_to_elem(self.history.ism_iso_yield_massive[h]))
 
@@ -4163,10 +4128,6 @@ class chem_evol(object):
         if self.ns_merger_on:
             self.__nsmerger_contribution(i)
 
-        # Add the contribution of black hole - neutron star mergers, if any...
-        if self.bhns_merger_on:
-            self.__bhnsmerger_contribution(i)
-
         # Add the contribution of delayed extra sources, if any...
         if len(self.delayed_extra_dtd) > 0:
             self.__delayed_extra_contribution(i)
@@ -4356,7 +4317,6 @@ class chem_evol(object):
                     self.ymgal_agb_radio[i][i_dr] *= f_remain
                     self.ymgal_1a_radio[i][i_dr] *= f_remain
                     self.ymgal_nsm_radio[i][i_dr] *= f_remain
-                    self.ymgal_bhnsm_radio[i][i_dr] *= f_remain
                     for iiii in range(0,self.nb_delayed_extra_radio):
                         self.ymgal_delayed_extra_radio[iiii][i][i_dr] *= f_remain
 
@@ -5252,186 +5212,6 @@ class chem_evol(object):
 
         # Ensure normalization only occurs once
         self.nsm_normalized = True
-
-
-    #############################################
-    #           BHNS Merger Contribution        #
-    #############################################
-    def __bhnsmerger_contribution(self, i):
-        '''
-        This function calculates the contribution of BH-NS mergers on the stellar ejecta
-        and adds it to the mdot array.
-
-        Arguments
-        =========
-
-            i : index of the current timestep
-
-        '''
-
-        # Get BHNS merger yields
-        tables_Z = self.ytables_bhnsmerger.metallicities
-        for tz in tables_Z:
-            if self.zmetal > tz:
-                yieldsbhnsm = self.ytables_bhnsmerger.get(Z=tz, quantity='Yields')
-                break
-            if self.zmetal <= tables_Z[-1]:
-                yieldsbhnsm = self.ytables_bhnsmerger.get(Z=tables_Z[-1], quantity='Yields')
-                break
-
-        # initialize variables which cumulate in loop
-        tt = 0
-
-        # Normalize ...
-        if not self.bhnsm_normalized:
-            self.__normalize_bhnsmerger()
-
-        # For every upcoming timestep j, starting with the current one...
-        for j in range(i-1, self.nb_timesteps):
-
-            # Set the upper and lower time boundary of the timestep j
-            timemin = tt
-            tt += self.history.timesteps[j]
-            timemax = tt
-
-            # Stop if the SSP no more BHNS merger occurs
-            #if timemin >= self.t_bhns_merger_max:
-            #    break
-
-            # Calculate the number of BHNS mergers per unit of stellar mass formed
-            nbhns_m = self.__bhnsmerger_num(timemin, timemax)
-
-            # Calculate the number of BHNS mergers in the current SSP
-            nbhns_m = nbhns_m * self.m_locked
-            self.bhnsm_numbers[j] += nbhns_m
-
-            # Add the contribution of NS mergers to the timestep j
-            self.mdot_bhnsm[j] = np.array(self.mdot_bhnsm[j]) + np.array(nbhns_m * self.m_ej_bhnsm * yieldsbhnsm)
-            self.mdot[j] = np.array(self.mdot[j]) + np.array(nbhns_m * self.m_ej_bhnsm * yieldsbhnsm)
-
-
-    ##############################################
-    #              BHNS merger number            #
-    ##############################################
-    def __bhnsmerger_num(self, timemin, timemax):
-
-        '''
-        This function returns the number of BH-NS mergers, per units of stellar mass
-        formed, occurring within a given time interval using a delay-time distribution
-        function.
-
-        Arguments
-        =========
-
-            timemin : Lower boundary of time interval.
-            timemax : Upper boundary of time interval.
-
-        '''
-
-        # If an input DTD array is provided ...
-        if self.len_bhnsmerger_dtd_array > 0:
-
-            # Find the lower and upper Z boundaries
-            if self.zmetal <= self.Z_bhnsmerger[0]:
-                i_Z_low = 0
-                i_Z_up  = 0
-            elif self.zmetal >= self.Z_bhnsmerger[-1]:
-                i_Z_low = -1
-                i_Z_up  = -1
-            else:
-                i_Z_low = 0
-                i_Z_up  = 1
-                while self.zmetal > self.Z_bhnsmerger[i_Z_up]:
-                    i_Z_low += 1
-                    i_Z_up  += 1
-
-            # Get the number of BHNSMs at the lower Z boundary
-            nb_BHNSMs_low = self.__get_nb_bhnsm_array(timemin, timemax, i_Z_low)
-
-            # Return the number of BHNSM .. if no interpolation is needed
-            if i_Z_up == i_Z_low:
-                return nb_BHNSMs_low
-
-            # Interpolate the number of BHNSMs .. if needed
-            else:
-                nb_BHNSMs_up = self.__get_nb_bhnsm_array(timemin, timemax, i_Z_up)
-                lg_Z_low   = np.log10(self.Z_bhnsmerger[i_Z_low])
-                lg_Z_up    = np.log10(self.Z_bhnsmerger[i_Z_up])
-                lg_Z_metal = np.log10(self.zmetal)
-                a = (nb_BHNSMs_up - nb_BHNSMs_low) / (lg_Z_up - lg_Z_low)
-                b = nb_BHNSMs_low - a * lg_Z_low
-                return a * lg_Z_metal + b
-
-        # Return zero if no DTD is selected
-        else:
-            return 0.0
-
-
-    ##############################################
-    #             Get Nb BHNSM Array             #
-    ##############################################
-    def __get_nb_bhnsm_array(self, timemin, timemax, i_Z_temp):
-        '''
-        This function returns the number of BHNSMs that occur within
-        a specific time interval for the input DTD array.
-
-        Arguments
-        =========
-
-            timemin : Lower time intervall of the OMEGA timestep
-            timemax : Upper time intervall of the OMEGA timestep
-            i_Z_temp : Index of the considered Z in the DTD array
-
-        '''
-
-        # If there are some BHNSMs ...
-        nb_BHNSMs_temp = 0.0
-        if timemin < max(self.bhnsmerger_dtd_array[i_Z_temp][0]) and \
-           timemax > min(self.bhnsmerger_dtd_array[i_Z_temp][0]):
-
-            # Find the lower time boundary of the first input interval
-            i_t_low = 0
-            while timemin > self.bhnsmerger_dtd_array[i_Z_temp][0][i_t_low+1]:
-                i_t_low += 1
-
-            # While the current input interval is still within timemin - timemax ...
-            while timemax > self.bhnsmerger_dtd_array[i_Z_temp][0][i_t_low]:
-
-                # Cumulate the number of NSMs
-                dt_BHNSM_temp = \
-                    min(timemax, self.bhnsmerger_dtd_array[i_Z_temp][0][i_t_low+1]) - \
-                    max(timemin, self.bhnsmerger_dtd_array[i_Z_temp][0][i_t_low])
-                nb_BHNSMs_temp += \
-                    self.bhnsmerger_dtd_array[i_Z_temp][1][i_t_low] * dt_BHNSM_temp
-
-                # Go to the next interval
-                i_t_low += 1
-
-        # Return the number of NSMs
-        return nb_BHNSMs_temp
-
-
-    ##############################################
-    #         BHNS Merger Normalization          #
-    ##############################################
-    def __normalize_bhnsmerger(self):
-        '''
-        This function normalizes the delay time distribution of BH-NS merger
-        to appropriately compute the total number of BH-NS mergers in an SSP.
-
-        '''
-
-        # Calculate the normalization of the input DTD .. if chosen
-        if self.len_bhnsmerger_dtd_array > 0:
-            self.Z_bhnsmerger   = np.zeros(self.len_bhnsmerger_dtd_array)
-            for i_dtd in range(0,self.len_bhnsmerger_dtd_array):
-                self.Z_bhnsmerger[i_dtd] = self.bhnsmerger_dtd_array[i_dtd][2]
-                if max(self.bhnsmerger_dtd_array[i_dtd][0]) < self.history.tend:
-                    self.bhnsmerger_dtd_array[i_dtd][0].append(2.*self.history.tend)
-                    self.bhnsmerger_dtd_array[i_dtd][1].append(0.0)
-
-        # Ensure normalization only occurs once
-        self.bhnsm_normalized = True
 
 
     #############################################
@@ -6690,13 +6470,13 @@ class chem_evol(object):
             self.ci = ci
             # Choose the right option
             if inte == 0:
-                return self.imfnorm * self.__g1_costum(mass)
+                return self.imfnorm * self.__g1_custom(mass)
             if inte == 1:
-                return quad(self.__g1_costum, mmin, mmax)[0]
+                return quad(self.__g1_custom, mmin, mmax)[0]
             if inte == 2:
-                return quad(self.__g2_costum, mmin, mmax)[0]
+                return quad(self.__g2_custom, mmin, mmax)[0]
             if inte == -1:
-                self.imfnorm = 1.0 / quad(self.__g2_costum, \
+                self.imfnorm = 1.0 / quad(self.__g2_custom, \
                     self.imf_bdys[0], self.imf_bdys[1])[0]
 
         # Chabrier IMF
@@ -6900,9 +6680,9 @@ class chem_evol(object):
 
 
     ##############################################
-    #                  G1 Costum                 #
+    #                  G1 Custom                 #
     ##############################################
-    def __g1_costum(self, mass):
+    def __g1_custom(self, mass):
 
         '''
         This function returns the number of stars having a certain stellar mass
@@ -6921,9 +6701,9 @@ class chem_evol(object):
 
 
     ##############################################
-    #                  G2 Costum                 #
+    #                  G2 Custom                 #
     ##############################################
-    def __g2_costum(self, mass):
+    def __g2_custom(self, mass):
 
         '''
         This function returns the total mass of stars having a certain stellar
@@ -7653,15 +7433,35 @@ class chem_evol(object):
     ##############################################
     #          Interpolation routine             #
     ##############################################
-    def interpolation(x_arr, y_arr, xx, indx, interp_list):
+    def interpolation(self, x_arr, y_arr, xx, indx, interp_list, return_coefs=False):
 
         '''
-        This function
+        This function interpolates with the Steffen 1990 algorithm, adding
+        linear extra points at both ends of the interval.
 
         Argument
         ========
+            x_arr: coordinate array
+            y_arr: 1-D or 2-D numpy array for interpolation
+            xx: value for which y_arr must be interpolated
+            indx: interpolation index such that
+                x_arr[indx] < xx < x_arr[indx + 1].
+                The minimum value is 0 and the maximum is len(x_arr) - 1.
+            interp_list: list holding the interpolation coefficients.
+                it should have the same size and dimensions as y_arr and
+                initialized to None.
+            return_coefs: If True, return the calculated interp_list[indx]
+                instead of returning the interpolated y_arr
 
         '''
+
+        # Get the dimensions and catch non-numpy arrays
+        try:
+            dimensions = y_arr.ndim
+        except AttributeError:
+            raise Exception("The interpolation routine uses numpy arrays")
+        except:
+            raise
 
         # Get the dimensions and catch non-numpy arrays
         try:
@@ -7681,17 +7481,19 @@ class chem_evol(object):
 
         # Return the calculation with coefficients if exists
         if dimensions == 1:
-            if interp_list[indx] is not None:
-                coefs = interp_list[indx]
-                deltx = xx - x_arr[indx]
-                return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
+            coefCheck = interp_list[indx]
         elif dimensions == 2:
-            if interp_list[indx][0] is not None:
-                coefs = interp_list[indx]
-                deltx = xx - x_arr[indx]
-                return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
+            coefCheck = interp_list[indx][0]
         else:
             raise Exception("Current support for up to 2-d in interpolation method")
+
+        if coefCheck is not None:
+            if return_coefs:
+                return interp_list[indx]
+            else:
+                coefs = interp_list[indx]
+                deltx = xx - x_arr[indx]
+                return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
 
         # If not, we have to calculate the coefficients for this region
         x0 = x_arr[indx]; xp1 = x_arr[indx + 1]
@@ -7728,7 +7530,6 @@ class chem_evol(object):
             deriv0 = deriv0*np.minimum(abs(sim1),\
                     np.minimum(abs(si0), 0.5*abs(pi0)))
 
-
         # Calculate sip1, pip1 and derivp1
         if indx < len(x_arr) - 2:
             yp2 = y_arr[indx + 2]
@@ -7759,7 +7560,7 @@ class chem_evol(object):
         bi = (3*si0 - 2*deriv0 - derivp1)/hi0
 
         interp_list[indx] = (ai, bi, deriv0)
-        return interpolation(x_arr, y_arr, xx, indx, interp_list)
+        return self.interpolation(x_arr, y_arr, xx, indx, interp_list)
 
 
     ##############################################
@@ -7792,7 +7593,6 @@ class chem_evol(object):
             self.ism_iso_yield_massive = []
             self.ism_iso_yield_1a = []
             self.ism_iso_yield_nsm = []
-            self.ism_iso_yield_bhnsm = []
             self.isotopes = []
             self.elements = []
             self.ism_elem_yield = []
@@ -7800,14 +7600,15 @@ class chem_evol(object):
             self.ism_elem_yield_massive = []
             self.ism_elem_yield_1a = []
             self.ism_elem_yield_nsm = []
-            self.ism_elem_yield_bhnsm = []
             self.sn1a_numbers = []
             self.nsm_numbers = []
-            self.bhnsm_numbers = []
             self.sn2_numbers = []
             self.t_m_bdys = []
 
 
+    ##############################################
+    #               Const CLASS                #
+    ##############################################
     class __const():
 
         '''
