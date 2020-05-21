@@ -785,7 +785,7 @@ class chem_evol(object):
                 self.__interpolate_massive_and_agb_yields(is_radio=True)
 
         # Check whether the initial metallicity is available
-        if (not self.iniZ in self.ytables.metallicities) and (self.iniZ > 0.0):
+        if (not self.iniZ in self.ytables.Z_list) and (self.iniZ > 0.0):
             print ('Error - iniZ must be an available metallicity in the grid of stellar yields.')
             self.need_to_quit = True
             return
@@ -1172,42 +1172,36 @@ class chem_evol(object):
 
         # Massive stars and AGB stars
         if self.table[0] == '/':
-            self.ytables = ry.read_nugrid_yields(\
-                self.table, excludemass=self.exclude_masses)
+            self.ytables = ry.read_yields_M_Z(self.table)
         else:
-            self.ytables = ry.read_nugrid_yields(\
-                os.path.join(nupy_path, self.table),\
-                excludemass=self.exclude_masses)
+            self.ytables = ry.read_yields_M_Z(\
+                os.path.join(nupy_path, self.table))
 
         # Get the list of isotopes
         # The massive and AGB star yields set the list of isotopes
-        M_temp = float(self.ytables.table_mz[0].split(',')[0].split('=')[1])
-        Z_temp = float(self.ytables.table_mz[0].split(',')[1].split('=')[1][:-1])
-        self.history.isotopes = self.ytables.get(\
-            Z=Z_temp, M=M_temp, quantity='Isotopes')
+        self.history.isotopes = copy.deepcopy(self.ytables.isotopes)
         self.nb_isotopes = len(self.history.isotopes)
 
         # PopIII massive stars
-        self.ytables_pop3 = ry.read_nugrid_yields( \
-            os.path.join(nupy_path, self.pop3_table), self.history.isotopes, \
-                excludemass=self.exclude_masses)
+        self.ytables_pop3 = ry.read_yields_M_Z( \
+            os.path.join(nupy_path, self.pop3_table), isotopes=self.history.isotopes)
 
         # SNe Ia
         #sys.stdout.flush()
-        self.ytables_1a = ry.read_yield_sn1a_tables( \
-            os.path.join(nupy_path, self.sn1a_table), self.history.isotopes)
+        self.ytables_1a = ry.read_yields_Z( \
+            os.path.join(nupy_path, self.sn1a_table), isotopes=self.history.isotopes)
 
         # Neutron star mergers
-        self.ytables_nsmerger = ry.read_yield_sn1a_tables( \
-            os.path.join(nupy_path, self.nsmerger_table), self.history.isotopes)
+        self.ytables_nsmerger = ry.read_yields_Z( \
+            os.path.join(nupy_path, self.nsmerger_table), isotopes=self.history.isotopes)
 
         # Delayed-extra sources
         if self.nb_delayed_extra > 0:
           self.ytables_delayed_extra = []
           for i_syt in range(0,self.nb_delayed_extra):
-            self.ytables_delayed_extra.append(ry.read_yield_sn1a_tables( \
+            self.ytables_delayed_extra.append(ry.read_yields_Z( \
             os.path.join(nupy_path, self.delayed_extra_yields[i_syt]),\
-            self.history.isotopes))
+            isotopes = self.history.isotopes))
 
         # Extra yields (on top of massive and AGB yields)
         if self.extra_source_on == True:
@@ -1218,12 +1212,12 @@ class chem_evol(object):
 
                #if absolute path don't apply nupy_path
                if self.extra_source_table[ee][0] == '/':
-                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
-                        self.extra_source_table[ee], self.history.isotopes))
+                   self.ytables_extra.append( ry.read_yields_Z( \
+                        self.extra_source_table[ee], isotopes=self.history.isotopes))
                else:
-                   self.ytables_extra.append( ry.read_yield_sn1a_tables( \
+                   self.ytables_extra.append( ry.read_yields_Z( \
                      os.path.join(nupy_path, self.extra_source_table[ee]),\
-                     self.history.isotopes))
+                     isotopes=self.history.isotopes))
 
         # Read stellar parameter. stellar_param
         if self.stellar_param_on:
@@ -1246,24 +1240,13 @@ class chem_evol(object):
         '''
 
         # Main massive and AGB star yields
-        self.Z_table = self.ytables.metallicities
-        self.M_table = []
-        for model in self.ytables.table_mz:
-            the_Z = float(model.split(',')[1].split('=')[1].split(')')[0])
-            if not the_Z == self.Z_table[0]:
-                break
-            self.M_table.append(float(model.split(',')[0].split('=')[1]))
+        self.Z_table = copy.deepcopy(self.ytables.Z_list)
+        self.M_table = copy.deepcopy(self.ytables.M_list)
         self.nb_Z_table = len(self.Z_table)
         self.nb_M_table = len(self.M_table)
 
         # Massive PopIII stars
-        Z_table_pop3 = self.ytables_pop3.metallicities
-        self.M_table_pop3 = []
-        for model in self.ytables_pop3.table_mz:
-            self.M_table_pop3.append(float(model.split(',')[0].split('=')[1]))
-            the_Z = float(model.split(',')[1].split('=')[1].split(')')[0])
-            if not the_Z == Z_table_pop3[0]:
-                break
+        self.M_table_pop3 = copy.deepcopy(self.ytables_pop3.M_list)
         self.nb_M_table_pop3 = len(self.M_table_pop3)
 
 
@@ -2859,11 +2842,11 @@ class chem_evol(object):
 
                 # Get the primordial composition of Walker et al. (1991)
                 iniabu_table = 'yield_tables/iniabu/iniab_bb_walker91.txt'
-                ytables_bb = ry.read_yield_sn1a_tables( \
-                    os.path.join(nupy_path, iniabu_table), self.history.isotopes)
+                ytables_bb = ry.read_yields_Z( \
+                    os.path.join(nupy_path, iniabu_table), isotopes=self.history.isotopes)
 
                 # Assign the composition to the gas reservoir
-                ymgal_gi = ytables_bb.get(quantity='Yields') * self.mgal
+                ymgal_gi = ytables_bb.get(Z=0.0, quantity='Yields') * self.mgal
 
                 # Output information
                 if self.iolevel > 0:
@@ -3188,29 +3171,15 @@ class chem_evol(object):
 
         '''
 
-        # Get the number of masses per metallicity in the grid
-        nb_m_per_z = int(len(self.ytables.table_mz) / \
-                     len(self.ytables.metallicities))
-
-        # Extract the masses of each metallicity
-        m_per_z = []
-        for i_gcwf in range(0,nb_m_per_z):
-            m_temp = re.findall("\d+.\d+", \
-                     self.ytables.table_mz[i_gcwf])
-            m_per_z.append(float(m_temp[0]))
-
-        # Create the complete M-axis in a 1-D array
-        m_complete = []
-        for i_gcwf in range(0,len(self.ytables.metallicities)):
-            m_complete += m_per_z
-
         # Only consider stars between 3 and 8 Mo
         lg_m_fit = []
         lg_t_fit = []
-        for i_gcwf in range(0,len(m_complete)):
-            if m_complete[i_gcwf] >= 3.0 and m_complete[i_gcwf] <= 8.0:
-                lg_m_fit.append(np.log10(m_complete[i_gcwf]))
-                lg_t_fit.append(np.log10(self.ytables.age[i_gcwf]))
+        for Z in self.ytables.Z_list:
+            for M in self.ytables.M_list:
+                if M >= 3.0 and M <= 8.0:
+                    lg_m_fit.append(np.log10(M))
+                    lg_t_fit.append(np.log10(\
+                            self.ytables.get(M=M,Z=Z,quantity="Lifetime")))
 
         # Create fit lgt = a*lgM**2 + b*lgM + c
         a_fit, b_fit, c_fit = polyfit(lg_m_fit, lg_t_fit, 2)
@@ -4492,9 +4461,9 @@ class chem_evol(object):
         self._imf(0, 0, -1, 0)
 
         # Get SN Ia yields
-        tables_Z = sorted(self.ytables_1a.metallicities,reverse=True)
+        tables_Z = sorted(self.ytables_1a.Z_list,reverse=True)
         if self.radio_sn1a_on:
-            tables_Z_radio = sorted(self.ytables_1a_radio.metallicities,reverse=True)
+            tables_Z_radio = sorted(self.ytables_1a_radio.Z_list,reverse=True)
 
         # Pick the metallicity
         for tz in tables_Z:
