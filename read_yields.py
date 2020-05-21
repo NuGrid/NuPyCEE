@@ -54,7 +54,8 @@ class read_yields( object ):
         self.table_type = table_type
         self.isotopes = isotopes
 
-        # TODO: Write test functions
+        # Thresholds used for tolerances
+        self.X0_tol = 0.01
 
 
     ##############################################
@@ -362,6 +363,101 @@ class read_yields( object ):
             self.nb_Z = len(self.Z_list)
 
 
+    ##############################################
+    #                 Run Tests                  #
+    ##############################################
+    def _run_tests(self):
+
+        '''
+
+        Series of tests to see whether the yields table
+        is suitable for GCE calculations
+
+
+        '''
+
+        # Check whether all absolute masses are provided
+        self.__check_absolute_masses()
+
+        # Check whether X0 is provided for net yields
+        self.__check_net_yields()
+
+        # TODO check mass and isotope consistency
+        # .. self.isotopes + what is in Yields and X0
+
+
+    ##############################################
+    #              Check Net Yields              #
+    ##############################################
+    def __check_net_yields(self):
+
+        '''
+
+        Check whether the initial composition of the models
+        are provided, and whether they add up to 1.0.
+
+
+        '''
+
+        # Set the potential use of net yields
+        self.net_yields_available = True
+
+        # For each model ..
+        for model in self.models:
+
+            # Check if X0 was in the table
+            if not "X0" in self.table[model].keys():
+                self.net_yields_available = False
+
+            # Check if the initial composition add to 1.0
+            else: 
+                X0_sum = sum(self.table[model]["X0"].values())
+                ratio_tol = np.minimum(X0_sum,1.0) / np.maximum(X0_sum,1.0)
+                if ratio_tol < self.X0_tol:
+                    self.net_yields_available = False
+
+        # Set initial composition to None if cannot use net yields
+        if not self.net_yields_available:
+            for model in self.models:
+                self.table[model]["X0"] = None
+                self.table[model]["Net_yields"] = None
+
+        # Calculate net yields if we can
+        else:
+            for model in self.models:
+                self.table[model]["Net_yields"] = dict()
+                for iso in self.isotopes:
+                    self.table[model]["Net_yields"][iso] = self.table[model]["Yields"][iso] - \
+                     self.table[model]["X0"][iso] * self.table[model]["M_ejected"]
+
+
+    ##############################################
+    #            Check Absolute Masses           #
+    ##############################################
+    def __check_absolute_masses(self):
+
+        '''
+
+        Make sure the final remnant masses and the total
+        ejected masses are provided and consistent
+
+
+        '''
+
+        # For each model ..
+        for model in self.models:
+
+            # Fill total ejected mass
+            M_ejected = sum(self.table[model]["Yields"].values())
+            self.table[model]["M_ejected"] = M_ejected
+
+            # Get the initial and final stellar mass
+            if not self.table_type == "Z_dependent":
+                M_initial = float(model.split(",")[0].split("=")[1])
+                self.table[model]["M_initial"] = M_initial
+                self.table[model]["M_final"] = M_initial - M_ejected
+
+
 
 ##############################################
 #                                            #
@@ -388,7 +484,7 @@ class read_yields_M_Z( read_yields ):
 
         # Define the type of yields table
         table_type = "M_Z_dependent"
-        self.key_one_item = ["Lifetime", "Mfinal"]
+        self.key_one_item = ["Lifetime", "M_final"]
 
         # Initialize the common parameters
         read_yields.__init__(self, table_path=table_path, \
@@ -399,6 +495,9 @@ class read_yields_M_Z( read_yields ):
 
         # Create list of masses and metallicities
         self._create_M_Z_lists(define_M=True, define_Z=True)
+
+        # Run test functions to make sure everything is ok
+        self._run_tests()
 
 
     ##############################################
@@ -448,7 +547,7 @@ class read_yields_M_Z( read_yields ):
 
             # Collect the final mass
             elif "H Mfinal:" in line:
-                self.table[model_label]["Mfinal"] = float(line.split(":")[-1])
+                self.table[model_label]["M_final"] = float(line.split(":")[-1])
 
             # Collect the column labels
             elif "&Isotopes" in line:
@@ -522,6 +621,9 @@ class read_yields_Z( read_yields ):
 
         # Create list of metallicities
         self._create_M_Z_lists(define_M=False, define_Z=True)
+
+        # Run test functions to make sure everything is ok
+        self._run_tests()
 
 
     ##############################################
