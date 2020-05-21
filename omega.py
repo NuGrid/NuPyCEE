@@ -499,6 +499,7 @@ class omega( chem_evol ):
         self.beta_crit = beta_crit
         self.r_vir_array = r_vir_array
         self.pre_calculate_SSPs = pre_calculate_SSPs
+        self.yield_modifier = yield_modifier
 
         # If SSPs needs to be pre-calculated ..
         if self.pre_calculate_SSPs:
@@ -1638,7 +1639,7 @@ class omega( chem_evol ):
                  ytables_radio_in=self.ytables_radio_in, radio_iso_in=self.radio_iso_in, \
                  ytables_1a_radio_in=self.ytables_1a_radio_in, \
                  ytables_nsmerger_radio_in=self.ytables_nsmerger_radio_in,
-                 yield_modifier=yield_modifier)
+                 yield_modifier=self.yield_modifier)
 
               # Copy the ejecta arrays from the SYGMA simulation
               self.ej_SSP[i_ras] = sygma_inst.mdot
