@@ -437,28 +437,29 @@ class chem_evol(object):
     ##############################################
     ##               Constructor                ##
     ##############################################
-    def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
-             sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30, \
-             nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
-             ini_alpha=True, is_sygma=False, \
-             table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
-             use_decay_module=False, f_network='isotopes_modified.prn', f_format=1, \
+    def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100],\
+             sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30,\
+             nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0,\
+             ini_alpha=True, is_sygma=False,\
+             table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt',\
+             use_decay_module=False, f_network='isotopes_modified.prn', f_format=1,\
              table_radio='', decay_file='', sn1a_table_radio='',\
              nsmerger_table_radio='',\
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
-             sn1a_energy=1e51, ns_merger_on=False, \
+             sn1a_energy=1e51, ns_merger_on=False,\
              f_binary=1.0, f_merger=0.0008, t_merger_max=1.3e10,\
-             m_ej_nsm = 2.5e-02, nb_nsm_per_m=-1.0, \
+             m_ej_nsm = 2.5e-02, nb_nsm_per_m=-1.0,\
              t_nsm_coal=-1.0, nsm_dtd_power=[],\
              nsmerger_table = 'yield_tables/r_process_arnould_2007.txt',\
-             iniabu_table='', extra_source_on=False, \
-             extra_source_table=['yield_tables/extra_source.txt'], \
+             iniabu_table='', extra_source_on=False,\
+             extra_source_table=['yield_tables/extra_source.txt'],\
              f_extra_source=[1.0], pre_calculate_SSPs=False,\
-             extra_source_mass_range=[[8,30]], \
-             extra_source_exclude_Z=[[]], radio_refinement=100, \
-             pop3_table='yield_tables/popIII_heger10.txt', \
-             imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
+             extra_source_mass_range=[[8,30]],\
+             extra_source_exclude_Z=[[]], radio_refinement=100,\
+             pop3_table='yield_tables/popIII_heger10.txt',\
+             imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30],\
              imf_pop3_char_mass=40.0,\
+             use_net_yields_stable=False, use_net_yields_radio=False, \
              high_mass_extrapolation='copy',\
              use_external_integration=False,\
              starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
@@ -469,10 +470,10 @@ class chem_evol(object):
              total_ejecta_interp=True, tau_ferrini=False,\
              input_yields=False,t_merge=-1.0,stellar_param_on=False,\
              stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',\
-             popIII_info_fast=True, out_follows_E_rate=False, \
-             t_dtd_poly_split=-1.0, delayed_extra_log=False, \
-             delayed_extra_yields_log_int=False, \
-             delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False, \
+             popIII_info_fast=True, out_follows_E_rate=False,\
+             t_dtd_poly_split=-1.0, delayed_extra_log=False,\
+             delayed_extra_yields_log_int=False,\
+             delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False,\
              pritchet_1a_dtd=[], ism_ini=np.array([]), ism_ini_radio=np.array([]),\
              nsmerger_dtd_array=np.array([]),\
              ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
@@ -486,12 +487,12 @@ class chem_evol(object):
              dt_ssp=np.array([]), poly_fit_dtd_5th=np.array([]),\
              mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
              poly_fit_range=np.array([]), SSPs_in=np.array([]),\
-             delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
-             delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]), \
-             delayed_extra_yields_radio=np.array([]), \
-             delayed_extra_yields_norm_radio=np.array([]), \
-             delayed_extra_stochastic=np.array([]), \
-             ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
+             delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]),\
+             delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]),\
+             delayed_extra_yields_radio=np.array([]),\
+             delayed_extra_yields_norm_radio=np.array([]),\
+             delayed_extra_stochastic=np.array([]),\
+             ytables_radio_in=np.array([]), radio_iso_in=np.array([]),\
              ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
              test_clayton=np.array([]), inter_Z_points=np.array([]),\
              nb_inter_Z_points=np.array([]), y_coef_M=np.array([]),\
@@ -619,6 +620,7 @@ class chem_evol(object):
         self.use_external_integration = use_external_integration
         self.yield_tables_dir = yield_tables_dir
         self.print_off = print_off
+        self.use_net_yields_stable = use_net_yields_stable
 
         # Attributes associated with radioactive species
         self.table_radio = table_radio
@@ -641,6 +643,7 @@ class chem_evol(object):
         self.radio_refinement = radio_refinement
         self.test_clayton = test_clayton
         self.use_decay_module = use_decay_module
+        self.use_net_yields_radio = use_net_yields_radio
 
         # Initialize decay module
         if self.use_decay_module:
@@ -680,12 +683,6 @@ class chem_evol(object):
         # Parameter that determines if not enough gas is available for star formation
         self.not_enough_gas_count = 0
         self.not_enough_gas = False
-
-        # Check for incompatible inputs - Error messages
-        self.__check_inputs()
-        if self.need_to_quit:
-            return
-        # NOTE: This if statement also needs to be in SYGMA and OMEGA!
 
         # Initialisation of the timesteps
         if len(self.dt_split_info) > 0: # and len(self.ej_massive) == 0:
@@ -789,6 +786,12 @@ class chem_evol(object):
             print ('Error - iniZ must be an available metallicity in the grid of stellar yields.')
             self.need_to_quit = True
             return
+
+        # Check for incompatible inputs - Error messages
+        self.__check_inputs()
+        if self.need_to_quit:
+            return
+        # NOTE: This if statement also needs to be in SYGMA and OMEGA!
 
         # Initialisation of the composition of the gas reservoir
         if is_sygma:
@@ -972,6 +975,16 @@ class chem_evol(object):
         '''
 
         self.need_to_quit = False
+
+        # Check the use of net yields
+        if self.use_net_yields_stable or self.use_net_yields_radio:
+            if not self.ytables.net_yields_available:
+                print("Error - Net yields cannot be use for "+self.table)
+                print("  --> Make sure X0 is provided and sum(X0) = 1.0")
+                self.need_to_quit = True
+            if self.pre_calculate_SSPs:
+                print("Error - Net yields cannot be used with pre_calculate_SSPs=True")
+                self.need_to_quit = True
 
         # Total duration of the simulation
         if self.history.tend > 1.5e10:

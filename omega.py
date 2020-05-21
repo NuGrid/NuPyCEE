@@ -267,6 +267,7 @@ class omega( chem_evol ):
                  f_network='isotopes_modified.prn', f_format=1,\
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  nsmerger_table_radio='',\
+                 use_net_yields_stable=False, use_net_yields_radio=False,\
                  hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[],\
                  sn1a_table='yield_tables/sn1a_i99_W7.txt',\
                  ns_merger_on=False, f_binary=1.0, f_merger=0.0008,\
@@ -369,6 +370,8 @@ class omega( chem_evol ):
                  extra_source_mass_range=extra_source_mass_range, \
                  extra_source_exclude_Z=extra_source_exclude_Z,\
                  pop3_table=pop3_table, \
+                 use_net_yields_stable=use_net_yields_stable,\
+                 use_net_yields_radio=use_net_yields_radio,\
                  imf_bdys_pop3=imf_bdys_pop3, \
                  imf_pop3_char_mass=imf_pop3_char_mass, \
                  total_ejecta_interp=total_ejecta_interp, \
