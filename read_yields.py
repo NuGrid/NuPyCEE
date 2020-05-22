@@ -61,7 +61,7 @@ class read_yields( object ):
     ##############################################
     #                    Get                     #
     ##############################################
-    def get(self, M=None, Z=None, quantity=None):
+    def get(self, M=None, Z=None, quantity=None, isotopes=[]):
 
         '''
 
@@ -73,6 +73,8 @@ class read_yields( object ):
             M: Initial mass of the model
             Z: Initial metallicity of the model
             quantity: "Lifetime", "Mfinal", "Yields", "C-12", ...
+            isotopes: If empty, use self.isotopes for Yields and Xo
+                      If provide Yields and X0 will follow that list
 
         '''
 
@@ -88,7 +90,11 @@ class read_yields( object ):
 
         # Return the full yields
         elif quantity == "Yields":
-            return self.__get_yields_list(model_label)
+            return self.__get_field_list(model_label, isotopes=isotopes, field="Yields")
+
+        # Return the full yields
+        elif quantity == "X0":
+            return self.__get_field_list(model_label, isotopes=isotopes, field="X0")
 
         # Return a specific isotope
         elif quantity in self.isotopes:
@@ -100,9 +106,9 @@ class read_yields( object ):
 
 
     ##############################################
-    #              Get Yields List               #
+    #               Get Field List               #
     ##############################################
-    def __get_yields_list(self, model_label):
+    def __get_field_list(self, model_label, isotopes=[], field="Yields"):
 
         '''
 
@@ -113,16 +119,29 @@ class read_yields( object ):
         =========
 
             model_label: Model (M,Z) at which the yields are requested
+            isotopes: If empty, use self.isotopes for Yields and Xo
+                      If provide Yields and X0 will follow that list
+            field: "Yields" or "X0"
 
         '''
 
+        # Select the list of isotopes
+        if len(isotopes) == 0:
+            iso_list = self.isotopes
+        else:
+            iso_list = isotopes
+        nb_isotopes = len(iso_list)
+
         # Declare the yields list
-        yields_temp = np.zeros(self.nb_isotopes)
+        yields_temp = np.zeros(nb_isotopes)
 
         # Collect the yields of every isotopes
-        for i_iso in range(self.nb_isotopes):
-            iso = self.isotopes[i_iso]
-            yields_temp[i_iso] = self.table[model_label]["Yields"][iso]
+        for i_iso in range(nb_isotopes):
+            iso = iso_list[i_iso]
+            if iso in self.isotopes:
+                yields_temp[i_iso] = self.table[model_label][field][iso]
+            else:
+                yields_temp[i_iso] = 1.0e-30
 
         # Return the yields
         return yields_temp
