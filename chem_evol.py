@@ -3442,8 +3442,7 @@ class chem_evol(object):
 
             # Update a limited number of gas components
             self.ymgal[i] = f_lock_remain * self.ymgal[i-1]
-            # TODO - Check SSP compatibility
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ymgal_radio[i] = f_lock_remain * self.ymgal_radio[i-1]
 
             # Keep track of the mass locked into stars
@@ -3499,8 +3498,7 @@ class chem_evol(object):
 
             # Pollute a limited number of gas components
             self.ymgal[i] += self.mdot[i-1]
-            # TODO - Check SSP compatibility
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ymgal_radio[i][:self.nb_radio_iso] += self.mdot_radio[i-1]
 
         # If this is the normal chem_evol version ..
@@ -7380,8 +7378,7 @@ class chem_evol(object):
                 # Add the ejecta
                 self.mdot[i_sim_low+j_ase] += \
                     self.ej_SSP_int[i_ssp] * time_frac[j_ase]
-                # TODO - Check SSP compatibility
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     self.mdot_radio[i_sim_low+j_ase] += \
                         self.ej_SSP_int_radio[i_ssp] * time_frac[j_ase]
 
@@ -7409,15 +7406,13 @@ class chem_evol(object):
         # Use the lowest metallicity
         if self.zmetal <= self.Z_trans:
             self.ej_SSP_int = self.ej_SSP[0] * self.m_locked
-            # TODO - Check SSP compatibility
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ej_SSP_int_radio = self.ej_SSP_radio[0] * self.m_locked
 
         # Use the highest metallicity
         elif self.zmetal >= self.Z_table_SSP[-1]:
             self.ej_SSP_int = self.ej_SSP[-1] * self.m_locked
-            # TODO - Check SSP compatibility
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ej_SSP_int_radio = self.ej_SSP_radio[-1] * self.m_locked
 
         # If the metallicity is between Z_trans and lowest non-zero Z_table ..
@@ -7426,8 +7421,7 @@ class chem_evol(object):
                 self.ej_SSP_int = self.ej_SSP[0] * self.m_locked
             else:
                 self.ej_SSP_int = self.ej_SSP[1] * self.m_locked
-            # TODO - Check SSP compatibility
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 if self.Z_table_SSP[0] == self.Z_table_first_nzero:
                     self.ej_SSP_int_radio = self.ej_SSP_radio[0] * self.m_locked
                 else:
@@ -7453,8 +7447,7 @@ class chem_evol(object):
                 # Interpolate the isotopes
                 self.ej_SSP_int[j_ise] = (self.ej_SSP_coef[0][i_Z_low][j_ise] * \
                     log_Z_cur + self.ej_SSP_coef[1][i_Z_low][j_ise]) * self.m_locked
-                # TODO - Check SSP compatibility
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     self.ej_SSP_int_radio[j_ise] = (\
                         self.ej_SSP_coef_radio[0][i_Z_low][j_ise] * log_Z_cur + \
                             self.ej_SSP_coef_radio[1][i_Z_low][j_ise]) * self.m_locked

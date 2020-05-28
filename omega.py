@@ -507,8 +507,7 @@ class omega( chem_evol ):
 
             # Create the arrays that will contain the interpolated isotopes
             self.ej_SSP_int = np.zeros((self.nb_steps_table,self.nb_isotopes))
-            # TODO - Check SSP compatibility
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ej_SSP_int_radio = np.zeros((self.nb_steps_table,self.nb_radio_iso))
 
         # If the IMF will randomly be sampled ...
@@ -1575,8 +1574,7 @@ class omega( chem_evol ):
 
           # Declare the SSP ejecta arrays [Z][dt][iso]
           self.ej_SSP = np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_isotopes))
-          # TODO - Check SSP compatibility
-          if self.len_decay_file > 0:
+          if self.len_decay_file > 0 or self.use_decay_module:
               self.ej_SSP_radio = \
                   np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_radio_iso))
 
@@ -1642,8 +1640,7 @@ class omega( chem_evol ):
 
               # Copy the ejecta arrays from the SYGMA simulation
               self.ej_SSP[i_ras] = sygma_inst.mdot
-              # TODO - Check SSP compatibility
-              if self.len_decay_file > 0:
+              if self.len_decay_file > 0 or self.use_decay_module:
                   self.ej_SSP_radio[i_ras] = sygma_inst.mdot_radio
 
               # If this is the last Z entry ..
@@ -1702,8 +1699,7 @@ class omega( chem_evol ):
         # Declare the interpolation coefficients arrays
         self.ej_SSP_coef = \
             np.zeros((2,self.nb_Z_table_SSP,self.nb_steps_table,self.nb_isotopes))
-        # TODO - Check SSP compatibility
-        if self.len_decay_file > 0:
+        if self.len_decay_file > 0 or self.use_decay_module:
             self.ej_SSP_coef_radio = \
                 np.zeros((2,self.nb_Z_table_SSP,self.nb_steps_table,self.nb_radio_iso))
 
@@ -1735,8 +1731,7 @@ class omega( chem_evol ):
                     self.ej_SSP_coef[0][i_cic][j_cic][k_cic] * logZ_up
 
               # For every radioactive isotope ..
-              # TODO - Check SSP compatibility
-              if self.len_decay_file > 0:
+              if self.len_decay_file > 0 or self.use_decay_module:
                 for k_cic in range(0,self.nb_radio_iso):
 
                     # Copy the isotope mass for the boundary metallicities
@@ -3228,7 +3223,7 @@ class omega( chem_evol ):
         # This dictionary contains the mass fraction contribution toward the total
         # by SN1a's for each species
         species_frac_1a = {k: species_mass_1a[k] / species_mass_gal[k]
-        for k in species_mass_1a if k in species_mass_gal}        
+        for k in species_mass_1a if k in species_mass_gal}
         
         map_str_dic = {
         "agb":species_mass_agb,
