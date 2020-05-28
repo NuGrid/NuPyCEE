@@ -517,7 +517,7 @@ class chem_evol(object):
              nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
              inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
              inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
-             yield_modifier=np.array([])):
+             yield_modifier=np.array([]), in_parallel = False):
 
         # Initialize the history class which keeps the simulation in memory
         self.history = History()
@@ -631,6 +631,10 @@ class chem_evol(object):
         self.use_external_integration = use_external_integration
         self.yield_tables_dir = yield_tables_dir
         self.print_off = print_off
+        self.input_yields = input_yields
+        self.yield_modifier = yield_modifier
+        self.is_sygma = is_sygma
+        self.iolevel = iolevel
 
         # Attributes associated with radioactive species
         self.table_radio = table_radio
@@ -662,12 +666,18 @@ class chem_evol(object):
             self.f_format = f_format
             self.__initialize_decay_module()
 
+        if not in_parallel:
+            self.run_chem_evol()
+
+
+    def run_chem_evol(self):
+
         # Normalization of the delayed extra sources
         if self.nb_delayed_extra > 0:
             self.__normalize_delayed_extra()
 
         # Normalization constants for the Kroupa IMF
-        if imf_type == 'kroupa':
+        if self.imf_type == 'kroupa':
             self.p0 = 1.0
             self.p1 = 0.08**(-0.3 + 1.3)
             self.p2 = 0.5**(-1.3 + 2.3)
@@ -718,7 +728,7 @@ class chem_evol(object):
             self.__define_decay_info()
 
         # If the yield tables have already been read previously ...
-        if input_yields:
+        if self.input_yields:
 
             # Assign the input yields and lifetimes
             self.history.isotopes = isotopes_in
@@ -776,7 +786,7 @@ class chem_evol(object):
                 self.__read_radio_tables()
 
             # Modify the yields (ttrueman edit) 
-            if len(yield_modifier) > 0:
+            if len(self.yield_modifier) > 0:
                 iso = [i[0] for i in yield_modifier]
                 M = [i[1] for i in yield_modifier]
                 Z = [i[2] for i in yield_modifier]
@@ -842,7 +852,7 @@ class chem_evol(object):
             return
 
         # Initialisation of the composition of the gas reservoir
-        if is_sygma:
+        if self.is_sygma:
             ymgal = np.zeros(self.nb_isotopes)
             ymgal[0] = copy.deepcopy(self.mgal)
         else:
@@ -886,7 +896,7 @@ class chem_evol(object):
             self.__define_unstab_stab_indexes()
 
         # Output information
-        if iolevel >= 1:
+        if self.iolevel >= 1:
              print ('Number of timesteps: ', '{:.1E}'.format(len(timesteps)))
 
         # Create empty arrays if on the fast mode
@@ -970,7 +980,7 @@ class chem_evol(object):
 
         # Set the initial time and metallicity
 
-        if is_sygma:
+        if self.is_sygma:
             zmetal = copy.deepcopy(self.iniZ)
         else:
             zmetal = self._getmetallicity(0)
@@ -986,11 +996,11 @@ class chem_evol(object):
         self.__get_elem_to_iso_main()
 
         # Get coefficients for the fraction of white dwarfs fit (2nd poly)
-        if not pre_calculate_SSPs:
+        if not self.pre_calculate_SSPs:
             self.__get_coef_wd_fit()
 
         # Output information
-        if iolevel > 0:
+        if self.iolevel > 0:
             print ('### Start with initial metallicity of ','{:.4E}'.format(zmetal))
             print ('###############################')
 

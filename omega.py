@@ -338,7 +338,7 @@ class omega( chem_evol ):
                  nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
                  inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
                  inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
-                 yield_modifier=np.array([])):
+                 yield_modifier=np.array([]), in_parallel = False):
 
         # Get the name of the instance
         import traceback
@@ -432,21 +432,8 @@ class omega( chem_evol ):
                  nb_inter_M_points_pop3=nb_inter_M_points_pop3,\
                  inter_M_points_pop3_tree=inter_M_points_pop3_tree,\
                  nb_inter_M_points=nb_inter_M_points, inter_M_points=inter_M_points,\
-                 y_coef_Z_aM_ej=y_coef_Z_aM_ej, yield_modifier=yield_modifier)
-
-        # Quit if something bad happened in chem_evol ..
-        if self.need_to_quit:
-            return
-
-        # Calculate the number of CC SNe per Msun formed
-        if out_follows_E_rate:
-            A_pop3 = 1.0 / self._imf(imf_bdys_pop3[0],imf_bdys_pop3[1],2)
-            self.nb_ccsne_per_m_pop3 = \
-                A_pop3 * self._imf(imf_yields_range_pop3[0], \
-                              imf_yields_range_pop3[1],1)
-            A = 1.0 / self._imf(imf_bdys[0],imf_bdys[1],2)
-            self.nb_ccsne_per_m = \
-                A * self._imf(transitionmass,imf_yields_range[1],1)
+                 y_coef_Z_aM_ej=y_coef_Z_aM_ej, yield_modifier=yield_modifier,\
+                 in_parallel = in_parallel)
 
         # Attribute the input parameters to the current OMEGA object
         self.galaxy = galaxy
@@ -500,6 +487,46 @@ class omega( chem_evol ):
         self.r_vir_array = r_vir_array
         self.pre_calculate_SSPs = pre_calculate_SSPs
         self.yield_modifier = yield_modifier
+        self.in_parallel = in_parallel
+        self.calc_SSP_ej = calc_SSP_ej
+        self.mass_frac_SSP = -1.0
+        self.mass_frac_SSP_in = mass_frac_SSP
+
+        # Set cosmological parameters - default is Planck 2013 (used in Caterpillar)
+        self.omega_0   = omega_0   # Current mass density parameter
+        self.omega_b_0 = omega_b_0 # Current baryonic mass density parameter
+        self.lambda_0  = lambda_0  # Current dark energy density parameter
+        self.H_0       = H_0       # Hubble constant [km s^-1 Mpc^-1]
+
+        if not self.in_parallel:
+            self.run_simulation()
+
+
+    ##############################################
+    #           Run simulation wrapper           #
+    ##############################################
+    def run_simulation(self):
+        '''
+        Wrapper for self.__run_simulation and all that comes before
+
+        '''
+
+        # Run chem evol
+        chem_evol.run_chem_evol(self)
+
+        # Quit if something bad happened in chem_evol ..
+        if self.need_to_quit:
+            return
+
+        # Calculate the number of CC SNe per Msun formed
+        if self.out_follows_E_rate:
+            A_pop3 = 1.0 / self._imf(imf_bdys_pop3[0],imf_bdys_pop3[1],2)
+            self.nb_ccsne_per_m_pop3 = \
+                A_pop3 * self._imf(imf_yields_range_pop3[0], \
+                              imf_yields_range_pop3[1],1)
+            A = 1.0 / self._imf(imf_bdys[0],imf_bdys[1],2)
+            self.nb_ccsne_per_m = \
+                A * self._imf(transitionmass,imf_yields_range[1],1)
 
         # If SSPs needs to be pre-calculated ..
         if self.pre_calculate_SSPs:
@@ -551,12 +578,6 @@ class omega( chem_evol ):
         #self.lambda_0  = 0.734   # Current dark energy density parameter
         #self.H_0       = 71.0    # Hubble constant [km s^-1 Mpc^-1]
 
-        # Set cosmological parameters - default is Planck 2013 (used in Caterpillar)
-        self.omega_0   = omega_0   # Current mass density parameter
-        self.omega_b_0 = omega_b_0 # Current baryonic mass density parameter
-        self.lambda_0  = lambda_0  # Current dark energy density parameter
-        self.H_0       = H_0       # Hubble constant [km s^-1 Mpc^-1]
-
         # Look for errors in the input parameters
         self.__check_inputs_omega()
 
@@ -600,8 +621,7 @@ class omega( chem_evol ):
 
         # If the mass fraction ejected by SSPs needs to be calculated ...
         # Need to be before self.__initialize_gal_prop()!!
-        self.mass_frac_SSP = -1.0
-        if calc_SSP_ej:
+        if self.calc_SSP_ej:
 
             # Run SYGMA with five different metallicities
             Z = [0.02, 0.01, 0.006, 0.001, 0.0001]
@@ -629,7 +649,7 @@ class omega( chem_evol ):
             self.mass_frac_SSP = self.mass_frac_SSP / len(Z)
             print ('Average SSP mass fraction returned = ',self.mass_frac_SSP)
         else:
-            self.mass_frac_SSP = mass_frac_SSP
+            self.mass_frac_SSP = self.mass_frac_SSP_in
 
         # Set the general properties of the selected galaxy
         self.__initialize_gal_prop()
@@ -663,7 +683,7 @@ class omega( chem_evol ):
                 self.ymgal[0][i_ini] = self.ism_ini[i_ini]
 
         # Copy the outflow-vs-SFR array and re-initialize for delayed outflow
-        if out_follows_E_rate:
+        if self.out_follows_E_rate:
             self.outflow_test = np.sum(self.m_outflow_t)
             self.m_outflow_t_vs_SFR = copy.copy(self.m_outflow_t)
             for i_ofer in range(0,self.nb_timesteps):
