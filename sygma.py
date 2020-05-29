@@ -141,7 +141,7 @@ class sygma( chem_evol ):
                  extra_source_exclude_Z=[[]], \
                  total_ejecta_interp=True, yield_tables_dir='',\
                  high_mass_extrapolation='copy',\
-                 radio_refinement=100, use_decay_module=False,\
+                 radio_refinement=100,\
                  f_network='isotopes_modified.prn', f_format=1,\
                  pop3_table='yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
@@ -220,7 +220,6 @@ class sygma( chem_evol ):
                  ytables_1a_radio_in=ytables_1a_radio_in, ism_ini_radio=ism_ini_radio,\
                  ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
                  radio_refinement=radio_refinement,\
-                 use_decay_module=use_decay_module,\
                  f_network=f_network, f_format=f_format,\
                  high_mass_extrapolation=high_mass_extrapolation,
                  yield_modifier=yield_modifier)
