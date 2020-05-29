@@ -442,7 +442,7 @@ class chem_evol(object):
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, is_sygma=False, \
              table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
-             use_decay_module=False, f_network='isotopes_modified.prn', f_format=1, \
+             f_network='isotopes_modified.prn', f_format=1, \
              table_radio='', decay_file='', sn1a_table_radio='',\
              nsmerger_table_radio='',\
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
@@ -640,7 +640,16 @@ class chem_evol(object):
         self.radio_nsmerger_on = False
         self.radio_refinement = radio_refinement
         self.test_clayton = test_clayton
-        self.use_decay_module = use_decay_module
+
+        # Define the use of the decay_module and the decay_file
+        is_radio = not (len(self.table_radio) == 0 \
+                        and len(self.sn1a_table_radio) == 0 \
+                        and len(self.nsmerger_table_radio) == 0 \
+                        and self.nb_delayed_extra_radio == 0)
+        if is_radio and self.len_decay_file == 0:
+            self.use_decay_module = True
+        else:
+            self.use_decay_module = False
 
         # Initialize decay module
         if self.use_decay_module:
