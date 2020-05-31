@@ -666,12 +666,6 @@ class chem_evol(object):
             self.f_format = f_format
             self.__initialize_decay_module()
 
-        if not in_parallel:
-            self.run_chem_evol()
-
-
-    def run_chem_evol(self):
-
         # Normalization of the delayed extra sources
         if self.nb_delayed_extra > 0:
             self.__normalize_delayed_extra()
@@ -844,6 +838,12 @@ class chem_evol(object):
 
                 # Interpolate the radioactive yields tables
                 self.__interpolate_massive_and_agb_yields(is_radio=True)
+
+        if not in_parallel:
+            self.run_chem_evol()
+
+
+    def run_chem_evol(self):
 
         # Check whether the initial metallicity is available
         if (not self.iniZ in self.ytables.metallicities) and (self.iniZ > 0.0):
