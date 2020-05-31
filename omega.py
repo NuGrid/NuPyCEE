@@ -511,8 +511,10 @@ class omega( chem_evol ):
 
         '''
 
-        # Run chem evol
-        chem_evol.run_chem_evol(self)
+        # Run chem evol only if it was not run before, which happens if
+        # not in parallel
+        if self.in_parallel:
+            chem_evol.run_chem_evol(self)
 
         # Quit if something bad happened in chem_evol ..
         if self.need_to_quit:
@@ -693,7 +695,7 @@ class omega( chem_evol ):
         if not self.external_control:
 
             # Run the simulation
-            self.__run_simulation(mass_sampled, scale_cor)
+            self.__run_simulation(self.mass_sampled, self.scale_cor)
 
 
     ##############################################
