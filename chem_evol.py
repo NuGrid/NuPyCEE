@@ -391,9 +391,9 @@ class chem_evol(object):
         Default value : 2.5e-02
 
     yield_modifier : list of arrays --> [[iso, M, Z, type, modifier],[...]]
-        When used, modifies all isotopes yields for the given M and Z by 
-        multiplying by a given factor (type="multiply") or replacing the 
-        yield by a new value (type="replace"). Modifier will be either the 
+        When used, modifies all isotopes yields for the given M and Z by
+        multiplying by a given factor (type="multiply") or replacing the
+        yield by a new value (type="replace"). Modifier will be either the
         factor or value depending on type.
 
         Default value : [] --> Deactivated
@@ -517,7 +517,7 @@ class chem_evol(object):
              nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
              inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
              inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
-             yield_modifier=np.array([]), in_parallel = False):
+             yield_modifier=np.array([])):
 
         # Initialize the history class which keeps the simulation in memory
         self.history = History()
@@ -779,7 +779,7 @@ class chem_evol(object):
             if self.len_decay_file > 0:
                 self.__read_radio_tables()
 
-            # Modify the yields (ttrueman edit) 
+            # Modify the yields (ttrueman edit)
             if len(self.yield_modifier) > 0:
                 iso = [i[0] for i in yield_modifier]
                 M = [i[1] for i in yield_modifier]
@@ -838,12 +838,6 @@ class chem_evol(object):
 
                 # Interpolate the radioactive yields tables
                 self.__interpolate_massive_and_agb_yields(is_radio=True)
-
-        if not in_parallel:
-            self.run_chem_evol()
-
-
-    def run_chem_evol(self):
 
         # Check whether the initial metallicity is available
         if (not self.iniZ in self.ytables.metallicities) and (self.iniZ > 0.0):

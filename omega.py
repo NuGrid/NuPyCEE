@@ -338,7 +338,7 @@ class omega( chem_evol ):
                  nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
                  inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
                  inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
-                 yield_modifier=np.array([]), in_parallel = False):
+                 yield_modifier=np.array([])):
 
         # Get the name of the instance
         import traceback
@@ -432,8 +432,7 @@ class omega( chem_evol ):
                  nb_inter_M_points_pop3=nb_inter_M_points_pop3,\
                  inter_M_points_pop3_tree=inter_M_points_pop3_tree,\
                  nb_inter_M_points=nb_inter_M_points, inter_M_points=inter_M_points,\
-                 y_coef_Z_aM_ej=y_coef_Z_aM_ej, yield_modifier=yield_modifier,\
-                 in_parallel = in_parallel)
+                 y_coef_Z_aM_ej=y_coef_Z_aM_ej, yield_modifier=yield_modifier)
 
         # Attribute the input parameters to the current OMEGA object
         self.galaxy = galaxy
@@ -487,7 +486,6 @@ class omega( chem_evol ):
         self.r_vir_array = r_vir_array
         self.pre_calculate_SSPs = pre_calculate_SSPs
         self.yield_modifier = yield_modifier
-        self.in_parallel = in_parallel
         self.calc_SSP_ej = calc_SSP_ej
         self.mass_frac_SSP = -1.0
         self.mass_frac_SSP_in = mass_frac_SSP
@@ -497,24 +495,6 @@ class omega( chem_evol ):
         self.omega_b_0 = omega_b_0 # Current baryonic mass density parameter
         self.lambda_0  = lambda_0  # Current dark energy density parameter
         self.H_0       = H_0       # Hubble constant [km s^-1 Mpc^-1]
-
-        if not self.in_parallel:
-            self.run_simulation()
-
-
-    ##############################################
-    #           Run simulation wrapper           #
-    ##############################################
-    def run_simulation(self):
-        '''
-        Wrapper for self.__run_simulation and all that comes before
-
-        '''
-
-        # Run chem evol only if it was not run before, which happens if
-        # not in parallel
-        if self.in_parallel:
-            chem_evol.run_chem_evol(self)
 
         # Quit if something bad happened in chem_evol ..
         if self.need_to_quit:
