@@ -450,7 +450,7 @@ class chem_evol(object):
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0, \
              ini_alpha=True, is_sygma=False, \
              table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
-             use_decay_module=False, f_network='isotopes_modified.prn', f_format=1, \
+             f_network='isotopes_modified.prn', f_format=1, \
              table_radio='', decay_file='', sn1a_table_radio='',\
              nsmerger_table_radio='',\
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
@@ -656,7 +656,16 @@ class chem_evol(object):
         self.radio_nsmerger_on = False
         self.radio_refinement = radio_refinement
         self.test_clayton = test_clayton
-        self.use_decay_module = use_decay_module
+
+        # Define the use of the decay_module and the decay_file
+        is_radio = not (len(self.table_radio) == 0 \
+                        and len(self.sn1a_table_radio) == 0 \
+                        and len(self.nsmerger_table_radio) == 0 \
+                        and self.nb_delayed_extra_radio == 0)
+        if is_radio and self.len_decay_file == 0:
+            self.use_decay_module = True
+        else:
+            self.use_decay_module = False
 
         # Initialize decay module
         if self.use_decay_module:
@@ -718,7 +727,9 @@ class chem_evol(object):
                     self.history.timesteps[i_init]
 
         # Define the decay properties
-        if self.len_decay_file > 0:
+        if self.use_decay_module:
+            self.__read_isotopes_and_define_decay_info()
+        elif self.len_decay_file > 0:
             self.__define_decay_info()
 
         # If the yield tables have already been read previously ...
@@ -762,7 +773,7 @@ class chem_evol(object):
             self.y_coef_Z_aM_ej = y_coef_Z_aM_ej
 
             # Assign the input yields for radioactive isotopes
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ytables_1a_radio = ytables_1a_radio_in
                 self.ytables_nsmerger_radio = ytables_nsmerger_radio_in
                 self.y_coef_M_radio = y_coef_M_radio
@@ -776,7 +787,7 @@ class chem_evol(object):
             self.__read_tables()
 
             # Read radioactive tables
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.__read_radio_tables()
 
             # Modify the yields (ttrueman edit)
@@ -867,7 +878,7 @@ class chem_evol(object):
                 ymgal[0][i_ini] = self.ism_ini[i_ini]
 
         # If radioactive isotopes are used ..
-        if self.len_decay_file > 0:
+        if self.len_decay_file > 0 or self.use_decay_module:
 
             # Define initial radioactive gas composition
             ymgal_radio = np.zeros(self.nb_radio_iso)
@@ -887,7 +898,8 @@ class chem_evol(object):
                     ymgal_radio[0][i_ini] = self.ism_ini_radio[i_ini]
 
             # Define indexes to make connection between unstable/stable isotopes
-            self.__define_unstab_stab_indexes()
+            if not self.use_decay_module:
+                self.__define_unstab_stab_indexes()
 
         # Output information
         if self.iolevel >= 1:
@@ -948,7 +960,7 @@ class chem_evol(object):
         self.imf_mass_ranges_mtot = imf_mass_ranges_mtot
 
         # Attribute radioactive arrays and variables to the current object
-        if self.len_decay_file > 0:
+        if self.len_decay_file > 0 or self.use_decay_module:
             self.mdot_radio = mdot_radio
             self.ymgal_radio = ymgal_radio
             self.ymgal_massive_radio = ymgal_massive_radio
@@ -1118,13 +1130,13 @@ class chem_evol(object):
              #    self.need_to_quit = True
 
         # Use of radioactive isotopes
-        if self.len_decay_file > 0 and (len(self.table_radio) == 0 and \
-           len(self.sn1a_table_radio) == 0 and \
+        if (self.len_decay_file > 0 or self.use_decay_module) and \
+           (len(self.table_radio) == 0 and len(self.sn1a_table_radio) == 0 and \
            len(self.nsmerger_table_radio) == 0 and self.nb_delayed_extra_radio == 0):
             print ('Error -  At least one radioactive yields table must '+\
                   'be defined when using radioactive isotopes.')
             self.need_to_quit = True
-        elif self.len_decay_file > 0:
+        elif self.len_decay_file > 0 or self.use_decay_module:
             if self.yield_interp == 'wiersma':
                 print ('Error - Radioactive isotopes cannot be used with net yields .. for now.')
                 self.need_to_quit = True
@@ -1167,6 +1179,76 @@ class chem_evol(object):
         # Count the number of radioactive isotopes
         self.nb_radio_iso = len(self.decay_info)
         self.nb_new_radio_iso = len(self.decay_info)
+
+
+    ##############################################
+    #     Read isotopes and define decay info    #
+    ##############################################
+    def __read_isotopes_and_define_decay_info(self):
+
+        '''
+        This function reads the yield files and creates the decay_info
+        array from them to include all isotopes.
+
+        '''
+
+        allIsotopes = set()
+
+        # Massive and AGB stars
+        if len(self.table_radio) > 0:
+            path = os.path.join(nupy_path, self.table_radio)
+            self.__table_isotopes_in_set(allIsotopes, path)
+
+        # SNe Ia
+        if len(self.sn1a_table_radio) > 0:
+            path = os.path.join(nupy_path, self.sn1a_table_radio)
+            self.__table_isotopes_in_set(allIsotopes, path)
+
+        # NS mergers
+        if len(self.nsmerger_table_radio) > 0:
+            path = os.path.join(nupy_path, self.nsmerger_table_radio)
+            self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Delayed extra sources
+        if self.nb_delayed_extra_radio > 0:
+            self.ytables_delayed_extra_radio = []
+            for i_syt in range(0,self.nb_delayed_extra_radio):
+                path = os.path.join(nupy_path, self.delayed_extra_yields_radio[i_syt])
+                self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Declare the decay_info array
+        # decay_info[nb_radio_iso][0] --> Unstable isotope
+        # decay_info[nb_radio_iso][1] --> None
+        # decay_info[nb_radio_iso][2] --> None
+        self.decay_info = []
+        for isotope in allIsotopes:
+            self.decay_info.append([isotope, None, None])
+
+        # Count the number of radioactive isotopes
+        self.nb_radio_iso = len(self.decay_info)
+        self.nb_new_radio_iso = len(self.decay_info)
+
+
+    ##############################################
+    #  Read yield table to add isotopes in set   #
+    ##############################################
+    def __table_isotopes_in_set(self, allIsotopes, path):
+
+        '''
+        Simply read the isotopes in path and add them to the set "allIsotopes"
+
+        '''
+
+        # Open the file in path
+        with open(path, "r") as fread:
+            for line in fread:
+                # Make sure we are not taking a header
+                if line[0] == "H" or "Isotopes" in line:
+                    continue
+
+                # Retrieve the isotope name and add it to the set
+                isoName = line.split("&")[1].strip()
+                allIsotopes.add(isoName)
 
 
     ##############################################
@@ -1818,7 +1900,8 @@ class chem_evol(object):
 
         # Radioactive isotopes (non-zero metallicity)
         # ===========================================
-        if self.len_decay_file > 0 and len(self.table_radio) > 0:
+        if (self.len_decay_file > 0 or self.use_decay_module) and \
+           len(self.table_radio) > 0:
 
             # Declare the array containing the coefficients for
             # the yields interpolation between masses (a_M, b_M)
@@ -3658,7 +3741,7 @@ class chem_evol(object):
 
             # Update a limited number of gas components
             self.ymgal[i] = f_lock_remain * self.ymgal[i-1]
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ymgal_radio[i] = f_lock_remain * self.ymgal_radio[i-1]
 
             # Keep track of the mass locked into stars
@@ -3679,9 +3762,9 @@ class chem_evol(object):
                     f_lock_remain * self.ymgal_delayed_extra[iiii][i-1]
 
             # Update all radioactive gas components
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ymgal_radio[i] = f_lock_remain * self.ymgal_radio[i-1]
-            if not self.use_decay_module:
+            if not self.use_decay_module and self.len_decay_file > 0:
                 if self.radio_massive_agb_on:
                     self.ymgal_massive_radio[i] = f_lock_remain * self.ymgal_massive_radio[i-1]
                     self.ymgal_agb_radio[i] = f_lock_remain * self.ymgal_agb_radio[i-1]
@@ -3714,7 +3797,7 @@ class chem_evol(object):
 
             # Pollute a limited number of gas components
             self.ymgal[i] += self.mdot[i-1]
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ymgal_radio[i][:self.nb_radio_iso] += self.mdot_radio[i-1]
 
         # If this is the normal chem_evol version ..
@@ -3940,7 +4023,8 @@ class chem_evol(object):
                                 upper_mass = the_m_upp)
 
                         # If there are radioactive isotopes
-                        if self.len_decay_file > 0 and len(self.table_radio) > 0:
+                        if (self.len_decay_file > 0 or self.use_decay_module) and \
+                           len(self.table_radio) > 0:
 
                             # Get the yields for the central stellar mass
                             the_yields = self.get_interp_yields(the_m_cen, \
@@ -5538,7 +5622,7 @@ class chem_evol(object):
         for i_extra in range(0,self.nb_delayed_extra):
 
             # Get the yields and metallicity indexes of the considered source
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 Z_extra, yextra_low, yextra_up, yextra_low_radio, \
                     yextra_up_radio, iZ_low, iZ_up = \
                         self.__get_YZ_delayed_extra(i_extra, return_radio=True)
@@ -5571,7 +5655,7 @@ class chem_evol(object):
               if timemax > tmin_extra:
 
                 # Get the total number of sources and yields (interpolated)
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     nb_sources_extra_tot, yields_extra_interp, yields_extra_interp_radio = \
                         self.__get_nb_y_interp(timemin, timemax, i_extra, iZ_low, iZ_up,\
                             yextra_low, yextra_up, Z_extra, yextra_low_radio=yextra_low_radio,\
@@ -5590,7 +5674,7 @@ class chem_evol(object):
                 self.mdot[j] = np.array(self.mdot[j]) + yields_extra_interp
 
                 # Add the radioactive contribution
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     self.mdot_delayed_extra_radio[i_extra][j] = \
                         np.array(self.mdot_delayed_extra_radio[i_extra][j]) + yields_extra_interp_radio
                     self.mdot_radio[j] = np.array(self.mdot_radio[j]) + yields_extra_interp_radio
@@ -7612,7 +7696,7 @@ class chem_evol(object):
                 # Add the ejecta
                 self.mdot[i_sim_low+j_ase] += \
                     self.ej_SSP_int[i_ssp] * time_frac[j_ase]
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     self.mdot_radio[i_sim_low+j_ase] += \
                         self.ej_SSP_int_radio[i_ssp] * time_frac[j_ase]
 
@@ -7640,13 +7724,13 @@ class chem_evol(object):
         # Use the lowest metallicity
         if self.zmetal <= self.Z_trans:
             self.ej_SSP_int = self.ej_SSP[0] * self.m_locked
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ej_SSP_int_radio = self.ej_SSP_radio[0] * self.m_locked
 
         # Use the highest metallicity
         elif self.zmetal >= self.Z_table_SSP[-1]:
             self.ej_SSP_int = self.ej_SSP[-1] * self.m_locked
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ej_SSP_int_radio = self.ej_SSP_radio[-1] * self.m_locked
 
         # If the metallicity is between Z_trans and lowest non-zero Z_table ..
@@ -7655,7 +7739,7 @@ class chem_evol(object):
                 self.ej_SSP_int = self.ej_SSP[0] * self.m_locked
             else:
                 self.ej_SSP_int = self.ej_SSP[1] * self.m_locked
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 if self.Z_table_SSP[0] == self.Z_table_first_nzero:
                     self.ej_SSP_int_radio = self.ej_SSP_radio[0] * self.m_locked
                 else:
@@ -7681,7 +7765,7 @@ class chem_evol(object):
                 # Interpolate the isotopes
                 self.ej_SSP_int[j_ise] = (self.ej_SSP_coef[0][i_Z_low][j_ise] * \
                     log_Z_cur + self.ej_SSP_coef[1][i_Z_low][j_ise]) * self.m_locked
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     self.ej_SSP_int_radio[j_ise] = (\
                         self.ej_SSP_coef_radio[0][i_Z_low][j_ise] * log_Z_cur + \
                             self.ej_SSP_coef_radio[1][i_Z_low][j_ise]) * self.m_locked
