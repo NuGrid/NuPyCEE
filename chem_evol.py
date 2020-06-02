@@ -391,9 +391,9 @@ class chem_evol(object):
         Default value : 2.5e-02
 
     yield_modifier : list of arrays --> [[iso, M, Z, type, modifier],[...]]
-        When used, modifies all isotopes yields for the given M and Z by 
-        multiplying by a given factor (type="multiply") or replacing the 
-        yield by a new value (type="replace"). Modifier will be either the 
+        When used, modifies all isotopes yields for the given M and Z by
+        multiplying by a given factor (type="multiply") or replacing the
+        yield by a new value (type="replace"). Modifier will be either the
         factor or value depending on type.
 
         Default value : [] --> Deactivated
@@ -520,8 +520,8 @@ class chem_evol(object):
              yield_modifier=np.array([])):
 
         # Initialize the history class which keeps the simulation in memory
-        self.history = self.__history()
-        self.const = self.__const()
+        self.history = History()
+        self.const = Const()
 
         # Define elements for ordering
         self.__define_elements()
@@ -631,6 +631,10 @@ class chem_evol(object):
         self.use_external_integration = use_external_integration
         self.yield_tables_dir = yield_tables_dir
         self.print_off = print_off
+        self.input_yields = input_yields
+        self.yield_modifier = yield_modifier
+        self.is_sygma = is_sygma
+        self.iolevel = iolevel
 
         # Attributes associated with radioactive species
         self.table_radio = table_radio
@@ -676,7 +680,7 @@ class chem_evol(object):
             self.__normalize_delayed_extra()
 
         # Normalization constants for the Kroupa IMF
-        if imf_type == 'kroupa':
+        if self.imf_type == 'kroupa':
             self.p0 = 1.0
             self.p1 = 0.08**(-0.3 + 1.3)
             self.p2 = 0.5**(-1.3 + 2.3)
@@ -729,7 +733,7 @@ class chem_evol(object):
             self.__define_decay_info()
 
         # If the yield tables have already been read previously ...
-        if input_yields:
+        if self.input_yields:
 
             # Assign the input yields and lifetimes
             self.history.isotopes = isotopes_in
@@ -786,8 +790,8 @@ class chem_evol(object):
             if self.len_decay_file > 0 or self.use_decay_module:
                 self.__read_radio_tables()
 
-            # Modify the yields (ttrueman edit) 
-            if len(yield_modifier) > 0:
+            # Modify the yields (ttrueman edit)
+            if len(self.yield_modifier) > 0:
                 iso = [i[0] for i in yield_modifier]
                 M = [i[1] for i in yield_modifier]
                 Z = [i[2] for i in yield_modifier]
@@ -853,7 +857,7 @@ class chem_evol(object):
             return
 
         # Initialisation of the composition of the gas reservoir
-        if is_sygma:
+        if self.is_sygma:
             ymgal = np.zeros(self.nb_isotopes)
             ymgal[0] = copy.deepcopy(self.mgal)
         else:
@@ -898,7 +902,7 @@ class chem_evol(object):
                 self.__define_unstab_stab_indexes()
 
         # Output information
-        if iolevel >= 1:
+        if self.iolevel >= 1:
              print ('Number of timesteps: ', '{:.1E}'.format(len(timesteps)))
 
         # Create empty arrays if on the fast mode
@@ -982,7 +986,7 @@ class chem_evol(object):
 
         # Set the initial time and metallicity
 
-        if is_sygma:
+        if self.is_sygma:
             zmetal = copy.deepcopy(self.iniZ)
         else:
             zmetal = self._getmetallicity(0)
@@ -998,11 +1002,11 @@ class chem_evol(object):
         self.__get_elem_to_iso_main()
 
         # Get coefficients for the fraction of white dwarfs fit (2nd poly)
-        if not pre_calculate_SSPs:
+        if not self.pre_calculate_SSPs:
             self.__get_coef_wd_fit()
 
         # Output information
-        if iolevel > 0:
+        if self.iolevel > 0:
             print ('### Start with initial metallicity of ','{:.4E}'.format(zmetal))
             print ('###############################')
 
@@ -1943,7 +1947,7 @@ class chem_evol(object):
 
         # Sort the list of masses
         self.inter_M_points_pop3 = sorted(self.inter_M_points_pop3)
-        self.inter_M_points_pop3_tree = self._bin_tree(self.inter_M_points_pop3)
+        self.inter_M_points_pop3_tree = Bin_tree(self.inter_M_points_pop3)
 
         # Calculate the number of interpolation mass-points
         self.nb_inter_M_points_pop3 = len(self.inter_M_points_pop3)
@@ -1984,7 +1988,7 @@ class chem_evol(object):
 
         # Sort the list of masses
         self.inter_M_points = sorted(self.inter_M_points)
-        self.inter_M_points_tree = self._bin_tree(self.inter_M_points)
+        self.inter_M_points_tree = Bin_tree(self.inter_M_points)
 
         # Calculate the number of interpolation mass-points
         self.nb_inter_M_points = len(self.inter_M_points)
@@ -3082,7 +3086,7 @@ class chem_evol(object):
 
         # Sort the list to have lifetimes in increasing order
         self.inter_lifetime_points_pop3 = sorted(self.inter_lifetime_points_pop3)
-        self.inter_lifetime_points_pop3_tree = self._bin_tree(
+        self.inter_lifetime_points_pop3_tree = Bin_tree(
                 self.inter_lifetime_points_pop3)
 
 
@@ -3109,7 +3113,7 @@ class chem_evol(object):
 
         # Sort the list to have lifetimes in increasing order
         self.inter_lifetime_points = sorted(self.inter_lifetime_points)
-        self.inter_lifetime_points_tree = self._bin_tree(
+        self.inter_lifetime_points_tree = Bin_tree(
                 self.inter_lifetime_points)
 
 
@@ -7904,195 +7908,195 @@ class chem_evol(object):
         return self.interpolation(x_arr, y_arr, xx, indx, interp_list)
 
 
-    ##############################################
-    #               History CLASS                #
-    ##############################################
-    class __history():
+##############################################
+#               History CLASS                #
+##############################################
+class History():
+
+    '''
+    Class tracking the evolution of composition, model parameter, etc.
+    Allows separation of tracking variables from original code.
+
+    '''
+
+    #############################
+    #        Constructor        #
+    #############################
+    def __init__(self):
 
         '''
-        Class tracking the evolution of composition, model parameter, etc.
-        Allows separation of tracking variables from original code.
-
-        '''
-
-        #############################
-        #        Constructor        #
-        #############################
-        def __init__(self):
-
-            '''
-            Initiate variables tracking.history
-
-            '''
-
-            self.age = []
-            self.sfr = []
-            self.gas_mass = []
-            self.metallicity = []
-            self.ism_iso_yield = []
-            self.ism_iso_yield_agb = []
-            self.ism_iso_yield_massive = []
-            self.ism_iso_yield_1a = []
-            self.ism_iso_yield_nsm = []
-            self.isotopes = []
-            self.elements = []
-            self.ism_elem_yield = []
-            self.ism_elem_yield_agb = []
-            self.ism_elem_yield_massive = []
-            self.ism_elem_yield_1a = []
-            self.ism_elem_yield_nsm = []
-            self.sn1a_numbers = []
-            self.nsm_numbers = []
-            self.sn2_numbers = []
-            self.t_m_bdys = []
-
-
-    ##############################################
-    #               Const CLASS                #
-    ##############################################
-    class __const():
-
-        '''
-        Holds the physical constants.
-        Please add further constants if required.
+        Initiate variables tracking.history
 
         '''
 
-        #############################
-        #        Constructor        #
-        #############################
-        def __init__(self):
+        self.age = []
+        self.sfr = []
+        self.gas_mass = []
+        self.metallicity = []
+        self.ism_iso_yield = []
+        self.ism_iso_yield_agb = []
+        self.ism_iso_yield_massive = []
+        self.ism_iso_yield_1a = []
+        self.ism_iso_yield_nsm = []
+        self.isotopes = []
+        self.elements = []
+        self.ism_elem_yield = []
+        self.ism_elem_yield_agb = []
+        self.ism_elem_yield_massive = []
+        self.ism_elem_yield_1a = []
+        self.ism_elem_yield_nsm = []
+        self.sn1a_numbers = []
+        self.nsm_numbers = []
+        self.sn2_numbers = []
+        self.t_m_bdys = []
 
-            '''
-            Initiate variables tracking.history
 
-            '''
+##############################################
+#               Const CLASS                #
+##############################################
+class Const():
 
+    '''
+    Holds the physical constants.
+    Please add further constants if required.
 
-            self.syr = 31536000 #seconds in a year
-            self.c= 2.99792458e10 #speed of light in vacuum (cm s^-1)
-            self.pi = 3.1415926535897932384626433832795029e0
-            self.planck_h  = 6.62606896e-27 # Planck's constant (erg s)
-            self.ev2erg = 1.602176487e-12 # electron volt (erg)
-            self.rsol = 6.9598e10 # solar radius (cm)
-            self.lsol = 3.8418e33 #erg/s
-            self.msol =  1.9892e33  # solar mass (g)
-            self.ggrav = 6.67428e-8 #(g^-1 cm^3 s^-2)
+    '''
 
-
-    ##############################################
-    #               BinTree CLASS                #
-    ##############################################
-    class _bin_tree():
+    #############################
+    #        Constructor        #
+    #############################
+    def __init__(self):
 
         '''
-        Class for the construction and search in a binary tree.
+        Initiate variables tracking.history
 
         '''
 
-        #############################
-        #        Constructor        #
-        #############################
-        def __init__(self, sorted_array):
 
-            '''
-            Initialize the balanced tree
+        self.syr = 31536000 #seconds in a year
+        self.c= 2.99792458e10 #speed of light in vacuum (cm s^-1)
+        self.pi = 3.1415926535897932384626433832795029e0
+        self.planck_h  = 6.62606896e-27 # Planck's constant (erg s)
+        self.ev2erg = 1.602176487e-12 # electron volt (erg)
+        self.rsol = 6.9598e10 # solar radius (cm)
+        self.lsol = 3.8418e33 #erg/s
+        self.msol =  1.9892e33  # solar mass (g)
+        self.ggrav = 6.67428e-8 #(g^-1 cm^3 s^-2)
 
-            '''
 
-            self.head = self._create_tree(sorted_array)
+##############################################
+#               BinTree CLASS                #
+##############################################
+class Bin_tree():
 
-        #############################
-        #        Tree creation      #
-        #############################
-        def _create_tree(self, sorted_array, index = 0):
-            '''
-            Create the tree itself
+    '''
+    Class for the construction and search in a binary tree.
 
-            '''
+    '''
 
-            # Sort edge cases
-            len_array = len(sorted_array)
-            if len_array == 0:
-                return None
-            elif len_array == 1:
-                return self._node(sorted_array[0], index)
+    #############################
+    #        Constructor        #
+    #############################
+    def __init__(self, sorted_array):
 
-            # Find middle value and index, introduce them
-            # and recursively create the children
-            mid_index = len_array//2
-            mid_value = sorted_array[mid_index]
-            new_node = self._node(mid_value, mid_index + index)
-            new_node.lchild = self._create_tree(sorted_array[0:mid_index], index)
-            new_node.rchild = self._create_tree(sorted_array[mid_index + 1:],
-                    mid_index + 1 + index)
+        '''
+        Initialize the balanced tree
 
-            return new_node
+        '''
 
-        #############################
-        #  Wraper Tree search left  #
-        #############################
-        def search_left(self, value):
-            '''
-            Wrapper for search_left
-            Search for the rightmost index lower or equal than value
+        self.head = self._create_tree(sorted_array)
 
-            '''
+    #############################
+    #        Tree creation      #
+    #############################
+    def _create_tree(self, sorted_array, index = 0):
+        '''
+        Create the tree itself
 
-            # Call function and be careful with lowest case
-            index = self._search_left_rec(value, self.head)
+        '''
+
+        # Sort edge cases
+        len_array = len(sorted_array)
+        if len_array == 0:
+            return None
+        elif len_array == 1:
+            return Node(sorted_array[0], index)
+
+        # Find middle value and index, introduce them
+        # and recursively create the children
+        mid_index = len_array//2
+        mid_value = sorted_array[mid_index]
+        new_node = Node(mid_value, mid_index + index)
+        new_node.lchild = self._create_tree(sorted_array[0:mid_index], index)
+        new_node.rchild = self._create_tree(sorted_array[mid_index + 1:],
+                mid_index + 1 + index)
+
+        return new_node
+
+    #############################
+    #  Wraper Tree search left  #
+    #############################
+    def search_left(self, value):
+        '''
+        Wrapper for search_left
+        Search for the rightmost index lower or equal than value
+
+        '''
+
+        # Call function and be careful with lowest case
+        index = self._search_left_rec(value, self.head)
+        if index is None:
+            return 0
+
+        return index
+
+    #############################
+    #        Tree search left   #
+    #############################
+    def _search_left_rec(self, value, node):
+        '''
+        Search for the rightmost index lower or equal than value
+
+        '''
+
+        # Sort edge case
+        if node is None:
+            return None
+
+        # If to the left, we can always return the index, even if None.
+        # If to the right and none, we return current index, as it will
+        # be the closest to value from the left
+        if value < node.value:
+            return self._search_left_rec(value, node.lchild)
+        else:
+            index = self._search_left_rec(value, node.rchild)
             if index is None:
-                return 0
+                return node.index
 
             return index
 
-        #############################
-        #        Tree search left   #
-        #############################
-        def _search_left_rec(self, value, node):
-            '''
-            Search for the rightmost index lower or equal than value
 
-            '''
+##############################################
+#               Node CLASS                   #
+##############################################
+class Node():
 
-            # Sort edge case
-            if node is None:
-                return None
+    '''
+    Class for the bin_tree nodes.
 
-            # If to the left, we can always return the index, even if None.
-            # If to the right and none, we return current index, as it will
-            # be the closest to value from the left
-            if value < node.value:
-                return self._search_left_rec(value, node.lchild)
-            else:
-                index = self._search_left_rec(value, node.rchild)
-                if index is None:
-                    return node.index
+    '''
 
-                return index
+    #############################
+    #        Constructor        #
+    #############################
+    def __init__(self, value, index):
 
+        '''
+        Initialize the constructor
 
-        ##############################################
-        #               Node CLASS                   #
-        ##############################################
-        class _node():
+        '''
 
-            '''
-            Class for the bin_tree nodes.
-
-            '''
-
-            #############################
-            #        Constructor        #
-            #############################
-            def __init__(self, value, index):
-
-                '''
-                Initialize the constructor
-
-                '''
-
-                self.value = value
-                self.index = index
-                self.lchild = None
-                self.rchild = None
+        self.value = value
+        self.index = index
+        self.lchild = None
+        self.rchild = None

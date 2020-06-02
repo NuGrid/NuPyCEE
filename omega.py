@@ -433,20 +433,6 @@ class omega( chem_evol ):
                  nb_inter_M_points=nb_inter_M_points, inter_M_points=inter_M_points,\
                  y_coef_Z_aM_ej=y_coef_Z_aM_ej, yield_modifier=yield_modifier)
 
-        # Quit if something bad happened in chem_evol ..
-        if self.need_to_quit:
-            return
-
-        # Calculate the number of CC SNe per Msun formed
-        if out_follows_E_rate:
-            A_pop3 = 1.0 / self._imf(imf_bdys_pop3[0],imf_bdys_pop3[1],2)
-            self.nb_ccsne_per_m_pop3 = \
-                A_pop3 * self._imf(imf_yields_range_pop3[0], \
-                              imf_yields_range_pop3[1],1)
-            A = 1.0 / self._imf(imf_bdys[0],imf_bdys[1],2)
-            self.nb_ccsne_per_m = \
-                A * self._imf(transitionmass,imf_yields_range[1],1)
-
         # Attribute the input parameters to the current OMEGA object
         self.galaxy = galaxy
         self.in_out_control = in_out_control
@@ -499,6 +485,29 @@ class omega( chem_evol ):
         self.r_vir_array = r_vir_array
         self.pre_calculate_SSPs = pre_calculate_SSPs
         self.yield_modifier = yield_modifier
+        self.calc_SSP_ej = calc_SSP_ej
+        self.mass_frac_SSP = -1.0
+        self.mass_frac_SSP_in = mass_frac_SSP
+
+        # Set cosmological parameters - default is Planck 2013 (used in Caterpillar)
+        self.omega_0   = omega_0   # Current mass density parameter
+        self.omega_b_0 = omega_b_0 # Current baryonic mass density parameter
+        self.lambda_0  = lambda_0  # Current dark energy density parameter
+        self.H_0       = H_0       # Hubble constant [km s^-1 Mpc^-1]
+
+        # Quit if something bad happened in chem_evol ..
+        if self.need_to_quit:
+            return
+
+        # Calculate the number of CC SNe per Msun formed
+        if self.out_follows_E_rate:
+            A_pop3 = 1.0 / self._imf(imf_bdys_pop3[0],imf_bdys_pop3[1],2)
+            self.nb_ccsne_per_m_pop3 = \
+                A_pop3 * self._imf(imf_yields_range_pop3[0], \
+                              imf_yields_range_pop3[1],1)
+            A = 1.0 / self._imf(imf_bdys[0],imf_bdys[1],2)
+            self.nb_ccsne_per_m = \
+                A * self._imf(transitionmass,imf_yields_range[1],1)
 
         # If SSPs needs to be pre-calculated ..
         if self.pre_calculate_SSPs:
@@ -550,12 +559,6 @@ class omega( chem_evol ):
         #self.lambda_0  = 0.734   # Current dark energy density parameter
         #self.H_0       = 71.0    # Hubble constant [km s^-1 Mpc^-1]
 
-        # Set cosmological parameters - default is Planck 2013 (used in Caterpillar)
-        self.omega_0   = omega_0   # Current mass density parameter
-        self.omega_b_0 = omega_b_0 # Current baryonic mass density parameter
-        self.lambda_0  = lambda_0  # Current dark energy density parameter
-        self.H_0       = H_0       # Hubble constant [km s^-1 Mpc^-1]
-
         # Look for errors in the input parameters
         self.__check_inputs_omega()
 
@@ -599,8 +602,7 @@ class omega( chem_evol ):
 
         # If the mass fraction ejected by SSPs needs to be calculated ...
         # Need to be before self.__initialize_gal_prop()!!
-        self.mass_frac_SSP = -1.0
-        if calc_SSP_ej:
+        if self.calc_SSP_ej:
 
             # Run SYGMA with five different metallicities
             Z = [0.02, 0.01, 0.006, 0.001, 0.0001]
@@ -628,7 +630,7 @@ class omega( chem_evol ):
             self.mass_frac_SSP = self.mass_frac_SSP / len(Z)
             print ('Average SSP mass fraction returned = ',self.mass_frac_SSP)
         else:
-            self.mass_frac_SSP = mass_frac_SSP
+            self.mass_frac_SSP = self.mass_frac_SSP_in
 
         # Set the general properties of the selected galaxy
         self.__initialize_gal_prop()
@@ -662,7 +664,7 @@ class omega( chem_evol ):
                 self.ymgal[0][i_ini] = self.ism_ini[i_ini]
 
         # Copy the outflow-vs-SFR array and re-initialize for delayed outflow
-        if out_follows_E_rate:
+        if self.out_follows_E_rate:
             self.outflow_test = np.sum(self.m_outflow_t)
             self.m_outflow_t_vs_SFR = copy.copy(self.m_outflow_t)
             for i_ofer in range(0,self.nb_timesteps):
@@ -672,7 +674,7 @@ class omega( chem_evol ):
         if not self.external_control:
 
             # Run the simulation
-            self.__run_simulation(mass_sampled, scale_cor)
+            self.__run_simulation(self.mass_sampled, self.scale_cor)
 
 
     ##############################################
@@ -3041,7 +3043,7 @@ class omega( chem_evol ):
         yscale: string
              choose y axis scale
              'log' or 'linear'
- 
+
         Examples
         ---------
 
@@ -3049,21 +3051,21 @@ class omega( chem_evol ):
                cycle=-1, solar_ref='Lodders', yscale='log')
 
         '''
-    
+
         import numpy as np
         import matplotlib
         import matplotlib.pyplot as plt
         from matplotlib.patches import Patch
-        
+
         f = open(os.path.join(nupy_path, 'stellab_data',\
             'solar_normalization', str(solar_ref) + '.txt'), 'r')
-        
+
         g = open(os.path.join(nupy_path, 'stellab_data',\
         'solar_normalization', 'element_mass.txt'), 'r')
-        
+
         h = open(os.path.join(nupy_path, 'stellab_data',\
         'solar_normalization', 'Asplund_et_al_2009_iso.txt'), 'r')
-        
+
         lines=f.readlines()
         lines_g=g.readlines()
         lines_h=h.readlines()
@@ -3073,7 +3075,7 @@ class omega( chem_evol ):
         ele_sol = []
         iso_nam =[]
         iso_frac =[]
-        
+
         # items taken from Asplund
         # keys = element symbol, values = logarithmic solar abundnace
         for i in lines:
@@ -3081,7 +3083,7 @@ class omega( chem_evol ):
             abu_sol.append(float(i.split()[2]))
         f.close()
         sol_dict = dict(zip(ele_sol, abu_sol))
-        
+
         # items taken from online data table
         # keys = element symbol, values = element mass number
         for j in lines_g:
@@ -3089,7 +3091,7 @@ class omega( chem_evol ):
             ele_nam.append(j.split()[2])
         g.close()
         ele_dict = dict(zip(ele_nam, ele_mass))
-        
+
         # items taken from Asplund
         # keys = isotope symbol, values = relative number fraction of isotope
         for k in lines_h:
@@ -3097,7 +3099,7 @@ class omega( chem_evol ):
             iso_frac.append(float(k.split()[1])/100)
         h.close()
         iso_frac_dict = dict(zip(iso_nam, iso_frac))
-        
+
         # Create a dictionary with keys = element symbol
         # and vals = solar mass fraction
         ele_mass_frac = {}
@@ -3105,13 +3107,13 @@ class omega( chem_evol ):
             for el,abu in sol_dict.items():
                 if ele == el:
                     ele_mass_frac.update([(ele,10**(abu-12)*mass*0.7381)])
-        
+
         # Normalise the above dictionary so that mass fractions
         # sum to unity
         tot_mass_frac = sum(ele_mass_frac.values())
         for ele,frac in ele_mass_frac.items():
             sol_dict.update([(ele,frac/tot_mass_frac)])
-        
+
         # Create a dictionary with keys = isotope
         # vals = (mass fraction)/(isotope mass)
         new = {}
@@ -3119,7 +3121,7 @@ class omega( chem_evol ):
             for iso,frac in iso_frac_dict.items():
                 if ele == iso.split('-',1)[0]:
                     new.update([(iso,frac/mass)])
-        
+
         # Create a dictionary with keys = isotope
         # vals = contribution towards total element mass fraction from each isotope
         weighted_iso_frac={}
@@ -3128,30 +3130,30 @@ class omega( chem_evol ):
                 if ele == iso.split('-',1)[0]:
                     weighted_iso_frac.update([
         (iso,frac*fracs*float(iso.split('-',1)[-1]))])
-        
+
         species_mass_frac_sol_dict = weighted_iso_frac
         species_mass_frac_sol_dict.update(sol_dict)
-        
+
         # Remove species which have no solar mass data
         remove_keys = []
         for key,val in species_mass_frac_sol_dict.items():
             if val < 10e-30:
                 remove_keys.append(key)
-        
+
         for i in remove_keys:
             if i in species_mass_frac_sol_dict:
                 del species_mass_frac_sol_dict[i]
-        
+
         iso_mass_gal = dict(zip(self.history.isotopes, self.ymgal[cycle]))
         ele_dum=[]
         for iso,mass in iso_mass_gal.items(): # create a list of the elements
             ele = (iso.split('-',1)[0])       # from list of isotopes
             ele_dum.append(ele)
-        
+
         elements = np.unique(ele_dum)
         ele_mass_gal = np.zeros(len(elements))
         i=0
-        
+
         # add the mass contribution from each isotope to
         # make the total element mass
         for el in elements:
@@ -3160,18 +3162,18 @@ class omega( chem_evol ):
                 if el == iso.split('-', 1)[0]:
                     ele_mass_gal[i] += mass
             i+=1
-        
+
         # create a dictionary which has keys = element/isotope and
         # vals = mass of species
         ele_mass_gal_dict = dict(zip(elements, ele_mass_gal))
         species_mass_gal = iso_mass_gal
         species_mass_gal.update(ele_mass_gal_dict)
-        
+
         iso_mass_agb = dict(zip(self.history.isotopes, self.ymgal_agb[cycle]/sum(self.ymgal[cycle])))
-        
+
         ele_mass_agb = np.zeros(len(elements))
         i=0
-        
+
         for el in elements:
             for iso,mass in iso_mass_agb.items():
                 mass = float(mass)
@@ -3181,17 +3183,17 @@ class omega( chem_evol ):
         ele_mass_agb_dict = dict(zip(elements, ele_mass_agb))
         species_mass_agb = iso_mass_agb
         species_mass_agb.update(ele_mass_agb_dict)
-        
+
         # This dictionary contains the mass fraction contribution toward the total
         # by AGB's for each species
         species_frac_agb = {k: species_mass_agb[k] / species_mass_gal[k]
         for k in species_mass_agb if k in species_mass_gal}
-        
+
         iso_mass_massive = dict(zip(self.history.isotopes, self.ymgal_massive[cycle]/sum(self.ymgal[cycle])))
-        
+
         ele_mass_massive = np.zeros(len(elements))
         i=0
-        
+
         for el in elements:
             for iso,mass in iso_mass_massive.items():
                 mass = float(mass)
@@ -3201,17 +3203,17 @@ class omega( chem_evol ):
         ele_mass_massive_dict = dict(zip(elements, ele_mass_massive))
         species_mass_massive = iso_mass_massive
         species_mass_massive.update(ele_mass_massive_dict)
-        
+
         # This dictionary contains the mass fraction contribution toward the total
         # by SN1a's for each species
         species_frac_massive = {k: species_mass_massive[k] / species_mass_gal[k]
         for k in species_mass_massive if k in species_mass_gal}
-        
+
         iso_mass_1a = dict(zip(self.history.isotopes, self.ymgal_1a[cycle]/sum(self.ymgal[cycle])))
-        
+
         ele_mass_1a = np.zeros(len(elements))
         i=0
-        
+
         for el in elements:
             for iso,mass in iso_mass_1a.items():
                 mass = float(mass)
@@ -3221,33 +3223,33 @@ class omega( chem_evol ):
         ele_mass_1a_dict = dict(zip(elements, ele_mass_1a))
         species_mass_1a = iso_mass_1a
         species_mass_1a.update(ele_mass_1a_dict)
-        
+
         # This dictionary contains the mass fraction contribution toward the total
         # by SN1a's for each species
         species_frac_1a = {k: species_mass_1a[k] / species_mass_gal[k]
-        for k in species_mass_1a if k in species_mass_gal}
-        
+        for k in species_mass_1a if k in species_mass_gal}        
+
         map_str_dic = {
         "agb":species_mass_agb,
         "1a":species_mass_1a,
         "massive":species_mass_massive,
         }
-        
+
         source_proper_name = {
         "agb":'AGB',
         "1a":'SN1a',
         "massive":'Massive Stars',
         }
-        
+
         colors = ['blue', 'orange', 'grey','navy','green']
-        
+
         if species == ['all']:
             species = species_mass_frac_sol_dict.keys()
-        
+
         bar_bottom=[]
         for spec in species:
             bar_bottom.append(0)
-        
+
         h=0
         j=0
         labels=[]
@@ -3272,7 +3274,7 @@ class omega( chem_evol ):
         plt.yscale(yscale)
         plt.ylabel('$X/X_{\odot}$')
         plt.tick_params(right=True)
-        
+
 
     def plot_mass(self,fig=0,specie='C',source='all',norm=False,label='',shape='',marker='',color='',markevery=20,multiplot=False,return_x_y=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,show_legend=True):
 
