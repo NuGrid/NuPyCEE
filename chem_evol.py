@@ -1250,7 +1250,7 @@ class chem_evol(object):
         # Massive and AGB stars
         if len(self.table_radio) > 0:
             self.radio_massive_agb_on = True
-            self.ytables_radio = ry.read_nugrid_yields(os.path.join(nupy_path,\
+            self.ytables_radio = ry.read_yields_M_Z(os.path.join(nupy_path,\
                 self.table_radio), excludemass=self.exclude_masses,\
                 isotopes=self.radio_iso)
 
@@ -1258,22 +1258,22 @@ class chem_evol(object):
         sys.stdout.flush()
         if len(self.sn1a_table_radio) > 0:
             self.radio_sn1a_on = True
-            self.ytables_1a_radio = ry.read_yield_sn1a_tables( \
-                os.path.join(nupy_path, self.sn1a_table_radio), self.radio_iso)
+            self.ytables_1a_radio = ry.read_yields_Z( \
+                os.path.join(nupy_path, self.sn1a_table_radio), isotopes=self.radio_iso)
 
         # NS mergers
         if len(self.nsmerger_table_radio) > 0:
             self.radio_nsmerger_on = True
-            self.ytables_nsmerger_radio = ry.read_yield_sn1a_tables( \
-                os.path.join(nupy_path, self.nsmerger_table_radio), self.radio_iso)
+            self.ytables_nsmerger_radio = ry.read_yields_Z( \
+                os.path.join(nupy_path, self.nsmerger_table_radio), isotopes=self.radio_iso)
 
         # Delayed extra sources
         if self.nb_delayed_extra_radio > 0:
             self.ytables_delayed_extra_radio = []
             for i_syt in range(0,self.nb_delayed_extra_radio):
-              self.ytables_delayed_extra_radio.append(ry.read_yield_sn1a_tables( \
+              self.ytables_delayed_extra_radio.append(ry.read_yields_Z( \
               os.path.join(nupy_path, self.delayed_extra_yields_radio[i_syt]),\
-              self.radio_iso))
+              isotopes=self.radio_iso))
 
 
     ##############################################

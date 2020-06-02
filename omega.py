@@ -642,8 +642,8 @@ class omega( chem_evol ):
         if self.in_out_control or self.SF_law or self.DM_evolution:
             prim_comp_table = os.path.join('yield_tables', 'iniabu',\
                     'iniab_bb_walker91.txt')
-            self.prim_comp = ry.read_yield_sn1a_tables(os.path.join(nupy_path,\
-                    prim_comp_table), self.history.isotopes)
+            self.prim_comp = ry.read_yields_Z(os.path.join(nupy_path,\
+                    prim_comp_table), isotopes=self.history.isotopes)
 
         # In construction .. need to avoid altering default setups ..
         # Assume the baryonic ratio for the initial gas reservoir, if needed
