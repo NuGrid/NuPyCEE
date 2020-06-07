@@ -4437,9 +4437,9 @@ class chem_evol(object):
             else:
                 ratio = 0
 
-            self.sn2_numbers[i_cse] += round(nb_stars*ratio)
+            self.sn2_numbers[i_cse] += nb_stars*ratio
             if self.out_follows_E_rate:
-                self.ssp_nb_cc_sne[i_cse-i-1] += round(nb_stars*ratio)
+                self.ssp_nb_cc_sne[i_cse-i-1] += nb_stars*ratio
 
             # Sum the total number of stars born in the timestep
             # where the stars originally formed
