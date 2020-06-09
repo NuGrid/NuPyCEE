@@ -199,11 +199,11 @@ class read_yields( object ):
         '''
 
         # Mass- and metallicity-dependent model
-        if not M == None and not Z == None:
+        if M is not None and Z is not None:
             return '(M='+str(float(M))+',Z='+str(float(Z))+')'
 
         # Metallicity-dependent model
-        elif M == None:
+        elif M is None:
             return '(M=None,Z='+str(float(Z))+')'
 
 
@@ -265,7 +265,7 @@ class read_yields( object ):
 
         # Define whether the list of isotopes is provided
         iso_provided = True
-        if self.isotopes == None:
+        if self.isotopes is None:
             iso_provided = False
 
         # Define the properties of the table

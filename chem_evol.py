@@ -3680,7 +3680,7 @@ class chem_evol(object):
         Argument
         ========
 
-          i : Index of the current timestep
+          i : Index of the timestep after the current timestep
           f_esc_yields: Fraction of non-contributing stellar ejecta
           mass_sampled : Stars sampled in the IMF by an external program
           scale_cor : Envelope correction for the IMF
@@ -3700,7 +3700,8 @@ class chem_evol(object):
 
             # Calculate the mass fraction of each isotope in the gas
             # at the time the stellar population formed
-            self.X0_gas = self.ymgal[i] / sum(self.ymgal[i])
+            # Note: i-1 is the current timestep
+            self.X0_gas = self.ymgal[i-1] / sum(self.ymgal[i-1])
 
         # Select the adequate IMF properties
         if self.zmetal <= self.Z_trans:
@@ -4174,6 +4175,10 @@ class chem_evol(object):
 
                 # Correct the total yields to account for the
                 # initial composition of the stellar model
+                
+                #print("chem_evol")
+                #print("  ",M_ejected,sum(self.X0_gas), sum(self.X0_stellar), the_tot_yields)
+
                 the_tot_yields = np.maximum(the_tot_yields + \
                         (self.X0_gas - self.X0_stellar) * M_ejected, 0.0)
                 
