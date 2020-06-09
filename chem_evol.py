@@ -390,6 +390,14 @@ class chem_evol(object):
 
         Default value : 2.5e-02
 
+    yield_modifier : list of arrays --> [[iso, M, Z, type, modifier],[...]]
+        When used, modifies all isotopes yields for the given M and Z by
+        multiplying by a given factor (type="multiply") or replacing the
+        yield by a new value (type="replace"). Modifier will be either the
+        factor or value depending on type.
+
+        Default value : [] --> Deactivated
+
     Delayed extra source
     Adding source that requires delay-time distribution (DTD) functions
     -------------------------------------------------------------------
@@ -442,7 +450,7 @@ class chem_evol(object):
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0,\
              ini_alpha=True, is_sygma=False,\
              table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt',\
-             use_decay_module=False, f_network='isotopes_modified.prn', f_format=1,\
+             f_network='isotopes_modified.prn', f_format=1,\
              table_radio='', decay_file='', sn1a_table_radio='',\
              nsmerger_table_radio='',\
              hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
@@ -509,11 +517,15 @@ class chem_evol(object):
              inter_lifetime_points=np.array([]), inter_lifetime_points_tree=np.array([]),\
              nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
              inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
-             inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([])):
+             inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
+             yield_modifier=np.array([])):
 
         # Initialize the history class which keeps the simulation in memory
-        self.history = self.__history()
-        self.const = self.__const()
+        self.history = History()
+        self.const = Const()
+
+        # Define elements for ordering
+        self.__define_elements()
 
         # If we need to assume the current baryonic ratio ...
         if mgal < 0.0:
@@ -621,6 +633,10 @@ class chem_evol(object):
         self.yield_tables_dir = yield_tables_dir
         self.print_off = print_off
         self.use_net_yields_stable = use_net_yields_stable
+        self.input_yields = input_yields
+        self.yield_modifier = yield_modifier
+        self.is_sygma = is_sygma
+        self.iolevel = iolevel
 
         # Attributes associated with radioactive species
         self.table_radio = table_radio
@@ -642,11 +658,20 @@ class chem_evol(object):
         self.radio_nsmerger_on = False
         self.radio_refinement = radio_refinement
         self.test_clayton = test_clayton
-        self.use_decay_module = use_decay_module
         self.use_net_yields_radio = use_net_yields_radio
 
         # Number of coefficients for the interpolation routine
         self.nb_c_needed = 3
+
+        # Define the use of the decay_module and the decay_file
+        is_radio = not (len(self.table_radio) == 0 \
+                        and len(self.sn1a_table_radio) == 0 \
+                        and len(self.nsmerger_table_radio) == 0 \
+                        and self.nb_delayed_extra_radio == 0)
+        if is_radio and self.len_decay_file == 0:
+            self.use_decay_module = True
+        else:
+            self.use_decay_module = False
 
         # Initialize decay module
         if self.use_decay_module:
@@ -661,7 +686,7 @@ class chem_evol(object):
             self.__normalize_delayed_extra()
 
         # Normalization constants for the Kroupa IMF
-        if imf_type == 'kroupa':
+        if self.imf_type == 'kroupa':
             self.p0 = 1.0
             self.p1 = 0.08**(-0.3 + 1.3)
             self.p2 = 0.5**(-1.3 + 2.3)
@@ -702,11 +727,13 @@ class chem_evol(object):
                     self.history.timesteps[i_init]
 
         # Define the decay properties
-        if self.len_decay_file > 0:
+        if self.use_decay_module:
+            self.__read_isotopes_and_define_decay_info()
+        elif self.len_decay_file > 0:
             self.__define_decay_info()
 
         # If the yield tables have already been read previously ...
-        if input_yields:
+        if self.input_yields:
 
             # Assign the input yields and lifetimes
             self.history.isotopes = isotopes_in
@@ -746,7 +773,7 @@ class chem_evol(object):
             self.y_coef_Z_aM_ej = y_coef_Z_aM_ej
 
             # Assign the input yields for radioactive isotopes
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ytables_1a_radio = ytables_1a_radio_in
                 self.ytables_nsmerger_radio = ytables_nsmerger_radio_in
                 self.y_coef_M_radio = y_coef_M_radio
@@ -760,8 +787,47 @@ class chem_evol(object):
             self.__read_tables()
 
             # Read radioactive tables
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.__read_radio_tables()
+
+            # Modify the yields (ttrueman edit)
+            if len(self.yield_modifier) > 0:
+                iso = [i[0] for i in yield_modifier]
+                M = [i[1] for i in yield_modifier]
+                Z = [i[2] for i in yield_modifier]
+                modifier = [i[3] for i in yield_modifier]
+                val = [i[4] for i in yield_modifier]
+
+                for j,specie in enumerate(iso):
+                    if Z[j] not in self.Z_table or M[j] not in self.M_table:
+                        print('Z = %s or M_sun = %s is not in yield table'%(Z[j],M[j]))
+                        print('No modifications will be performed on %s'%iso[j],"\n")
+                    elif specie in self.history.isotopes:
+                        if modifier[j]  == "replace":
+                            self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
+                                    value=val[j])
+                        if modifier[j]  == "multiply":
+                            original = self.ytables.get(M=M[j],Z=Z[j],
+                                    specie=iso[j],quantity="yields")
+                            self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
+                                    value=original*val[j])
+                    elif self.len_decay_file > 0:
+                        if specie in self.radio_iso:
+                            if modifier[j]  == "replace":
+                                self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
+                                        value=val[j])
+                            if modifier[j]  == "multiply":
+                                original = self.ytables_radio.get(M=M[j],Z=Z[j],
+                                        specie=iso[j],quantity="yields")
+                                self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
+                                        value=original*val[j])
+                        else:
+                            print("ERROR 404: %s not found in list of isotopes"%specie,
+                                    "\n")
+                    else:
+                        print("ERROR 404: %s not found in list of isotopes"%specie,
+                                "\n")
+
 
             # Declare the interpolation coefficient arrays
             self.__declare_interpolation_arrays()
@@ -797,7 +863,7 @@ class chem_evol(object):
         # NOTE: This if statement also needs to be in SYGMA and OMEGA!
 
         # Initialisation of the composition of the gas reservoir
-        if is_sygma:
+        if self.is_sygma:
             ymgal = np.zeros(self.nb_isotopes)
             ymgal[0] = copy.deepcopy(self.mgal)
         else:
@@ -818,7 +884,7 @@ class chem_evol(object):
                 ymgal[0][i_ini] = self.ism_ini[i_ini]
 
         # If radioactive isotopes are used ..
-        if self.len_decay_file > 0:
+        if self.len_decay_file > 0 or self.use_decay_module:
 
             # Define initial radioactive gas composition
             ymgal_radio = np.zeros(self.nb_radio_iso)
@@ -828,7 +894,7 @@ class chem_evol(object):
             ymgal_1a_radio, ymgal_nsm_radio, \
             ymgal_delayed_extra_radio, mdot_massive_radio, mdot_agb_radio,\
             mdot_1a_radio, mdot_nsm_radio,\
-            mdot_delayed_extra_radio, dummy, dummy, dummy, dummy, dummy, \
+            mdot_delayed_extra_radio, dummy, dummy, dummy, dummy, \
             dummy, dummy, dummy = \
             self._get_storing_arrays(ymgal_radio, self.nb_radio_iso)
 
@@ -838,10 +904,11 @@ class chem_evol(object):
                     ymgal_radio[0][i_ini] = self.ism_ini_radio[i_ini]
 
             # Define indexes to make connection between unstable/stable isotopes
-            self.__define_unstab_stab_indexes()
+            if not self.use_decay_module:
+                self.__define_unstab_stab_indexes()
 
         # Output information
-        if iolevel >= 1:
+        if self.iolevel >= 1:
              print ('Number of timesteps: ', '{:.1E}'.format(len(timesteps)))
 
         # Create empty arrays if on the fast mode
@@ -899,7 +966,7 @@ class chem_evol(object):
         self.imf_mass_ranges_mtot = imf_mass_ranges_mtot
 
         # Attribute radioactive arrays and variables to the current object
-        if self.len_decay_file > 0:
+        if self.len_decay_file > 0 or self.use_decay_module:
             self.mdot_radio = mdot_radio
             self.ymgal_radio = ymgal_radio
             self.ymgal_massive_radio = ymgal_massive_radio
@@ -926,7 +993,7 @@ class chem_evol(object):
         # Set the initial time and metallicity
         # Hardcode the metallicity if Sygma, so it does not required 
         # a consistent iniabu file for all (unexpected) metallicities
-        if is_sygma:
+        if self.is_sygma:
             zmetal = copy.deepcopy(self.iniZ)
         else:
             zmetal = self._getmetallicity(0)
@@ -946,11 +1013,11 @@ class chem_evol(object):
         self.__get_elem_to_iso_main()
 
         # Get coefficients for the fraction of white dwarfs fit (2nd poly)
-        if not pre_calculate_SSPs:
+        if not self.pre_calculate_SSPs:
             self.__get_coef_wd_fit()
 
         # Output information
-        if iolevel > 0:
+        if self.iolevel > 0:
             print ('### Start with initial metallicity of ','{:.4E}'.format(zmetal))
             print ('###############################')
 
@@ -1179,13 +1246,13 @@ class chem_evol(object):
              #    self.need_to_quit = True
 
         # Use of radioactive isotopes
-        if self.len_decay_file > 0 and (len(self.table_radio) == 0 and \
-           len(self.sn1a_table_radio) == 0 and \
+        if (self.len_decay_file > 0 or self.use_decay_module) and \
+           (len(self.table_radio) == 0 and len(self.sn1a_table_radio) == 0 and \
            len(self.nsmerger_table_radio) == 0 and self.nb_delayed_extra_radio == 0):
             print ('Error -  At least one radioactive yields table must '+\
                   'be defined when using radioactive isotopes.')
             self.need_to_quit = True
-        elif self.len_decay_file > 0:
+        elif self.len_decay_file > 0 or self.use_decay_module:
             if self.yield_interp == 'wiersma':
                 print ('Error - Radioactive isotopes cannot be used with net yields .. for now.')
                 self.need_to_quit = True
@@ -1228,6 +1295,76 @@ class chem_evol(object):
         # Count the number of radioactive isotopes
         self.nb_radio_iso = len(self.decay_info)
         self.nb_new_radio_iso = len(self.decay_info)
+
+
+    ##############################################
+    #     Read isotopes and define decay info    #
+    ##############################################
+    def __read_isotopes_and_define_decay_info(self):
+
+        '''
+        This function reads the yield files and creates the decay_info
+        array from them to include all isotopes.
+
+        '''
+
+        allIsotopes = set()
+
+        # Massive and AGB stars
+        if len(self.table_radio) > 0:
+            path = os.path.join(nupy_path, self.table_radio)
+            self.__table_isotopes_in_set(allIsotopes, path)
+
+        # SNe Ia
+        if len(self.sn1a_table_radio) > 0:
+            path = os.path.join(nupy_path, self.sn1a_table_radio)
+            self.__table_isotopes_in_set(allIsotopes, path)
+
+        # NS mergers
+        if len(self.nsmerger_table_radio) > 0:
+            path = os.path.join(nupy_path, self.nsmerger_table_radio)
+            self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Delayed extra sources
+        if self.nb_delayed_extra_radio > 0:
+            self.ytables_delayed_extra_radio = []
+            for i_syt in range(0,self.nb_delayed_extra_radio):
+                path = os.path.join(nupy_path, self.delayed_extra_yields_radio[i_syt])
+                self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Declare the decay_info array
+        # decay_info[nb_radio_iso][0] --> Unstable isotope
+        # decay_info[nb_radio_iso][1] --> None
+        # decay_info[nb_radio_iso][2] --> None
+        self.decay_info = []
+        for isotope in allIsotopes:
+            self.decay_info.append([isotope, None, None])
+
+        # Count the number of radioactive isotopes
+        self.nb_radio_iso = len(self.decay_info)
+        self.nb_new_radio_iso = len(self.decay_info)
+
+
+    ##############################################
+    #  Read yield table to add isotopes in set   #
+    ##############################################
+    def __table_isotopes_in_set(self, allIsotopes, path):
+
+        '''
+        Simply read the isotopes in path and add them to the set "allIsotopes"
+
+        '''
+
+        # Open the file in path
+        with open(path, "r") as fread:
+            for line in fread:
+                # Make sure we are not taking a header
+                if line[0] == "H" or "Isotopes" in line:
+                    continue
+
+                # Retrieve the isotope name and add it to the set
+                isoName = line.split("&")[1].strip()
+                allIsotopes.add(isoName)
 
 
     ##############################################
@@ -1277,6 +1414,222 @@ class chem_evol(object):
 
 
     ##############################################
+    #  Read yield table to add isotopes in set   #
+    ##############################################
+    def __table_isotopes_in_set(self, allIsotopes, path):
+
+        '''
+        Simply read the isotopes in path and add them to the set "allIsotopes"
+
+        '''
+
+        # Open the file in path
+        with open(path, "r") as fread:
+            for line in fread:
+                # Make sure we are not taking a header
+                if line[0] == "H" or "Isotopes" in line:
+                    continue
+
+                # Retrieve the isotope name and add it to the set
+                isoName = line.split("&")[1].strip()
+                allIsotopes.add(isoName)
+
+
+    ##############################################
+    #      Select suitable path for path sent.   #
+    ##############################################
+    def __select_path(self, table_path):
+        '''
+        Take care of absolute paths
+
+        '''
+
+        if table_path[0] == '/':
+            return table_path
+        else:
+            return os.path.join(nupy_path, table_path)
+
+    ##############################################
+    #              Define Elements               #
+    ##############################################
+    def __define_elements(self):
+
+        '''
+
+        Define the dictionaries storing information about
+        chemical elements
+
+        '''
+
+        # Atomic number of elements
+        self.element_Z_number = dict()
+        self.element_Z_number["H"]  = 1
+        self.element_Z_number["He"] = 2
+        self.element_Z_number["Li"] = 3
+        self.element_Z_number["Be"] = 4
+        self.element_Z_number["B"]  = 5
+        self.element_Z_number["C"]  = 6
+        self.element_Z_number["N"]  = 7
+        self.element_Z_number["O"]  = 8
+        self.element_Z_number["F"]  = 9
+        self.element_Z_number["Ne"] = 10
+        self.element_Z_number["Na"] = 11
+        self.element_Z_number["Mg"] = 12
+        self.element_Z_number["Al"] = 13
+        self.element_Z_number["Si"] = 14
+        self.element_Z_number["P"]  = 15
+        self.element_Z_number["S"]  = 16
+        self.element_Z_number["Cl"] = 17
+        self.element_Z_number["Ar"] = 18
+        self.element_Z_number["K"]  = 19
+        self.element_Z_number["Ca"] = 20
+        self.element_Z_number["Sc"] = 21
+        self.element_Z_number["Ti"] = 22
+        self.element_Z_number["V"]  = 23
+        self.element_Z_number["Cr"] = 24
+        self.element_Z_number["Mn"] = 25
+        self.element_Z_number["Fe"] = 26
+        self.element_Z_number["Co"] = 27
+        self.element_Z_number["Ni"] = 28
+        self.element_Z_number["Cu"] = 29
+        self.element_Z_number["Zn"] = 30
+        self.element_Z_number["Ga"] = 31
+        self.element_Z_number["Ge"] = 32
+        self.element_Z_number["As"] = 33
+        self.element_Z_number["Se"] = 34
+        self.element_Z_number["Br"] = 35
+        self.element_Z_number["Kr"] = 36
+        self.element_Z_number["Rb"] = 37
+        self.element_Z_number["Sr"] = 38
+        self.element_Z_number["Y"]  = 39
+        self.element_Z_number["Zr"] = 40
+        self.element_Z_number["Nb"] = 41
+        self.element_Z_number["Mo"] = 42
+        self.element_Z_number["Tc"] = 43
+        self.element_Z_number["Ru"] = 44
+        self.element_Z_number["Rh"] = 45
+        self.element_Z_number["Pd"] = 46
+        self.element_Z_number["Ag"] = 47
+        self.element_Z_number["Cd"] = 48
+        self.element_Z_number["In"] = 49
+        self.element_Z_number["Sn"] = 50
+        self.element_Z_number["Sb"] = 51
+        self.element_Z_number["Te"] = 52
+        self.element_Z_number["I"]  = 53
+        self.element_Z_number["Xe"] = 54
+        self.element_Z_number["Cs"] = 55
+        self.element_Z_number["Ba"] = 56
+        self.element_Z_number["La"] = 57
+        self.element_Z_number["Ce"] = 58
+        self.element_Z_number["Pr"] = 59
+        self.element_Z_number["Nd"] = 60
+        self.element_Z_number["Pm"] = 61
+        self.element_Z_number["Sm"] = 62
+        self.element_Z_number["Eu"] = 63
+        self.element_Z_number["Gd"] = 64
+        self.element_Z_number["Tb"] = 65
+        self.element_Z_number["Dy"] = 66
+        self.element_Z_number["Ho"] = 67
+        self.element_Z_number["Er"] = 68
+        self.element_Z_number["Tm"] = 69
+        self.element_Z_number["Yb"] = 70
+        self.element_Z_number["Lu"] = 71
+        self.element_Z_number["Hf"] = 72
+        self.element_Z_number["Ta"] = 73
+        self.element_Z_number["W"]  = 74
+        self.element_Z_number["Re"] = 75
+        self.element_Z_number["Os"] = 76
+        self.element_Z_number["Ir"] = 77
+        self.element_Z_number["Pt"] = 78
+        self.element_Z_number["Au"] = 79
+        self.element_Z_number["Hg"] = 80
+        self.element_Z_number["Tl"] = 81
+        self.element_Z_number["Pb"] = 82
+        self.element_Z_number["Bi"] = 83
+        self.element_Z_number["Po"] = 84
+        self.element_Z_number["At"] = 85
+        self.element_Z_number["Rn"] = 86
+        self.element_Z_number["Fr"] = 87
+        self.element_Z_number["Ra"] = 88
+        self.element_Z_number["Ac"] = 89
+        self.element_Z_number["Th"] = 90
+        self.element_Z_number["Pa"] = 91
+        self.element_Z_number["U"]  = 92
+        self.element_Z_number["Np"] = 93
+        self.element_Z_number["Pu"] = 94
+        self.element_Z_number["Am"] = 95
+        self.element_Z_number["Cm"] = 96
+        self.element_Z_number["Bk"] = 97
+        self.element_Z_number["Cf"] = 98
+        self.element_Z_number["Es"] = 99
+        self.element_Z_number["Fm"] = 100
+        self.element_Z_number["Md"] = 101
+        self.element_Z_number["No"] = 102
+        self.element_Z_number["Lr"] = 103
+        self.element_Z_number["Rf"] = 104
+        self.element_Z_number["Db"] = 105
+        self.element_Z_number["Sg"] = 106
+        self.element_Z_number["Bh"] = 107
+        self.element_Z_number["Hs"] = 108
+        self.element_Z_number["Mt"] = 109
+        self.element_Z_number["Ds"] = 110
+        self.element_Z_number["Rg"] = 111
+        self.element_Z_number["Cn"] = 112
+        self.element_Z_number["Nh"] = 113
+        self.element_Z_number["Fl"] = 114
+        self.element_Z_number["Mc"] = 115
+        self.element_Z_number["Lv"] = 116
+        self.element_Z_number["Ts"] = 117
+        self.element_Z_number["Og"] = 118
+
+        # List of elements in order of apperance in the periodic table
+        self.elem_list_periodic_table = ["H", "He", "Li", "Be", "B", "C", "N", "O", \
+                "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", \
+                "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", \
+                "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", \
+                "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", \
+                "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", \
+                "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", \
+                "Bi", "Po", "At", "Rn" "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", \
+                "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", \
+                "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"]
+
+    ##############################################
+    #              Sort Isotope List             #
+    ##############################################
+    def __sort_isotope_list(self, iso_list):
+
+        '''
+
+        Sort list of isotopes by atomic number, then by mass number
+
+        '''
+
+        # Define the list of sorted isotopes
+        nb_iso_temp = len(iso_list)
+        iso_list_sorted = []
+
+        # For each element in the periodic table ..
+        for elem in self.elem_list_periodic_table:
+
+            # Collect mass numbers for the isotopes of that element
+            A_temp = []
+            for iso in iso_list:
+                split = iso.split("-")
+                if split[0] == elem:
+                    A_temp.append(split[1])
+
+            # Sort the mass number
+            A_temp = sorted(A_temp)
+
+            # Add the isotopes
+            for the_A in A_temp:
+                iso_list_sorted.append(elem+"-"+the_A)
+
+        # Return the sorted list
+        return iso_list_sorted
+
+    ##############################################
     #                 Read Tables                #
     ##############################################
     def __read_tables(self):
@@ -1286,38 +1639,63 @@ class chem_evol(object):
 
         '''
 
-        # Massive stars and AGB stars
-        if self.table[0] == '/':
-            self.ytables = ry.read_yields_M_Z(self.table)
-        else:
-            self.ytables = ry.read_yields_M_Z(\
-                os.path.join(nupy_path, self.table))
-
         # Get the list of isotopes
-        # The massive and AGB star yields set the list of isotopes
-        self.history.isotopes = copy.deepcopy(self.ytables.isotopes)
+        allIsotopes = set()
+
+        # Massive stars and AGB stars
+        path = self.__select_path(self.table)
+        self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Pop III massive stars
+        path = self.__select_path(self.pop3_table)
+        self.__table_isotopes_in_set(allIsotopes, path)
+        # SNe Ia
+        path = self.__select_path(self.sn1a_table)
+        self.__table_isotopes_in_set(allIsotopes, path)
+        # Neutron star mergers
+        path = self.__select_path(self.nsmerger_table)
+        self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Delayed-extra sources
+        if self.nb_delayed_extra > 0:
+          for i_syt in range(0,self.nb_delayed_extra):
+            path = self.__select_path(self.delayed_extra_yields[i_syt])
+            self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Extra yields (on top of massive and AGB yields)
+        if self.extra_source_on == True:
+            for ee in range(len(self.extra_source_table)):
+                path = self.__select_path(self.extra_source_table[ee])
+                self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Store the isotopes
+        isotope_list = list(allIsotopes)
+        self.history.isotopes = self.__sort_isotope_list(isotope_list)
         self.nb_isotopes = len(self.history.isotopes)
 
+        # Massive stars and AGB stars
+        path = self.__select_path(self.table)
+        self.ytables = ry.read_yields_M_Z(path, isotopes=self.history.isotopes)
+
         # PopIII massive stars
-        self.ytables_pop3 = ry.read_yields_M_Z( \
-            os.path.join(nupy_path, self.pop3_table), isotopes=self.history.isotopes)
+        path = self.__select_path(self.pop3_table)
+        self.ytables_pop3 = ry.read_yields_M_Z(path, isotopes=self.history.isotopes)
 
         # SNe Ia
-        #sys.stdout.flush()
-        self.ytables_1a = ry.read_yields_Z( \
-            os.path.join(nupy_path, self.sn1a_table), isotopes=self.history.isotopes)
+        path = self.__select_path(self.sn1a_table)
+        self.ytables_1a = ry.read_yields_Z(path, isotopes=self.history.isotopes)
 
         # Neutron star mergers
-        self.ytables_nsmerger = ry.read_yields_Z( \
-            os.path.join(nupy_path, self.nsmerger_table), isotopes=self.history.isotopes)
+        path = self.__select_path(self.nsmerger_table)
+        self.ytables_nsmerger = ry.read_yields_Z(path, isotopes=self.history.isotopes)
 
         # Delayed-extra sources
         if self.nb_delayed_extra > 0:
           self.ytables_delayed_extra = []
           for i_syt in range(0,self.nb_delayed_extra):
-            self.ytables_delayed_extra.append(ry.read_yields_Z( \
-            os.path.join(nupy_path, self.delayed_extra_yields[i_syt]),\
-            isotopes = self.history.isotopes))
+            path = self.__select_path(self.delayed_extra_yields[i_syt])
+            self.ytables_delayed_extra.append(ry.read_yields_Z(path, \
+                                                        isotopes=self.history.isotopes))
 
         # Extra yields (on top of massive and AGB yields)
         if self.extra_source_on == True:
@@ -1327,18 +1705,14 @@ class chem_evol(object):
             for ee in range(len(self.extra_source_table)):
 
                #if absolute path don't apply nupy_path
-               if self.extra_source_table[ee][0] == '/':
-                   self.ytables_extra.append( ry.read_yields_Z( \
-                        self.extra_source_table[ee], isotopes=self.history.isotopes))
-               else:
-                   self.ytables_extra.append( ry.read_yields_Z( \
-                     os.path.join(nupy_path, self.extra_source_table[ee]),\
-                     isotopes=self.history.isotopes))
+               path = self.__select_path(self.extra_source_table[ee])
+               self.ytables_extra.append(ry.read_yields_Z(path,\
+                                                    isotopes=self.history.isotopes))
 
         # Read stellar parameter. stellar_param
         if self.stellar_param_on:
-            table_param=ry.read_nugrid_parameter(os.path.join(nupy_path,\
-                    self.stellar_param_table))
+            path = self.__select_path(self.stellar_param_table)
+            table_param=ry.read_nugrid_parameter(path)
             self.table_param=table_param
 
         # Get the list of mass and metallicities found in the yields tables
@@ -1627,7 +2001,8 @@ class chem_evol(object):
 
         # Radioactive isotopes (non-zero metallicity)
         # ===========================================
-        if self.len_decay_file > 0 and len(self.table_radio) > 0:
+        if (self.len_decay_file > 0 or self.use_decay_module) and \
+           len(self.table_radio) > 0:
 
             # Declare the array containing the coefficients for
             # the yields interpolation between masses (a_M, b_M)
@@ -1673,7 +2048,7 @@ class chem_evol(object):
 
         # Sort the list of masses
         self.inter_M_points_pop3 = sorted(self.inter_M_points_pop3)
-        self.inter_M_points_pop3_tree = self._bin_tree(self.inter_M_points_pop3)
+        self.inter_M_points_pop3_tree = Bin_tree(self.inter_M_points_pop3)
 
         # Calculate the number of interpolation mass-points
         self.nb_inter_M_points_pop3 = len(self.inter_M_points_pop3)
@@ -1714,7 +2089,7 @@ class chem_evol(object):
 
         # Sort the list of masses
         self.inter_M_points = sorted(self.inter_M_points)
-        self.inter_M_points_tree = self._bin_tree(self.inter_M_points)
+        self.inter_M_points_tree = Bin_tree(self.inter_M_points)
 
         # Calculate the number of interpolation mass-points
         self.nb_inter_M_points = len(self.inter_M_points)
@@ -2847,7 +3222,7 @@ class chem_evol(object):
 
         # Sort the list to have lifetimes in increasing order
         self.inter_lifetime_points_pop3 = sorted(self.inter_lifetime_points_pop3)
-        self.inter_lifetime_points_pop3_tree = self._bin_tree(
+        self.inter_lifetime_points_pop3_tree = Bin_tree(
                 self.inter_lifetime_points_pop3)
 
 
@@ -2874,7 +3249,7 @@ class chem_evol(object):
 
         # Sort the list to have lifetimes in increasing order
         self.inter_lifetime_points = sorted(self.inter_lifetime_points)
-        self.inter_lifetime_points_tree = self._bin_tree(
+        self.inter_lifetime_points_tree = Bin_tree(
                 self.inter_lifetime_points)
 
 
@@ -3489,7 +3864,7 @@ class chem_evol(object):
 
             # Update a limited number of gas components
             self.ymgal[i] = f_lock_remain * self.ymgal[i-1]
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ymgal_radio[i] = f_lock_remain * self.ymgal_radio[i-1]
 
             # Keep track of the mass locked into stars
@@ -3510,9 +3885,9 @@ class chem_evol(object):
                     f_lock_remain * self.ymgal_delayed_extra[iiii][i-1]
 
             # Update all radioactive gas components
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ymgal_radio[i] = f_lock_remain * self.ymgal_radio[i-1]
-            if not self.use_decay_module:
+            if not self.use_decay_module and self.len_decay_file > 0:
                 if self.radio_massive_agb_on:
                     self.ymgal_massive_radio[i] = f_lock_remain * self.ymgal_massive_radio[i-1]
                     self.ymgal_agb_radio[i] = f_lock_remain * self.ymgal_agb_radio[i-1]
@@ -3545,7 +3920,7 @@ class chem_evol(object):
 
             # Pollute a limited number of gas components
             self.ymgal[i] += self.mdot[i-1]
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ymgal_radio[i][:self.nb_radio_iso] += self.mdot_radio[i-1]
 
         # If this is the normal chem_evol version ..
@@ -3780,10 +4155,13 @@ class chem_evol(object):
 
                         # Add yields in the stellar ejecta array.  We do this at
                         # each mass bin to distinguish between AGB and massive.
-                        self.__add_yields_in_mdot(nb_stars, the_yields, the_m_cen, i_cse, i)
+                        self.__add_yields_in_mdot(nb_stars, the_yields, \
+                                the_m_cen, i_cse, i, lower_mass = the_m_low, \
+                                upper_mass = the_m_upp)
 
                         # If there are radioactive isotopes
-                        if self.len_decay_file > 0 and len(self.table_radio) > 0:
+                        if (self.len_decay_file > 0 or self.use_decay_module) and \
+                           len(self.table_radio) > 0:
 
                             # Get the yields for the central stellar mass
                             the_yields = self.get_interp_yields(the_m_cen, \
@@ -4132,7 +4510,8 @@ class chem_evol(object):
     #            Add Yields in Mdot              #
     ##############################################
     def __add_yields_in_mdot(self, nb_stars, the_yields, the_m_cen, \
-                             i_cse, i, is_radio=False):
+                             i_cse, i, lower_mass = None, upper_mass = None, \
+                             is_radio=False):
 
         '''
         Add the IMF-weighted stellar yields in the ejecta "mdot" arrays.
@@ -4146,6 +4525,10 @@ class chem_evol(object):
           the_m_cen : Central stellar mass of the IMF bin
           i_cse : Index of the "future" timestep (see __calculate_stellar_ejecta)
           i : Index of the timestep where the stars originally formed
+          lower_mass: lower limit of the imf mass bin
+          upper_mass: upper limit of the imf mass bin
+              both the upper and lower limit must be provided to calculate the
+              fractional number of SNe before the imf cut-off
 
         '''
 
@@ -4175,10 +4558,6 @@ class chem_evol(object):
 
                 # Correct the total yields to account for the
                 # initial composition of the stellar model
-                
-                #print("chem_evol")
-                #print("  ",M_ejected,sum(self.X0_gas), sum(self.X0_stellar), the_tot_yields)
-
                 the_tot_yields = np.maximum(the_tot_yields + \
                         (self.X0_gas - self.X0_stellar) * M_ejected, 0.0)
                 
@@ -4192,11 +4571,23 @@ class chem_evol(object):
                 self.mdot_agb[i_cse] += the_tot_yields
 
             # Count the number of core-collapse SNe
-            if the_m_cen > self.transitionmass:
-                self.sn2_numbers[i_cse] += nb_stars
-                if self.out_follows_E_rate:
-                    self.ssp_nb_cc_sne[i_cse-i-1] += nb_stars
-#                    self.ssp_nb_cc_sne[i_cse-i+1] += nb_stars
+
+            # Calculate the fraction of imf above transitionmass
+            # But only if upper_mass and lower_mass are provided
+            if upper_mass is not None and lower_mass is not None:
+                if upper_mass > self.transitionmass:
+                    ratio = upper_mass - max(self.transitionmass, lower_mass)
+                    ratio /= upper_mass - lower_mass
+                else:
+                    ratio = 0
+            elif the_m_cen > self.transitionmass:
+                ratio = 1
+            else:
+                ratio = 0
+
+            self.sn2_numbers[i_cse] += nb_stars*ratio
+            if self.out_follows_E_rate:
+                self.ssp_nb_cc_sne[i_cse-i-1] += nb_stars*ratio
 
             # Sum the total number of stars born in the timestep
             # where the stars originally formed
@@ -5389,7 +5780,7 @@ class chem_evol(object):
         for i_extra in range(0,self.nb_delayed_extra):
 
             # Get the yields and metallicity indexes of the considered source
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 Z_extra, yextra_low, yextra_up, yextra_low_radio, \
                     yextra_up_radio, iZ_low, iZ_up = \
                         self.__get_YZ_delayed_extra(i_extra, return_radio=True)
@@ -5422,7 +5813,7 @@ class chem_evol(object):
               if timemax > tmin_extra:
 
                 # Get the total number of sources and yields (interpolated)
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     nb_sources_extra_tot, yields_extra_interp, yields_extra_interp_radio = \
                         self.__get_nb_y_interp(timemin, timemax, i_extra, iZ_low, iZ_up,\
                             yextra_low, yextra_up, Z_extra, yextra_low_radio=yextra_low_radio,\
@@ -5441,7 +5832,7 @@ class chem_evol(object):
                 self.mdot[j] = np.array(self.mdot[j]) + yields_extra_interp
 
                 # Add the radioactive contribution
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     self.mdot_delayed_extra_radio[i_extra][j] = \
                         np.array(self.mdot_delayed_extra_radio[i_extra][j]) + yields_extra_interp_radio
                     self.mdot_radio[j] = np.array(self.mdot_radio[j]) + yields_extra_interp_radio
@@ -7465,7 +7856,7 @@ class chem_evol(object):
                 # Add the ejecta
                 self.mdot[i_sim_low+j_ase] += \
                     self.ej_SSP_int[i_ssp] * time_frac[j_ase]
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     self.mdot_radio[i_sim_low+j_ase] += \
                         self.ej_SSP_int_radio[i_ssp] * time_frac[j_ase]
 
@@ -7493,13 +7884,13 @@ class chem_evol(object):
         # Use the lowest metallicity
         if self.zmetal <= self.Z_trans:
             self.ej_SSP_int = self.ej_SSP[0] * self.m_locked
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ej_SSP_int_radio = self.ej_SSP_radio[0] * self.m_locked
 
         # Use the highest metallicity
         elif self.zmetal >= self.Z_table_SSP[-1]:
             self.ej_SSP_int = self.ej_SSP[-1] * self.m_locked
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 self.ej_SSP_int_radio = self.ej_SSP_radio[-1] * self.m_locked
 
         # If the metallicity is between Z_trans and lowest non-zero Z_table ..
@@ -7508,7 +7899,7 @@ class chem_evol(object):
                 self.ej_SSP_int = self.ej_SSP[0] * self.m_locked
             else:
                 self.ej_SSP_int = self.ej_SSP[1] * self.m_locked
-            if self.len_decay_file > 0:
+            if self.len_decay_file > 0 or self.use_decay_module:
                 if self.Z_table_SSP[0] == self.Z_table_first_nzero:
                     self.ej_SSP_int_radio = self.ej_SSP_radio[0] * self.m_locked
                 else:
@@ -7534,7 +7925,7 @@ class chem_evol(object):
                 # Interpolate the isotopes
                 self.ej_SSP_int[j_ise] = (self.ej_SSP_coef[0][i_Z_low][j_ise] * \
                     log_Z_cur + self.ej_SSP_coef[1][i_Z_low][j_ise]) * self.m_locked
-                if self.len_decay_file > 0:
+                if self.len_decay_file > 0 or self.use_decay_module:
                     self.ej_SSP_int_radio[j_ise] = (\
                         self.ej_SSP_coef_radio[0][i_Z_low][j_ise] * log_Z_cur + \
                             self.ej_SSP_coef_radio[1][i_Z_low][j_ise]) * self.m_locked
@@ -7573,6 +7964,14 @@ class chem_evol(object):
         # Get the dimensions and catch non-numpy arrays
         try:
             dimensions = y_arr.ndim
+        except AttributeError:
+            raise Exception("The interpolation routine uses numpy arrays")
+        except:
+            raise
+
+        # Get the dimensions and catch non-numpy arrays
+        try:
+            dimensions = len(y_arr.shape)
         except AttributeError:
             raise Exception("The interpolation routine uses numpy arrays")
         except:
@@ -7670,195 +8069,195 @@ class chem_evol(object):
         return self.interpolation(x_arr, y_arr, xx, indx, interp_list, return_coefs=return_coefs)
 
 
-    ##############################################
-    #               History CLASS                #
-    ##############################################
-    class __history():
+##############################################
+#               History CLASS                #
+##############################################
+class History():
+
+    '''
+    Class tracking the evolution of composition, model parameter, etc.
+    Allows separation of tracking variables from original code.
+
+    '''
+
+    #############################
+    #        Constructor        #
+    #############################
+    def __init__(self):
 
         '''
-        Class tracking the evolution of composition, model parameter, etc.
-        Allows separation of tracking variables from original code.
-
-        '''
-
-        #############################
-        #        Constructor        #
-        #############################
-        def __init__(self):
-
-            '''
-            Initiate variables tracking.history
-
-            '''
-
-            self.age = []
-            self.sfr = []
-            self.gas_mass = []
-            self.metallicity = []
-            self.ism_iso_yield = []
-            self.ism_iso_yield_agb = []
-            self.ism_iso_yield_massive = []
-            self.ism_iso_yield_1a = []
-            self.ism_iso_yield_nsm = []
-            self.isotopes = []
-            self.elements = []
-            self.ism_elem_yield = []
-            self.ism_elem_yield_agb = []
-            self.ism_elem_yield_massive = []
-            self.ism_elem_yield_1a = []
-            self.ism_elem_yield_nsm = []
-            self.sn1a_numbers = []
-            self.nsm_numbers = []
-            self.sn2_numbers = []
-            self.t_m_bdys = []
-
-
-    ##############################################
-    #               Const CLASS                #
-    ##############################################
-    class __const():
-
-        '''
-        Holds the physical constants.
-        Please add further constants if required.
+        Initiate variables tracking.history
 
         '''
 
-        #############################
-        #        Constructor        #
-        #############################
-        def __init__(self):
+        self.age = []
+        self.sfr = []
+        self.gas_mass = []
+        self.metallicity = []
+        self.ism_iso_yield = []
+        self.ism_iso_yield_agb = []
+        self.ism_iso_yield_massive = []
+        self.ism_iso_yield_1a = []
+        self.ism_iso_yield_nsm = []
+        self.isotopes = []
+        self.elements = []
+        self.ism_elem_yield = []
+        self.ism_elem_yield_agb = []
+        self.ism_elem_yield_massive = []
+        self.ism_elem_yield_1a = []
+        self.ism_elem_yield_nsm = []
+        self.sn1a_numbers = []
+        self.nsm_numbers = []
+        self.sn2_numbers = []
+        self.t_m_bdys = []
 
-            '''
-            Initiate variables tracking.history
 
-            '''
+##############################################
+#               Const CLASS                #
+##############################################
+class Const():
 
+    '''
+    Holds the physical constants.
+    Please add further constants if required.
 
-            self.syr = 31536000 #seconds in a year
-            self.c= 2.99792458e10 #speed of light in vacuum (cm s^-1)
-            self.pi = 3.1415926535897932384626433832795029e0
-            self.planck_h  = 6.62606896e-27 # Planck's constant (erg s)
-            self.ev2erg = 1.602176487e-12 # electron volt (erg)
-            self.rsol = 6.9598e10 # solar radius (cm)
-            self.lsol = 3.8418e33 #erg/s
-            self.msol =  1.9892e33  # solar mass (g)
-            self.ggrav = 6.67428e-8 #(g^-1 cm^3 s^-2)
+    '''
 
-
-    ##############################################
-    #               BinTree CLASS                #
-    ##############################################
-    class _bin_tree():
+    #############################
+    #        Constructor        #
+    #############################
+    def __init__(self):
 
         '''
-        Class for the construction and search in a binary tree.
+        Initiate variables tracking.history
 
         '''
 
-        #############################
-        #        Constructor        #
-        #############################
-        def __init__(self, sorted_array):
 
-            '''
-            Initialize the balanced tree
+        self.syr = 31536000 #seconds in a year
+        self.c= 2.99792458e10 #speed of light in vacuum (cm s^-1)
+        self.pi = 3.1415926535897932384626433832795029e0
+        self.planck_h  = 6.62606896e-27 # Planck's constant (erg s)
+        self.ev2erg = 1.602176487e-12 # electron volt (erg)
+        self.rsol = 6.9598e10 # solar radius (cm)
+        self.lsol = 3.8418e33 #erg/s
+        self.msol =  1.9892e33  # solar mass (g)
+        self.ggrav = 6.67428e-8 #(g^-1 cm^3 s^-2)
 
-            '''
 
-            self.head = self._create_tree(sorted_array)
+##############################################
+#               BinTree CLASS                #
+##############################################
+class Bin_tree():
 
-        #############################
-        #        Tree creation      #
-        #############################
-        def _create_tree(self, sorted_array, index = 0):
-            '''
-            Create the tree itself
+    '''
+    Class for the construction and search in a binary tree.
 
-            '''
+    '''
 
-            # Sort edge cases
-            len_array = len(sorted_array)
-            if len_array == 0:
-                return None
-            elif len_array == 1:
-                return self._node(sorted_array[0], index)
+    #############################
+    #        Constructor        #
+    #############################
+    def __init__(self, sorted_array):
 
-            # Find middle value and index, introduce them
-            # and recursively create the children
-            mid_index = len_array//2
-            mid_value = sorted_array[mid_index]
-            new_node = self._node(mid_value, mid_index + index)
-            new_node.lchild = self._create_tree(sorted_array[0:mid_index], index)
-            new_node.rchild = self._create_tree(sorted_array[mid_index + 1:],
-                    mid_index + 1 + index)
+        '''
+        Initialize the balanced tree
 
-            return new_node
+        '''
 
-        #############################
-        #  Wraper Tree search left  #
-        #############################
-        def search_left(self, value):
-            '''
-            Wrapper for search_left
-            Search for the rightmost index lower or equal than value
+        self.head = self._create_tree(sorted_array)
 
-            '''
+    #############################
+    #        Tree creation      #
+    #############################
+    def _create_tree(self, sorted_array, index = 0):
+        '''
+        Create the tree itself
 
-            # Call function and be careful with lowest case
-            index = self._search_left_rec(value, self.head)
+        '''
+
+        # Sort edge cases
+        len_array = len(sorted_array)
+        if len_array == 0:
+            return None
+        elif len_array == 1:
+            return Node(sorted_array[0], index)
+
+        # Find middle value and index, introduce them
+        # and recursively create the children
+        mid_index = len_array//2
+        mid_value = sorted_array[mid_index]
+        new_node = Node(mid_value, mid_index + index)
+        new_node.lchild = self._create_tree(sorted_array[0:mid_index], index)
+        new_node.rchild = self._create_tree(sorted_array[mid_index + 1:],
+                mid_index + 1 + index)
+
+        return new_node
+
+    #############################
+    #  Wraper Tree search left  #
+    #############################
+    def search_left(self, value):
+        '''
+        Wrapper for search_left
+        Search for the rightmost index lower or equal than value
+
+        '''
+
+        # Call function and be careful with lowest case
+        index = self._search_left_rec(value, self.head)
+        if index is None:
+            return 0
+
+        return index
+
+    #############################
+    #        Tree search left   #
+    #############################
+    def _search_left_rec(self, value, node):
+        '''
+        Search for the rightmost index lower or equal than value
+
+        '''
+
+        # Sort edge case
+        if node is None:
+            return None
+
+        # If to the left, we can always return the index, even if None.
+        # If to the right and none, we return current index, as it will
+        # be the closest to value from the left
+        if value < node.value:
+            return self._search_left_rec(value, node.lchild)
+        else:
+            index = self._search_left_rec(value, node.rchild)
             if index is None:
-                return 0
+                return node.index
 
             return index
 
-        #############################
-        #        Tree search left   #
-        #############################
-        def _search_left_rec(self, value, node):
-            '''
-            Search for the rightmost index lower or equal than value
 
-            '''
+##############################################
+#               Node CLASS                   #
+##############################################
+class Node():
 
-            # Sort edge case
-            if node is None:
-                return None
+    '''
+    Class for the bin_tree nodes.
 
-            # If to the left, we can always return the index, even if None.
-            # If to the right and none, we return current index, as it will
-            # be the closest to value from the left
-            if value < node.value:
-                return self._search_left_rec(value, node.lchild)
-            else:
-                index = self._search_left_rec(value, node.rchild)
-                if index is None:
-                    return node.index
+    '''
 
-                return index
+    #############################
+    #        Constructor        #
+    #############################
+    def __init__(self, value, index):
 
+        '''
+        Initialize the constructor
 
-        ##############################################
-        #               Node CLASS                   #
-        ##############################################
-        class _node():
+        '''
 
-            '''
-            Class for the bin_tree nodes.
-
-            '''
-
-            #############################
-            #        Constructor        #
-            #############################
-            def __init__(self, value, index):
-
-                '''
-                Initialize the constructor
-
-                '''
-
-                self.value = value
-                self.index = index
-                self.lchild = None
-                self.rchild = None
+        self.value = value
+        self.index = index
+        self.lchild = None
+        self.rchild = None

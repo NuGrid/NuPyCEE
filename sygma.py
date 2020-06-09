@@ -141,7 +141,7 @@ class sygma( chem_evol ):
                  extra_source_exclude_Z=[[]], \
                  total_ejecta_interp=True, yield_tables_dir='',\
                  high_mass_extrapolation='copy',\
-                 radio_refinement=100, use_decay_module=False,\
+                 radio_refinement=100,\
                  use_net_yields_stable=False, use_net_yields_radio=False,\
                  f_network='isotopes_modified.prn', f_format=1,\
                  pop3_table='yield_tables/popIII_heger10.txt', \
@@ -167,7 +167,8 @@ class sygma( chem_evol ):
                  delayed_extra_yields_radio=np.array([]), ism_ini_radio=np.array([]), \
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
-                 ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([])):
+                 ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),
+                 yield_modifier=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, is_sygma=True, imf_type=imf_type, alphaimf=alphaimf, \
@@ -222,9 +223,9 @@ class sygma( chem_evol ):
                  ytables_1a_radio_in=ytables_1a_radio_in, ism_ini_radio=ism_ini_radio,\
                  ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
                  radio_refinement=radio_refinement,\
-                 use_decay_module=use_decay_module,\
                  f_network=f_network, f_format=f_format,\
-                 high_mass_extrapolation=high_mass_extrapolation)
+                 high_mass_extrapolation=high_mass_extrapolation,
+                 yield_modifier=yield_modifier)
 
         if self.need_to_quit:
             return
