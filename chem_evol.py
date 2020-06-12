@@ -5217,7 +5217,7 @@ class chem_evol(object):
         '''
 
         # Get NS merger yields
-        tables_Z = self.ytables_nsmerger.metallicities
+        tables_Z = self.ytables_nsmerger.Z_list
         for tz in tables_Z:
             if self.zmetal > tz:
                 yieldsnsm = self.ytables_nsmerger.get(Z=tz, quantity='Yields', \
@@ -5230,7 +5230,7 @@ class chem_evol(object):
 
         # Get NS merger radioactive yields
         if self.radio_nsmerger_on:
-            tables_Z_radio = self.ytables_nsmerger_radio.metallicities
+            tables_Z_radio = self.ytables_nsmerger_radio.Z_list
             for tz in tables_Z_radio:
                 if self.zmetal > tz:
                     yieldsnsm_radio = \
@@ -5855,7 +5855,7 @@ class chem_evol(object):
         '''
 
         # Get the number of metallicities considered source (in decreasing order)
-        Z_extra =  self.ytables_delayed_extra[i_extra].metallicities
+        Z_extra =  self.ytables_delayed_extra[i_extra].Z_list
         nb_Z_extra = len(Z_extra)
 
         # Set the Z indexes if only one metallicity is provided
