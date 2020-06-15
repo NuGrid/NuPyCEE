@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from setuptools import setup, find_packages
+import setuptools
+from numpy.distutils.core import setup, Extension
 from codecs import open
 from os import path, system
 from re import compile as re_compile
-import glob
 
 __version__="3.0"
 
@@ -17,28 +17,30 @@ def read(filename):
         contents = fp.read()
     return contents
 
+decay_mod = Extension(name="NuPyCEE.decay_module", sources=["NuPyCEE/decay_module.f95",])
+
 # package_data and data_files behave similarly,
 # but data_files requires pip and cannot be used with setuptools
 setup(
     name="NuPyCEE",
     packages=['NuPyCEE'],
-    package_data={"NuPyCEE":[
- 'burst.txt',
- 'decay_data/*',
- 'decay_data/fission/*',
- 'evol_tables/*',
- 'm_dm_evolution/*',
- 'yield_tables/*',
- 'yield_tables/other/*',
- 'yield_tables/iniabu/*',
- 'stellab_data/*',
- 'stellab_data/lmc_data/*',
- 'stellab_data/solar_normalization/*',
- 'stellab_data/carina_data/*',
- 'stellab_data/fornax_data/*',
- 'stellab_data/milky_way_data/*',
- 'stellab_data/sculptor_data/*'
-]},
+    package_data={"NuPyCEE":['burst.txt',
+                             'decay_data/*',
+                             'decay_data/fission/*',
+                             'evol_tables/*',
+                             'm_dm_evolution/*',
+                             'yield_tables/*',
+                             'yield_tables/other/*',
+                             'yield_tables/iniabu/*',
+                             'stellab_data/*',
+                             'stellab_data/lmc_data/*',
+                             'stellab_data/solar_normalization/*',
+                             'stellab_data/carina_data/*',
+                             'stellab_data/fornax_data/*',
+                             'stellab_data/milky_way_data/*',
+                             'stellab_data/sculptor_data/*'
+                            ]},
+    ext_modules=[decay_mod],
     version=__version__,
     author="Benoit Cote",
     #author_email="",  # <-- Direct complaints to this address.
