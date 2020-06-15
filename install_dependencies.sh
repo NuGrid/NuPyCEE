@@ -42,5 +42,5 @@ pip install h5py
 
 #To start the interactive ipython session:
 
-ipython --pylab --profile=numpy
+#ipython --pylab --profile=numpy
 

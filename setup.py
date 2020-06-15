@@ -19,14 +19,26 @@ def read(filename):
 
 # package_data and data_files behave similarly,
 # but data_files requires pip and cannot be used with setuptools
-data = list(glob.glob('NuPyCEE/data/**/', recursive=True))
-for i,item in enumerate(data):
-    data[i] = item[8:] + '*'
-
 setup(
     name="NuPyCEE",
     packages=['NuPyCEE'],
-    package_data={"NuPyCEE":data},
+    package_data={"NuPyCEE":[
+ 'burst.txt',
+ 'decay_data/*',
+ 'decay_data/fission/*',
+ 'evol_tables/*',
+ 'm_dm_evolution/*',
+ 'yield_tables/*',
+ 'yield_tables/other/*',
+ 'yield_tables/iniabu/*',
+ 'stellab_data/*',
+ 'stellab_data/lmc_data/*',
+ 'stellab_data/solar_normalization/*',
+ 'stellab_data/carina_data/*',
+ 'stellab_data/fornax_data/*',
+ 'stellab_data/milky_way_data/*',
+ 'stellab_data/sculptor_data/*'
+]},
     version=__version__,
     author="Benoit Cote",
     #author_email="",  # <-- Direct complaints to this address.
@@ -46,5 +58,13 @@ setup(
     keywords="astronomy",
     install_requires=[
         "numpy",
+        "ipython",
+        "matplotlib",
+        "scipy",
+        "jupyter",
+        "pysph",
+        "astropy",
+        "nugridpy",
+        "h5py"
         ],
 )
