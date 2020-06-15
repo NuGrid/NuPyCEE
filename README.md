@@ -23,15 +23,8 @@ This is a code repository containing the simple stellar population code SYGMA (S
 
 
 ### Installation Instructions
-* Run `python setup.py install`
+* Run `python setup.py install`. The Fortran-based `decay_module` will be built using numpy's `f2py` as part of this process.
 * You can import the individual models with:
 	* `from NuPyCEE import omega`
 	* `from NuPyCEE import sygma`
 	* `from NuPyCEE import stellab`
-
-
-### Installation of the Decay Module for Using Radioactive Isotopes
-
-* In the NuPyCEE folder, type the following
-	* `f2py -c decay_module.f95 -m decay_module`
-	* **Note**: Use the f2py version that will be compatible with your Python version.
