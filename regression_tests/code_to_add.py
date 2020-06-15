@@ -18,7 +18,7 @@ def modify_code(filename):
 	done=False
 	for k in range(len(lines2)):
 		line=lines2[k]
-		print 'line'
+		print('line')
 		if 'nbagg' in line:
 			line=line.replace('nbagg','inline')
 		if (('cells' in line) and (not done)):

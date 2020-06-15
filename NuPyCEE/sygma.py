@@ -41,7 +41,7 @@ Usage
 
 Simple run example:
 
->>> import sygma as s
+>>> from NuPyCEE import sygma as s
 
 Get help with
 
@@ -90,12 +90,9 @@ For example with artificial yields of only H-1, you can try
 # Import standard python packages
 import os
 
-# Define where is the working directory
-# This is where the NuPyCEE code will be extracted
-nupy_path = os.path.dirname(os.path.realpath(__file__))
-
 # Import NuPyCEE codes
 from NuPyCEE.chem_evol import *
+from NuPyCEE import nupy_path
 
 class sygma( chem_evol ):
 
