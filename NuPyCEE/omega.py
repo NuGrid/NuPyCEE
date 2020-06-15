@@ -59,7 +59,7 @@ Usage
 
 Import the module:
 
->>> import omega as o
+>>> from NuPyCEE import omega as o
 
 Get help:
 
@@ -87,12 +87,9 @@ import math
 import random
 import os
 
-# Define where is the working directory
-# This is where the NuPyCEE code will be extracted
-nupy_path = os.path.dirname(os.path.realpath(__file__))
-
 # Import NuPyCEE codes
 import NuPyCEE.sygma as sygma
+from NuPyCEE import nupy_path
 from NuPyCEE.chem_evol import *
 
 class omega( chem_evol ):

@@ -67,12 +67,9 @@ from pylab import polyfit
 from scipy.integrate import quad
 from scipy.integrate import dblquad
 
-# Define where is the working directory
-nupy_path = os.path.dirname(os.path.realpath(__file__))
-
 # Import NuPyCEE codes
 import NuPyCEE.read_yields as ry
-
+from NuPyCEE import nupy_path
 
 class chem_evol(object):
 

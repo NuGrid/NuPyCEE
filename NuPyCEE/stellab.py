@@ -23,7 +23,7 @@ Usage
 
 Import the module:
 
->>> import stellab
+>>> from NuPyCEE import stellab
 
 Load the data:
 
@@ -43,12 +43,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 import os
 
-# Define where is the working directory
-# This is where the NuPyCEE code will be extracted
-nupy_path = os.path.dirname(os.path.realpath(__file__))
-
 # Import NuPyCEE codes
 import NuPyCEE.read_yields as ry
+from NuPyCEE import nupy_path
 
 class stellab():
 
