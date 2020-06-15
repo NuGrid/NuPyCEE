@@ -262,24 +262,24 @@ class omega( chem_evol ):
                  tend=13e9, mgal=1.0e10, transitionmass=8.0, iolevel=0, \
                  ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=-1,\
                  high_mass_extrapolation='copy',\
-                 table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
+                 table='data/yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  yield_tables_dir='',\
                  f_network='isotopes_modified.prn', f_format=1,\
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  nsmerger_table_radio='',\
                  use_net_yields_stable=False, use_net_yields_radio=False,\
                  hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[],\
-                 sn1a_table='yield_tables/sn1a_i99_W7.txt',\
+                 sn1a_table='data/yield_tables/sn1a_i99_W7.txt',\
                  ns_merger_on=False, f_binary=1.0, f_merger=0.0008,\
                  t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, \
-                 nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
+                 nsmerger_table = 'data/yield_tables/r_process_arnould_2007.txt', \
                  iniabu_table='', extra_source_on=False, \
-                 extra_source_table=['yield_tables/extra_source.txt'], \
+                 extra_source_table=['data/yield_tables/extra_source.txt'], \
                  f_extra_source=[1.0], pre_calculate_SSPs=False, \
                  extra_source_mass_range=[[8,30]], \
                  total_ejecta_interp=True, radio_refinement=100, \
                  extra_source_exclude_Z=[[]], beta_crit=1.0, \
-                 pop3_table='yield_tables/popIII_heger10.txt', \
+                 pop3_table='data/yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  imf_pop3_char_mass=40.0, \
                  starbursts=[], beta_pow=-1.0, gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
@@ -643,7 +643,7 @@ class omega( chem_evol ):
 
         # Read the primordial composition of the inflow gas
         if self.in_out_control or self.SF_law or self.DM_evolution:
-            prim_comp_table = os.path.join('yield_tables', 'iniabu',\
+            prim_comp_table = os.path.join('data/yield_tables', 'iniabu',\
                     'iniab_bb_walker91.txt')
             self.prim_comp = ry.read_yields_Z(os.path.join(nupy_path,\
                     prim_comp_table), isotopes=self.history.isotopes)
@@ -1008,11 +1008,11 @@ class omega( chem_evol ):
 
             # Read Chiappini et al. (2001) SFH
             if self.galaxy == 'milky_way':
-                self.__copy_sfr_input('stellab_data/milky_way_data/sfh_mw_cmr01.txt')
+                self.__copy_sfr_input('data/stellab_data/milky_way_data/sfh_mw_cmr01.txt')
 
             # Read constant SFH
             else:
-                self.__copy_sfr_input('stellab_data/milky_way_data/sfh_cte.txt')
+                self.__copy_sfr_input('data/stellab_data/milky_way_data/sfh_cte.txt')
 
         # Sculptor dwarf galaxy ...
         elif self.galaxy == 'sculptor':
@@ -1023,7 +1023,7 @@ class omega( chem_evol ):
             self.stellar_mass_0 = self.stellar_mass_0 * (1-self.mass_frac_SSP)
 
             # Read deBoer et al. (2012) SFH
-            self.__copy_sfr_input('stellab_data/sculptor_data/sfh_deBoer12.txt')
+            self.__copy_sfr_input('data/stellab_data/sculptor_data/sfh_deBoer12.txt')
 
         # Fornax dwarf galaxy ...
         elif self.galaxy == 'fornax':
@@ -1034,7 +1034,7 @@ class omega( chem_evol ):
             self.stellar_mass_0 = self.stellar_mass_0 * (1-self.mass_frac_SSP)
 
             # Read deBoer et al. (2012) SFH
-            self.__copy_sfr_input('stellab_data/fornax_data/sfh_fornax_deboer_et_al_2012.txt')
+            self.__copy_sfr_input('data/stellab_data/fornax_data/sfh_fornax_deboer_et_al_2012.txt')
 
         # Carina dwarf galaxy ...
         elif self.galaxy == 'carina':
@@ -1045,7 +1045,7 @@ class omega( chem_evol ):
             self.stellar_mass_0 = self.stellar_mass_0 * (1-self.mass_frac_SSP)
 
             # Read deBoer et al. (2014) SFH
-            self.__copy_sfr_input('stellab_data/carina_data/sfh_deBoer14.txt')
+            self.__copy_sfr_input('data/stellab_data/carina_data/sfh_deBoer14.txt')
 
         # Interpolate the last timestep
         if len(self.sfr_input) > 3:
@@ -1592,7 +1592,7 @@ class omega( chem_evol ):
                   iniabu_t = ''
                   hardsetZ2 = self.hardsetZ
               else:
-                  iniabu_t='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+                  iniabu_t='data/yield_tables/iniabu/iniab2.0E-02GN93.ppn'
                   hardsetZ2 = self.Z_table_SSP[i_ras]
 
               # Run a SYGMA simulation (1 Msun SSP)
@@ -1977,7 +1977,7 @@ class omega( chem_evol ):
         '''
 
         # Open the file containing the coefficient of the 3rd order polynomial fit
-        with open(os.path.join(nupy_path, "m_dm_evolution", "poly3_fits.txt"),\
+        with open(os.path.join(nupy_path, "data/m_dm_evolution", "poly3_fits.txt"),\
                 'r') as m_dm_file:
 
             # Read the first line
@@ -3060,13 +3060,13 @@ class omega( chem_evol ):
         import matplotlib.pyplot as plt
         from matplotlib.patches import Patch
 
-        f = open(os.path.join(nupy_path, 'stellab_data',\
+        f = open(os.path.join(nupy_path, 'data/stellab_data',\
             'solar_normalization', str(solar_ref) + '.txt'), 'r')
 
-        g = open(os.path.join(nupy_path, 'stellab_data',\
+        g = open(os.path.join(nupy_path, 'data/stellab_data',\
         'solar_normalization', 'element_mass.txt'), 'r')
 
-        h = open(os.path.join(nupy_path, 'stellab_data',\
+        h = open(os.path.join(nupy_path, 'data/stellab_data',\
         'solar_normalization', 'Asplund_et_al_2009_iso.txt'), 'r')
 
         lines=f.readlines()
@@ -3649,7 +3649,7 @@ class omega( chem_evol ):
         if len(solar_ab) > 0:
             iniabu=ry.iniabu(os.path.join(nupy_path, solar_ab))
         else:
-            iniabu=ry.iniabu(os.path.join(nupy_path, 'yield_tables', 'iniabu',\
+            iniabu=ry.iniabu(os.path.join(nupy_path, 'data/yield_tables', 'iniabu',\
                     'iniab2.0E-02GN93.ppn'))
 
         # If a solar normalization is used ..
@@ -3686,7 +3686,7 @@ class omega( chem_evol ):
             sol_values_ab = []
 
             # Open the data file
-            with open(os.path.join(nupy_path, 'stellab_data',\
+            with open(os.path.join(nupy_path, 'data/stellab_data',\
                     'solar_normalization', solar_norm + '.txt'), 'r') as data_file:
 
                 # For every line (for each element) ...
@@ -4999,8 +4999,8 @@ class omega( chem_evol ):
     ###################################################
     def plot_iso_ratio(self,return_x_y=False, grain_notation=False,
         xaxis='age',yaxis='C-12/C-13',\
-        solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
-        solar_iso='stellab_data/solar_normalization/Asplund_et_al_2009_iso.txt',\
+        solar_ab='data/yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
+        solar_iso='data/stellab_data/solar_normalization/Asplund_et_al_2009_iso.txt',\
         fig=18,source='all',marker='',shape='',\
         color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
         bspace=0.15,labelsize=15,legend_fontsize=14):
@@ -5308,7 +5308,7 @@ class omega( chem_evol ):
     #                  Plot MDF                  #
     ##############################################
     def plot_mdf(self, fig=19, return_x_y=False, axis_mdf = '[Fe/H]',\
-        dx = 0.05, solar_ab='yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
+        dx = 0.05, solar_ab='data/yield_tables/iniabu/iniab2.0E-02GN93.ppn',\
         sigma_gauss=0.0, nb_sigma = 3.0,\
         marker='',shape='', norm=True,\
         color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,\
@@ -5469,7 +5469,7 @@ class omega( chem_evol ):
     #                 Get [X/Y]                  #
     ##############################################
     def __get_XY(self, axis_mdf = '[Fe/H]', \
-             solar_ab=os.path.join('yield_tables', 'iniabu',\
+             solar_ab=os.path.join('data/yield_tables', 'iniabu',\
              'iniab2.0E-02GN93.ppn')):
 
         # Access solar abundance
@@ -5562,7 +5562,7 @@ class omega( chem_evol ):
         def plot_abun(self, fig=20, age=9.2e9,\
         solar_norm=False, iso_on=False,\
         list_elem=[], list_iso=[],return_x_y=False, over_plot_solar=False,\
-        solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn', species_labels=True,f_y_annotate=0.9,\
+        solar_ab_m='data/yield_tables/iniabu/iniab2.0E-02GN93.ppn', species_labels=True,f_y_annotate=0.9,\
         marker='o',marker_s='^',shape='',shape_s='-', color='b', color_s='r', label='Prediction',label_s='solar',fsize=[10,4.5],\
         fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,\
         legend_fontsize=14, markersize=5):
@@ -5604,7 +5604,7 @@ class omega( chem_evol ):
              Note: This option is desactivated if solar_norm=True
         solar_ab_m : string
              Path of the solar normalization containing the mass fraction of each isotope
-             Default: solar_ab_m='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+             Default: solar_ab_m='data/yield_tables/iniabu/iniab2.0E-02GN93.ppn'
         f_y_annotate : float (between 0 and 1)
              Fraction of the Y axis where the name of the element will be shown
              Default: f_y_annotate=0.9

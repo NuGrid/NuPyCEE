@@ -268,22 +268,22 @@ class chem_evol(object):
     table : string
         Path pointing toward the stellar yield tables for massive and AGB stars.
 
-        Default value : 'yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt' (NuGrid)
+        Default value : 'data/yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt' (NuGrid)
 
     sn1a_table : string
         Path pointing toward the stellar yield table for SNe Ia.
 
-        Default value : 'yield_tables/sn1a_t86.txt' (Tielemann et al. 1986)
+        Default value : 'data/yield_tables/sn1a_t86.txt' (Tielemann et al. 1986)
 
     nsmerger_table : string
         Path pointing toward the r-process yield tables for neutron star mergers
 
-        Default value : 'yield_tables/r_process_rosswog_2014.txt' (Rosswog et al. 2013)
+        Default value : 'data/yield_tables/r_process_rosswog_2014.txt' (Rosswog et al. 2013)
 
     iniabu_table : string
         Path pointing toward the table of initial abuncances in mass fraction.
 
-        Default value : 'yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+        Default value : 'data/yield_tables/iniabu/iniab2.0E-02GN93.ppn'
 
     yield_tables_dir : string
         Path to a custom directory that includes yields.
@@ -326,7 +326,7 @@ class chem_evol(object):
         Path pointoing toward the table hosting the evolution of stellar parameter
         derived from stellar evolution calculations.
 
-        Default table : 'yield_tables/isotope_yield_table_MESA_only_param.txt'
+        Default table : 'data/yield_tables/isotope_yield_table_MESA_only_param.txt'
 
     iolevel : int
         Specifies the amount of output for testing purposes (up to 3).
@@ -449,22 +449,22 @@ class chem_evol(object):
              sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30,\
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0,\
              ini_alpha=True, is_sygma=False,\
-             table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt',\
+             table='data/yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt',\
              f_network='isotopes_modified.prn', f_format=1,\
              table_radio='', decay_file='', sn1a_table_radio='',\
              nsmerger_table_radio='',\
-             hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
+             hardsetZ=-1, sn1a_on=True, sn1a_table='data/yield_tables/sn1a_t86.txt',\
              sn1a_energy=1e51, ns_merger_on=False,\
              f_binary=1.0, f_merger=0.0008, t_merger_max=1.3e10,\
              m_ej_nsm = 2.5e-02, nb_nsm_per_m=-1.0,\
              t_nsm_coal=-1.0, nsm_dtd_power=[],\
-             nsmerger_table = 'yield_tables/r_process_arnould_2007.txt',\
+             nsmerger_table = 'data/yield_tables/r_process_arnould_2007.txt',\
              iniabu_table='', extra_source_on=False,\
-             extra_source_table=['yield_tables/extra_source.txt'],\
+             extra_source_table=['data/yield_tables/extra_source.txt'],\
              f_extra_source=[1.0], pre_calculate_SSPs=False,\
              extra_source_mass_range=[[8,30]],\
              extra_source_exclude_Z=[[]], radio_refinement=100,\
-             pop3_table='yield_tables/popIII_heger10.txt',\
+             pop3_table='data/yield_tables/popIII_heger10.txt',\
              imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30],\
              imf_pop3_char_mass=40.0,\
              use_net_yields_stable=False, use_net_yields_radio=False, \
@@ -477,7 +477,7 @@ class chem_evol(object):
              print_off=False, yield_tables_dir='',\
              total_ejecta_interp=True, tau_ferrini=False,\
              input_yields=False,t_merge=-1.0,stellar_param_on=False,\
-             stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',\
+             stellar_param_table='data/yield_tables/stellar_feedback_nugrid_MESAonly.txt',\
              popIII_info_fast=True, out_follows_E_rate=False,\
              t_dtd_poly_split=-1.0, delayed_extra_log=False,\
              delayed_extra_yields_log_int=False,\
@@ -3367,7 +3367,7 @@ class chem_evol(object):
             else:
 
                 # Get the primordial composition of Walker et al. (1991)
-                iniabu_table = 'yield_tables/iniabu/iniab_bb_walker91.txt'
+                iniabu_table = 'data/yield_tables/iniabu/iniab_bb_walker91.txt'
                 ytables_bb = ry.read_yields_Z( \
                     os.path.join(nupy_path, iniabu_table), isotopes=self.history.isotopes)
 
@@ -3403,7 +3403,7 @@ class chem_evol(object):
                 for metal in ini_Z:
                     if metal == float(self.iniZ):
                         iniabu = ry.iniabu(os.path.join(nupy_path,\
-                                "yield_tables", "iniabu",\
+                                "data/yield_tables", "iniabu",\
                                 ini_list[ini_Z.index(metal)]))
                         if self.iolevel>0:
                             print ('Use initial abundance of ', \

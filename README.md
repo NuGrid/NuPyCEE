@@ -23,19 +23,12 @@ This is a code repository containing the simple stellar population code SYGMA (S
 
 
 ### Installation Instructions
-
-* Create the directory where you want to download the codes.
-* Go in that directory with a terminal and clone the GitHub repository:
-	* `git clone https://github.com/NuGrid/NuPyCEE.git`
-* From the same directory which contains the cloned NuPyCEE directory, you can import the codes in Python mode by typing:
+* Run `python setup.py install`
+* You can import the individual models with:
 	* `from NuPyCEE import omega`
 	* `from NuPyCEE import sygma`
 	* `from NuPyCEE import stellab`
-* If you want to import the NuPyCEE codes from anywhere else within your work space, you have to update your Python path using a terminal:
-	* `export PYTHONPATH="your_path_to_before_NuPyCEE:$PYTHONPATH"`
-	* **Example**: `export PYTHONPATH="benoitcote/gce_code:$PYTHONPATH"`
-	* **Important**: Do not forget `:$PYTHONPATH` at the end, otherwise the python path will be overwritten.
-	* **Note**: All `export` commands should be put into your bash file. With MAC, it is the .bash_profile file in your home directory. Otherwise, you will need to define the paths each time you open a terminal.
+
 
 ### Installation of the Decay Module for Using Radioactive Isotopes
 

@@ -12,8 +12,8 @@ for k in range(len(lines)):
 		if iso == iso1:
 			out+= ('"'+iso.capitalize()+'-'+a+'",')
 			write_out+=lines[k]
-print out
-print write_out
+print(out)
+print(write_out)
 f2=open('iniab1.0E-05GN93_alpha_scaled.ppn','w')
 f2.write(write_out)
 f2.close()

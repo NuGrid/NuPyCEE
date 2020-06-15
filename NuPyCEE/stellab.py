@@ -46,6 +46,7 @@ import os
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
 nupy_path = os.path.dirname(os.path.realpath(__file__))
+print(nupy_path)
 
 # Import NuPyCEE codes
 import NuPyCEE.read_yields as ry
@@ -64,7 +65,7 @@ class stellab():
         # read abundance data library via
         # index file abundance_data_library.txt
         # creates self.paths, self.paths_s, self.cs, self.leg
-        self.read_abundance_data_library(os.path.join(nupy_path, "stellab_data",\
+        self.read_abundance_data_library(os.path.join(nupy_path, "data/stellab_data",\
                 "abundance_data_library.txt"))
 
         # Declaration of the name of available galaxies
@@ -158,7 +159,7 @@ class stellab():
             # read data set
             else:
                 #print (line)
-                path = 'stellab_data/'+line.split('&&')[0].strip()
+                path = 'data/stellab_data/'+line.split('&&')[0].strip()
                 leg = line.split('&&')[1].strip()
                 cs = line.split('&&')[2].strip()
                 self.paths.append(path)
@@ -271,7 +272,7 @@ class stellab():
         self.sol_norm.append([])
 
         # Open the data file
-        with open(os.path.join(nupy_path, "stellab_data", "solar_normalization",\
+        with open(os.path.join(nupy_path, "data/stellab_data", "solar_normalization",\
             file_path + ".txt"), "r") as data_file:
 
             # For every line (for each element) ...
@@ -1273,7 +1274,7 @@ class stellab():
 
         '''
         Write stellar data table for the stellab database. Format as for
-        files found in stellab_data and read in by stellab.
+        files found in data/stellab_data and read in by stellab.
 
         Parameters
         ---------

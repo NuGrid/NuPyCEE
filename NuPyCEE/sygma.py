@@ -82,8 +82,8 @@ For the necessary structure see again the default choice of that variable.
 
 For example with artificial yields of only H-1, you can try
 
->>> s2 = s.sygma(iniZ=0.0001,dt=1e8,tend=1.5e10, mgal=1e11,table='yield_tables/agb_and_massive_stars_h1.txt',
-    sn1a_table='yield_tables/sn1a_h1.txt',iniabu_table='yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt')
+>>> s2 = s.sygma(iniZ=0.0001,dt=1e8,tend=1.5e10, mgal=1e11,table='data/yield_tables/agb_and_massive_stars_h1.txt',
+    sn1a_table='data/yield_tables/sn1a_h1.txt',iniabu_table='data/yield_tables/iniab1.0E-04GN93_alpha_h1.ppn.txt')
 
 '''
 
@@ -127,15 +127,15 @@ class sygma( chem_evol ):
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30, \
                  nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8.0, iolevel=0, \
-                 ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
+                 ini_alpha=True, table='data/yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  nsmerger_table_radio='',\
-                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_i99_W7.txt',sn1a_energy=1e51,\
+                 hardsetZ=-1, sn1a_on=True, sn1a_table='data/yield_tables/sn1a_i99_W7.txt',sn1a_energy=1e51,\
                  ns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
                  t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
-                 nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', iniabu_table='', \
+                 nsmerger_table = 'data/yield_tables/r_process_arnould_2007.txt', iniabu_table='', \
                  extra_source_on=False, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0, \
-                 extra_source_table=['yield_tables/extra_source.txt'], \
+                 extra_source_table=['data/yield_tables/extra_source.txt'], \
                  f_extra_source=[1.0], pre_calculate_SSPs=False, \
                  extra_source_mass_range=[[8,30]], \
                  extra_source_exclude_Z=[[]], \
@@ -144,7 +144,7 @@ class sygma( chem_evol ):
                  radio_refinement=100,\
                  use_net_yields_stable=False, use_net_yields_radio=False,\
                  f_network='isotopes_modified.prn', f_format=1,\
-                 pop3_table='yield_tables/popIII_heger10.txt', \
+                 pop3_table='data/yield_tables/popIII_heger10.txt', \
                  imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
                  imf_pop3_char_mass=40.0, \
                  starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
@@ -153,7 +153,7 @@ class sygma( chem_evol ):
                  netyields_on=False,wiersmamod=False,yield_interp='lin', \
                  stellar_param_on=False, t_dtd_poly_split=-1.0, \
                  delayed_extra_yields_log_int=False, \
-                 stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
+                 stellar_param_table='data/yield_tables/stellar_feedback_nugrid_MESAonly.txt',
                  tau_ferrini=False, delayed_extra_log=False, dt_in=np.array([]),\
                  nsmerger_dtd_array=np.array([]),\
                  ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
@@ -312,7 +312,7 @@ class sygma( chem_evol ):
 ###############################################################################################
 
 
-    def write_stellar_param_table(self,table_name='gce_stellar_param_table.txt', path="evol_tables",interact=False):
+    def write_stellar_param_table(self,table_name='gce_stellar_param_table.txt', path="data/evol_tables",interact=False):
 
         '''
         Writes out evolution of stellar parameter such as luminosity and kinetic energy.
@@ -375,7 +375,7 @@ class sygma( chem_evol ):
                 import random
                 randnum=random.randrange(10000,99999)
                 name=table_name+str(randnum)+'.txt'
-                #f1=open(os.path.join(nupy_path, 'evol_tables', name),'w')
+                #f1=open(os.path.join(nupy_path, 'data/evol_tables', name),'w')
                 f1=open(name,'w')
                 f1.write(out)
                 f1.close()
@@ -385,16 +385,16 @@ class sygma( chem_evol ):
                 #from IPython import display
                 from IPython.core.display import HTML
                 import IPython.display as display
-                #return HTML("""<a href="evol_tables/download.php?file="""+name+"""">Download</a>""")
+                #return HTML("""<a href="data/evol_tables/download.php?file="""+name+"""">Download</a>""")
                 #test=
                 #return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
                 #if interact==False:
-                #return HTML("""<a href="""+nupy_path+"""/evol_tables/"""+name+""">Download</a>""")
+                #return HTML("""<a href="""+nupy_path+"""/data/evol_tables/"""+name+""">Download</a>""")
                 return HTML("""<a href="""+name+""">Download</a>""")
                 #else:
                 #        return name
         else:
-                print ('file '+table_name+' saved in subdirectory evol_tables.')
+                print ('file '+table_name+' saved in subdirectory data/evol_tables.')
                 f1=open(path+'/'+table_name,'w')
                 f1.write(out)
                 f1.close()
@@ -511,7 +511,7 @@ class sygma( chem_evol ):
         #self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
 
-    def plot_table_param(self,fig=8,ax='',xaxis='mini',quantity='Lifetime',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_table_param(self,fig=8,ax='',xaxis='mini',quantity='Lifetime',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='data/yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
         Plots the yield table quantities such as lifetimes versus initial mass as given in yield input tables.
@@ -575,7 +575,7 @@ class sygma( chem_evol ):
         plt.yscale('log')
 
 
-    def plot_table_remnant(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_table_remnant(self,fig=8,xaxis='mini',iniZ=0.02,masses=[],label='',marker='o',color='r',shape='-',table='data/yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
 
@@ -669,7 +669,7 @@ class sygma( chem_evol ):
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
 
 
-    def plot_table_yield_mass(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_table_yield_mass(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='data/yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
         Plots yields for isotopes given in yield tables.
@@ -727,7 +727,7 @@ class sygma( chem_evol ):
         self.__save_data(header=[headerx,headery],data=[x,y])
 
 
-    def plot_net_yields(self,fig=91,species='[C-12/Fe-56]',netyields_iniabu='yield_tables/iniabu/iniab_solar_Wiersma.ppn'):
+    def plot_net_yields(self,fig=91,species='[C-12/Fe-56]',netyields_iniabu='data/yield_tables/iniabu/iniab_solar_Wiersma.ppn'):
 
         '''
                 Plots net yields as calculated in the code when using netyields_on=True.
@@ -781,7 +781,7 @@ class sygma( chem_evol ):
         plt.xlabel('initial mass [M$_{\odot}$]')
         #plt.xscale('log')
 
-    def plot_table_yield(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_abu='',netyields_iniabu=''):
+    def plot_table_yield(self,fig=8,xaxis='mini',yaxis='C-12',iniZ=0.0001,netyields=False,masses=[],label='',marker='o',color='r',shape='-',table='data/yield_tables/isotope_yield_table.txt',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,solar_abu='',netyields_iniabu=''):
 
         '''
 
@@ -804,7 +804,7 @@ class sygma( chem_evol ):
              table to plot data from; default sygma input table
         solar_abu : string
              solar abundance for spectroscopic notation
-             default: yield_tables/iniabu/iniab2.0E-02GN93.ppn (if empty string)
+             default: data/yield_tables/iniabu/iniab2.0E-02GN93.ppn (if empty string)
         netyields : bool
              if true assume net yields in table and add corresponding initial contribution to get total yields
         netyields_iniabu : string
@@ -839,7 +839,7 @@ class sygma( chem_evol ):
         ####Get solar metallicity elements, if necessary
         if specx or specy:
                 if len(solar_abu) ==0:
-                     iniabu_sol=ry.iniabu(os.path.join(nupy_path, 'yield_tables',\
+                     iniabu_sol=ry.iniabu(os.path.join(nupy_path, 'data/yield_tables',\
                              'iniabu', 'iniab2.0E-02GN93.ppn'))
                 else:
                      iniabu_sol=ry.iniabu(os.path.join(nupy_path, solar_abu))
@@ -1639,7 +1639,7 @@ class sygma( chem_evol ):
         if len(solar_ab) > 0:
             iniabu=ry.iniabu(os.path.join(nupy_path, solar_ab))
         else:
-            iniabu=ry.iniabu(os.path.join(nupy_path, 'yield_tables', 'iniabu',\
+            iniabu=ry.iniabu(os.path.join(nupy_path, 'data/yield_tables', 'iniabu',\
                     'iniab2.0E-02GN93.ppn'))
 
         x_ini_iso=iniabu.iso_abundance(self.history.isotopes)
@@ -1858,7 +1858,7 @@ class sygma( chem_evol ):
                 yields_iso.append(yields_iso1[k])
 
 
-        iniabu=ry.iniabu('yield_tables/iniabu/iniab2.0E-02GN93.ppn')
+        iniabu=ry.iniabu('data/yield_tables/iniabu/iniab2.0E-02GN93.ppn')
         x_ini_iso=iniabu.iso_abundance(isotopes)
         #elements,x_ini=self.iso_abu_to_elem(self.isotopes,x_ini_iso)
 
@@ -2662,7 +2662,7 @@ class sygma( chem_evol ):
 
         '''
         if path == "":
-            path = os.path.join(nupy_path, 'evol_tables')
+            path = os.path.join(nupy_path, 'data/evol_tables')
 
         yields_evol=self.history.ism_iso_yield
         metal_evol=self.history.metallicity
@@ -2719,7 +2719,7 @@ class sygma( chem_evol ):
                 import random
                 randnum=random.randrange(10000,99999)
                 name=table_name+str(randnum)+'.txt'
-                #f1=open(os.path.join(nupy_path, 'evol_tables', name),'w')
+                #f1=open(os.path.join(nupy_path, 'data/evol_tables', name),'w')
                 f1=open(name,'w')
                 f1.write(out)
                 f1.close()
@@ -2729,16 +2729,16 @@ class sygma( chem_evol ):
                 #from IPython import display
                 from IPython.core.display import HTML
                 import IPython.display as display
-                #return HTML("""<a href="evol_tables/download.php?file="""+name+"""">Download</a>""")
+                #return HTML("""<a href="data/evol_tables/download.php?file="""+name+"""">Download</a>""")
                 #test=
                 #return display.FileLink('../../nugrid/SYGMA/SYGMA_online/SYGMA_dev/evol_table/'+name)
                 #if interact==False:
-                #return HTML("""<a href="""+nupy_path+"""/evol_tables/"""+name+""">Download</a>""")
+                #return HTML("""<a href="""+nupy_path+"""/data/evol_tables/"""+name+""">Download</a>""")
                 return HTML("""<a href="""+name+""">Download</a>""")
                 #else:
                 #        return name
         else:
-                print ('file '+table_name+' saved in subdirectory evol_tables.')
+                print ('file '+table_name+' saved in subdirectory data/evol_tables.')
                 f1=open(os.path.join(path, table_name),'w')
                 f1.write(out)
                 f1.close()

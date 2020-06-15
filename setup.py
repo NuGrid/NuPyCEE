@@ -6,6 +6,7 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path, system
 from re import compile as re_compile
+import glob
 
 __version__="3.0"
 
@@ -16,9 +17,16 @@ def read(filename):
         contents = fp.read()
     return contents
 
+# package_data and data_files behave similarly,
+# but data_files requires pip and cannot be used with setuptools
+data = list(glob.glob('NuPyCEE/data/**/', recursive=True))
+for i,item in enumerate(data):
+    data[i] = item[8:] + '*'
 
 setup(
     name="NuPyCEE",
+    packages=['NuPyCEE'],
+    package_data={"NuPyCEE":data},
     version=__version__,
     author="Benoit Cote",
     #author_email="",  # <-- Direct complaints to this address.
