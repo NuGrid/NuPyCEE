@@ -2588,7 +2588,7 @@ class omega( chem_evol ):
 
                         # Add primordial gas coming with the inflow
                         if m_inflow_current > 0.0:
-                            ym_inflow = self.prim_comp.get(quantity='Yields') * \
+                            ym_inflow = self.prim_comp.get(quantity='Yields', Z=0.0) * \
                                         m_inflow_current
                             for k_op in range(0, self.nb_isotopes):
                                 self.ymgal[i][k_op] += ym_inflow[k_op]
@@ -2602,7 +2602,7 @@ class omega( chem_evol ):
                                 frac_rem = 0.0
                                 # Add primordial gas coming with the inflow
                                 self.m_outflow_t[i-1] = 0.0
-                                ym_inflow = self.prim_comp.get(quantity='Yields') * \
+                                ym_inflow = self.prim_comp.get(quantity='Yields', Z=0.0) * \
                                             (-1.0) * self.m_outflow_t[i-1]
                                 for k_op in range(0, self.nb_isotopes):
                                     self.ymgal[i][k_op] += ym_inflow[k_op]
