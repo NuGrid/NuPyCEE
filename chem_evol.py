@@ -808,7 +808,7 @@ class chem_evol(object):
                                     value=val[j])
                         if modifier[j]  == "multiply":
                             original = self.ytables.get(M=M[j],Z=Z[j],
-                                    specie=iso[j],quantity="yields")
+                                    quantity=iso[j])
                             self.ytables.set(M=M[j],Z=Z[j],specie=iso[j],
                                     value=original*val[j])
                     elif self.len_decay_file > 0:
@@ -818,7 +818,7 @@ class chem_evol(object):
                                         value=val[j])
                             if modifier[j]  == "multiply":
                                 original = self.ytables_radio.get(M=M[j],Z=Z[j],
-                                        specie=iso[j],quantity="yields")
+                                        quantity=iso[j])
                                 self.ytables_radio.set(M=M[j],Z=Z[j],specie=iso[j],
                                         value=original*val[j])
                         else:
