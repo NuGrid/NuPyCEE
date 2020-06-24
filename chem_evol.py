@@ -2273,7 +2273,7 @@ class chem_evol(object):
                 # Get radioactive yields
                 y_tables_0_radio = self.ytables_radio.get(\
                     Z=self.Z_table[i_Z], M=self.M_table[0], quantity='Yields',\
-                    isotopes=self.history.isotopes)
+                    isotopes=self.radio_iso)
 
                 # Extrapolate the lower boundary (using stable yields total mass)
                 yields_low = self.scale_yields_to_M_ej(self.M_table[0],\
@@ -2345,7 +2345,7 @@ class chem_evol(object):
                 # Keep the lower-boundary yields
                 yields_low = self.ytables_radio.get(Z=self.Z_table[i_Z],\
                     M=self.inter_M_points[i_M], quantity='Yields',\
-                    isotopes=self.history.isotopes)
+                    isotopes=self.radio_iso)
 
             # If stable table
             else:
@@ -2405,7 +2405,7 @@ class chem_evol(object):
                 # Keep the lower-boundary yields
                 yields_upp = self.ytables_radio.get(Z=self.Z_table[i_Z],\
                     M=self.inter_M_points[i_M+1], quantity='Yields',\
-                    isotopes=self.history.isotopes)
+                    isotopes=self.radio_iso)
 
             # If stable table
             else:
@@ -2429,7 +2429,7 @@ class chem_evol(object):
                 # Take the highest-mass model for the lower boundary
                 yields_low = self.ytables_radio.get(Z=self.Z_table[i_Z],\
                     M=self.M_table[-1], quantity='Yields',\
-                    isotopes=self.history.isotopes)
+                    isotopes=self.radio_iso)
 
                 # Extrapolate the upper boundary
                 yields_upp = self.extrapolate_high_mass(self.ytables_radio,\
@@ -5058,16 +5058,16 @@ class chem_evol(object):
                 if self.zmetal <= tables_Z_radio[-1]:
                     yields1a_radio = \
                         self.ytables_1a_radio.get(Z=tables_Z_radio[-1], quantity='Yields',\
-                        isotopes=self.history.isotopes)
+                        isotopes=self.radio_iso)
                     break
                 if self.zmetal >= tables_Z_radio[0]:
                     yields1a_radio = \
                         self.ytables_1a_radio.get(Z=tables_Z_radio[0], quantity='Yields',\
-                        isotopes=self.history.isotopes)
+                        isotopes=self.radio_iso)
                     break
                 if self.zmetal > tz:
                     yields1a_radio = self.ytables_1a_radio.get(Z=tz, quantity='Yields',\
-                        isotopes=self.history.isotopes)
+                        isotopes=self.radio_iso)
                     break
 
         # If the selected SN Ia rate depends on the number of white dwarfs ...
@@ -5235,12 +5235,12 @@ class chem_evol(object):
                 if self.zmetal > tz:
                     yieldsnsm_radio = \
                         self.ytables_nsmerger_radio.get(Z=tz, quantity='Yields',\
-                        isotopes=self.history.isotopes)
+                        isotopes=self.radio_iso)
                     break
                 if self.zmetal <= tables_Z_radio[-1]:
                     yieldsnsm_radio = \
                         self.ytables_nsmerger_radio.get(Z=tables_Z_radio[-1], quantity='Yields',\
-                        isotopes=self.history.isotopes)
+                        isotopes=self.radio_iso)
                     break
 
         # initialize variables which cumulate in loop
