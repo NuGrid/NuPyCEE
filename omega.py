@@ -4367,7 +4367,7 @@ class omega( chem_evol ):
             plt.ylabel('SFR [Mo/yr]')
 
             #Plot
-            plt.plot(age,sfr_plot,label=label,marker=marker,color=color,linestyle=shape)
+            plt.plot(age[:-1],sfr_plot[:-1],label=label,marker=marker,color=color,linestyle=shape)
 
             #self.save_data(header=['age','SFR'],data=[age,sfr_plot])
 
@@ -4732,7 +4732,7 @@ class omega( chem_evol ):
             age = self.history.age[:-1]
             inflow_plot = []
             for i_op in range(0,len(age)):
-                inflow_plot.append(self.history.m_inflow_t[i_op] / \
+                inflow_plot.append(self.m_inflow_t[i_op] / \
                     self.history.timesteps[i_op])
 
             #Plot data
