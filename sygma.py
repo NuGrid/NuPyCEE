@@ -2370,21 +2370,21 @@ class sygma( chem_evol ):
 
 
         '''
-	Plots yield contribution (Msun) of a certain mass range
-	versus initial mass. Each stellar ejecta in one mass range
-	is represented by the same yields, yields from certain stellar simulation.
-	Be aware that a larger mass range means also a larger amount
-	of yield for that range.
-	Note: Used in WENDI.
+        Plots yield contribution (Msun) of a certain mass range
+        versus initial mass. Each stellar ejecta in one mass range
+        is represented by the same yields, yields from certain stellar simulation.
+        Be aware that a larger mass range means also a larger amount
+        of yield for that range.
+        Note: Used in WENDI.
 
         Parameters
         ----------
         specie : string
             Element or isotope name in the form 'C' or 'C-12'
-	rebin : change the bin size to uniform mass intervals of size 'rebin'
-	        default 0, bin size is defined by ranges of (stellar) yield inputs	
-	log : boolean
-	    if true, use log yaxis
+        rebin : change the bin size to uniform mass intervals of size 'rebin'
+            default 0, bin size is defined by ranges of (stellar) yield inputs
+        log : boolean
+            if true, use log yaxis
         label : string
              figure label
         marker : string

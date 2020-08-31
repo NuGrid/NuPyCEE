@@ -3230,7 +3230,7 @@ class omega( chem_evol ):
         # This dictionary contains the mass fraction contribution toward the total
         # by SN1a's for each species
         species_frac_1a = {k: species_mass_1a[k] / species_mass_gal[k]
-        for k in species_mass_1a if k in species_mass_gal}        
+        for k in species_mass_1a if k in species_mass_gal}
 
         map_str_dic = {
         "agb":species_mass_agb,

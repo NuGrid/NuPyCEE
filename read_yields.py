@@ -11,7 +11,7 @@ from __future__ import (division, print_function, absolute_import,
     Two classes: One for reading and extracting of
     NuGrid table data, the other one for SN1a data.
 
-    = = = = = = = = = = = = = = = = 
+    = = = = = = = = = = = = = = = =
 
     New version: Benoit Cote, May 2020
 
@@ -73,8 +73,8 @@ class read_yields( object ):
             M: Initial mass of the model
             Z: Initial metallicity of the model
             quantity: "Lifetime", "Mfinal", "Yields", "C-12", ...
-            isotopes: If empty, use self.isotopes for Yields and Xo
-                      If provide Yields and X0 will follow that list
+            isotopes: If empty, use self.isotopes for Yields and X0
+                      If provided Yields and X0 will follow that list
 
         '''
 
@@ -112,7 +112,7 @@ class read_yields( object ):
 
         '''
 
-        Return an array of isotopic yields, in sync with the 
+        Return an array of isotopic yields, in sync with the
         self.isotopes array
 
         Arguments
@@ -261,7 +261,7 @@ class read_yields( object ):
         Declare general parameters for reading yields tables
 
 
-        ''' 
+        '''
 
         # Define whether the list of isotopes is provided
         iso_provided = True
@@ -297,7 +297,7 @@ class read_yields( object ):
             model_label: name of the new model found in the yields table file
             iso_provided: True if the list of isotopes is pre-defined
        
-        ''' 
+        '''
 
         # Add the yields entry
         self.table[model_label] = dict()
@@ -325,7 +325,7 @@ class read_yields( object ):
             model_label: name of the new model found in the yields table file
             iso_provided: True if the list of isotopes is pre-defined
        
-        ''' 
+        '''
 
         # If the list of isotopes is pre-defined ..
         if iso_provided:
@@ -429,7 +429,7 @@ class read_yields( object ):
                 self.net_yields_available = False
 
             # Check if the initial composition add to 1.0
-            else: 
+            else:
                 X0_sum = sum(self.table[model]["X0"].values())
                 ratio_tol = np.minimum(X0_sum,1.0) / np.maximum(X0_sum,1.0)
                 if ratio_tol < self.X0_tol:
@@ -843,9 +843,9 @@ class iniabu():
 
 # Below
 # # # # # # # # # # # # # # # # # # # # # #
-#                                         # 
+#                                         #
 #           NOT    UPDATED    YET         #
-#                                         # 
+#                                         #
 # # # # # # # # # # # # # # # # # # # # # #
 
 

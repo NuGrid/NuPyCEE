@@ -991,7 +991,7 @@ class chem_evol(object):
         self.len_i_nonmetals = len(self.i_nonmetals)
 
         # Set the initial time and metallicity
-        # Hardcode the metallicity if Sygma, so it does not required 
+        # Hardcode the metallicity if Sygma, so it does not required
         # a consistent iniabu file for all (unexpected) metallicities
         if self.is_sygma:
             zmetal = copy.deepcopy(self.iniZ)
@@ -2433,7 +2433,8 @@ class chem_evol(object):
 
                 # Extrapolate the upper boundary
                 yields_upp = self.extrapolate_high_mass(self.ytables_radio,\
-                    self.Z_table[i_Z], self.inter_M_points[i_M+1])
+                    self.Z_table[i_Z], self.inter_M_points[i_M+1],\
+                    is_radio = is_radio)
 
             # If stable table ..
             else:
@@ -2461,20 +2462,22 @@ class chem_evol(object):
             # Use the appropriate yield tables ..
             if is_radio:
                 the_ytables = self.ytables_radio
+                the_isotopes = self.radio_iso
             else:
                 the_ytables = self.ytables
+                the_isotopes = self.history.isotopes
 
             # Assign the upper-mass model
             yields_upp = the_ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M+1], quantity='Yields',\
-                isotopes=self.history.isotopes)
+                isotopes=the_isotopes)
 
             # Interpolate the lower-mass model
             i_M_upp = self.M_table.index(self.inter_M_points[i_M+1])
             aa, bb, dummy, dummy = self.__get_inter_coef_M(self.M_table[i_M_upp-1],\
                self.M_table[i_M_upp], the_ytables.get(Z=self.Z_table[i_Z],\
                    M=self.M_table[i_M_upp-1], quantity='Yields',\
-                   isotopes=self.history.isotopes), yields_upp,\
+                   isotopes=the_isotopes), yields_upp,\
                    1.0, 2.0, yields_upp, yields_upp)
             yields_low = 10**(aa * self.inter_M_points[i_M] + bb)
 
@@ -2485,7 +2488,7 @@ class chem_evol(object):
                     self.M_table[i_M_ori-1], self.inter_M_points[i_M+1],\
                     self.ytables.get(Z=self.Z_table[i_Z],\
                     M=self.M_table[i_M_ori-1], quantity='Yields',\
-                    isotopes=self.history.isotopes), yields_upp
+                    isotopes=the_isotopes), yields_upp
 
         # If the mass point is the last one, is lower than the
         # most massive mass in the yields table, but is not part
@@ -2497,20 +2500,22 @@ class chem_evol(object):
             # Use the appropriate yield tables ..
             if is_radio:
                 the_ytables = self.ytables_radio
+                the_isotopes = self.radio_iso
             else:
                 the_ytables = self.ytables
+                the_isotopes = self.history.isotopes
 
             # Assign the lower-mass model
             yields_low = the_ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M], quantity='Yields',\
-                isotopes=self.history.isotopes)
+                isotopes=the_isotopes)
 
             # Interpolate the upper-mass model
             i_M_low = self.M_table.index(self.inter_M_points[i_M])
             aa, bb, dummy, dummy = self.__get_inter_coef_M(self.M_table[i_M_low],\
                 self.M_table[i_M_low+1], yields_low, the_ytables.get(\
                     Z=self.Z_table[i_Z], M=self.M_table[i_M_low+1],quantity='Yields',\
-                    isotopes=self.history.isotopes),\
+                    isotopes=the_isotopes),\
                     1.0, 2.0, yields_low, yields_low)
             yields_upp = 10**(aa * self.inter_M_points[i_M+1] + bb)
 
@@ -2521,7 +2526,7 @@ class chem_evol(object):
                     self.inter_M_points[i_M], self.M_table[i_M_ori+1],\
                     yields_low, self.ytables.get(Z=self.Z_table[i_Z],\
                     M=self.M_table[i_M_ori+1], quantity='Yields',\
-                    isotopes=self.history.isotopes)
+                    isotopes=the_isotopes)
 
         # If this is an interpolation between two models
         # originally in the yields table ..
@@ -2530,16 +2535,18 @@ class chem_evol(object):
             # Use the appropriate yield tables ..
             if is_radio:
                 the_ytables = self.ytables_radio
+                the_isotopes = self.radio_iso
             else:
                 the_ytables = self.ytables
+                the_isotopes = self.history.isotopes
 
             # Get the original models
             yields_low = the_ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M], quantity='Yields',\
-                isotopes=self.history.isotopes)
+                isotopes=the_isotopes)
             yields_upp = the_ytables.get(Z=self.Z_table[i_Z],\
                 M=self.inter_M_points[i_M+1], quantity='Yields',\
-                isotopes=self.history.isotopes)
+                isotopes=the_isotopes)
 
             # Set the yields and mass for total-mass-ejected interpolation
             if not is_radio:
@@ -2728,6 +2735,7 @@ class chem_evol(object):
           table_ehm : Yields table
           Z_ehm : Metallicity of the yields table
           m_extra : Mass to which the yields will be extrapolated
+          is_radio : Whether these are radioactive yields
 
         '''
 
@@ -2739,9 +2747,15 @@ class chem_evol(object):
             mass_m2 = self.M_table[-2]
             mass_m1 = self.M_table[-1]
 
+        # Take into account radio
+        if is_radio:
+            the_isotopes = self.radio_iso
+        else:
+            the_isotopes = self.history.isotopes
+
         # Copy the yields of most massive model
         y_tables_m1 = table_ehm.get(Z=Z_ehm, M=mass_m1, quantity='Yields',\
-                isotopes=self.history.isotopes)
+                isotopes=the_isotopes)
 
         # If the yields are copied ..
         if self.high_mass_extrapolation == 'copy':
@@ -2754,9 +2768,9 @@ class chem_evol(object):
 
             # Make sure we use the stable yields for scaling (table_ehm could be radio)
             y_stable_m1 = self.ytables.get(Z=Z_ehm, M=mass_m1, quantity='Yields',\
-                    isotopes=self.history.isotopes)
+                    isotopes=the_isotopes)
             y_stable_m2 = self.ytables.get(Z=Z_ehm, M=mass_m2, quantity='Yields',\
-                    isotopes=self.history.isotopes)
+                    isotopes=the_isotopes)
 
             # Calculate the scaled yields
             y_scaled = self.scale_yields_to_M_ej(mass_m2,\
@@ -2777,7 +2791,7 @@ class chem_evol(object):
 
             # Copy the yields of the second most massive model
             y_tables_m2 = table_ehm.get(Z=Z_ehm, M=mass_m2, quantity='Yields',\
-                    isotopes=self.history.isotopes)
+                    isotopes=the_isotopes)
 
             # Extrapolate the yields
             the_a, the_b, the_a_ej, the_b_ej = self.__get_inter_coef_M(\
@@ -4066,7 +4080,7 @@ class chem_evol(object):
 
 
         # If net yields are used ..
-        if self.use_net_yields_stable: 
+        if self.use_net_yields_stable:
             
             # Get the interpolated initial stellar composition
             # The metallicity is the metallicity at which the
@@ -4551,7 +4565,7 @@ class chem_evol(object):
         else:
 
             # If net yields are used ..
-            if self.use_net_yields_stable: 
+            if self.use_net_yields_stable:
 
                 # Calculate the mass lost by the stars
                 M_ejected = sum(the_tot_yields)
@@ -5851,6 +5865,7 @@ class chem_evol(object):
         =========
 
           i_extra : index of the extra source
+          return_radio : whether to calculate radioactive yields
 
         '''
 
@@ -5885,9 +5900,9 @@ class chem_evol(object):
             Z=Z_extra[iZ_up],  quantity='Yields', isotopes=self.history.isotopes)
         if return_radio:
             yextra_low_radio = self.ytables_delayed_extra_radio[i_extra].get( \
-                Z=Z_extra[iZ_low], quantity='Yields', isotopes=self.history.isotopes)
+                Z=Z_extra[iZ_low], quantity='Yields', isotopes=self.radio_iso)
             yextra_up_radio  = self.ytables_delayed_extra_radio[i_extra].get( \
-                Z=Z_extra[iZ_up],  quantity='Yields', isotopes=self.history.isotopes)
+                Z=Z_extra[iZ_up],  quantity='Yields', isotopes=self.radio_iso)
 
         # Return the metallicities and the yields and Z boundaries
         if return_radio:
