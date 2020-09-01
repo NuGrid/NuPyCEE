@@ -97,8 +97,8 @@ nupy_path = os.path.dirname(os.path.realpath(__file__))
 #from NuPyCEE.chem_evol import *
 
 import imp
-sygma = imp.load_source('sygma', nupy_path+'sygma.py')
-chem_evol = imp.load_source('chem_evol', nupy_path+'chem_evol.py')
+sygma = imp.load_source('sygma', nupy_path+'/sygma.py')
+chem_evol = imp.load_source('chem_evol', nupy_path+'/chem_evol.py')
 
 class omega( chem_evol ):
 
