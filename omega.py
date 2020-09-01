@@ -86,6 +86,7 @@ import copy
 import math
 import random
 import os
+import numpy as np
 
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
