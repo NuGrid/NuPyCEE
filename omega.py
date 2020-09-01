@@ -250,7 +250,8 @@ class omega( chem_evol ):
     '''
 
     #Combine docstrings from chem_evol with sygma docstring
-    __doc__ = __doc__+chem_evol.__doc__
+    #TODO: uncomment this
+    #__doc__ = __doc__+chem_evol.__doc__
 
 
     ##############################################
