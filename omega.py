@@ -86,7 +86,6 @@ import copy
 import math
 import random
 import os
-import numpy as np
 
 # Define where is the working directory
 # This is where the NuPyCEE code will be extracted
@@ -94,12 +93,12 @@ nupy_path = os.path.dirname(os.path.realpath(__file__))
 
 # Import NuPyCEE codes
 # BEFORE ChETEC SCHOOL
-#import NuPyCEE.sygma as sygma
-#from NuPyCEE.chem_evol import *
+import NuPyCEE.sygma as sygma
+from NuPyCEE.chem_evol import *
 
-import imp
-sygma = imp.load_source('sygma', nupy_path+'/sygma.py')
-chem_evol = imp.load_source('chem_evol', nupy_path+'/chem_evol.py')
+#import imp
+#sygma = imp.load_source('sygma', nupy_path+'/sygma.py')
+#chem_evol = imp.load_source('chem_evol', nupy_path+'/chem_evol.py')
 
 class omega( chem_evol ):
 
@@ -251,8 +250,7 @@ class omega( chem_evol ):
     '''
 
     #Combine docstrings from chem_evol with sygma docstring
-    #TODO: uncomment this
-    #__doc__ = __doc__+chem_evol.__doc__
+    __doc__ = __doc__+chem_evol.__doc__
 
 
     ##############################################
