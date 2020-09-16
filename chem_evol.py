@@ -9,7 +9,7 @@ Chemical Evolution - chem_evol.py
 Functionality
 =============
 
-This is the superclass inherited by the SYGMA and the OMEGA modules.  It provides
+This is the superclass inherited by the SYGMA and the OMEGA modules. It provides
 common functions for initialization and for the evolution of one single timestep.
 
 
