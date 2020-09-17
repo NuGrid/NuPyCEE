@@ -965,6 +965,35 @@ class omega( chem_evol ):
 
 
     ##############################################
+    #            Remove Last Timestep            #
+    ##############################################
+    def remove_last_timestep(self):
+
+        '''
+        This function remove the last timestep that was created to 
+        make sure rates are provided for the last step. For example,
+        if the user asks for 30 timesteps, there will be 31 time
+        entries in the output, but we need to add temporarily a
+        32nd steps so that rates can be calculated for step 31.
+
+        '''
+
+        # Go through chem_evol.py to remove fundamental arrays
+        self._remove_last_timestep()
+
+        # Remove last entry from a subset of OMEGA arrays
+        self.sfr_input = self.sfr_input[:-1]
+        self.m_DM_t = self.m_DM_t[:-1]
+        self.r_vir_DM_t = self.r_vir_DM_t[:-1]
+        self.sfr_abs = self.sfr_abs[:-1]
+        self.v_vir_DM_t = self.v_vir_DM_t[:-1]
+        self.m_tot_ISM_t = self.m_tot_ISM_t[:-1]
+        self.t_SF_t = self.t_SF_t[:-1]
+        self.m_crit_t = self.m_crit_t[:-1]
+        self.redshift_t = self.redshift_t[:-1]
+
+
+    ##############################################
     #            Initialize Gal Prop             #
     ##############################################
     def __initialize_gal_prop(self):
@@ -1055,7 +1084,7 @@ class omega( chem_evol ):
             self.sfr_input[-1] = aa*self.history.tend + bb
 
         # Keep the SFH in memory
-        self.history.sfr_abs = self.sfr_input
+        self.sfr_abs = self.sfr_input
 
 
     ##############################################
@@ -2462,10 +2491,6 @@ class omega( chem_evol ):
             self.run_step(i, self.sfr_input[i-1], \
                 mass_sampled=mass_sampled, scale_cor=scale_cor)
 
-        # Calculate the last SFR at the end point of the simulation
-        if self.cl_SF_law and not self.open_box:
-            self.history.sfr_abs[-1] = self.sfe_gcs * np.sum(self.ymgal[i])
-
 
     ##############################################
     #                   Run Step                 #
@@ -2660,19 +2685,19 @@ class omega( chem_evol ):
 
                     # If external control ...
                     if self.external_control:
-                        self.history.sfr_abs[i] = self.history.sfr_abs[i-1]
+                        self.sfr_abs[i] = self.sfr_abs[i-1]
 
                     # Calculate the total mass of gas
                     self.m_stel_tot = 0.0
                     for i_tot in range(0,len(self.history.timesteps)):
-                        self.m_stel_tot += self.history.sfr_abs[i_tot] * \
+                        self.m_stel_tot += self.sfr_abs[i_tot] * \
                             self.history.timesteps[i_tot]
                     if self.m_stel_tot > 0.0:
                         self.m_stel_tot = 1.0 / self.m_stel_tot
                     self.f_m_stel_tot = []
                     m_temp = 0.0
                     for i_tot in range(0,len(self.history.timesteps)):
-                        m_temp += self.history.sfr_abs[i_tot] * \
+                        m_temp += self.sfr_abs[i_tot] * \
                             self.history.timesteps[i_tot]
                         self.f_m_stel_tot.append(m_temp*self.m_stel_tot)
                     self.f_m_stel_tot.append(self.f_m_stel_tot[-1])
@@ -2757,13 +2782,13 @@ class omega( chem_evol ):
 
         # If the SFR is calculated from a star formation law (closed box)
         if self.cl_SF_law and not self.open_box:
-            self.history.sfr_abs[i-1] = self.sfe_gcs * np.sum(self.ymgal[i-1])
-            self.sfrin = self.history.sfr_abs[i-1] * self.history.timesteps[i-1]
+            self.sfr_abs[i-1] = self.sfe_gcs * np.sum(self.ymgal[i-1])
+            self.sfrin = self.sfr_abs[i-1] * self.history.timesteps[i-1]
 
         else:
             # Calculate the total mass of stars formed during this timestep
             self.sfrin = sfr_rs * self.history.timesteps[i-1]
-            self.history.sfr_abs[i-1] = sfr_rs
+            self.sfr_abs[i-1] = sfr_rs
 
         # Calculate the mass fraction of gas converted into stars
         mgal_tot = 0.0
@@ -2776,7 +2801,7 @@ class omega( chem_evol ):
 
         # Modify the history of SFR if there is not enough gas
         if self.sfrin > 1.0:
-           self.history.sfr_abs[i-1] = mgal_tot / self.history.timesteps[i-1]
+           self.sfr_abs[i-1] = mgal_tot / self.history.timesteps[i-1]
 
 
     ##############################################
@@ -3583,7 +3608,7 @@ class omega( chem_evol ):
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
         self.save_data(header=[xaxis,yaxis],data=[x,y])
 
-    def plot_spectro(self,fig=3,xaxis='age',yaxis='[Fe/H]',source='all',label='',shape='-',marker='o',color='k',markevery=100,show_data=False,show_sculptor=False,show_legend=True,return_x_y=False,sub_plot=False,linewidth=3,sub=1,plot_data=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,only_one_iso=False,solar_ab='',sfr_thresh=0.0,m_formed_thresh=1.0,solar_norm=''):
+    def plot_spectro(self,fig=3,xaxis='age',yaxis='[Fe/H]',label='',shape='-',marker='o',color='k',markevery=100,show_data=False,show_sculptor=False,show_legend=True,return_x_y=False,sub_plot=False,linewidth=3,sub=1,plot_data=False,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14,only_one_iso=False,solar_ab='',sfr_thresh=0.0,m_formed_thresh=1.0,solar_norm=''):
         '''
         Plots elements in spectroscopic notation:
 
@@ -3595,16 +3620,6 @@ class omega( chem_evol ):
             if 'age': time evolution in years
         yaxis : string
                 Elements in spectroscopic notation, e.g. [C/Fe]
-        source : string
-                If yields come from
-                all sources use 'all' (include
-                AGB+SN1a, massive stars.)
-
-                If yields come from distinctive source:
-                only agb stars use 'agb', only
-                SN1a ('SN1a'), or only massive stars
-                ('massive')
-
         label : string
              figure label
         marker : string
@@ -3636,7 +3651,7 @@ class omega( chem_evol ):
             if len(label)<1:
                     label=yaxis
 
-            shape,marker,color=self.__msc(source,shape,marker,color)
+            shape,marker,color=self.__msc("all",shape,marker,color)
 
         #Set the figure output
         if sub_plot:
@@ -3711,14 +3726,7 @@ class omega( chem_evol ):
         x_ini = self._iso_abu_to_elem(x_ini_iso)
 
         #to test the different contributions
-        if source == 'all':
-            yields_evol=self.history.ism_elem_yield
-        elif source =='agb':
-            yields_evol=self.history.ism_elem_yield_agb
-        elif source == 'sn1a':
-            yields_evol=self.history.ism_elem_yield_1a
-        elif source == 'massive':
-            yields_evol=self.history.ism_elem_yield_massive
+        yields_evol=self.history.ism_elem_yield
 
         #Operations associated with plot visual aspects
         if not return_x_y and not sub_plot:
@@ -3849,13 +3857,13 @@ class omega( chem_evol ):
         #Remove values when SFR is zero, that is when no element is locked into stars
         i_rem = len(y) - 1
         if m_formed_thresh < 1.0 or sfr_thresh > 0.0:
-            while self.history.sfr_abs[i_rem] <= sfr_thresh or \
+            while self.sfr_abs[i_rem] <= sfr_thresh or \
                self.f_m_stel_tot[i_rem] >= m_formed_thresh:
                 del y[-1]
                 del x[-1]
                 i_rem -= 1
         else:
-            while self.history.sfr_abs[i_rem] == 0.0:
+            while self.sfr_abs[i_rem] == 0.0:
                 del y[-1]
                 del x[-1]
                 i_rem -= 1
@@ -4075,7 +4083,7 @@ class omega( chem_evol ):
         #self.save_data(header=['age','mass'],data=[x,y])
 
 
-    def plot_sn_distr(self,fig=5,rate=True,rate_only='',xaxis='time',fraction=False,label1='SNIa',label2='SN2',shape1=':',shape2='--',marker1='o',marker2='s',color1='k',color2='b',markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_sn_distr(self,fig=5,rate_only='',label1='SNIa',label2='SN2',shape1=':',shape2='--',marker1='o',marker2='s',color1='k',color2='b',markevery=20,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
 
         '''
         Plots the SN1a distribution:
@@ -4084,20 +4092,12 @@ class omega( chem_evol ):
 
         Parameters
         ----------
-        rate : boolean
-            if true, calculate rate [1/century]
-            else calculate numbers
-        fraction ; boolean
-            if true, ignorate rate and calculate number fraction of SNIa per WD
         rate_only : string
             if empty string, plot both rates (default)
 
             if 'sn1a', plot only SN1a rate
 
             if 'sn2', plot only SN2 rate
-        xaxis: string
-            if 'time' : time evolution
-            if 'redshift': experimental! use with caution; redshift evolution
         label : string
              figure label
         marker : string
@@ -4118,146 +4118,51 @@ class omega( chem_evol ):
         import matplotlib
         import matplotlib.pyplot as plt
 
-        #For Wiersma09
-        Hubble_0=73.
-        Omega_lambda=0.762
-        Omega_m=0.238
-
         figure=plt.figure(fig, figsize=(fsize[0],fsize[1]))
         age=self.history.age
-        sn1anumbers=self.history.sn1a_numbers#[:-1]
-        sn2numbers=self.history.sn2_numbers
-        if xaxis=='redshift':
-                print ('this features is not tested yet.')
-                return 0
-                age,idx=self.__time_to_z(age,Hubble_0,Omega_lambda,Omega_m)
-                age=[0]+age
-                plt.xlabel('Redshift z')
-                timesteps=self.history.timesteps[idx-1:]
-                sn2numbers=sn2numbers[idx:]
-                sn1anumbers=sn1anumbers[idx:]
-        else:
-                plt.xlabel('Log-scaled age [yrs]')
-                #plt.xscale('log')
-        if rate and not fraction:
-            if xaxis=='redshift':
-                sn1a_rate=np.array(sn1anumbers)/ (np.array(timesteps)/100.)
-                sn2_rate=np.array(sn2numbers)/ (np.array(timesteps)/100.)
-            else:
-                sn1a_rate=np.array(sn1anumbers[1:])/ (np.array(self.history.timesteps)/100.)
-                sn2_rate=np.array(sn2numbers[1:])/ (np.array(self.history.timesteps)/100.)
-            sn1a_rate1=[]
-            sn2_rate1=[]
-            age=age[1:]
-            age_sn1a=[] #age[1:]
-            age_sn2=[]
-            #correct sn1a rate
-            for k in range(len(sn1a_rate)):
-                if sn1a_rate[k]>0:
-                        sn1a_rate1.append(sn1a_rate[k])
-                        age_sn1a.append(age[k])
+        sn1anumbers=self.sn1a_numbers
+        sn2numbers=self.sn2_numbers
+        plt.xlabel('Log-scaled age [yrs]')
+        sn1a_rate=np.array(sn1anumbers)/ (np.array(self.history.timesteps)/100.)
+        sn2_rate=np.array(sn2numbers)/ (np.array(self.history.timesteps)/100.)
+        sn1a_rate1=[]
+        sn2_rate1=[]
+        age=age
+        age_sn1a=[]
+        age_sn2=[]
+        #correct sn1a rate
+        for k in range(len(sn1a_rate)):
+            if sn1a_rate[k]>0:
+                    sn1a_rate1.append(sn1a_rate[k])
+                    age_sn1a.append(age[k])
 
-            for k in range(len(sn2_rate)):
-                if sn2_rate[k]>0:
-                        sn2_rate1.append(sn2_rate[k])
-                        age_sn2.append(age[k])
+        for k in range(len(sn2_rate)):
+            if sn2_rate[k]>0:
+                    sn2_rate1.append(sn2_rate[k])
+                    age_sn2.append(age[k])
 
-            if len(rate_only)==0:
-                    x=[age_sn2,age_sn1a]
-                    y=[sn1a_rate1,sn2_rate1]
-                    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
-                    plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-                    plt.ylabel('SN rate [century$^{-1}$]')
-            if rate_only=='sn1a':
-                    x=age_sn1a
-                    y= sn1a_rate1
-                    plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
-                    plt.ylabel('SNIa rate [century$^{-1}$]')
-            if rate_only=='sn2':
-                    x=age_sn2
-                    y=sn2_rate
-                    plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-                    plt.ylabel('SN2 rate [century$^{-1}$]')
-
-        else:
-            #if xaxis=='redshift':
-                        #sn1_numbers=np.array(sn1anumbers)/ (np.array(timesteps)/100.)
-                        #sn2_numbers=np.array(sn2numbers)/ (np.array(timesteps)/100.)
-            #True: #else:
-                        #sn1a_rate=np.array(sn1anumbers[1:])/ (np.array(self.history.timesteps)/100.)
-                        #sn2_rate=np.array(sn2numbers[1:])/ (np.array(self.history.timesteps)/100.)
-
-            sn1a_numbers=sn1anumbers[1:]
-            sn2_numbers=sn2numbers[1:]
-            sn1a_numbers1=[]
-            sn2_numbers1=[]
-            age_sn1a=[]
-            age_sn2=[]
-            age=age[1:]
-            for k in range(len(sn1a_numbers)):
-                if sn1a_numbers[k]>0:
-                        sn1a_numbers1.append(sn1a_numbers[k])
-                        age_sn1a.append(age[k])
-            for k in range(len(sn2_numbers)):
-                if sn2_numbers[k]>0:
-                        sn2_numbers1.append(sn2_numbers[k])
-                        age_sn2.append(age[k])
-
-            if fraction:
-                age=self.history.age
-                ratio=[]
-                age1=[]
-                for k in range(len(self.wd_sn1a_range1)):
-                    if self.wd_sn1a_range1[k]>0:
-                        ratio.append(self.history.sn1a_numbers[1:][k]/self.wd_sn1a_range1[k])
-                        age1.append(age[k])
-                plt.plot(age1,ratio)
-                plt.yscale('log')
-                #plt.xscale('log')
-                plt.ylabel('Number of SNIa going off per WD born')
-                label='SNIafractionperWD';label='sn1a '+label
-                x=age1
-                y=ratio
-                self.save_data(header=['age',label],data=[x,y])
-                return
-            else:
-                    if len(rate_only)==0:
-                            x=[age_sn1a,age_sn2]
-                            y=[sn1a_numbers,sn2_numbers]
-                            plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
-                            plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-                            plt.ylabel('SN numbers')
-                    if rate_only=='sn1a':
-                            x= age1
-                            y= sn1anumbers1
-                            plt.plot(age_sn1a,sn1a_numbers1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markever)
-                            plt.ylabel('SN numbers')
-                    if rate_only=='sn2':
-                            x= age[1:]
-                            y= sn2numbers[1:]
-                            plt.plot(age_sn2,sn2_numbers1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
-                            plt.ylabel('SN numbers')
+        if len(rate_only)==0:
+                x=[age_sn2,age_sn1a]
+                y=[sn1a_rate1,sn2_rate1]
+                plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
+                plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
+                plt.ylabel('SN rate [century$^{-1}$]')
+        if rate_only=='sn1a':
+                x=age_sn1a
+                y= sn1a_rate1
+                plt.plot(age_sn1a,sn1a_rate1,linestyle=shape1,color=color1,label=label1,marker=marker1,markevery=markevery)
+                plt.ylabel('SNIa rate [century$^{-1}$]')
+        if rate_only=='sn2':
+                x=age_sn2
+                y=sn2_rate
+                plt.plot(age_sn2,sn2_rate1,linestyle=shape2,color=color2,label=label2,marker=marker2,markevery=markevery)
+                plt.ylabel('SN2 rate [century$^{-1}$]')
 
         plt.legend(loc=1)
         plt.yscale('log')
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-        if rate:
-            label='rate'
-        else:
-            label='number'
-        if len(rate_only)==0:
-                if rate:
-                        label='rate'
-                else:
-                        label='number'
-                self.save_data(header=['age','SNIa '+label,'age','CCSN '+label],data=[x[0],y[0],x[1],y[1]])
-        else:
-                if rate_only=='sn1a':
-                        label='sn1a '+label
-                else:
-                        label='ccsn '+label
-                #self.save_data(header=['age',label],data=[x,y])
+
 
     def save_data(self,header=[],data=[],filename='plot_data.txt'):
         '''
@@ -4294,7 +4199,7 @@ class omega( chem_evol ):
     ##############################################
     #          Plot Star Formation Rate          #
     ##############################################
-    def plot_star_formation_rate(self,fig=6,fraction=False,source='all',marker='',shape='',color='',label='',abs_unit=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_star_formation_rate(self,fig=6,marker='',shape='',color='',label='',fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
         '''
 
         Plots the star formation rate over time.
@@ -4302,14 +4207,6 @@ class omega( chem_evol ):
 
         Parameters
         ----------
-
-        fraction : boolean
-           if true: fraction of ISM which transforms into stars;
-           else: mass of ISM which goes into stars
-
-        source : string
-            either 'all' for total star formation rate; 'agb' for AGB and 'massive' for massive stars
-            WARNING! Do not use in OMEGA, only use it in SYGMA.
 
         marker : string
             marker type
@@ -4327,92 +4224,31 @@ class omega( chem_evol ):
         import matplotlib.pyplot as plt
 
         if (len(marker)==0 and len(shape)==0) and len(color)==0:
-            shape,marker,color=self.__msc(source,shape,marker,color)
+            shape,marker,color=self.__msc("all",shape,marker,color)
         plt.figure(fig, figsize=(fsize[0],fsize[1]))
         #maybe a histogram for display the SFR?
-        if False:
-                age=self.history.age
-                #age=[0.1]+self.history.age[1:-1]
-                sfr=self.history.sfr
-                plt.xlabel('Log-scaled age [yrs]')
-                #plt.xscale('log')
-                mean_age=[]
-                color='r'
-                label='aa'
-                age_bdy=[]
-                for k in range(len(age)-1):
-                        mean_age.append(1) #age[k+1]-age[k])
-                for k in range(len(age)):
-                        age_bdy.append(age[k])
-                print ('age',len(mean_age))
-                print ('weights',len(sfr))
-                print ('bdy',len(age_bdy))
-                print (sfr[:5])
-                p1 =plt.hist(mean_age, bins=age_bdy,weights=sfr,facecolor=color,color=color,alpha=0.5,label=label)
 
         #Plot the SFR in [Mo yr^-1]
-        if abs_unit:
 
-            #Define visual aspects
-            shape,marker,color=self.__msc(source,shape,marker,color)
+        #Define visual aspects
+        shape,marker,color=self.__msc("all",shape,marker,color)
 
-            #Recover the SFR by dividing the mass locked into stars, at
-            #each timestep, by the duration of the timestep
-            age=self.history.age
-            #sfr_plot = self.history.m_locked / self.history.timesteps
-            sfr_plot = self.history.sfr_abs
+        #Recover the SFR by dividing the mass locked into stars, at
+        #each timestep, by the duration of the timestep
+        age=self.history.age
+        #sfr_plot = self.history.m_locked / self.history.timesteps
+        sfr_plot = self.sfr_abs
 
-            #Label and display axis
-            plt.xlabel('Age [yrs]')
-            plt.ylabel('SFR [Mo/yr]')
+        #Label and display axis
+        plt.xlabel('Age [yrs]')
+        plt.ylabel('SFR [Mo/yr]')
 
-            #Plot
-            plt.plot(age[:-1],sfr_plot[:-1],label=label,marker=marker,color=color,linestyle=shape)
+        #Plot
+        plt.plot(age,sfr_plot,label=label,marker=marker,color=color,linestyle=shape)
 
-            #self.save_data(header=['age','SFR'],data=[age,sfr_plot])
-
-        #Plot the mass fraction of gas available converted into stars
-        elif fraction:
-                sfr=self.history.sfr
-                if source=='all':
-                        label='all'
-                elif source=='agb':
-                        sfr=np.array(sfr)*np.array(self.history.m_locked_agb)/np.array(self.history.m_locked)
-                        label='AGB'
-                elif source=='massive':
-                        masslocked=self.history.m_locked_massive
-                        sfr=np.array(sfr)*np.array(self.history.m_locked_massive)/np.array(self.history.m_locked)
-                        label='Massive'
-                age=self.history.age[:-1]
-                print (len(age),len(sfr))
-                plt.xlabel('Age [yrs]')
-                plt.plot(age,sfr,label=label,marker=marker,linestyle=shape)
-                plt.ylabel('Fraction of current gas mass into stars')
-                #self.save_data(header=['age','SFR'],data=[age,sfr])
-
-        #Plot the mass converted into stars
-        else:
-                if source=='all':
-                        masslocked=self.history.m_locked
-                        label='all'
-                elif source=='agb':
-                        masslocked=self.history.m_locked_agb
-                        label='AGB'
-                elif source=='massive':
-                        masslocked=self.history.m_locked_massive
-                        label='Massive'
-                age=self.history.age[1:]
-                plt.plot(age,masslocked,marker=marker,linestyle=shape,label=label)
-                plt.xlabel('Age [yrs]')
-                plt.ylabel('ISM Mass transformed into stars')
-                plt.xscale('log');plt.yscale('log')
-                plt.legend()
 
         ax=plt.gca()
         self.__fig_standard(ax=ax,fontsize=fontsize,labelsize=labelsize,rspace=rspace, bspace=bspace,legend_fontsize=legend_fontsize)
-
-        #print ('Total mass transformed in stars, total mass transformed in AGBs, total mass transformed in massive stars:')
-        #print (np.sum(self.history.m_locked),np.sum(self.history.m_locked_agb),np.sum(self.history.m_locked_massive))
 
 
     def __time_to_z(self,time,Hubble_0,Omega_lambda,Omega_m):
@@ -5907,7 +5743,7 @@ class omega( chem_evol ):
 
         # Save the star formation history
         fig = plt.figure()
-        plt.plot(self.history.age,self.history.sfr_abs)
+        plt.plot(self.history.age,self.sfr_abs)
         plt.xlabel('Age [yr]', fontsize=fontsize)
         plt.ylabel('Star formation rate [Msun/yr]', fontsize=fontsize)
         plt.savefig(log_path+'star_formation_history.pdf')
@@ -5915,11 +5751,11 @@ class omega( chem_evol ):
 
         # Save the SN rates
         fig = plt.figure()
-        y_cc = 100.0*np.array(self.history.sn2_numbers[1:])/ \
+        y_cc = 100.0*np.array(self.sn2_numbers)/ \
                  np.array(self.history.timesteps)
-        plt.plot(self.history.age[1:],y_cc,linestyle='-',label='CC SNe')
-        plt.plot(self.history.age[1:], \
-                 100.0*np.array(self.history.sn1a_numbers[1:])/ \
+        plt.plot(self.history.age[:-1],y_cc,linestyle='-',label='CC SNe')
+        plt.plot(self.history.age[:-1], \
+                 100.0*np.array(self.sn1a_numbers)/ \
                  np.array(self.history.timesteps),linestyle='--',\
                  label='SNe Ia')
         plt.xlabel('Age [yr]', fontsize=fontsize)
@@ -5953,8 +5789,8 @@ class omega( chem_evol ):
         f.write('Initial mass of gas: '+str("%.4g" % np.sum(self.ymgal[0]))+' [Msun]\n')
         f.write('Final mass of gas: '+str("%.4g" % np.sum(self.ymgal[-1]))+' [Msun]\n')
         f.write('Final CC/Ia SN ratio: '+\
-                 str("%.4g" % (self.history.sn2_numbers[-1]/\
-                 self.history.sn1a_numbers[-1])+'\n'))
+                 str("%.4g" % (self.sn2_numbers[-1]/\
+                 self.sn1a_numbers[-1])+'\n'))
         f.write('Final metallicity (Z): ' + str(self.history.metallicity[-1]) + '\n')
 
         # Close the output file

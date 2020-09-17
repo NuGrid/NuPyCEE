@@ -929,9 +929,8 @@ class chem_evol(object):
             self.history.ism_iso_yield_1a.append(ymgal_1a[0])
             self.history.ism_iso_yield_nsm.append(ymgal_nsm[0])
             self.history.ism_iso_yield_massive.append(ymgal_massive[0])
-            self.history.sn1a_numbers.append(0)
-            self.history.nsm_numbers.append(0)
-            self.history.sn2_numbers.append(0)
+            self.history.sn1a_numbers = []
+            self.history.nsm_numbers = []
             self.history.m_locked = []
             self.history.m_locked_agb = []
             self.history.m_locked_massive = []
@@ -3461,7 +3460,11 @@ class chem_evol(object):
         if len(self.dt_in) > 0:
 
             # Copy the timesteps
-            timesteps_gt = self.dt_in
+            timesteps_gt = list(self.dt_in)
+
+            # Add one last step (needed to calculated rates 
+            # for the last timestep wanted by the user)
+            timesteps_gt.append(timesteps_gt[-1])
 
         # If the timesteps need to be calculated ...
         else:
@@ -3490,6 +3493,9 @@ class chem_evol(object):
                     timesteps_gt.append(int(t-t0)*self.history.dt)
                     t0=t
 
+                # Add one last step
+                timesteps_gt.append(self.history.dt)
+
             # If the special timestep option is chosen ...
             if self.special_timesteps > 0:
 
@@ -3498,6 +3504,11 @@ class chem_evol(object):
                          np.log10(self.history.tend), self.special_timesteps)
                 times1 = [0] + list(times1)
                 timesteps_gt = np.array(times1[1:]) - np.array(times1[:-1])
+
+                # Add one last step
+                aa = (np.log10(timesteps_gt[-1]) - np.log10(timesteps_gt[-2]))
+                bb = np.log10(timesteps_gt[-1]) - aa * len(timesteps_gt)
+                timesteps_gt = np.append(timesteps_gt, 10**(aa*(len(timesteps_gt)+1) + bb))
 
         # If a timestep needs to be added to be synchronized with
         # the external program managing merger trees ...
@@ -3540,7 +3551,55 @@ class chem_evol(object):
             timesteps_gt[-1] = self.history.tend - sum(timesteps_gt)
 
         # Return the duration of all timesteps
-        return timesteps_gt
+        return np.array(timesteps_gt)
+
+    ##############################################
+    #            Remove Last Timestep            #
+    ##############################################
+    def _remove_last_timestep(self):
+
+        '''
+        This function remove the last timestep that was created to 
+        make sure rates are provided for the last step. For example,
+        if the user asks for 30 timesteps, there will be 31 time
+        entries in the output, but we need to add temporarily a
+        32nd steps so that rates can be calculated for step 31.
+
+        '''
+
+        # Remove last entry from a subset of arrays
+        self.nb_timesteps -= 1
+        self.history.age = self.history.age[:-1]
+        self.ymgal = self.ymgal[:-1]
+        self.ymgal_massive = self.ymgal_massive[:-1]
+        self.ymgal_agb = self.ymgal_agb[:-1]
+        self.ymgal_1a = self.ymgal_1a[:-1]
+        self.ymgal_nsm = self.ymgal_nsm[:-1]
+        for iiii in range(0,self.nb_delayed_extra):
+            ymgal_delayed_extra[iiii] = ymgal_delayed_extra[iiii][:-1]
+        if self.len_decay_file > 0 or self.use_decay_module:
+            self.ymgal_radio = self.ymgal_radio[:-1]
+            self.ymgal_massive_radio = self.ymgal_massive_radio[:-1]
+            self.ymgal_agb_radio = self.ymgal_agb_radio[:-1]
+            self.ymgal_1a_radio = self.ymgal_1a_radio[:-1]
+            self.ymgal_nsm_radio = self.ymgal_nsm_radio[:-1]
+            for iiii in range(0,self.nb_delayed_extra):
+                ymgal_delayed_extra_radio[iiii] = ymgal_delayed_extra_radio[iiii][:-1]
+        self.imf_mass_ranges_contribution = self.imf_mass_ranges_contribution[:-1]
+        self.imf_mass_ranges_mtot = self.imf_mass_ranges_mtot[:-1]
+        self.number_stars_born = self.number_stars_born[:-1]
+        if self.pre_calculate_SSPs:
+            self.t_ce = self.t_ce[:-1]
+
+        self.history.ism_elem_yield = self.history.ism_elem_yield[:-1]
+        self.history.ism_iso_yield = self.history.ism_iso_yield[:-1]
+        self.history.ism_elem_yield_agb = self.history.ism_elem_yield_agb[:-1]
+        self.history.ism_iso_yield_agb = self.history.ism_iso_yield_agb[:-1]
+        self.history.ism_elem_yield_1a = self.history.ism_elem_yield_1a[:-1]
+        self.history.ism_iso_yield_1a = self.history.ism_iso_yield_1a[:-1]
+        self.history.ism_elem_yield_nsm = self.history.ism_elem_yield_nsm[:-1]
+        self.history.ism_iso_yield_nsm = self.history.ism_iso_yield_nsm[:-1]
+        self.history.ism_elem_yield_massive = self.history.ism_iso_yield_massive[:-1]
 
 
     ##############################################
@@ -3696,8 +3755,11 @@ class chem_evol(object):
                 dt_in_split.append(self.dt_split_info[i_bsd][0])
                 t_bsd += dt_in_split[-1]
 
+        # Add one last timestep
+        dt_in_split.append(dt_in_split[-1])
+
         # Return the timesteps array
-        return dt_in_split
+        return np.array(dt_in_split)
 
 
     ##############################################
@@ -4008,9 +4070,7 @@ class chem_evol(object):
             self.history.ism_iso_yield_1a.append(self.ymgal_1a[i])
             self.history.ism_iso_yield_nsm.append(self.ymgal_nsm[i])
             self.history.ism_iso_yield_massive.append(self.ymgal_massive[i])
-            self.history.sn1a_numbers.append(self.sn1a_numbers[i-1])
             self.history.nsm_numbers.append(self.nsm_numbers[i-1])
-            self.history.sn2_numbers.append(self.sn2_numbers[i-1])
             self.history.m_locked.append(self.m_locked)
 #            self.history.m_locked_agb.append(self.m_locked_agb)
 #            self.history.m_locked_massive.append(self.m_locked_massive)
@@ -4026,11 +4086,6 @@ class chem_evol(object):
         as converting isotopes into chemical elements.
 
         '''
-
-        # Fill the last bits of the history class
-        self.history.mdot = self.mdot
-        self.history.imf_mass_ranges_contribution=self.imf_mass_ranges_contribution
-        self.history.imf_mass_ranges_mtot = self.imf_mass_ranges_mtot
 
         # Convert isotopes into elements
         if self.pre_calculate_SSPs:
