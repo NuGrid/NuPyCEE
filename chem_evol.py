@@ -3600,6 +3600,7 @@ class chem_evol(object):
         self.history.ism_elem_yield_nsm = self.history.ism_elem_yield_nsm[:-1]
         self.history.ism_iso_yield_nsm = self.history.ism_iso_yield_nsm[:-1]
         self.history.ism_elem_yield_massive = self.history.ism_iso_yield_massive[:-1]
+        self.history.metallicity = self.history.metallicity[:-1]
 
 
     ##############################################
