@@ -3462,7 +3462,7 @@ class chem_evol(object):
             # Copy the timesteps
             timesteps_gt = list(self.dt_in)
 
-            # Add one last step (needed to calculated rates 
+            # Add one last step (needed to calculated rates
             # for the last timestep wanted by the user)
             timesteps_gt.append(timesteps_gt[-1])
 
@@ -3559,7 +3559,7 @@ class chem_evol(object):
     def _remove_last_timestep(self):
 
         '''
-        This function remove the last timestep that was created to 
+        This function remove the last timestep that was created to
         make sure rates are provided for the last step. For example,
         if the user asks for 30 timesteps, there will be 31 time
         entries in the output, but we need to add temporarily a
