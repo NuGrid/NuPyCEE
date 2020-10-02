@@ -1390,8 +1390,7 @@ class chem_evol(object):
         if len(self.table_radio) > 0:
             self.radio_massive_agb_on = True
             self.ytables_radio = ry.read_yields_M_Z(os.path.join(nupy_path,\
-                self.table_radio), excludemass=self.exclude_masses,\
-                isotopes=self.radio_iso)
+                self.table_radio), isotopes=self.radio_iso)
 
         # SNe Ia
         sys.stdout.flush()
