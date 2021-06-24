@@ -3916,17 +3916,12 @@ class omega( chem_evol ):
             #self.save_data(header=[xaxis,yaxis],data=[x,y])
 
 
-    def plot_totmasses(self,fig=4,mass='gas',source='all',norm='no',label='',shape='',marker='',color='',markevery=20,log=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
+    def plot_totmasses(self,fig=4,source='all',norm='no',label='',shape='',marker='',color='',markevery=20,log=True,fsize=[10,4.5],fontsize=14,rspace=0.6,bspace=0.15,labelsize=15,legend_fontsize=14):
         '''
-        Plots either gas or star mass in fraction of total mass
-        vs time.
+        Plots gas mass in fraction of total mass vs time.
 
         Parameters
         ----------
-
-        mass : string
-            either 'gas' for ISM gas mass
-            or 'stars' for gas locked away in stars (totalgas - ISM gas)
 
         norm : string
             normalization, either 'no' for no normalization (total gass mass in solar masses),
@@ -4038,6 +4033,10 @@ class omega( chem_evol ):
             elif norm == 'no':
                 ism_gasm.append(gas_evol[k])
                 star_m.append(self.history.mgal-gas_evol[k])
+
+        mass = 'gas'
+        #TODO This is a quick fix to remove input mass option (should rewrite the whole function)
+
         if mass == 'gas':
             y=ism_gasm
         if mass == 'stars':
