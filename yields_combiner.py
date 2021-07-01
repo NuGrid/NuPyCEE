@@ -52,7 +52,7 @@ class yields_combiner():
     ##############################################
     #               Combine Tables               #
     ##############################################
-    def combine_tables(self, path_list, isotopes, log_q=True, log_Z=True):
+    def combine_tables(self, path_list, isotopes, log_q=True, log_Z=True, overwrite=[]):
 
         '''
         Combine different yields table and create a unique
@@ -66,6 +66,8 @@ class yields_combiner():
             isotopes:  List of isotopes to be in the combined table
             log_q:     Whether quantity should be interpolated in log space
             log_Z:     Whether metallicities should be interpolated in log space
+            overwrite: List of table paths that will overwrite the combined table.
+                       See function __overwrite_models(..) for more information.
 
         '''
 
@@ -81,6 +83,11 @@ class yields_combiner():
         # Extract the list of metallicities covered by all tables
         Z_list = self.__combine_Z(nb_ytables, ytable_list)
 
+        # Overwrite specific stellar models if necessary
+        if len(overwrite) > 0:
+            ytable_comb = self.__overwrite_models(\
+                nb_ytables, ytable_list, overwrite, isotopes)
+
         # Uniform the metallicity grid of each individual yields table
         ytable_list = self.__uniform_ytables(\
                         nb_ytables, ytable_list, Z_list, log_q, log_Z)
@@ -88,6 +95,9 @@ class yields_combiner():
         # Combine the yields table objects into one
         ytable_comb = self.__combine_yields_dictionaries(\
                         nb_ytables, ytable_list, Z_list)
+
+        # Calculate net yields if possible (needed for interpolated models)
+        ytable_comb.check_net_yields()
 
         # Return the combined yields table object
         return ytable_comb
@@ -251,11 +261,73 @@ class yields_combiner():
         # Calculate the initial, final, and total ejected mass
         ytable_comb.check_absolute_masses()
 
-        # Calculate net yields if possible
-        ytable_comb.check_net_yields()
-
         # Return the combined yields
         return ytable_comb
+
+
+
+    ##############################################
+    #             Overwrite Models               #
+    ##############################################
+    def __overwrite_models(self, nb_ytables, ytable_list, overwrite, isotopes):
+
+        '''
+        Overwrite models in the combined yields table. For example,
+        if overwrite=[path1,path2] and it points to table1 with 
+        M=20,25 and table2 with M=25, then it will first overwrite
+        the 20 and 25 Msun model in the combined table using table1,
+        and then overwrite (again) the 25 Msun using table2. The 
+        results will be a combined table where the 20 Msun comes
+        from table1 and the 25 Msun model comes from table2. Overwrite
+        should be in order of increasing priority.
+
+        Parameters
+        ==========
+            nb_ytables:  Number of yields tables to be ultimately combined
+            ytable_list: List of read_yields objects
+            overwrite:   List of table paths that will overwrite the combined table.
+            isotopes:    List of isotopes to be in the combined table
+
+        '''
+
+        # Copy the list of all models of the combined table
+        all_models = []
+        for ytable in ytable_list:
+            all_models = all_models + ytable.models
+
+        # Read all yields table aimed to overwrite
+        ov_table_list = []
+        for path in overwrite:
+            ov_table_list.append(ry.read_yields_M_Z(\
+                os.path.join(nupy_path,path), isotopes=isotopes))
+
+        # For each table that will overwrite ..
+        for i_t in range(len(ov_table_list)):
+            ov_table = ov_table_list[i_t]
+
+            # Check if all models exist in the combined table
+            models_exist = True
+            for model in ov_table.models:
+                if model not in all_models:
+                    models_exist = False
+
+            # If the overwrite process can be accomodated ..
+            if models_exist:
+
+                # Overwrite models one by one
+                for model in ov_table.models:
+                    for i_main in range(nb_ytables):
+                        if model in ytable_list[i_main].models:
+                            ytable_list[i_main].table[model] = copy.deepcopy(ov_table.table[model])
+
+            # Do not overwrite if it cannot be fully accomodated
+            else:
+                print("Warning - The following table did not overwrite, due to"+\
+                    " a mismatch with the list of models in the main yields tables.")
+                print(overwrite[i_t])
+
+        # Return the overwritten yields tables
+        return ytable_list
 
 
 
