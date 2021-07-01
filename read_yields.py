@@ -92,6 +92,14 @@ class read_yields( object ):
         elif quantity == "Yields":
             return self.__get_field_list(model_label, isotopes=isotopes, field="Yields")
 
+        # Return the full net yields
+        elif quantity == "Net_yields":
+            if self.net_yields_available:
+                return self.__get_field_list(model_label, isotopes=isotopes, field="Net_yields")
+            else:
+                print("Error - Net yields not available (see X0 values)")
+                return None
+
         # Return the full yields
         elif quantity == "X0":
             return self.__get_field_list(model_label, isotopes=isotopes, field="X0")
@@ -154,7 +162,7 @@ class read_yields( object ):
 
         '''
 
-        Overwrite the yieldsof a specific specie (e.g., C-12)
+        Overwrite the yields of a specific specie (e.g., C-12)
         of a given stellar model
 
         Arguments
@@ -396,10 +404,10 @@ class read_yields( object ):
         '''
 
         # Check whether all absolute masses are provided
-        self.__check_absolute_masses()
+        self.check_absolute_masses()
 
         # Check whether X0 is provided for net yields
-        self.__check_net_yields()
+        self.check_net_yields()
 
         # TODO check mass and isotope consistency
         # .. self.isotopes + what is in Yields and X0
@@ -408,7 +416,7 @@ class read_yields( object ):
     ##############################################
     #              Check Net Yields              #
     ##############################################
-    def __check_net_yields(self):
+    def check_net_yields(self):
 
         '''
 
@@ -453,7 +461,7 @@ class read_yields( object ):
     ##############################################
     #            Check Absolute Masses           #
     ##############################################
-    def __check_absolute_masses(self):
+    def check_absolute_masses(self):
 
         '''
 
@@ -503,7 +511,7 @@ class read_yields_M_Z( read_yields ):
 
         # Define the type of yields table
         table_type = "M_Z_dependent"
-        self.key_one_item = ["Lifetime", "M_final"]
+        self.key_one_item = ["Lifetime", "M_initial", "M_final", "M_ejected"]
 
         # Initialize the common parameters
         read_yields.__init__(self, table_path=table_path, \

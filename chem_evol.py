@@ -49,6 +49,8 @@ JAN2019: B. Cote
 FEB2019: A. Yagüe, B. Cote
 - Optimized to code to run faster (integration method)
 
+Please see GitHub commit history for up-to-date credits
+
 Usage
 =====
 
@@ -74,7 +76,7 @@ nupy_path = os.path.dirname(os.path.realpath(__file__))
 import NuPyCEE.read_yields as ry
 
 
-class chem_evol(object):
+class chem_evol( object ):
 
 
     '''
@@ -1166,11 +1168,6 @@ class chem_evol(object):
             print ('Error - dt must be smaller or equal to tend.')
             self.need_to_quit = True
 
-        # Transition mass between AGB and massive stars
-        #if #(self.transitionmass <= 7)or(self.transitionmass > 12):
-           # print ('Error - transitionmass must be between 7 and 12 Mo.')
-           # self.need_to_quit = True
-
         # IMF
         if not self.imf_type in ['salpeter','chabrier','kroupa','input', \
             'alphaimf','chabrieralpha','fpp', 'kroupa93', 'lognormal']:
@@ -1178,13 +1175,6 @@ class chem_evol(object):
             self.need_to_quit = True
 
         # IMF yields range
-        #if self.imf_yields_range[0] < 1:
-        #    print ('Error - imf_yields_range lower boundary must be >= 1.')
-            #self.need_to_quit = True
-
-        #if (self.imf_yields_range[0] >= self.imf_bdys[1]) or \
-        #   (self.imf_yields_range[0] <= self.imf_bdys[0]) or \
-         #  (self.imf_yields_range[1] >= self.imf_bdys[1]):
         if ((self.imf_yields_range[0] >  self.imf_bdys[1]) or \
             (self.imf_yields_range[1] < self.imf_bdys[0])):
             print ('Error - part of imf_yields_range must be within imf_bdys.')
@@ -1204,11 +1194,6 @@ class chem_evol(object):
             ['exp','gauss','maoz','power_law']:
             print ('Error - Selected sn1a_rate is not available.')
             self.need_to_quit = True
-
-        # Initial metallicity for the gas
-        #if not self.iniZ in [0.0, 0.0001, 0.001, 0.006, 0.01, 0.02]:
-        #    print ('Error - Selected iniZ is not available.')
-        #    self.need_to_quit = True
 
         # If popIII stars are used ...
         if self.iniZ == 0.0:
@@ -1241,9 +1226,6 @@ class chem_evol(object):
              if (not lt == lmr):
                  print ('Error - parameter extra_source_table and  extra_source_mass_range not of equal size')
                  self.need_to_quit = True
-             #if  (not lt == leZ):
-             #    print ('Error - parameter extra_source_table and extra_source_exclude_Z not of equal size')
-             #    self.need_to_quit = True
 
         # Use of radioactive isotopes
         if (self.len_decay_file > 0 or self.use_decay_module) and \
