@@ -44,10 +44,6 @@ class yields_combiner():
         # Convert input parameters into self parameters
         self.zero_log = zero_log
 
-        # Declare dictionary fields that are isotopic abundances
-        self.iso_fields = ["Yields", "X0"]
-
-
 
     ##############################################
     #               Combine Tables               #
@@ -71,6 +67,9 @@ class yields_combiner():
 
         '''
 
+        # Set the list of fields that includes isotopes abundances
+        self.__set_iso_fields()
+
         # Read all yields table that need to be combined
         nb_ytables, ytable_list = self.__read_all_yields(path_list, isotopes)
 
@@ -85,8 +84,13 @@ class yields_combiner():
 
         # Overwrite specific stellar models if necessary
         if len(overwrite) > 0:
-            ytable_comb = self.__overwrite_models(\
+            ytable_list = self.__overwrite_models(\
                 nb_ytables, ytable_list, overwrite, isotopes)
+
+        # Remove net yields fields if this option cannot be
+        # accomodated with all individual yields tables.
+        # This needs to be after __overwrite_models().
+        ytable_list = self.__adjust_net_yields_option(nb_ytables, ytable_list)
 
         # Uniform the metallicity grid of each individual yields table
         ytable_list = self.__uniform_ytables(\
@@ -140,6 +144,50 @@ class yields_combiner():
 
 
     ##############################################
+    #          Adjust Net Yields Option          #
+    ##############################################
+    def __adjust_net_yields_option(self, nb_ytables, ytable_list):
+
+        '''
+        Scan all yields table objects that will compose the combined
+        table, and remove the net yields option for all object if at
+        least one of them cannot work with net yields. This is because
+        the combined yields will be used in NuPyCEE as if it was a
+        single yields table.
+
+        Parameters
+        ==========
+            nb_ytables:  Number of yields tables to be ultimately combined
+            ytable_list: List of read_yields objects
+
+        '''
+
+        # Keep track of whether the net yields option can be used
+        can_use_net_yields = True
+
+        # For each yields table object ..
+        for ytable in ytable_list:
+
+            # Check if net yields can be used
+            if not ytable.net_yields_available:
+                can_use_net_yields = False
+                break
+
+        # Remove the net yields option if needed
+        if not can_use_net_yields:
+            self.__set_iso_fields(net_yields_available=False)
+            for i_t in range(nb_ytables):
+                ytable_list[i_t].net_yields_available = False
+                for model in ytable_list[i_t].models:
+                    del ytable_list[i_t].table[model]["X0"]
+                    del ytable_list[i_t].table[model]["Net_yields"]
+
+        # Return the yields table objects
+        return ytable_list
+
+
+
+    ##############################################
     #              Add Z to Ytable               #
     ##############################################
     def __add_Z_to_ytable(self, Z_int, ytable, log_q, log_Z):
@@ -171,9 +219,11 @@ class yields_combiner():
             # For each quantity ..
             for quantity in quantity_list:
 
-                # Interpolate the quantity. This excludes net yields, since
-                # there are negative values that cannot be in log10.
-                if not quantity == "Net_yields":
+                # Interpolate the quantity (if not net yields, they are 
+                # calculated later on to avoid log10(0) problems)
+                if quantity == "Net_yields":
+                    quantity_int = None
+                else:
                     quantity_int = self.__interpolate_specific_M_vs_Z(\
                         M, Z_int, ytable, quantity, log_q, log_Z)
 
@@ -220,6 +270,32 @@ class yields_combiner():
 
         # Returned the yields table object
         return ytable
+
+
+
+    ##############################################
+    #              Set Iso Fields                #
+    ##############################################
+    def __set_iso_fields(self, net_yields_available=True):
+
+        '''
+        Set the dictionary keys that include isotopic abundances
+        in the yields table object.
+
+        Parameters
+        ==========
+            net_yields_available: True is net yields can be used
+
+        '''
+
+        # If net yields are available ..
+        if net_yields_available:
+            self.iso_fields = ["Yields", "X0"]
+
+        # If net yields are not available ..
+        else:
+            self.iso_fields = ["Yields"]
+
 
 
     ##############################################
@@ -319,6 +395,11 @@ class yields_combiner():
                     for i_main in range(nb_ytables):
                         if model in ytable_list[i_main].models:
                             ytable_list[i_main].table[model] = copy.deepcopy(ov_table.table[model])
+
+                # Signal that the net yields option need to be turned off if needed
+                # See __adjust_net_yields_option()
+                if not ov_table.net_yields_available:
+                    ytable_list[0].net_yields_available = False
 
             # Do not overwrite if it cannot be fully accomodated
             else:
@@ -545,6 +626,7 @@ class yields_combiner():
             quantity_arr = np.zeros(ytable.nb_Z)
 
         # Extract the quantity for each metallicity available in the table
+        #print(quantity)
         for i_Z in range(ytable.nb_Z):
             quantity_arr[i_Z] = ytable.get(M=M, Z=ytable.Z_list[i_Z], quantity=quantity)
 
