@@ -138,6 +138,10 @@ class yields_combiner():
                     ytable_list[i_t] = \
                         self.__add_Z_to_ytable(Z, ytable_list[i_t], log_q, log_Z)
 
+            # Update the list of metallicities in the table
+            ytable_list[i_t].Z_list = copy.deepcopy(Z_list)
+            ytable_list[i_t].nb_Z = len(Z_list)
+
         # Return the uniform yields tables
         return ytable_list
 
@@ -626,7 +630,6 @@ class yields_combiner():
             quantity_arr = np.zeros(ytable.nb_Z)
 
         # Extract the quantity for each metallicity available in the table
-        #print(quantity)
         for i_Z in range(ytable.nb_Z):
             quantity_arr[i_Z] = ytable.get(M=M, Z=ytable.Z_list[i_Z], quantity=quantity)
 
