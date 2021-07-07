@@ -19,8 +19,7 @@ nupy_path = os.path.dirname(os.path.realpath(__file__))
 
 # Import NuPyCEE codes
 import NuPyCEE.read_yields as ry
-import NuPyCEE.chem_evol as chem_evol
-
+from NuPyCEE.utils import interpolation
 
 class yields_combiner():
 
@@ -28,7 +27,11 @@ class yields_combiner():
     Input parameters (yields_combiner.py)
     ================
 
-    ...
+    zero_log : float
+        Value that replaces zeros in the yields table when
+        the codes need to interpolate yields in log-log space
+
+        Default value : 1.0e-30
 
     '''
 
@@ -37,9 +40,6 @@ class yields_combiner():
     ##               Constructor                ##
     ##############################################
     def __init__(self, zero_log=1.0e-30):
-
-        # Create an instance of chem_evol to access interpolation functions
-        self.ce = chem_evol.chem_evol()
 
         # Convert input parameters into self parameters
         self.zero_log = zero_log
@@ -716,7 +716,7 @@ class yields_combiner():
                 indx += 1
 
         # Return the interpolated quantities
-        return self.ce.interpolation(x_arr, y_arr, xx, indx, interp_list)
+        return interpolation(x_arr, y_arr, xx, indx, interp_list)
 
 
 

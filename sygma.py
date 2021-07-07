@@ -127,7 +127,9 @@ class sygma( chem_evol ):
                  imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
                  sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30, \
                  nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8.0, iolevel=0, \
-                 ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
+                 ini_alpha=True, \
+                 agb_table='yield_tables/agb_stars_nugrid_R18.txt',\
+                 massive_table='yield_tables/massive_stars_nugrid_R18_delay.txt',\
                  table_radio='', decay_file='', sn1a_table_radio='',\
                  nsmerger_table_radio='',\
                  hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_i99_W7.txt',sn1a_energy=1e51,\
@@ -168,14 +170,15 @@ class sygma( chem_evol ):
                  delayed_extra_yields_norm_radio=np.array([]), \
                  ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
                  ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),
-                 yield_modifier=np.array([])):
+                 yield_modifier=np.array([]), overwrite=np.array([])):
 
         # Call the init function of the class inherited by SYGMA
         chem_evol.__init__(self, is_sygma=True, imf_type=imf_type, alphaimf=alphaimf, \
                  imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \
                  special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
                  nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
-                 ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
+                 ini_alpha=ini_alpha, agb_table=agb_table, overwrite=overwrite,\
+                 massive_table=massive_table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table,sn1a_energy=sn1a_energy,\
                  table_radio=table_radio, decay_file=decay_file,\
                  sn1a_table_radio=sn1a_table_radio, \

@@ -262,7 +262,8 @@ class omega( chem_evol ):
                  tend=13e9, mgal=1.0e10, transitionmass=8.0, iolevel=0, \
                  ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=-1,\
                  high_mass_extrapolation='copy',\
-                 table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
+                 agb_table='yield_tables/agb_stars_nugrid_R18.txt',\
+                 massive_table='yield_tables/massive_stars_nugrid_R18_delay.txt',\
                  yield_tables_dir='',\
                  f_network='isotopes_modified.prn', f_format=1,\
                  table_radio='', decay_file='', sn1a_table_radio='',\
@@ -339,7 +340,7 @@ class omega( chem_evol ):
                  nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
                  inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
                  inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
-                 yield_modifier=np.array([])):
+                 yield_modifier=np.array([]),overwrite=np.array([])):
 
         # Get the name of the instance
         import traceback
@@ -358,7 +359,8 @@ class omega( chem_evol ):
                  imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \
                  special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
                  transitionmass=transitionmass, iolevel=iolevel, \
-                 ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
+                 ini_alpha=ini_alpha, agb_table=agb_table, overwrite=overwrite, \
+                 massive_table=massive_table, hardsetZ=hardsetZ, \
                  sn1a_on=sn1a_on, sn1a_table=sn1a_table, nsm_dtd_power=nsm_dtd_power,\
                  ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
                  nsmerger_table=nsmerger_table, t_merger_max=t_merger_max,\

@@ -74,6 +74,8 @@ nupy_path = os.path.dirname(os.path.realpath(__file__))
 
 # Import NuPyCEE codes
 import NuPyCEE.read_yields as ry
+import NuPyCEE.yields_combiner as yields_combiner
+from NuPyCEE.utils import interpolation
 
 
 class chem_evol( object ):
@@ -267,10 +269,20 @@ class chem_evol( object ):
 
         Default value : []
 
-    table : string
-        Path pointing toward the stellar yield tables for massive and AGB stars.
+    agb_table : string
+        Path pointing toward the stellar yield tables for AGB stars.
 
-        Default value : 'yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt' (NuGrid)
+        Default value : 'yield_tables/agb_stars_nugrid_R18.txt' (NuGrid)
+
+    massive_table : string
+        Path pointing toward the stellar yield tables for massive stars.
+
+        Default value : 'yield_tables/massive_stars_nugrid_R18_delay.txt' (NuGrid)
+
+    overwrite : list of strings
+        Path pointing to specific stellar models that will overwrite agb_ and massive_table
+
+        Default value : []
 
     sn1a_table : string
         Path pointing toward the stellar yield table for SNe Ia.
@@ -451,7 +463,8 @@ class chem_evol( object ):
              sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30,\
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0,\
              ini_alpha=True, is_sygma=False,\
-             table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt',\
+             agb_table='yield_tables/agb_stars_nugrid_R18.txt',\
+             massive_table='yield_tables/massive_stars_nugrid_R18_delay.txt',\
              f_network='isotopes_modified.prn', f_format=1,\
              table_radio='', decay_file='', sn1a_table_radio='',\
              nsmerger_table_radio='',\
@@ -520,7 +533,10 @@ class chem_evol( object ):
              nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
              inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
              inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
-             yield_modifier=np.array([])):
+             yield_modifier=np.array([]),overwrite=np.array([])):
+
+        # Create an instance of the yields combiner code
+        self.yc = yields_combiner.yields_combiner()
 
         # Initialize the history class which keeps the simulation in memory
         self.history = History()
@@ -566,7 +582,8 @@ class chem_evol( object ):
         self.extra_source_exclude_Z=extra_source_exclude_Z
         self.pre_calculate_SSPs = pre_calculate_SSPs
         self.SSPs_in = SSPs_in
-        self.table = table
+        self.agb_table = agb_table
+        self.massive_table = massive_table
         self.iniabu_table = iniabu_table
         self.sn1a_table = sn1a_table
         self.nsmerger_table = nsmerger_table
@@ -639,8 +656,11 @@ class chem_evol( object ):
         self.yield_modifier = yield_modifier
         self.is_sygma = is_sygma
         self.iolevel = iolevel
+        self.overwrite = overwrite
 
         # Attributes associated with radioactive species
+        #TODO deal with radioactive decoupled tables
+        print("Implementation incomplete, radioactive yields still coupled")
         self.table_radio = table_radio
         self.sn1a_table_radio = sn1a_table_radio
         self.nsmerger_table_radio = nsmerger_table_radio
@@ -1080,7 +1100,7 @@ class chem_evol( object ):
 
         # Interpolate for each metallicity bin
         for i_Z in range(self.ytables.nb_Z-1):
-            self.X0_int_coefs[i_Z] = self.interpolation(x_arr, y_arr, \
+            self.X0_int_coefs[i_Z] = interpolation(x_arr, y_arr, \
                 None, i_Z, interp_list, return_coefs=True)
 
 
@@ -1128,7 +1148,7 @@ class chem_evol( object ):
         # Get the interpolated value
         x_arr = np.log10(np.array(Z_list))
         y_arr = np.log10(np.array(self.X0_vs_Z))
-        X0_interp = 10**(self.interpolation(x_arr, y_arr, \
+        X0_interp = 10**(interpolation(x_arr, y_arr, \
                     np.log10(Z_interp), i_Z, self.X0_int_coefs))
 
         # Return the normalized abundances
@@ -1624,16 +1644,22 @@ class chem_evol( object ):
         # Get the list of isotopes
         allIsotopes = set()
 
-        # Massive stars and AGB stars
-        path = self.__select_path(self.table)
+        # AGB stars
+        path = self.__select_path(self.agb_table)
+        self.__table_isotopes_in_set(allIsotopes, path)
+
+        # Massive stars
+        path = self.__select_path(self.massive_table)
         self.__table_isotopes_in_set(allIsotopes, path)
 
         # Pop III massive stars
         path = self.__select_path(self.pop3_table)
         self.__table_isotopes_in_set(allIsotopes, path)
+
         # SNe Ia
         path = self.__select_path(self.sn1a_table)
         self.__table_isotopes_in_set(allIsotopes, path)
+
         # Neutron star mergers
         path = self.__select_path(self.nsmerger_table)
         self.__table_isotopes_in_set(allIsotopes, path)
@@ -1656,8 +1682,11 @@ class chem_evol( object ):
         self.nb_isotopes = len(self.history.isotopes)
 
         # Massive stars and AGB stars
-        path = self.__select_path(self.table)
-        self.ytables = ry.read_yields_M_Z(path, isotopes=self.history.isotopes)
+        path_agb = self.__select_path(self.agb_table)
+        path_massive = self.__select_path(self.massive_table)
+        path_list = [path_agb,path_massive]
+        self.ytables = self.yc.combine_tables(path_list, \
+                self.history.isotopes, overwrite=self.overwrite)
 
         # PopIII massive stars
         path = self.__select_path(self.pop3_table)
@@ -7930,140 +7959,6 @@ class chem_evol( object ):
                 # Break if the SSP time exceed the simulation time
                 if self.t_ssp[j_ise] > t_left_ce:
                   break
-
-
-    ##############################################
-    #          Interpolation routine             #
-    ##############################################
-    def interpolation(self, x_arr, y_arr, xx, indx, interp_list, return_coefs=False):
-
-        '''
-        This function interpolates with the Steffen 1990 algorithm, adding
-        linear extra points at both ends of the interval.
-
-        Argument
-        ========
-
-            x_arr: coordinate array
-            y_arr: 1-D or 2-D numpy array for interpolation
-            xx: value for which y_arr must be interpolated
-            indx: interpolation index such that
-                x_arr[indx] < xx < x_arr[indx + 1].
-                The minimum value is 0 and the maximum is len(x_arr) - 1.
-            interp_list: list holding the interpolation coefficients.
-                it should have the same size and dimensions as y_arr and
-                initialized to None.
-            return_coefs: If True, return the calculated interp_list[indx]
-                instead of returning the interpolated y_arr
-
-        '''
-
-        # Get the dimensions and catch non-numpy arrays
-        try:
-            dimensions = y_arr.ndim
-        except AttributeError:
-            raise Exception("The interpolation routine uses numpy arrays")
-        except:
-            raise
-
-        # Get the dimensions and catch non-numpy arrays
-        try:
-            dimensions = len(y_arr.shape)
-        except AttributeError:
-            raise Exception("The interpolation routine uses numpy arrays")
-        except:
-            raise
-
-        # Return if last extreme
-        if indx == len(x_arr) - 1:
-            return y_arr[indx]
-
-        # Check that the indx is lower than the maximum
-        if indx > len(x_arr) - 1:
-            raise Exception("Interpolating outside of range!")
-
-        # Return the calculation with coefficients if exists
-        if dimensions == 1:
-            coefCheck = interp_list[indx]
-        elif dimensions == 2:
-            coefCheck = interp_list[indx][0]
-        else:
-            raise Exception("Current support for up to 2-d in interpolation method")
-
-        if coefCheck is not None:
-            if return_coefs:
-                return interp_list[indx]
-            else:
-                coefs = interp_list[indx]
-                deltx = xx - x_arr[indx]
-                return coefs[0]*deltx**3 + coefs[1]*deltx**2 + coefs[2]*deltx + y_arr[indx]
-
-        # If not, we have to calculate the coefficients for this region
-        x0 = x_arr[indx]; xp1 = x_arr[indx + 1]
-
-        # Store yp1 and y0
-        yp1 = y_arr[indx + 1]; y0 = y_arr[indx]
-
-        hi0 = (xp1 - x0)
-        si0 = (yp1 - y0)/hi0
-
-        # Calculate sim1 and deriv0
-        if indx > 0:
-            # Store x, y
-            ym1 = y_arr[indx - 1]
-            xm1 = x_arr[indx - 1]
-        else:
-            # We are in the lowest extreme, create an extra point
-            dx = x_arr[indx + 1] - x_arr[indx]
-            dy = y_arr[indx + 1] - y_arr[indx]
-            xm1 = x_arr[indx] - dx*1e-5
-            ym1 = y_arr[indx + 1] - dy/dx*1e-5
-
-        him1 = (x0 - xm1)
-        sim1 = (y0 - ym1)/him1
-
-        # Pi0 calculation
-        pi0 = (sim1*hi0 + si0*him1)/(him1 + hi0)
-
-        # Derivative
-        deriv0 = np.sign(sim1) + np.sign(si0)
-        if dimensions == 1:
-            deriv0 = deriv0*min(abs(sim1), abs(si0), 0.5*abs(pi0))
-        elif dimensions == 2:
-            deriv0 = deriv0*np.minimum(abs(sim1),\
-                    np.minimum(abs(si0), 0.5*abs(pi0)))
-
-        # Calculate sip1, pip1 and derivp1
-        if indx < len(x_arr) - 2:
-            yp2 = y_arr[indx + 2]
-            xp2 = x_arr[indx + 2]
-        else:
-            # We are in the highest extreme, create an extra point
-            dx = x_arr[indx + 1] - x_arr[indx]
-            dy = y_arr[indx + 1] - y_arr[indx]
-            xp2 = x_arr[indx + 1] + dx*1e-5
-            yp2 = y_arr[indx + 1] + dy/dx*1e-5
-
-        hip1 = (xp2 - xp1)
-        sip1 = (yp2 - yp1)/hip1
-
-        # Pip1 calculation
-        pip1 = (si0*hip1 + sip1*hi0)/(hi0 + hip1)
-
-        # Derivative
-        derivp1 = np.sign(si0) + np.sign(sip1)
-        if dimensions == 1:
-            derivp1 = derivp1*min(abs(si0), abs(sip1), 0.5*abs(pip1))
-        elif dimensions == 2:
-            derivp1 = derivp1*np.minimum(abs(si0), \
-                    np.minimum(abs(sip1), 0.5*abs(pip1)))
-
-        # Now calculate coefficients (ci = deriv0; di = y0)
-        ai = (deriv0 + derivp1 - 2*si0)/(hi0*hi0)
-        bi = (3*si0 - 2*deriv0 - derivp1)/hi0
-
-        interp_list[indx] = (ai, bi, deriv0)
-        return self.interpolation(x_arr, y_arr, xx, indx, interp_list, return_coefs=return_coefs)
 
 
 ##############################################
