@@ -6049,6 +6049,13 @@ class chem_evol(object):
 
         '''
 
+        #print("{:.2e}".format(timemin), "{:.2e}".format(timemax), i_search, "{:.2e}".format(self.delayed_extra_dtd[i_extra][i_ZZ][i_search][0]), "{:.2e}".format(self.delayed_extra_dtd[i_extra][i_ZZ][i_search+1][0]))
+
+        # No enrichment event if beyond the DTD range
+        if timemax <= self.delayed_extra_dtd[i_extra][i_ZZ][0][0] or \
+            timemin >= self.delayed_extra_dtd[i_extra][i_ZZ][-1][0]:
+            return 0.0
+
         # Initialize the number of sources that occur between timemin and timemax
         N_den = 0
 
@@ -6062,7 +6069,7 @@ class chem_evol(object):
         t_cur = max(self.delayed_extra_dtd[i_extra][i_ZZ][0][0], timemin)
         timemax_cor = min(timemax,self.delayed_extra_dtd[i_extra][i_ZZ][-1][0])
 
-        # While the is still time to consider in the OMEGA timestep ...
+        # While there is still time to consider in the OMEGA timestep ...
         while abs(timemax_cor - t_cur) > 0.01:
 
             # Integrate the DTD
