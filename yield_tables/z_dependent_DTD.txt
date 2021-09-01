@@ -1,0 +1,4 @@
+H Yields (Msun)
+H Arbitrary yields table to test Z-dependent delayed-extra sources
+&Isotopes  &Z=0.02     &Z=0.01    &Z=0.001
+&W-180      &1.00E-01   &1.00E-02  &1.00E-03
