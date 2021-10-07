@@ -1415,7 +1415,7 @@ class omega( chem_evol ):
         # Normalise the SFR in order to be consistent with the input
         # current stellar mass
         norm_sfr_in = self.stellar_mass_0 / ((1-self.mass_frac_SSP) * m_stel_sfr_in)
-        for i_csi in range(0,len(timesteps)+1):
+        for i_csi in range(0,self.nb_timesteps+1):
             self.sfr_input[i_csi] = self.sfr_input[i_csi] * norm_sfr_in
 
 
