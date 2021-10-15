@@ -678,8 +678,19 @@ class read_yields_Z( read_yields ):
                 # For each metallicity available ..
                 for i_col in range(1, len(columns)):
 
+                    # Make sure that the metallicity value will
+                    # be written in the same way
+                    value = columns[i_col].split("=")
+                    try:
+                        value[1] = str(float(value[1]))
+                    except ValueError:
+                        pass
+                    except:
+                        raise
+                    value = "=".join(value)
+
                     # Create the label of the model
-                    model_label = "(M=None,"+columns[i_col]+")"
+                    model_label = "(M=None,"+value+")"
                     self.models.append(model_label)
 
                     # Create new entry for the table dictionary
