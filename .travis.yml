@@ -1,28 +1,10 @@
 sudo: required
 language: python
 python:
-  - "3.4"
+  - "3.6"
+before install:
+  - pip install -U pip
 install:
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-#  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy 
-  - pip install runipy matplotlib
+  - pip install -U pytest
 script:
-  - python -m regression_tests.selftest
-#  - cd regression_tests
-#  - bash run_notebooks.sh
-#  - python -m regression_tests/setup_notebooks.py
-#  - runipy regression_tests/SYGMA_SSP_h_yield_input.ipynb True
-#  - runipy regression_tests/Plotting_functions.ipynb True
-#  - runipy regression_tests/Stellab_tests.ipynb
-notifications:
-  slack: nugrid:wTgGR31cFsNUqfytUDZ5ZLug
-  email: false
+  - pytest regression_tests.sygma_test.py
