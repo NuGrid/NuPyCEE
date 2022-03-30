@@ -273,7 +273,7 @@ class chem_evol(object):
     sn1a_table : string
         Path pointing toward the stellar yield table for SNe Ia.
 
-        Default value : 'yield_tables/sn1a_t86.txt' (Tielemann et al. 1986)
+        Default value : 'yield_tables/sn1a_i99_W7.txt' (Iwamoto et al. 1999)
 
     nsmerger_table : string
         Path pointing toward the r-process yield tables for neutron star mergers
@@ -453,7 +453,7 @@ class chem_evol(object):
              f_network='isotopes_modified.prn', f_format=1,\
              table_radio='', decay_file='', sn1a_table_radio='',\
              nsmerger_table_radio='',\
-             hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_t86.txt',\
+             hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_i99_W7.txt',\
              sn1a_energy=1e51, ns_merger_on=False,\
              f_binary=1.0, f_merger=0.0008, t_merger_max=1.3e10,\
              m_ej_nsm = 2.5e-02, nb_nsm_per_m=-1.0,\
