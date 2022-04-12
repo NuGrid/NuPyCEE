@@ -115,6 +115,14 @@ class sygma( chem_evol ):
 
         Default value : 'input'
 
+    mass_sampled : list
+        Stellar masses that are sampled to eject yields in a stellar population.
+        Warning : The use of this parameter bypasses the IMF calculation and
+        do not ensure a correlation with the star formation rate.  Each sampled
+        mass will eject the exact amount of mass give in the stellar yields.
+
+        Default value : np.array([]) --> Deactivated
+
     ================
     '''
     # Combine docstrings from chem_evol with sygma docstring
@@ -123,110 +131,16 @@ class sygma( chem_evol ):
     ##############################################
     #                Constructor                 #
     ##############################################
-    def __init__(self, sfr='input', \
-                 imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
-                 sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30, \
-                 nsmerger_bdys=[8, 100], tend=13e9, mgal=1e4, transitionmass=8.0, iolevel=0, \
-                 ini_alpha=True, table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
-                 table_radio='', decay_file='', sn1a_table_radio='',\
-                 nsmerger_table_radio='',\
-                 hardsetZ=-1, sn1a_on=True, sn1a_table='yield_tables/sn1a_i99_W7.txt',sn1a_energy=1e51,\
-                 ns_merger_on=False, f_binary=1.0, f_merger=0.0008, \
-                 t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, nsm_dtd_power=[],\
-                 nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', iniabu_table='', \
-                 extra_source_on=False, nb_nsm_per_m=-1.0, t_nsm_coal=-1.0, \
-                 extra_source_table=['yield_tables/extra_source.txt'], \
-                 f_extra_source=[1.0], pre_calculate_SSPs=False, \
-                 extra_source_mass_range=[[8,30]], \
-                 extra_source_exclude_Z=[[]], \
-                 total_ejecta_interp=True, yield_tables_dir='',\
-                 high_mass_extrapolation='copy',\
-                 radio_refinement=100,\
-                 use_net_yields_stable=False, use_net_yields_radio=False,\
-                 f_network='isotopes_modified.prn', f_format=1,\
-                 pop3_table='yield_tables/popIII_heger10.txt', \
-                 imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
-                 imf_pop3_char_mass=40.0, \
-                 starbursts=[], beta_pow=-1.0,gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
-                 nb_1a_per_m=1.0e-3,direct_norm_1a=-1, Z_trans=0.0, \
-                 f_arfo=1.0, imf_yields_range=[1,30],exclude_masses=[], \
-                 netyields_on=False,wiersmamod=False,yield_interp='lin', \
-                 stellar_param_on=False, t_dtd_poly_split=-1.0, \
-                 delayed_extra_yields_log_int=False, \
-                 stellar_param_table='yield_tables/stellar_feedback_nugrid_MESAonly.txt',
-                 tau_ferrini=False, delayed_extra_log=False, dt_in=np.array([]),\
-                 nsmerger_dtd_array=np.array([]),\
-                 ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
-                 isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
-                 zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]), \
-                 mass_sampled=np.array([]), scale_cor=np.array([]), \
-                 poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
-                 ytables_nsmerger_in=np.array([]), dt_split_info=np.array([]),\
-                 delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
-                 delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]), \
-                 delayed_extra_yields_radio=np.array([]), ism_ini_radio=np.array([]), \
-                 delayed_extra_yields_norm_radio=np.array([]), \
-                 ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
-                 ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),
-                 yield_modifier=np.array([])):
+    def __init__(self, sfr='input', no_sf=False, mass_sampled=[], \
+                 scale_cor=[], yield_modifier=[], **kwargs):
+
+        # Overwrite default chem_evol parameters (if needed)
+        kwargs["is_sygma"] = True
+        if not "mgal" in kwargs:
+            kwargs["mgal"] = 1.0
 
         # Call the init function of the class inherited by SYGMA
-        chem_evol.__init__(self, is_sygma=True, imf_type=imf_type, alphaimf=alphaimf, \
-                 imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \
-                 special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
-                 nsmerger_bdys=nsmerger_bdys, transitionmass=transitionmass, iolevel=iolevel, \
-                 ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
-                 sn1a_on=sn1a_on, sn1a_table=sn1a_table,sn1a_energy=sn1a_energy,\
-                 table_radio=table_radio, decay_file=decay_file,\
-                 sn1a_table_radio=sn1a_table_radio, \
-                 nsmerger_table_radio=nsmerger_table_radio,\
-                 use_net_yields_stable=use_net_yields_stable,\
-                 use_net_yields_radio=use_net_yields_radio,\
-                 ns_merger_on=ns_merger_on, nsmerger_table=nsmerger_table, \
-                 f_binary=f_binary, f_merger=f_merger, \
-                 nsm_dtd_power=nsm_dtd_power, yield_tables_dir=yield_tables_dir, \
-                 total_ejecta_interp=total_ejecta_interp, \
-                 t_merger_max=t_merger_max, m_ej_nsm = m_ej_nsm, \
-                 iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
-                 extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
-                 extra_source_mass_range=extra_source_mass_range, \
-                 extra_source_exclude_Z=extra_source_exclude_Z,
-                 pop3_table=pop3_table, pre_calculate_SSPs=pre_calculate_SSPs, \
-                 nb_nsm_per_m=nb_nsm_per_m, t_nsm_coal=t_nsm_coal, \
-                 imf_bdys_pop3=imf_bdys_pop3, \
-                 imf_pop3_char_mass=imf_pop3_char_mass, \
-                 imf_yields_range_pop3=imf_yields_range_pop3, \
-                 starbursts=starbursts, beta_pow=beta_pow, \
-                 gauss_dtd=gauss_dtd,exp_dtd=exp_dtd,\
-                 nb_1a_per_m=nb_1a_per_m,direct_norm_1a=direct_norm_1a, \
-                 Z_trans=Z_trans, f_arfo=f_arfo, t_dtd_poly_split=t_dtd_poly_split, \
-                 imf_yields_range=imf_yields_range,exclude_masses=exclude_masses,\
-                 netyields_on=netyields_on,wiersmamod=wiersmamod,\
-                 yield_interp=yield_interp, tau_ferrini=tau_ferrini,\
-                 delayed_extra_log=delayed_extra_log,\
-                 ytables_in=ytables_in, nsmerger_dtd_array=nsmerger_dtd_array, \
-                 zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
-                 isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
-                 zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
-                 ytables_1a_in=ytables_1a_in, ytables_nsmerger_in=ytables_nsmerger_in, \
-                 dt_in=dt_in,stellar_param_on=stellar_param_on,\
-                 stellar_param_table=stellar_param_table,\
-                 poly_fit_dtd_5th=poly_fit_dtd_5th, \
-                 poly_fit_range=poly_fit_range, dt_split_info=dt_split_info, \
-                 delayed_extra_dtd=delayed_extra_dtd,\
-                 delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
-                 delayed_extra_yields=delayed_extra_yields,\
-                 delayed_extra_yields_norm=delayed_extra_yields_norm,\
-                 delayed_extra_yields_radio=delayed_extra_yields_radio,\
-                 delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
-                 ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
-                 ytables_1a_radio_in=ytables_1a_radio_in, ism_ini_radio=ism_ini_radio,\
-                 ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
-                 radio_refinement=radio_refinement,\
-                 f_network=f_network, f_format=f_format,\
-                 high_mass_extrapolation=high_mass_extrapolation,
-                 yield_modifier=yield_modifier)
-
+        chem_evol.__init__(self, **kwargs)
         if self.need_to_quit:
             return
 
@@ -236,6 +150,7 @@ class sygma( chem_evol ):
         self.start_time = start_time
 
         # Attribute the input parameter to the current object
+        self.no_sf = no_sf
         self.sfr = sfr
         self.mass_sampled = mass_sampled
         self.scale_cor = scale_cor
@@ -273,9 +188,6 @@ class sygma( chem_evol ):
             # Run the timestep i
             self._evol_stars(i, 0.0, self.mass_sampled, self.scale_cor)
 
-#            if i == 1:
-#                self.ymgal_radio[i][2] = 1.0
-
             # Decay radioactive isotopes
             if self.len_decay_file > 0:
                 if self.use_decay_module:
@@ -303,7 +215,8 @@ class sygma( chem_evol ):
 
         # Return the SFR (mass fraction) of every timestep
         sfr_i = np.zeros(self.nb_timesteps+1)
-        sfr_i[0] = 1.0
+        if not self.no_sf:
+            sfr_i[0] = 1.0
         return sfr_i
 
 

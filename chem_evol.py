@@ -347,14 +347,6 @@ class chem_evol(object):
 
         Default value : np.array([]) --> Deactivated
 
-    mass_sampled : list
-        Stellar masses that are sampled to eject yields in a stellar population.
-        Warning : The use of this parameter bypasses the IMF calculation and
-        do not ensure a correlation with the star formation rate.  Each sampled
-        mass will eject the exact amount of mass give in the stellar yields.
-
-        Default value : np.array([]) --> Deactivated
-
     scale_cor : 2D list
         Determine the fraction of yields ejected for any given stellar mass bin.
         Example : [ [1.0,8], [0.5,100] ] means that stars with initial mass between
@@ -446,8 +438,8 @@ class chem_evol(object):
     ##               Constructor                ##
     ##############################################
     def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100],\
-             sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=30,\
-             nsmerger_bdys=[8, 100], tend=13e9, mgal=1.6e11, transitionmass=8, iolevel=0,\
+             sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=60,\
+             nsmerger_bdys=[8, 100], tend=13e9, mgal=1.0e11, transitionmass=8, iolevel=0,\
              ini_alpha=True, is_sygma=False,\
              table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt',\
              f_network='isotopes_modified.prn', f_format=1,\
@@ -470,8 +462,8 @@ class chem_evol(object):
              use_net_yields_stable=False, use_net_yields_radio=False, \
              high_mass_extrapolation='copy',\
              use_external_integration=False,\
-             starbursts=[], beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
-             exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=0.0, \
+             beta_pow=-1.0,gauss_dtd=[3.3e9,6.6e8],\
+             exp_dtd=2e9,nb_1a_per_m=1.0e-3,direct_norm_1a=-1,Z_trans=1.0e-20, \
              f_arfo=1, imf_yields_range=[1,30],exclude_masses=[],\
              netyields_on=False,wiersmamod=False,yield_interp='lin',\
              print_off=False, yield_tables_dir='',\
@@ -482,43 +474,42 @@ class chem_evol(object):
              t_dtd_poly_split=-1.0, delayed_extra_log=False,\
              delayed_extra_yields_log_int=False,\
              delayed_extra_log_radio=False, delayed_extra_yields_log_int_radio=False,\
-             pritchet_1a_dtd=[], ism_ini=np.array([]), ism_ini_radio=np.array([]),\
-             nsmerger_dtd_array=np.array([]),\
-             ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
-             isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
-             zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
-             ytables_nsmerger_in=np.array([]), dt_in_SSPs=np.array([]),\
-             dt_in=np.array([]),dt_split_info=np.array([]),\
-             ej_massive=np.array([]), ej_agb=np.array([]),\
-             ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
-             ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
-             dt_ssp=np.array([]), poly_fit_dtd_5th=np.array([]),\
-             mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
-             poly_fit_range=np.array([]), SSPs_in=np.array([]),\
-             delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]),\
-             delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]),\
-             delayed_extra_yields_radio=np.array([]),\
-             delayed_extra_yields_norm_radio=np.array([]),\
-             delayed_extra_stochastic=np.array([]),\
-             ytables_radio_in=np.array([]), radio_iso_in=np.array([]),\
-             ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
-             test_clayton=np.array([]), inter_Z_points=np.array([]),\
-             nb_inter_Z_points=np.array([]), y_coef_M=np.array([]),\
-             y_coef_M_ej=np.array([]), y_coef_Z_aM=np.array([]),\
-             y_coef_Z_bM=np.array([]), y_coef_Z_bM_ej=np.array([]),\
-             tau_coef_M=np.array([]), tau_coef_M_inv=np.array([]),\
-             tau_coef_Z_aM=np.array([]), tau_coef_Z_bM=np.array([]),\
-             tau_coef_Z_aM_inv=np.array([]), tau_coef_Z_bM_inv=np.array([]),\
-             y_coef_M_pop3=np.array([]), y_coef_M_ej_pop3=np.array([]),\
-             tau_coef_M_pop3=np.array([]), tau_coef_M_pop3_inv=np.array([]),\
-             inter_lifetime_points_pop3=np.array([]),\
-             inter_lifetime_points_pop3_tree=np.array([]),\
-             nb_inter_lifetime_points_pop3=np.array([]),\
-             inter_lifetime_points=np.array([]), inter_lifetime_points_tree=np.array([]),\
-             nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
-             inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
-             inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
-             yield_modifier=np.array([])):
+             pritchet_1a_dtd=[], ism_ini=[], ism_ini_radio=[],\
+             nsmerger_dtd_array=[],\
+             ytables_in=[], zm_lifetime_grid_nugrid_in=[],\
+             isotopes_in=[], ytables_pop3_in=[],\
+             zm_lifetime_grid_pop3_in=[], ytables_1a_in=[],\
+             ytables_nsmerger_in=[], dt_in_SSPs=[],\
+             dt_in=[],dt_split_info=[],\
+             ej_massive=[], ej_agb=[],\
+             ej_sn1a=[], ej_massive_coef=[],\
+             ej_agb_coef=[], ej_sn1a_coef=[],\
+             dt_ssp=[], poly_fit_dtd_5th=[],\
+             poly_fit_range=[], SSPs_in=[],\
+             delayed_extra_dtd=[], delayed_extra_dtd_norm=[],\
+             delayed_extra_yields=[], delayed_extra_yields_norm=[],\
+             delayed_extra_yields_radio=[],\
+             delayed_extra_yields_norm_radio=[],\
+             delayed_extra_stochastic=[],\
+             ytables_radio_in=[], radio_iso_in=[],\
+             ytables_1a_radio_in=[], ytables_nsmerger_radio_in=[],\
+             test_clayton=[], inter_Z_points=[],\
+             nb_inter_Z_points=[], y_coef_M=[],\
+             y_coef_M_ej=[], y_coef_Z_aM=[],\
+             y_coef_Z_bM=[], y_coef_Z_bM_ej=[],\
+             tau_coef_M=[], tau_coef_M_inv=[],\
+             tau_coef_Z_aM=[], tau_coef_Z_bM=[],\
+             tau_coef_Z_aM_inv=[], tau_coef_Z_bM_inv=[],\
+             y_coef_M_pop3=[], y_coef_M_ej_pop3=[],\
+             tau_coef_M_pop3=[], tau_coef_M_pop3_inv=[],\
+             inter_lifetime_points_pop3=[],\
+             inter_lifetime_points_pop3_tree=[],\
+             nb_inter_lifetime_points_pop3=[],\
+             inter_lifetime_points=[], inter_lifetime_points_tree=[],\
+             nb_inter_lifetime_points=[], nb_inter_M_points_pop3=[],\
+             inter_M_points_pop3_tree=[], nb_inter_M_points=[],\
+             inter_M_points=[], y_coef_Z_aM_ej=[],
+             yield_modifier=[]):
 
         # Initialize the history class which keeps the simulation in memory
         self.history = History()
@@ -571,7 +562,6 @@ class chem_evol(object):
         self.extra_source_table = extra_source_table
         self.pop3_table = pop3_table
         self.hardsetZ = hardsetZ
-        self.starbursts = starbursts
         self.imf_type = imf_type
         self.alphaimf = alphaimf
         self.sn1a_on = sn1a_on
@@ -1166,11 +1156,6 @@ class chem_evol(object):
             print ('Error - dt must be smaller or equal to tend.')
             self.need_to_quit = True
 
-        # Transition mass between AGB and massive stars
-        #if #(self.transitionmass <= 7)or(self.transitionmass > 12):
-           # print ('Error - transitionmass must be between 7 and 12 Mo.')
-           # self.need_to_quit = True
-
         # IMF
         if not self.imf_type in ['salpeter','chabrier','kroupa','input', \
             'alphaimf','chabrieralpha','fpp', 'kroupa93', 'lognormal']:
@@ -1178,13 +1163,6 @@ class chem_evol(object):
             self.need_to_quit = True
 
         # IMF yields range
-        #if self.imf_yields_range[0] < 1:
-        #    print ('Error - imf_yields_range lower boundary must be >= 1.')
-            #self.need_to_quit = True
-
-        #if (self.imf_yields_range[0] >= self.imf_bdys[1]) or \
-        #   (self.imf_yields_range[0] <= self.imf_bdys[0]) or \
-         #  (self.imf_yields_range[1] >= self.imf_bdys[1]):
         if ((self.imf_yields_range[0] >  self.imf_bdys[1]) or \
             (self.imf_yields_range[1] < self.imf_bdys[0])):
             print ('Error - part of imf_yields_range must be within imf_bdys.')
@@ -1204,11 +1182,6 @@ class chem_evol(object):
             ['exp','gauss','maoz','power_law']:
             print ('Error - Selected sn1a_rate is not available.')
             self.need_to_quit = True
-
-        # Initial metallicity for the gas
-        #if not self.iniZ in [0.0, 0.0001, 0.001, 0.006, 0.01, 0.02]:
-        #    print ('Error - Selected iniZ is not available.')
-        #    self.need_to_quit = True
 
         # If popIII stars are used ...
         if self.iniZ == 0.0:
@@ -1241,9 +1214,6 @@ class chem_evol(object):
              if (not lt == lmr):
                  print ('Error - parameter extra_source_table and  extra_source_mass_range not of equal size')
                  self.need_to_quit = True
-             #if  (not lt == leZ):
-             #    print ('Error - parameter extra_source_table and extra_source_exclude_Z not of equal size')
-             #    self.need_to_quit = True
 
         # Use of radioactive isotopes
         if (self.len_decay_file > 0 or self.use_decay_module) and \
@@ -1256,7 +1226,7 @@ class chem_evol(object):
             if self.yield_interp == 'wiersma':
                 print ('Error - Radioactive isotopes cannot be used with net yields .. for now.')
                 self.need_to_quit = True
-            if self.Z_trans > 0.0:
+            if self.Z_trans > 0.0 and not self.is_sygma:
                 print ('Error - Radioactive isotopes cannot be used with PopIII stars .. for now.')
                 self.need_to_quit = True
 
