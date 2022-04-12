@@ -252,189 +252,48 @@ class omega( chem_evol ):
     ##               Constructor                ##
     ##############################################
     def __init__(self, galaxy='none', in_out_control=False, SF_law=False, \
-                 DM_evolution=False, Z_trans=1e-20, f_dyn=0.1, sfe=0.1, \
-                 outflow_rate=-1.0, inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, \
-                 m_DM_0=1.0e11, mass_loading=1.0, t_star=-1.0, sfh_file='none', \
-                 in_out_ratio=1.0, stellar_mass_0=-1.0, \
-                 z_dependent=True, exp_ml=2.0,nsmerger_bdys=[8, 100], \
-                 imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100], \
-                 sn1a_rate='power_law', iniZ=0.0, dt=1e6, special_timesteps=30, \
-                 tend=13e9, mgal=1.0e10, transitionmass=8.0, iolevel=0, \
-                 ini_alpha=True, nb_nsm_per_m=-1.0, t_nsm_coal=-1,\
-                 high_mass_extrapolation='copy',\
-                 table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt', \
-                 yield_tables_dir='',\
-                 f_network='isotopes_modified.prn', f_format=1,\
-                 table_radio='', decay_file='', sn1a_table_radio='',\
-                 nsmerger_table_radio='',\
-                 use_net_yields_stable=False, use_net_yields_radio=False,\
-                 hardsetZ=-1, sn1a_on=True, nsm_dtd_power=[],\
-                 sn1a_table='yield_tables/sn1a_i99_W7.txt',\
-                 ns_merger_on=False, f_binary=1.0, f_merger=0.0008,\
-                 t_merger_max=1.3e10, m_ej_nsm = 2.5e-02, \
-                 nsmerger_table = 'yield_tables/r_process_arnould_2007.txt', \
-                 iniabu_table='', extra_source_on=False, \
-                 extra_source_table=['yield_tables/extra_source.txt'], \
-                 f_extra_source=[1.0], pre_calculate_SSPs=False, \
-                 extra_source_mass_range=[[8,30]], \
-                 total_ejecta_interp=True, radio_refinement=100, \
-                 extra_source_exclude_Z=[[]], beta_crit=1.0, \
-                 pop3_table='yield_tables/popIII_heger10.txt', \
-                 imf_bdys_pop3=[0.1,100], imf_yields_range_pop3=[10,30], \
-                 imf_pop3_char_mass=40.0, \
-                 starbursts=[], beta_pow=-1.0, gauss_dtd=[1e9,6.6e8],exp_dtd=2e9,\
-                 nb_1a_per_m=1.0e-3, f_arfo=1, t_merge=-1.0,\
-                 imf_yields_range=[1,30],exclude_masses=[], \
-                 netyields_on=False,wiersmamod=False,skip_zero=False,\
-                 redshift_f=0.0,print_off=False,long_range_ref=False,\
-                 f_s_enhance=1.0,m_gas_f=-1.0, cl_SF_law=False,\
-                 external_control=False, use_external_integration=False,\
-                 calc_SSP_ej=False, tau_ferrini=False,\
-                 input_yields=False, popIII_info_fast=True, t_sf_z_dep = 1.0,\
-                 m_crit_on=False, norm_crit_m=8.0e+09, mass_frac_SSP=0.5,\
-                 sfh_array_norm=-1.0, imf_rnd_sampling=False,\
-                 out_follows_E_rate=False, yield_interp='lin',\
-                 r_gas_star=-1.0, cte_m_gas = -1.0, t_dtd_poly_split=-1.0,\
-                 stellar_param_on=False, delayed_extra_log=False,\
-                 delayed_extra_yields_log_int=False,\
-                 dt_in_SSPs=np.array([]), \
-                 DM_array=np.array([]), nsmerger_dtd_array=np.array([]),\
-                 sfh_array=np.array([]),ism_ini=np.array([]),\
-                 ism_ini_radio=np.array([]),\
-                 m_inflow_array=np.array([]), m_gas_array=np.array([]),\
-                 mdot_ini=np.array([]), mdot_ini_t=np.array([]),\
-                 ytables_in=np.array([]), zm_lifetime_grid_nugrid_in=np.array([]),\
-                 isotopes_in=np.array([]), ytables_pop3_in=np.array([]),\
-                 zm_lifetime_grid_pop3_in=np.array([]), ytables_1a_in=np.array([]),\
-                 ytables_nsmerger_in=np.array([]), SSPs_in=np.array([]),\
-                 dt_in=np.array([]), dt_split_info=np.array([]),\
-                 ej_massive=np.array([]), ej_agb=np.array([]),\
-                 ej_sn1a=np.array([]), ej_massive_coef=np.array([]),\
-                 ej_agb_coef=np.array([]), ej_sn1a_coef=np.array([]),\
-                 dt_ssp=np.array([]), r_vir_array=np.array([]),\
-                 mass_sampled=np.array([]), scale_cor=np.array([]),\
-                 mass_sampled_ssp=np.array([]), scale_cor_ssp=np.array([]),\
-                 poly_fit_dtd_5th=np.array([]), poly_fit_range=np.array([]),\
-                 m_tot_ISM_t_in=np.array([]), m_inflow_X_array=np.array([]),\
-                 delayed_extra_dtd=np.array([]), delayed_extra_dtd_norm=np.array([]), \
-                 delayed_extra_yields=np.array([]), delayed_extra_yields_norm=np.array([]),\
-                 delayed_extra_yields_radio=np.array([]), \
-                 delayed_extra_yields_norm_radio=np.array([]), \
-                 ytables_radio_in=np.array([]), radio_iso_in=np.array([]), \
-                 ytables_1a_radio_in=np.array([]), ytables_nsmerger_radio_in=np.array([]),\
-                 omega_0=0.32, omega_b_0=0.05, lambda_0=0.68, H_0=67.11,\
-                 test_clayton=np.array([]), inter_Z_points=np.array([]),\
-                 nb_inter_Z_points=np.array([]), y_coef_M=np.array([]),\
-                 y_coef_M_ej=np.array([]), y_coef_Z_aM=np.array([]),\
-                 y_coef_Z_bM=np.array([]), y_coef_Z_bM_ej=np.array([]),\
-                 tau_coef_M=np.array([]), tau_coef_M_inv=np.array([]),\
-                 tau_coef_Z_aM=np.array([]), tau_coef_Z_bM=np.array([]),\
-                 tau_coef_Z_aM_inv=np.array([]), tau_coef_Z_bM_inv=np.array([]),\
-                 y_coef_M_pop3=np.array([]), y_coef_M_ej_pop3=np.array([]),\
-                 tau_coef_M_pop3=np.array([]), tau_coef_M_pop3_inv=np.array([]),\
-                 inter_lifetime_points_pop3=np.array([]),\
-                 inter_lifetime_points_pop3_tree=np.array([]),\
-                 nb_inter_lifetime_points_pop3=np.array([]),\
-                 inter_lifetime_points=np.array([]), inter_lifetime_points_tree=np.array([]),\
-                 nb_inter_lifetime_points=np.array([]), nb_inter_M_points_pop3=np.array([]),\
-                 inter_M_points_pop3_tree=np.array([]), nb_inter_M_points=np.array([]),\
-                 inter_M_points=np.array([]), y_coef_Z_aM_ej=np.array([]),
-                 yield_modifier=np.array([])):
+                 DM_evolution=False, f_dyn=0.1, sfe=0.01, outflow_rate=-1.0, \
+                 inflow_rate=-1.0, rand_sfh=0.0, cte_sfr=1.0, m_DM_0=1.0e12, \
+                 omega_0=0.32, omega_b_0=0.05, lambda_0=0.68, H_0=67.11, \
+                 mass_loading=1.0, t_star=-1.0, sfh_file='none', in_out_ratio=1.0, \
+                 stellar_mass_0=-1.0, z_dependent=True, exp_ml=2.0, beta_crit=1.0, \
+                 skip_zero=False, redshift_f=0.0, long_range_ref=False,\
+                 f_s_enhance=1.0, m_gas_f=-1.0, cl_SF_law=False, \
+                 external_control=False, calc_SSP_ej=False, t_sf_z_dep = 1.0, \
+                 m_crit_on=False, norm_crit_m=8.0e+09, mass_frac_SSP=0.5, \
+                 sfh_array_norm=-1.0, imf_rnd_sampling=False, r_gas_star=-1.0, \
+                 cte_m_gas = -1.0, DM_array=[], sfh_array=[], \
+                 m_inflow_array=[], m_gas_array=[], mdot_ini=[], mdot_ini_t=[], \
+                 r_vir_array=[], mass_sampled=[], scale_cor=[], \
+                 mass_sampled_ssp=[], m_tot_ISM_t_in=[], \
+                 m_inflow_X_array=[], dt_in_SSPs=[], **kwargs):
 
         # Get the name of the instance
         import traceback
         (filename,line_number,function_name,text)=traceback.extract_stack()[-2]
         self.inst_name = text[:text.find('=')].strip()
 
-        # Announce the beginning of the simulation
-        if not print_off:
-            print ('OMEGA run in progress..')
+        # Overwrite default chem_evol parameters (if needed)
+        if not "iniZ" in kwargs:
+            kwargs["iniZ"] = 0.0
+        if not "mgal" in kwargs:
+            kwargs["mgal"] = 8.0e10
 
+        # Call the init function of the class inherited by SYGMA
+        chem_evol.__init__(self, **kwargs)
+
+        # Quit if something bad happened in chem_evol ..
+        if self.need_to_quit:
+            return
+
+        # Announce the beginning of the simulation
+        if not self.print_off:
+            print ('OMEGA run in progress..')
         start_time = t_module.time()
         self.start_time = start_time
 
-        # Call the init function of the class inherited by SYGMA
-        chem_evol.__init__(self, imf_type=imf_type, alphaimf=alphaimf, \
-                 imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=iniZ, dt=dt, \
-                 special_timesteps=special_timesteps, tend=tend, mgal=mgal, \
-                 transitionmass=transitionmass, iolevel=iolevel, \
-                 ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
-                 sn1a_on=sn1a_on, sn1a_table=sn1a_table, nsm_dtd_power=nsm_dtd_power,\
-                 ns_merger_on=ns_merger_on, f_binary=f_binary, f_merger=f_merger,\
-                 nsmerger_table=nsmerger_table, t_merger_max=t_merger_max,\
-                 m_ej_nsm = m_ej_nsm, nb_nsm_per_m=nb_nsm_per_m, t_nsm_coal=t_nsm_coal, \
-                 table_radio=table_radio, decay_file=decay_file,\
-                 sn1a_table_radio=sn1a_table_radio, \
-                 nsmerger_table_radio=nsmerger_table_radio,\
-                 iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
-                 extra_source_table=extra_source_table,f_extra_source=f_extra_source, \
-                 extra_source_mass_range=extra_source_mass_range, \
-                 extra_source_exclude_Z=extra_source_exclude_Z,\
-                 pop3_table=pop3_table, \
-                 use_net_yields_stable=use_net_yields_stable,\
-                 use_net_yields_radio=use_net_yields_radio,\
-                 imf_bdys_pop3=imf_bdys_pop3, \
-                 imf_pop3_char_mass=imf_pop3_char_mass, \
-                 total_ejecta_interp=total_ejecta_interp, \
-                 imf_yields_range_pop3=imf_yields_range_pop3, \
-                 starbursts=starbursts, beta_pow=beta_pow, \
-                 gauss_dtd = gauss_dtd, exp_dtd = exp_dtd, \
-                 nb_1a_per_m=nb_1a_per_m, Z_trans=Z_trans, f_arfo=f_arfo, \
-                 imf_yields_range=imf_yields_range,exclude_masses=exclude_masses, \
-                 netyields_on=netyields_on,wiersmamod=wiersmamod, \
-                 input_yields=input_yields, ism_ini_radio=ism_ini_radio,\
-                 tau_ferrini=tau_ferrini, t_dtd_poly_split=t_dtd_poly_split, \
-                 t_merge=t_merge,popIII_info_fast=popIII_info_fast,\
-                 out_follows_E_rate=out_follows_E_rate,\
-                 use_external_integration=use_external_integration,\
-                 stellar_param_on=stellar_param_on, pre_calculate_SSPs=pre_calculate_SSPs,\
-                 print_off=print_off, yield_tables_dir=yield_tables_dir, \
-                 ism_ini=ism_ini,ytables_in=ytables_in,\
-                 delayed_extra_yields_log_int=delayed_extra_yields_log_int,\
-                 zm_lifetime_grid_nugrid_in=zm_lifetime_grid_nugrid_in,\
-                 isotopes_in=isotopes_in,ytables_pop3_in=ytables_pop3_in,\
-                 zm_lifetime_grid_pop3_in=zm_lifetime_grid_pop3_in,\
-                 ytables_1a_in=ytables_1a_in, dt_in_SSPs=dt_in_SSPs, \
-                 delayed_extra_log=delayed_extra_log, \
-                 nsmerger_dtd_array=nsmerger_dtd_array,\
-                 ytables_nsmerger_in=ytables_nsmerger_in, dt_in=dt_in,\
-                 dt_split_info=dt_split_info,ej_massive=ej_massive,\
-                 ej_agb=ej_agb,ej_sn1a=ej_sn1a,\
-                 ej_massive_coef=ej_massive_coef,ej_agb_coef=ej_agb_coef,\
-                 ej_sn1a_coef=ej_sn1a_coef,dt_ssp=dt_ssp,\
-                 yield_interp=yield_interp, SSPs_in=SSPs_in,\
-                 poly_fit_dtd_5th=poly_fit_dtd_5th,poly_fit_range=poly_fit_range,\
-                 delayed_extra_dtd=delayed_extra_dtd,\
-                 delayed_extra_dtd_norm=delayed_extra_dtd_norm,\
-                 delayed_extra_yields=delayed_extra_yields,\
-                 delayed_extra_yields_norm=delayed_extra_yields_norm,\
-                 delayed_extra_yields_radio=delayed_extra_yields_radio,\
-                 delayed_extra_yields_norm_radio=delayed_extra_yields_norm_radio,\
-                 ytables_radio_in=ytables_radio_in, radio_iso_in=radio_iso_in,\
-                 ytables_1a_radio_in=ytables_1a_radio_in,\
-                 ytables_nsmerger_radio_in=ytables_nsmerger_radio_in,\
-                 test_clayton=test_clayton, radio_refinement=radio_refinement,\
-                 f_network=f_network, f_format=f_format,\
-                 high_mass_extrapolation=high_mass_extrapolation,\
-                 inter_Z_points=inter_Z_points,\
-                 nb_inter_Z_points=nb_inter_Z_points, y_coef_M=y_coef_M,\
-                 y_coef_M_ej=y_coef_M_ej, y_coef_Z_aM=y_coef_Z_aM,\
-                 y_coef_Z_bM=y_coef_Z_bM, y_coef_Z_bM_ej=y_coef_Z_bM_ej,\
-                 tau_coef_M=tau_coef_M, tau_coef_M_inv=tau_coef_M_inv,\
-                 tau_coef_Z_aM=tau_coef_Z_aM, tau_coef_Z_bM=tau_coef_Z_bM,\
-                 tau_coef_Z_aM_inv=tau_coef_Z_aM_inv, tau_coef_Z_bM_inv=tau_coef_Z_bM_inv,\
-                 y_coef_M_pop3=y_coef_M_pop3, y_coef_M_ej_pop3=y_coef_M_ej_pop3,\
-                 tau_coef_M_pop3=tau_coef_M_pop3, tau_coef_M_pop3_inv=tau_coef_M_pop3_inv,\
-                 inter_lifetime_points_pop3=inter_lifetime_points_pop3,\
-                 inter_lifetime_points_pop3_tree=inter_lifetime_points_pop3_tree,\
-                 nb_inter_lifetime_points_pop3=nb_inter_lifetime_points_pop3,\
-                 inter_lifetime_points=inter_lifetime_points,\
-                 inter_lifetime_points_tree=inter_lifetime_points_tree,\
-                 nb_inter_lifetime_points=nb_inter_lifetime_points,\
-                 nb_inter_M_points_pop3=nb_inter_M_points_pop3,\
-                 inter_M_points_pop3_tree=inter_M_points_pop3_tree,\
-                 nb_inter_M_points=nb_inter_M_points, inter_M_points=inter_M_points,\
-                 y_coef_Z_aM_ej=y_coef_Z_aM_ej, yield_modifier=yield_modifier)
+        # Attributes for chem_evol
+        self.kwargs = kwargs
 
         # Attribute the input parameters to the current OMEGA object
         self.galaxy = galaxy
@@ -458,7 +317,6 @@ class omega( chem_evol ):
         self.DM_too_low = False
         self.skip_zero = skip_zero
         self.redshift_f = redshift_f
-        self.print_off = print_off
         self.long_range_ref = long_range_ref
         self.m_crit_on = m_crit_on
         self.norm_crit_m = norm_crit_m
@@ -476,7 +334,6 @@ class omega( chem_evol ):
         self.imf_rnd_sampling = imf_rnd_sampling
         self.cte_m_gas = cte_m_gas
         self.t_sf_z_dep = t_sf_z_dep
-        self.out_follows_E_rate = out_follows_E_rate
         self.m_tot_ISM_t_in = m_tot_ISM_t_in
         self.m_inflow_array = m_inflow_array
         self.len_m_inflow_array = len(m_inflow_array)
@@ -486,11 +343,10 @@ class omega( chem_evol ):
         self.len_m_gas_array = len(m_gas_array)
         self.beta_crit = beta_crit
         self.r_vir_array = r_vir_array
-        self.pre_calculate_SSPs = pre_calculate_SSPs
-        self.yield_modifier = yield_modifier
         self.calc_SSP_ej = calc_SSP_ej
         self.mass_frac_SSP = -1.0
         self.mass_frac_SSP_in = mass_frac_SSP
+        self.dt_in_SSPs = dt_in_SSPs
 
         # Set cosmological parameters - default is Planck 2013 (used in Caterpillar)
         self.omega_0   = omega_0   # Current mass density parameter
@@ -498,72 +354,21 @@ class omega( chem_evol ):
         self.lambda_0  = lambda_0  # Current dark energy density parameter
         self.H_0       = H_0       # Hubble constant [km s^-1 Mpc^-1]
 
-        # Quit if something bad happened in chem_evol ..
-        if self.need_to_quit:
+        # Look for errors in the input parameters
+        if self.__check_inputs_omega():
             return
 
-        # Calculate the number of CC SNe per Msun formed
+        # Calculate the number of CC SNe per Msun formed (if needed)
         if self.out_follows_E_rate:
-            A_pop3 = 1.0 / self._imf(imf_bdys_pop3[0],imf_bdys_pop3[1],2)
-            self.nb_ccsne_per_m_pop3 = \
-                A_pop3 * self._imf(imf_yields_range_pop3[0], \
-                              imf_yields_range_pop3[1],1)
-            A = 1.0 / self._imf(imf_bdys[0],imf_bdys[1],2)
-            self.nb_ccsne_per_m = \
-                A * self._imf(transitionmass,imf_yields_range[1],1)
+            self.__calc_ccsne_per_m()
 
-        # If SSPs needs to be pre-calculated ..
+        # Pre-calculate SSPs (if needed)
         if self.pre_calculate_SSPs:
+            self.__run_SSPs()
 
-            # Calculate all SSPs
-            self.__run_all_ssps()
-
-            # Create the arrays that will contain the interpolated isotopes
-            self.ej_SSP_int = np.zeros((self.nb_steps_table,self.nb_isotopes))
-            if self.len_decay_file > 0 or self.use_decay_module:
-                self.ej_SSP_int_radio = np.zeros((self.nb_steps_table,self.nb_radio_iso))
-
-        # If the IMF will randomly be sampled ...
+        # Calculate random IFM sampling parameters (if needed)
         if self.imf_rnd_sampling:
-
-            # Print info about the IMF samplint
-            self.m_pop_max = 1.0e4
-            print ('IMF random sampling for SSP with M < ',self.m_pop_max)
-
-            # Calculate the stellar mass associated with the
-            # highest IMF value (needed for Monte Carlo)
-            # ONLY SAMPLING MASSIVE STARS
-            self.A_rdm = 1.0 / self.transitionmass**(-2.3)
-            self.m_frac_massive_rdm = self.A_rdm * \
-                self._imf(self.transitionmass, self.imf_bdys[1], 2)
-
-            # Calculate the stellar mass associated with the
-            # highest IMF value (needed for Monte Carlo)
-            # SAMPLING ALL STARS (warning! --> Need to modify the code for this)
-            #self.imf_norm_sampled = 10.0
-            #self.imfnorm = self.imf_norm_sampled
-            #imf_temp = []
-            #m_temp = self.imf_bdys[0]
-            #dm = 0.02
-            #while m_temp <= (self.imf_bdys[1]):
-            #    imf_temp.append(self._imf(1.0,2.0,0,mass=m_temp))
-            #    m_temp += dm
-            #self.imf_max = max(imf_temp)
-
-        # Set cosmological parameters - Dunkley et al. (2009)
-        #self.omega_0   = 0.257   # Current mass density parameter
-        #self.omega_b_0 = 0.044   # Current baryonic mass density parameter
-        #self.lambda_0  = 0.742   # Current dark energy density parameter
-        #self.H_0       = 71.9    # Hubble constant [km s^-1 Mpc^-1]
-
-        # Set cosmological parameters - as in Wise et al. 2012
-        #self.omega_0   = 0.266   # Current mass density parameter
-        #self.omega_b_0 = 0.0449  # Current baryonic mass density parameter
-        #self.lambda_0  = 0.734   # Current dark energy density parameter
-        #self.H_0       = 71.0    # Hubble constant [km s^-1 Mpc^-1]
-
-        # Look for errors in the input parameters
-        self.__check_inputs_omega()
+            self.__calc_imf_rnd_param()
 
         # Define whether the open box scenario is used or not
         if self.in_out_control or self.SF_law or self.DM_evolution:
@@ -571,69 +376,16 @@ class omega( chem_evol ):
         else:
             self.open_box = False
 
-        # Check if the timesteps need to be refined
+        # Refine timesteps (if needed)
         if self.SF_law or self.DM_evolution:
-            self.t_SF_t = []
-            self.redshift_t = []
-            for k in range(self.nb_timesteps):
-                self.t_SF_t.append(0.0)
-                self.redshift_t.append(0.0)
-            self.t_SF_t.append(0.0)
-            self.redshift_t.append(0.0)
-            self.calculate_redshift_t()
-            self.__calculate_t_SF_t()
-            need_t_raf = False
-            for i_raf in range(self.nb_timesteps):
-                if self.history.timesteps[i_raf] > self.t_SF_t[i_raf] / self.sfe:
-                    need_t_raf = True
-                    break
-            if need_t_raf:
-              if self.long_range_ref:
-                self.__rafine_steps_lr()
-              else:
-                self.__rafine_steps()
-
-            # Re-Create entries for the mass-loss rate of massive stars
-            self.massive_ej_rate = []
-            self.sn1a_ej_rate = []
-            for k in range(self.nb_timesteps + 1):
-                self.massive_ej_rate.append(0.0)
-                self.sn1a_ej_rate.append(0.0)
+            self.__refine_timesteps()
 
         # Declare arrays used to follow the evolution of the galaxy
         self.__declare_evol_arrays()
 
-        # If the mass fraction ejected by SSPs needs to be calculated ...
-        # Need to be before self.__initialize_gal_prop()!!
-        if self.calc_SSP_ej:
-
-            # Run SYGMA with five different metallicities
-            Z = [0.02, 0.01, 0.006, 0.001, 0.0001]
-            s_inst = []
-            self.mass_frac_SSP = 0.0
-            for i_Z_SSP in range(0,len(Z)):
-                s_inst = sygma.sygma(imf_type=imf_type, alphaimf=alphaimf,\
-                 imf_bdys=imf_bdys, sn1a_rate=sn1a_rate, iniZ=Z[i_Z_SSP], dt=dt, \
-                 special_timesteps=special_timesteps, tend=tend, mgal=1.0, \
-                 transitionmass=transitionmass, iolevel=iolevel, \
-                 ini_alpha=ini_alpha, table=table, hardsetZ=hardsetZ, \
-                 sn1a_on=sn1a_on, sn1a_table=sn1a_table, \
-                 iniabu_table=iniabu_table, extra_source_on=extra_source_on, \
-                 extra_source_table=extra_source_table, pop3_table=pop3_table, \
-                 imf_bdys_pop3=imf_bdys_pop3, \
-                 imf_yields_range_pop3=imf_yields_range_pop3, \
-                 starbursts=starbursts, beta_pow=beta_pow, \
-                 gauss_dtd = gauss_dtd, exp_dtd = exp_dtd, \
-                 nb_1a_per_m=nb_1a_per_m, Z_trans=Z_trans, f_arfo=f_arfo, \
-                 imf_yields_range=imf_yields_range,exclude_masses=exclude_masses,\
-                 netyields_on=netyields_on,wiersmamod=wiersmamod)
-                self.mass_frac_SSP += np.sum(s_inst.ymgal[-1])
-
-            # Calculate the average mass fraction returned
-            self.mass_frac_SSP = self.mass_frac_SSP / len(Z)
-            print ('Average SSP mass fraction returned = ',self.mass_frac_SSP)
-        else:
-            self.mass_frac_SSP = self.mass_frac_SSP_in
+        # Calculate the average mass fraction ejected by SSPs
+        # !! This function needd to be before self.__initialize_gal_prop() !!
+        self.__calc_mass_frac_SSP()
 
         # Set the general properties of the selected galaxy
         self.__initialize_gal_prop()
@@ -647,15 +399,6 @@ class omega( chem_evol ):
                     'iniab_bb_walker91.txt')
             self.prim_comp = ry.read_yields_Z(os.path.join(nupy_path,\
                     prim_comp_table), isotopes=self.history.isotopes)
-
-        # In construction .. need to avoid altering default setups ..
-        # Assume the baryonic ratio for the initial gas reservoir, if needed
-#        if len(self.ism_ini) == 0 and not self.SF_law and not self.DM_evolution:
-#          if self.bar_ratio and not self.cl_SF_law:
-#            scale_m_tot = self.m_DM_0 * self.omega_b_0 / \
-#            (self.omega_0*np.sum(self.ymgal[0]))
-#            for k_cm in range(len(self.ymgal[0])):
-#                self.ymgal[0][k_cm] = self.ymgal[0][k_cm] * scale_m_tot
 
         # Add the stellar ejecta coming from external galaxies that just merged
         if len(self.mdot_ini) > 0:
@@ -673,10 +416,8 @@ class omega( chem_evol ):
             for i_ofer in range(0,self.nb_timesteps):
                 self.m_outflow_t[i_ofer] = 0.0
 
-        # If the timestep are not control by an external program ...
+        # Run the simulation if not controled by an external code
         if not self.external_control:
-
-            # Run the simulation
             self.__run_simulation(self.mass_sampled, self.scale_cor)
 
 
@@ -691,55 +432,158 @@ class omega( chem_evol ):
 
         '''
 
+        # Initialize whether or not the code should abord
+        abord = False
+
         # Input galaxy
         if not self.galaxy in ['none', 'milky_way', 'milky_way_cte', \
                                'sculptor', 'fornax', 'carina']:
             print ('Error - Selected galaxy not available.')
-            return
+            abord = True
 
         # Random SFH
         if self.rand_sfh > 0.0 and self.stellar_mass_0 < 0.0:
             print ('Error - You need to choose a current stellar mass.')
-            return
+            abord = True
 
         # Inflow control when non-available
         if self.in_out_control and (self.SF_law or self.DM_evolution):
             print ('Error - Cannot control inflows and outflows when SF_law or'\
                   'DM_evolution is equal to True.')
-            return
-
-        # Defined initial dark matter halo mass when non-available
-        #if self.m_DM_ini > 0.0 and not self.DM_evolution:
-        #    print ('Warning - Can\'t control m_DM_ini when the mass of', \
-        #          'the dark matter halo is not evolving.')
+            abord = True
 
         # Inflow and outflow control when the dark matter mass if evolving
         if (self.outflow_rate >= 0.0 or self.inflow_rate >= 0.0) and \
             self.DM_evolution:
             print ('Error - Cannot fix inflow and outflow rates when the mass'\
                   'of the dark matter halo is evolving.')
-            return
+            abord = True
 
         # Inflow array when input
         if self.len_m_inflow_array > 0:
             if not self.len_m_inflow_array == self.nb_timesteps:
                 print ('Error - len(m_inflow_array) needs to equal nb_timesteps.')
-                return
+                abord = True
 
         # Inflow X array when input
         if self.len_m_inflow_X_array > 0:
             if not self.len_m_inflow_X_array == self.nb_timesteps:
                 print ('Error - len(m_inflow_X_array) needs to equal nb_timesteps.')
-                return
+                abord = True
             if not len(self.m_inflow_X_array[0]) == self.nb_isotopes:
                 print ('Error - len(m_inflow_X_array[i]) needs to equal nb_isotopes.')
-                return
+                abord = True
 
         # Mgas array when input
         if self.len_m_gas_array > 0:
             if not self.len_m_gas_array == (self.nb_timesteps+1):
                 print ('Error - len(m_gas_array) needs to equal nb_timesteps+1.')
-                return
+                abord = True
+
+        # Return whether or not the code should abord
+        return abord
+
+
+    ##############################################
+    #             Calc CCSNe per M               #
+    ##############################################
+    def __calc_ccsne_per_m(self):
+
+        '''
+        Calculate the number of core-collapse SNe that will occur
+        in total per units of stellar mass formed.
+
+        '''
+
+        # IMF constant for a 1 Msun PopIII stellar population
+        A_pop3 = 1.0 / self._imf(self.imf_bdys_pop3[0], self.imf_bdys_pop3[1],2)
+        A = 1.0 / self._imf(self.imf_bdys[0], self.imf_bdys[1],2)
+
+        # Number of CC SNe per stellar mass formed
+        self.nb_ccsne_per_m_pop3 = \
+            A_pop3 * self._imf(self.imf_yields_range_pop3[0], \
+                self.imf_yields_range_pop3[1],1)
+        self.nb_ccsne_per_m = \
+            A * self._imf(self.transitionmass,\
+                self.imf_yields_range[1],1)
+
+
+    ##############################################
+    #                 Run SSPs                   #
+    ##############################################
+    def __run_SSPs(self):
+
+        '''
+        Run all stellar populations at all metallicties.
+
+        '''
+
+        # Calculate all SSPs
+        self.__run_all_ssps()
+
+        # Declare the arrays that will contain the interpolated isotopes
+        self.ej_SSP_int = np.zeros((self.nb_steps_table, self.nb_isotopes))
+        if self.len_decay_file > 0 or self.use_decay_module:
+            self.ej_SSP_int_radio = np.zeros((self.nb_steps_table, self.nb_radio_iso))
+
+
+    ##############################################
+    #            Calc IMF rnd Param              #
+    ##############################################
+    def __calc_imf_rnd_param(self):
+
+        '''
+        Calculate parameters that will be used when the IFM is randomly sampled.
+
+        '''
+
+        # Print info about the IMF sampling
+        self.m_pop_max = 1.0e4
+        print ('IMF random sampling for SSP with M < ',self.m_pop_max)
+
+        # Calculate the stellar mass associated with the
+        # highest IMF value (needed for Monte Carlo)
+        # This only samples massive stars
+        self.A_rdm = 1.0 / self.transitionmass**(-2.3)
+        self.m_frac_massive_rdm = self.A_rdm * \
+            self._imf(self.transitionmass, self.imf_bdys[1], 2)
+
+
+    ##############################################
+    #             Refine Timesteps               #
+    ##############################################
+    def __refine_timesteps(self):
+
+        '''
+        Refine the timesteps and increase the sizes of relevant arrays if needed.
+
+        '''
+
+        # Initialize evolution arrays that will determine the refinement needs
+        self.t_SF_t = np.zeros(self.nb_timesteps+1)
+        self.redshift_t = np.zeros(self.nb_timesteps+1)
+
+        # Fill the evolution arrays        
+        self.calculate_redshift_t()
+        self.__calculate_t_SF_t()
+
+        # Define whether refinement is needed
+        need_t_raf = False
+        for i_raf in range(self.nb_timesteps):
+            if self.history.timesteps[i_raf] > self.t_SF_t[i_raf] / self.sfe:
+                need_t_raf = True
+                break
+
+        # Refine timesteps (if needed)
+        if need_t_raf:
+            if self.long_range_ref:
+                self.__rafine_steps_lr()
+            else:
+                self.__rafine_steps()
+
+        # Re-Create entries for the mass-loss rate of massive stars
+        self.massive_ej_rate = np.zeros(self.nb_timesteps+1)
+        self.sn1a_ej_rate = np.zeros(self.nb_timesteps+1)
 
 
     ##############################################
@@ -937,6 +781,43 @@ class omega( chem_evol ):
         self.t_ce.append(self.history.timesteps[0])
         for i_init in range(1,self.nb_timesteps):
           self.t_ce.append(self.t_ce[i_init-1] + self.history.timesteps[i_init])
+
+
+    ##############################################
+    #             Calc Mass Frac SSP             #
+    ##############################################
+    def __calc_mass_frac_SSP(self):
+
+        '''
+        Calculate the average mass fraction returned by stellar populations.
+        This refers to the ratio between the ejected mass and the initial
+        stellar population mass.
+
+        '''
+
+        # If the mass fraction is self-calculated from SSPs ..
+        if self.calc_SSP_ej:
+
+            # Set the stellar population mass to 1 Msun
+            self.kwargs["mgal"] = 1.0
+
+            # Define the 5 metallicities that will be used
+            Z = [0.02, 0.01, 0.006, 0.001, 0.0001]
+
+            # Run SYGMA with different metallicities and cumulate ejected mass
+            self.mass_frac_SSP = 0.0
+            for i_Z_SSP in range(0,len(Z)):
+                self.kwargs["iniZ"] = Z[i_Z_SSP]
+                s_inst = sygma.sygma(**self.kwargs)
+                self.mass_frac_SSP += np.sum(s_inst.ymgal[-1])
+
+            # Calculate the average mass fraction returned
+            self.mass_frac_SSP = self.mass_frac_SSP / len(Z)
+            print ('Average SSP mass fraction returned = ',self.mass_frac_SSP)
+
+        # Take the input value if SSP calculations are not used
+        else:
+            self.mass_frac_SSP = self.mass_frac_SSP_in
 
 
     ##############################################
@@ -1559,8 +1440,12 @@ class omega( chem_evol ):
 
         '''
 
+        # Set (modify) parameters that are common to each SSP calculation
+        self.kwargs["mgal"] = 1.0
+        self.kwargs["pre_calculate_SSPs"] = False
+
         # Copy the metallicities and put them in increasing order
-        self.Z_table_SSP = copy.copy(self.ytables.metallicities)
+        self.Z_table_SSP = copy.copy(self.ytables.Z_list)
         self.Z_table_first_nzero = min(self.Z_table_SSP)
         if self.popIII_info_fast and self.iniZ <= 0.0 and self.Z_trans > 0.0:
             self.Z_table_SSP.append(0.0)
@@ -1573,77 +1458,33 @@ class omega( chem_evol ):
           # Define the SSP timesteps
           len_dt_SSPs = len(self.dt_in_SSPs)
           if len_dt_SSPs == 0:
-              dt_in_ras = self.history.timesteps
+              self.kwargs["dt_in"] = self.history.timesteps
               len_dt_SSPs = self.nb_timesteps
           else:
-              dt_in_ras = self.dt_in_SSPs
+              self.kwargs["dt_in"] = self.dt_in_SSPs
 
           # Declare the SSP ejecta arrays [Z][dt][iso]
-          self.ej_SSP = np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_isotopes))
+          self.ej_SSP = np.zeros((self.nb_Z_table_SSP, len_dt_SSPs, self.nb_isotopes))
           if self.len_decay_file > 0 or self.use_decay_module:
               self.ej_SSP_radio = \
-                  np.zeros((self.nb_Z_table_SSP,len_dt_SSPs,self.nb_radio_iso))
+                  np.zeros((self.nb_Z_table_SSP, len_dt_SSPs, self.nb_radio_iso))
 
           # For each metallicity ...
           for i_ras in range(0,self.nb_Z_table_SSP):
 
               # Use a dummy iniabu file if the metallicity is not zero
               if self.Z_table_SSP[i_ras] == 0:
-                  iniabu_t = ''
-                  hardsetZ2 = self.hardsetZ
+                  self.kwargs["iniabu_table"] = ''
+                  self.kwargs["hardsetZ"] = self.hardsetZ
               else:
-                  iniabu_t='yield_tables/iniabu/iniab2.0E-02GN93.ppn'
-                  hardsetZ2 = self.Z_table_SSP[i_ras]
+                  self.kwargs["iniabu_table"] = 'yield_tables/iniabu/iniab2.0E-02GN93.ppn'
+                  self.kwargs["hardsetZ"] = self.Z_table_SSP[i_ras]
+
+              # Set metallicity for SYGMA run
+              self.kwargs["iniZ"] = self.Z_table_SSP[i_ras]
 
               # Run a SYGMA simulation (1 Msun SSP)
-              sygma_inst = sygma.sygma(pre_calculate_SSPs=False, \
-                 imf_type=self.imf_type, alphaimf=self.alphaimf, \
-                 imf_bdys=self.history.imf_bdys, sn1a_rate=self.history.sn1a_rate, \
-                 iniZ=self.Z_table_SSP[i_ras], dt=self.history.dt, \
-                 special_timesteps=self.special_timesteps, \
-                 nsmerger_bdys=self.nsmerger_bdys, tend=self.history.tend, \
-                 mgal=1.0, transitionmass=self.transitionmass, \
-                 table=self.table, hardsetZ=hardsetZ2, \
-                 sn1a_on=self.sn1a_on, sn1a_table=self.sn1a_table, \
-                 sn1a_energy=self.sn1a_energy, ns_merger_on=self.ns_merger_on, \
-                 f_binary=self.f_binary, \
-                 f_merger=self.f_merger, t_merger_max=self.t_merger_max, \
-                 m_ej_nsm=self.m_ej_nsm, nsm_dtd_power=self.nsm_dtd_power,\
-                 nsmerger_table=self.nsmerger_table, iniabu_table=iniabu_t, \
-                 extra_source_on=self.extra_source_on, nb_nsm_per_m=self.nb_nsm_per_m, \
-                 t_nsm_coal=self.t_nsm_coal, extra_source_table=self.extra_source_table, \
-                 f_extra_source=self.f_extra_source, \
-                 extra_source_mass_range=self.extra_source_mass_range, \
-                 extra_source_exclude_Z=self.extra_source_exclude_Z, \
-                 pop3_table=self.pop3_table, imf_bdys_pop3=self.imf_bdys_pop3, \
-                 imf_yields_range_pop3=self.imf_yields_range_pop3, \
-                 starbursts=self.starbursts, beta_pow=self.beta_pow, \
-                 gauss_dtd=self.gauss_dtd, exp_dtd=self.exp_dtd, \
-                 nb_1a_per_m=self.nb_1a_per_m, direct_norm_1a=self.direct_norm_1a, \
-                 imf_yields_range=self.imf_yields_range, \
-                 exclude_masses=self.exclude_masses, netyields_on=self.netyields_on, \
-                 wiersmamod=self.wiersmamod, yield_interp=self.yield_interp, \
-                 stellar_param_on=self.stellar_param_on, \
-                 t_dtd_poly_split=self.t_dtd_poly_split, \
-                 stellar_param_table=self.stellar_param_table, \
-                 tau_ferrini=self.tau_ferrini, delayed_extra_log=self.delayed_extra_log, \
-                 dt_in=dt_in_ras, nsmerger_dtd_array=self.nsmerger_dtd_array, \
-                 poly_fit_dtd_5th=self.poly_fit_dtd_5th, \
-                 poly_fit_range=self.poly_fit_range, \
-                 delayed_extra_dtd=self.delayed_extra_dtd, \
-                 delayed_extra_dtd_norm=self.delayed_extra_dtd_norm, \
-                 delayed_extra_yields=self.delayed_extra_yields, \
-                 delayed_extra_yields_norm=self.delayed_extra_yields_norm, \
-                 table_radio=self.table_radio, decay_file=self.decay_file, \
-                 sn1a_table_radio=self.sn1a_table_radio, \
-                 nsmerger_table_radio=self.nsmerger_table_radio, \
-                 ism_ini_radio=self.ism_ini_radio, \
-                 delayed_extra_yields_radio=self.delayed_extra_yields_radio, \
-                 delayed_extra_yields_norm_radio=self.delayed_extra_yields_norm_radio, \
-                 ytables_radio_in=self.ytables_radio_in, radio_iso_in=self.radio_iso_in, \
-                 ytables_1a_radio_in=self.ytables_1a_radio_in, \
-                 ytables_nsmerger_radio_in=self.ytables_nsmerger_radio_in,
-                 yield_modifier=self.yield_modifier)
+              sygma_inst = sygma.sygma(**self.kwargs)
 
               # Copy the ejecta arrays from the SYGMA simulation
               self.ej_SSP[i_ras] = sygma_inst.mdot
@@ -1672,7 +1513,7 @@ class omega( chem_evol ):
         # If the SSPs are given as an input ..
         else:
 
-            # Copy the SSPs - TODO check when SSPs are checked
+            # Copy the SSPs
             self.ej_SSP = self.SSPs_in[0]
             self.nb_steps_table = len(self.ej_SSP[0])
             self.ej_SSP_coef = self.SSPs_in[1]
