@@ -132,7 +132,7 @@ class sygma( chem_evol ):
     #                Constructor                 #
     ##############################################
     def __init__(self, sfr='input', no_sf=False, mass_sampled=[], \
-                 scale_cor=[], yield_modifier=[], **kwargs):
+                 scale_cor=[], **kwargs):
 
         # Overwrite default chem_evol parameters (if needed)
         kwargs["is_sygma"] = True
