@@ -634,7 +634,7 @@ class sygma( chem_evol ):
                 ini_elems_sol = []
                 ini_elems_frac_sol = []
 
-                iniabu_sol = ry.iniabu(os.path.join(nupy_path, solar_abu))
+                iniabu_sol = ry.iniabu(os.path.join(nupy_path, solar_abunds))
                 isonames = list(iniabu_sol.abundances.keys())
 
                 for isotope in isonames:
